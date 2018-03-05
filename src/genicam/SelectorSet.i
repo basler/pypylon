@@ -1,0 +1,2 @@
+
+%include <GenApi/SelectorSet.h>;

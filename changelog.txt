@@ -1,0 +1,133 @@
+Version 1.1.0
+    - Date 2018-01-15
+    - Fixed a memory leak in exception handling code.
+    - Fixed a memory leak in string handling code.
+    - Fixed a crash, that happend when calling genicam.Deregister() on Win64.
+    - Completely reworked the SWIG source files. While this is largely
+      transparent to pypylon users, these changes in the API where introduced:
+       - The way the output pixel format of an ImageFormatConverter is set
+         became a little more pythonic. While in the past accessing it was done
+         like this:
+            converter.OutputPixelFormat.SetValue(format)
+            format = converter.OutputPixelFormat.GetValue()
+         now is has to be accessed directly as a property:
+            converter.OutputPixelFormat = format
+            format = converter.OutputPixelFormat
+
+Version 1.0.11
+    - Date 2017-10-16
+    - Use pylon 5.0.10.10613 to build pypylon.
+    - Enable usage of EnumerateTls.
+      E.g.:
+        tl_infos = pylon.TlFactory.GetInstance().EnumerateTls()
+    - Enable usage of the device filter in EnumerateDevices.
+      E.g.:
+        filter_list = [pylon.DeviceInfo()]
+        found_devices = pylon.TlFactory.GetInstance().EnumerateDevices(filter_list)
+    - Distribute pylons GenTL consumer library as well, so that GenTL producers
+      can be used.
+    - Restored support for PylonImageWindow on Windows. That got lost
+      accidentally in January 2015 (without anyone noticing it).
+
+Version 1.0.10
+    - Date 2016-11-29
+    - Use Pylon-BCON-INTERNAL_5.0.7.9644 (with BCON fixes) to create the builds
+      of pypylon for windows.
+
+Version 1.0.9
+    - Date 2016-11-18
+    - Use Pylon-BCON-INTERNAL_5.0.7.9615 (with BCON protocol extensions) to
+      create the builds of pypylon for windows.
+
+Version 1.0.8
+    - Date 2016-10-06
+    - Adapt SWIG code to a change in Pylon::CTlFactory.
+    - Use Pylon-BCON-INTERNAL_5.0.6.9389 (with BCON bug fixes) to create
+      build of pypylon for windows.
+
+Version 1.0.7
+    - Date 2016-08-22
+    - Use Pylon version 5.0.5.
+    - Let development builds have a valid version number.
+    - Drop the distribution of the deprecated modules 'pylon' and 'genicam' (
+      see notes for 1.0.0). Without them import statements have to be in the
+      form of 'import pypylon.pylon'. Those who still want to use these legacy
+      modules have to use the ones from the last release.
+    - Thanks to an improvement in the way Pylon for windows loads its libraries
+      the workaround in the pypylon.pylon module for loading the transport
+      layer DLLs is no longer necessary and was removed.
+    - Add support for BCON TL in Linux builds as well (up to now it was only
+      included in Windows builds).
+
+Version 1.0.6
+    - Date 2016-06-07
+    - Improve error message for accessing an invalid GrabResult attribute.
+    - In order to adapt to changes in the BCON transport layer, use Pylon
+      5.0.2.8501 for creating the windows builds.
+
+Version 1.0.5
+    - Date 2016-05-17
+    - On Windows pypylon for python 3.5 did not distribute the library
+      'msvcp140.dll' although it depends on it. Now that file is distributed
+      as well.
+    - Add support for BCON TL
+
+Version 1.0.4
+    - Date 2016-04-25
+    - Fixed two minor memory leaks
+    - Module genicam: Fixed all methods that use a feature_list_t to
+      return properly casted types.
+    - On windows the pylon camera link files are now distributed.
+    - Change the way the DLL seach path is handled for windows. The previous
+      way of that handling was easily disturbed by importing other modules.
+
+Version 1.0.3
+    - Date 2016-01-14
+    - Fixed a multi-threading issue in the genicam callback mechamism.
+    - Reworked build scripts for Linux.
+
+Version 1.0.2
+    - Date 2016-01-12
+    - Make pypylon requirement of legacy modules less restrictive. Instead of
+      being tied to a certain version of pypylon, the legacy modules now simply
+      depend on 'pypylon'.
+    - Version 1.0.0 tried to fix a build warning. That change unintentionally
+      corrupted the support for the genicam callback mechamism. Now the callback
+      support is operational again.
+
+Version 1.0.1
+    - Date 2015-12-09
+    - Fix arm build
+
+Version 1.0.0
+    - Date 2015-12-09
+    - Use pylon5 copy deloyment feature in order to deliver a more self
+      contained pypylon. Now the only thing that needs to be present aside
+      from python and pypylon are the pylon drivers - no more need for a
+      complete pylon installation.
+    - Using the copy deployment feature leads to an INCOMPATIBLE change in
+      module/package layout. Up to this point 'pylon' and 'genicam' have been
+      simple modules that could be imported directly - e.g. 'import pylon'.
+      Now there is the package 'pypylon' that consists of the modules 'pylon'
+      and 'genicam'. So the import has to look like this 'import pypylon.pylon'.
+    - In order to ease the transition to the new layout, the 'legacy' packages
+      'pylon' and 'genicam' are provided. When those are installed in addition
+      to 'pypylon' client code can still use the import 'import pylon' or
+      'import genicam'. These new 'legacy' packages are marked as 'deprecated'
+      and will be dropped at some point in the future.
+    - pypylon.pylon and pypylon.genicam now have an attribute named
+      '__version__' that contains the version string.
+
+Version 0.9.0 and 0.9.1
+    - Date 2015-11-06
+    - First steps towards using pylon5's copy deployment feature.
+
+Version 0.3.0
+    - Date 2015-11-04
+    - Build on pylon5 and genicam 3
+
+Version 0.2.0
+    - Date 2015-09-07
+    - Lots of stuff happend before this release - have to look at git history.
+    - Probably the last version that builds on pylon4. If there will be a need
+      for further pylon4 builds, these will stick to version 0.2.xx.

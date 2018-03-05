@@ -1,0 +1,9 @@
+The script builddoxygen.py generates DoxyGenApi.i and DoxyPylon.i from your Pylon installation.
+
+To rebuild the swigfiles from your Pylon installation
+you need the following programs:
+
+- Python (we used 3.5)
+- Some version of Pylon (pylon 5.0.7 Build 9644 was used).
+- Doxygen 1.5.9 (newest version at the time(1.8.3) does not parse XML correctly)
+

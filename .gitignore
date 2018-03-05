@@ -1,0 +1,39 @@
+# Ignore SWIG generates
+generated/
+
+# Ignore build/dist tree
+build/
+dist/
+pypylon/
+*.egg-info
+
+# Ignore python stuff
+__pycache__
+*.pyc
+python*/
+
+# Ignore compiler stuff
+*.idb
+*.pdb
+
+#ignore linux build stuff
+linux-build/
+linux-build-tools/
+
+# Ignore Genicamtest XML Stuff
+tests/genicam/xml/
+
+# Ignore .idea folder
+/.idea/
+
+# Ignore reference_types.txt
+scripts/reference_types.txt
+
+# Ignore NodeMap.pfs
+NodeMap.pfs
+
+#ignore temporary xml folder in scripts
+scripts/xml
+
+#ignore generated html
+pypylon.*.html
