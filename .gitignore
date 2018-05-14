@@ -2,9 +2,9 @@
 generated/
 
 # Ignore build/dist tree
-build/
-dist/
-pypylon/
+/build*
+/dist/
+/pypylon/
 *.egg-info
 
 # Ignore python stuff
@@ -17,8 +17,8 @@ python*/
 *.pdb
 
 #ignore linux build stuff
-linux-build/
-linux-build-tools/
+/linux-build/
+/linux-build-tools/
 
 # Ignore Genicamtest XML Stuff
 tests/genicam/xml/
