@@ -474,7 +474,7 @@ class BuildSupportLinux(BuildSupport):
 
         "bcon": [
             ("libbxapi*.so", ""),
-            ("libpylon_TL_bcon*.so", ""),
+            ("libpylon_TL_bcon-*.so", ""),
             ],
 
         "cl": [], # N/A
