@@ -10,7 +10,10 @@ class InstantCameraTestSuite(PylonEmuTestCase):
 
         # Do not choose a high value (> 15) for priority since that would require
         # admin privileges.
-        priority_for_test = 15
+        if platform == 'linux':
+            priority_for_test = 0
+        else:
+            priority_for_test = 15
 
         camera = pylon.InstantCamera()
         camera.MaxNumBuffer = 20
