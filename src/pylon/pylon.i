@@ -418,6 +418,39 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 #define APIIMPORT
 #define APIEXPORT
 
+%define GENICAM_PROP(name)
+    %rename(_##name) name;
+
+    %pythoncode %{
+        def _Get_## name(self):
+           return self._ ## name
+        def _Set_ ## name(self, value):
+           self._ ## name.SetValue(value)
+        name = property(_Get_ ## name, _Set_ ## name )
+    %}
+
+%enddef
+
+%define GENICAM_ENUM_PROP(name)
+    %rename(_##name) name;
+
+    GENAPI_NAMESPACE::IEnumeration * _getEnum ## name(){
+        return dynamic_cast<GenApi::IEnumeration*>(&($self->##name));
+    }
+
+    %pythoncode %{
+        def _Get_## name(self):
+           return self._getEnum ## name()
+        def _Set_ ## name(self, value):
+           if isinstance(value,int):
+            self._getEnum ## name().SetIntValue(value)
+           else:
+            self._getEnum ## name().SetValue(value)
+        name = property(_Get_ ## name, _Set_ ## name )
+    %}
+
+%enddef
+
 // ignore assignment operator in all classes
 %ignore *::operator=;
 

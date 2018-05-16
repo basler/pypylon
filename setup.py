@@ -81,8 +81,9 @@ class BuildSupport(object):
     RuntimeFiles = {}
 
     def get_swig_includes(self):
-        #TODO this seems arbitrary. Either document or fix it.
-        return self.ExtraCompileArgs[-1][2:]
+        # add compiler include paths to list
+        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
+        return includes
 
     def __init__(self):
 
@@ -108,7 +109,8 @@ class BuildSupport(object):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-        self.SwigOptions.append("-I%s" % self.get_swig_includes())
+        for inc in self.get_swig_includes():
+            self.SwigOptions.append("-I%s" % inc)
 
         if not args.skip_swig:
             call_args = [self.SwigExe]
@@ -515,7 +517,6 @@ class BuildSupportLinux(BuildSupport):
         self.ExtraCompileArgs.append('-O0')
         self.ExtraCompileArgs.append('-g3')
         self.ExtraLinkArgs.append('-g3')
-        self.ExtraLinkArgs.append('-fsanitize=address')
 
     def find_swig(self):
         # Find SWIG executable

@@ -6,18 +6,6 @@
 %ignore Basler_InstantCameraParams::CInstantCameraParams_Params::_GetVendorName(void);
 %ignore Basler_InstantCameraParams::CInstantCameraParams_Params::_GetModelName(void);
 
-%define GENICAM_PROP(name)
-    %rename(_##name) name;
-
-    %pythoncode %{
-        def _Get_## name(self):
-           return self._ ## name
-        def _Set_ ## name(self, value):
-           self._ ## name.SetValue(value)
-        name = property(_Get_ ## name, _Set_ ## name )
-    %}
-
-%enddef
 %extend Basler_InstantCameraParams::CInstantCameraParams_Params {
     GENICAM_PROP(MaxNumBuffer);
     GENICAM_PROP(MaxNumQueuedBuffer);
@@ -42,3 +30,5 @@
 %pythoncode %{
     CInstantCameraParams_Params = InstantCameraParams_Params
 %}
+
+#undef GenApi
