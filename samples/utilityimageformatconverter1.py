@@ -24,7 +24,6 @@ def show_image(img, message):
     image_array = img.GetArray()
     print(image_array)
 
-    input("Press a key to continue.")
 
 
 def grab_image():
@@ -43,11 +42,14 @@ def grab_image():
 try:
     # The image format converter basics.
     # First the image format converter class must be created.
-    converter = pylon.ImageFormatConverter
+    converter = pylon.ImageFormatConverter()
 
     # Second the converter must be parameterized.
     converter.OutputPixelFormat = pylon.PixelType_Mono16
+    converter.OutputBitAlignment = "MsbAligned"
+    # or alternatively
     converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
 
     # Then it can be used to convert input images to
     # the target image format.
