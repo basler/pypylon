@@ -27,7 +27,7 @@ def show_image(image, message):
 
 try:
     # Create the converter and set parameters.
-    converter = pylon.ImageFormatConverter
+    converter = pylon.ImageFormatConverter()
     converter.OutputPixelFormat = pylon.PixelType_Mono8
 
     # Try to get a grab result for demonstration purposes.
