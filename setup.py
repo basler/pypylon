@@ -341,8 +341,10 @@ class BuildSupportWindows(BuildSupport):
         self.ExtraLinkArgs.append('/DEBUG')     # create pdb file
 
     def find_swig(self):
+        #this searches for swigwin-<version>\swig.exe at the usual places
         env_names = ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMW6432']
         search = [os.environ[n] for n in env_names if n in os.environ]
+
         for prg in search:
             for swig_version in self.SwigVersions:
                 candidate = os.path.join(
@@ -351,10 +353,11 @@ class BuildSupportWindows(BuildSupport):
                     "swig.exe"
                     )
                 if os.path.exists(candidate):
+                    info("Found swig: %s" % (candidate,))
                     return candidate
 
-        error("swig executable not found!")
-        return None
+        #fallback to the standard implementation
+        return BuildSupport.find_swig(self)
 
     def copy_runtime(self):
         super(BuildSupportWindows, self).copy_runtime()
