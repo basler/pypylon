@@ -50,7 +50,7 @@ case $ABI_TAG in
     cp35m) BASE_IMAGE="python:3.5.5-jessie" ;;
     cp36m) BASE_IMAGE="python:3.6.5-jessie" ;;
     *)
-    echo "Unsupported abi '$ABI_TAG'"
+    echo "Unsupported abi '$ABI_TAG'. Supported tags: cp34m,cp35m,cp36m"
     exit 1
 esac
 
@@ -61,7 +61,7 @@ case $PLATFORM_TAG in
     linux_aarch64) QEMU_ARCH="aarch64"; BASE_IMAGE="arm64v8/$BASE_IMAGE"; PYLON_ARCH=arm64 ;;
     manylinux1_*) echo "manylinux is not yet supported :-("; exit 1 ;;
     *)
-    echo "Unsupported platform tag '$ABI_TAG'"
+    echo "Unsupported platform tag '$PLATFORM_TAG'. Supported platforms: linux_x86_64, linux_i686, linux_armv7l, linux_aarch64"
     exit 1
 esac
 
