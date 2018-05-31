@@ -81,9 +81,7 @@ class BuildSupport(object):
     RuntimeFiles = {}
 
     def get_swig_includes(self):
-        # add compiler include paths to list
-        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
-        return includes
+        raise RuntimeError("Must be implemented by platform build support!")
 
     def __init__(self):
 
@@ -320,12 +318,11 @@ class BuildSupportWindows(BuildSupport):
                 self.BinPath
                 )
             ]
-        self.ExtraCompileArgs.append(
-            '/I%s' % self.get_swig_includes()
-            )
+        for inc in self.get_swig_includes():
+            self.ExtraCompileArgs.append('/I%s' % inc)
 
     def get_swig_includes(self):
-        return os.path.join(self.PylonDevDir, "include")
+        return [os.path.join(self.PylonDevDir, "include")]
 
     def use_debug_configuration(self):
         self.ExtraCompileArgs.append('/Od')     # disable optimizations
@@ -530,6 +527,11 @@ class BuildSupportLinux(BuildSupport):
                 return swig_executable
 
         raise RuntimeError("swig executable not found!")
+
+    def get_swig_includes(self):
+        # add compiler include paths to list
+        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
+        return includes
 
     def copy_runtime(self):
         runtime_dir = self.call_pylon_config("--libdir")
