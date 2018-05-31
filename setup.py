@@ -173,16 +173,19 @@ class BuildSupport(object):
                 )
             git_version = git_version.strip()
             m_rel = re.match("^\d+(?:\.\d+){2,3}$", git_version)
-            m_dev = re.match("(\d+(?:\.\d+){2,3})-(\d+)-g[0-9a-f]+", git_version)
+            #this will match  something like v1.0.0-14-g123456 and v1.0.0-14-g123456-dirty and v1.0.0-dirty
+            m_dev = re.match("(\d+(?:\.\d+){2,3})(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?", git_version)
             if m_rel:
                 # release build -> return as is
                 return git_version
             if m_dev:
                 # development build
-                return "%s.dev%s" % (m_dev.group(1), m_dev.group(2))
+                return "%s.dev%s" % (m_dev.group(1), m_dev.group(2) or 0)
+
+            warning("failed to parse git version '%s'", git_version)
             raise OSError
-        except (OSError, subprocess.CalledProcessError):
-            warning("GIT not found or invalid tag found.")
+        except (OSError, subprocess.CalledProcessError) as e:
+            warning("git not found or invalid tag found.")
             warning("-> Building version from date!")
             now = datetime.datetime.now()
             midnight = datetime.datetime(now.year, now.month, now.day)
@@ -472,7 +475,7 @@ class BuildSupportLinux(BuildSupport):
 
         "bcon": [
             ("libbxapi*.so", ""),
-            ("libpylon_TL_bcon*.so", ""),
+            ("libpylon_TL_bcon-*.so", ""),
             ],
 
         "cl": [], # N/A
