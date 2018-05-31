@@ -12,6 +12,7 @@ usage()
     echo "  --qemu-target-arch  <name>    The arch part of qemu-<arch>-static"
     echo "  --pylon-tgz <package>         Use the given tgz"
     echo "  --python <path to python bin> Use the given python for the build"
+    echo "  -c <command>                  Execute the given command instead of the buildscript. This will be run as root instead of the calling uid, to be able to modify the system"
     echo "  -h                            This usage help"
 }
 
@@ -20,6 +21,7 @@ PYTHON="python"
 DOCKER_BASE_IMAGE=""
 PROXY="$HTTP_PROXY"
 QEMU_TARGET_ARCH=""
+EXEC_COMMAND=""
 
 # parse args
 while [ $# -gt 0 ]; do
@@ -29,6 +31,7 @@ while [ $# -gt 0 ]; do
         --qemu-target-arch) QEMU_TARGET_ARCH="$2"; shift ;;
         --pylon-tgz) PYLON_TGZ="$2" ; shift ;;
         --python) PYTHON="$2" ; shift ;;
+        -c) EXEC_COMMAND="$2"; shift; shift; break ;;
         -h|--help) usage ; exit 1 ;;
         *)         echo "Unknown argument $arg" ; usage ; exit 1 ;;
     esac
@@ -36,7 +39,11 @@ while [ $# -gt 0 ]; do
 done
 
 #make path absolute
-PYLON_TGZ=$(readlink -m "$PYLON_TGZ")
+PYLON_TGZ=$(readlink -m "$PYLON_TGZ" || true)
+if [ -z "$PYLON_TGZ" ]; then
+    echo "Pylon tgz must be specified"
+    exit 1
+fi
 
 if [[ "$PYLON_TGZ" != "$BASEDIR"* ]]; then
     echo "Pylon installer must be contained in '$BASEDIR'."
@@ -59,9 +66,12 @@ docker build --build-arg "HTTP_PROXY=$HTTP_PROXY" \
                 --build-arg "DOCKER_BASE_IMAGE=$DOCKER_BASE_IMAGE" \
                 --tag "$DOCKER_TAG" .
 
-set -x
-docker run -v "$BASEDIR:/work" -v "$PYLON_TGZ:/$PYLON_TGZ_BASE" --user $(id -u) $DOCKER_TAG  /work/scripts/build/build.sh --pylon-tgz "/$PYLON_TGZ_BASE" --python "$PYTHON"
-#to debug issues with docker use the following line to jump into an interactive session
-#exec docker run -ti -v "$BASEDIR:/work" -v "$PYLON_TGZ:/$PYLON_TGZ_BASE" $DOCKER_TAG  bash
-
+set +x
+if [ -z "$EXEC_COMMAND" ]; then
+    #the default case
+    docker run -v "$BASEDIR:/work" -v "$PYLON_TGZ:/$PYLON_TGZ_BASE" --user $(id -u) $DOCKER_TAG  /work/scripts/build/build.sh --pylon-tgz "/$PYLON_TGZ_BASE" --python "$PYTHON"
+else
+    MSG="In a normal build this script would run: /work/scripts/build/build.sh --pylon-tgz \"/$PYLON_TGZ_BASE\" --python \"$PYTHON\""
+    exec docker run -ti -v "$BASEDIR:/work" -v "$PYLON_TGZ:/$PYLON_TGZ_BASE" $DOCKER_TAG bash -c "echo '$MSG'; $EXEC_COMMAND $@"
+fi 
         
