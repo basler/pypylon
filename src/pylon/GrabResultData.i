@@ -7,24 +7,43 @@
 
 %include <pylon/GrabResultData.h>;
 %extend Pylon::CGrabResultData {
-    PyObject * GetBuffer(){
+    PyObject * GetBuffer()
+    {
         void * buf = $self->GetBuffer();
         size_t length = $self->GetPayloadSize();
         return (buf) ? PyByteArray_FromStringAndSize((const char *) buf, length) : Py_None;
     }
-#if PY_VERSION_HEX >= 0x03000000
-    PyObject * GetMemoryView() {
-        return PyMemoryView_FromMemory((char *) $self->GetBuffer(), $self->GetPayloadSize(), PyBUF_WRITE);
+
+    PyObject * GetMemoryView()
+    {
+// need at least Python 3.3 for memory view
+%#if PY_VERSION_HEX >= 0x03030000
+        return PyMemoryView_FromMemory(
+            (char*)$self->GetBuffer(),
+            $self->GetPayloadSize(),
+            PyBUF_WRITE
+            );
+%#else
+        PyErr_SetString(PyExc_RuntimeError, "memory view not available");
+        return NULL;
+%#endif
     }
-    int GetNumBufferExports(PyObject * omv) {
+
+    int GetNumBufferExports(PyObject * omv)
+    {
+// need at least Python 3.3 for memory view
+%#if PY_VERSION_HEX >= 0x03030000
         PyMemoryViewObject * mv = (PyMemoryViewObject *) omv;
         int ret = (int) mv->mbuf->exports;
         Py_DECREF(omv);
         return ret;
+%#else
+        return 0;
+%#endif
     }
-#endif
-    PyObject * _Unpack12BitPacked() {
 
+    PyObject * _Unpack12BitPacked()
+    {
         // Current pixel type of our data
         EPixelType cur_pt = $self->GetPixelType();
 
@@ -41,8 +60,8 @@
          *       so we treat Bayer* as Mono* as we only are interested in the
          *       unpack operation.
          */
-        switch(cur_pt) {
-
+        switch(cur_pt)
+        {
         case PixelType_Mono12packed:
             conv_src_pt = PixelType_Mono12packed;
             conv_dst_pt = PixelType_Mono16;
@@ -122,9 +141,12 @@
         size_t new_size = converter.GetBufferSizeForConversion(conv_src_pt, width, height);
         uint8_t *dst = new uint8_t[new_size];
 
-        try {
+        try
+        {
             converter.Convert(dst, new_size, buf, sz, conv_src_pt,  width, height, padding_x, ImageOrientation_TopDown);
-        } catch(...) {
+        }
+        catch(...)
+        {
             // Unable to convert, free temp buffer and return empty
             delete[] dst;
             throw LOGICAL_ERROR_EXCEPTION( "Failed to unpack!");
