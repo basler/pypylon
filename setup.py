@@ -93,6 +93,17 @@ class BuildSupport(object):
         for a in dir(self):
             info("%s=%s" % (a, getattr(self, a)))
 
+    def find_swig(self):
+        # Find SWIG executable
+        swig_executable = None
+        for candidate in ["swig3.0", "swig"]:
+            swig_executable = spawn.find_executable(candidate)
+            if swig_executable is not None:
+                info("Found swig: %s" % (swig_executable,))
+                return swig_executable
+
+        raise RuntimeError("swig executable not found on path!")
+
     def call_swig(self, sourcedir, source, version):
 
         name = os.path.splitext(source)[0]
@@ -518,15 +529,6 @@ class BuildSupportLinux(BuildSupport):
         self.ExtraCompileArgs.append('-g3')
         self.ExtraLinkArgs.append('-g3')
 
-    def find_swig(self):
-        # Find SWIG executable
-        swig_executable = None
-        for candidate in ["swig3.0", "swig"]:
-            swig_executable = spawn.find_executable(candidate)
-            if swig_executable is not None:
-                return swig_executable
-
-        raise RuntimeError("swig executable not found!")
 
     def get_swig_includes(self):
         # add compiler include paths to list
