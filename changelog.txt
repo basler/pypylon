@@ -5,6 +5,13 @@ Version ?.?.?
     - fix image format converter
     - enable enum_props in Pylon
     - fix SWIG include path in --pp-debug case
+    - Fixed TlFactory.EnumerateDevices so that arbitrary objects are no longer
+      accepted as boolean arguments - they have to be 'real' bool() objects.
+      This was done to easily spot this unwitting omission:
+        # programmer wrote:
+        found1 = pylon.TlFactory.GetInstance().EnumerateDevices(single_di)
+        # but meant to say:
+        found2 = pylon.TlFactory.GetInstance().EnumerateDevices([single_di])
 
 Version 1.1.0
     - Date 2018-01-15
