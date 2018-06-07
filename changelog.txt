@@ -12,6 +12,8 @@ Version ?.?.?
         found1 = pylon.TlFactory.GetInstance().EnumerateDevices(single_di)
         # but meant to say:
         found2 = pylon.TlFactory.GetInstance().EnumerateDevices([single_di])
+    - Pylon 5.0.11 and 5.0.12 require that the workaround for DLL loading on
+      windows is reactivated (had been removed in 1.0.7).
 
 Version 1.1.0
     - Date 2018-01-15

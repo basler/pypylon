@@ -120,11 +120,104 @@ void TranslateGenicamException(const GenericException* e)
     }
 }
 
+//  For copy deployment of pylon DLLs:
+//
+//  Version 5.0.5 of Pylon started to use LoadLibraryEx in order to load its
+//  DLLs. Calling LoadLibraryEx with the full path of the DLL and setting the
+//  flag LOAD_WITH_ALTERED_SEARCH_PATH adds the path of that DLL to the DLL
+//  search path, while its dependant DLLs are searched. That ensured that all
+//  Pylon DLLs that are stored in the pypylon package folder could be loaded.
+//  That also meant that nothing had to be done here, to make pypylon work.
+//
+//  Unfortunately with version 5.0.11 Pylon changed the way how the GigE and
+//  USB TLs DLLs loaded gxapi and uxapi. The mechanism was changed to 'delay
+//  loading'. This requires that the delay loaded DLLs are found in one of
+//  the standard DLL search paths. While this is going to be fixed in a future
+//  Pylon release, we now have to play tricks again like we had to do, before
+//  Pylon 5.0.5 was released.
+//
+//  Our trick is still this:
+//  The only thing we can do about the DLL search path here is changing the
+//  'PATH' environment variable (using 'SetDllDirectory' or 'AddDllDirectory'
+//  would not be appropriate). In order not to disturb the way pythons 'os'
+//  module handles 'os.environ', we do not want to make a permanent change.
+//
+//  So what we do is this:
+//   - Append the location of this DLL to the PATH.
+//   - Request that the TL DLLs (including gxapi and uxapi) are loaded NOW.
+//   - Restore the previous PATH.
+//
+//  We implement this workaround for Pylon versions < 5.0.5, == 5.0.11 and
+//  == 5.0.12. This list might have to be expanded in the future.
+
+#ifdef WIN32
+#define NEED_PYLON_DLL_WORKAROUND 1
+#include <Shlwapi.h>    // for PathRemoveFileSpec()
+#pragma comment(lib, "Shlwapi")
+#else
+#define NEED_PYLON_DLL_WORKAROUND 0
+#endif
+
+#if NEED_PYLON_DLL_WORKAROUND
+static void FixPylonDllLoadingIfNecessary()
+{
+    // Pylon::PylonInitialize must have been called before calling this
+    // function!
+
+    unsigned int major, minor, subminor, build;
+    Pylon::GetPylonVersion(&major, &minor, &subminor, &build);
+    bool necessary = (
+        major == 5 &&
+        minor == 0 &&
+        (subminor < 5 || subminor == 11 || subminor == 12)
+        );
+    if (!necessary)
+    {
+        return;
+    }
+
+    // Get HMODULE of this function
+    HMODULE hmod = nullptr;
+    GetModuleHandleExW(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<PWSTR>(FixPylonDllLoadingIfNecessary),
+        &hmod
+        );
+
+    // get module file name and remove file spec
+    const DWORD ENV_MAX = UNICODE_STRING_MAX_CHARS;
+    WCHAR new_PATH[ENV_MAX];
+    GetModuleFileNameW(hmod, new_PATH, ENV_MAX);
+    PathRemoveFileSpecW(new_PATH);
+
+    // append previous PATH
+    PWSTR p_Previous_PATH = new_PATH + lstrlenW(new_PATH);
+    *p_Previous_PATH++ = L';';
+    const DWORD rem = ENV_MAX - static_cast<DWORD>(p_Previous_PATH - new_PATH);
+    GetEnvironmentVariableW(L"PATH", p_Previous_PATH, rem);
+
+    // set new PATH
+    SetEnvironmentVariableW(L"PATH", new_PATH);
+
+    // Try to load TLs
+    Pylon::TlInfoList_t tli;
+    Pylon::CTlFactory::GetInstance().EnumerateTls(tli);
+
+    // restore p_Previous_PATH
+    SetEnvironmentVariableW(L"PATH", p_Previous_PATH);
+}
+#endif
+
 %}
 
 %init %{
 
     Pylon::PylonInitialize();
+
+#if NEED_PYLON_DLL_WORKAROUND
+    FixPylonDllLoadingIfNecessary();
+#endif
 
     // Need to import TranslateGenicamException from _genicam in order to be
     // able to translate C++ Genicam exceptions to the correct Python exceptions.
