@@ -147,7 +147,8 @@ void TranslateGenicamException(const GenericException* e)
 //   - Request that the TL DLLs (including gxapi and uxapi) are loaded NOW.
 //   - Restore the previous PATH.
 //
-//  After Pylon has been fixed, this workaround shall be removed, AGAIN :-(
+//  We implement this workaround for Pylon versions < 5.0.5, == 5.0.11 and
+//  == 5.0.12. This list might have to be expanded in the future.
 
 #ifdef WIN32
 #define NEED_PYLON_DLL_WORKAROUND 1
@@ -158,14 +159,29 @@ void TranslateGenicamException(const GenericException* e)
 #endif
 
 #if NEED_PYLON_DLL_WORKAROUND
-static void FixPylonDllLoading()
+static void FixPylonDllLoadingIfNecessary()
 {
+    // Pylon::PylonInitialize must have been called before calling this
+    // function!
+
+    unsigned int major, minor, subminor, build;
+    Pylon::GetPylonVersion(&major, &minor, &subminor, &build);
+    bool necessary = (
+        major == 5 &&
+        minor == 0 &&
+        (subminor < 5 || subminor == 11 || subminor == 12)
+        );
+    if (!necessary)
+    {
+        return;
+    }
+
     // Get HMODULE of this function
     HMODULE hmod = nullptr;
     GetModuleHandleExW(
         GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        reinterpret_cast<PWSTR>(FixPylonDllLoading),
+        reinterpret_cast<PWSTR>(FixPylonDllLoadingIfNecessary),
         &hmod
         );
 
@@ -184,7 +200,7 @@ static void FixPylonDllLoading()
     // set new PATH
     SetEnvironmentVariableW(L"PATH", new_PATH);
 
-    // Try to load TLs (Pylon::PylonInitialize must have been called before)
+    // Try to load TLs
     Pylon::TlInfoList_t tli;
     Pylon::CTlFactory::GetInstance().EnumerateTls(tli);
 
@@ -200,7 +216,7 @@ static void FixPylonDllLoading()
     Pylon::PylonInitialize();
 
 #if NEED_PYLON_DLL_WORKAROUND
-    FixPylonDllLoading();
+    FixPylonDllLoadingIfNecessary();
 #endif
 
     // Need to import TranslateGenicamException from _genicam in order to be
