@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from setuptools import setup, Extension
-from distutils.util import get_platform
 from distutils import spawn
+from distutils.util import get_platform
+from distutils.version import LooseVersion
 from logging import info, warning, error
 
 import argparse
@@ -98,11 +99,31 @@ class BuildSupport(object):
         swig_executable = None
         for candidate in ["swig3.0", "swig"]:
             swig_executable = spawn.find_executable(candidate)
-            if swig_executable is not None:
+            if self.is_supported_swig_version(swig_executable):
                 info("Found swig: %s" % (swig_executable,))
                 return swig_executable
 
         raise RuntimeError("swig executable not found on path!")
+
+    def is_supported_swig_version(self, swig_executable):
+        if swig_executable is None:
+            return False
+            
+        try:
+            output = subprocess.check_output([swig_executable, "-version"], universal_newlines=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+
+        res = re.search("SWIG Version ([\d\.]+)", output)
+        if res is None:
+            return False
+
+        if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
+            warning("The version of swig is %s which is too old. Minimum required version is 3.0.12", res.group(1))
+            return False
+
+        return True
+
 
     def call_swig(self, sourcedir, source, version):
 
@@ -352,7 +373,7 @@ class BuildSupportWindows(BuildSupport):
                     "swigwin-%s" % swig_version,
                     "swig.exe"
                     )
-                if os.path.exists(candidate):
+                if self.is_supported_swig_version(candidate):
                     info("Found swig: %s" % (candidate,))
                     return candidate
 
