@@ -204,9 +204,9 @@ class BuildSupport(object):
                 universal_newlines=True
                 )
             git_version = git_version.strip()
-            m_rel = re.match("^\d+(?:\.\d+){2,3}$", git_version)
-            #this will match  something like v1.0.0-14-g123456 and v1.0.0-14-g123456-dirty and v1.0.0-dirty
-            m_dev = re.match("(\d+(?:\.\d+){2,3})(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?", git_version)
+            m_rel = re.match("^\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?$", git_version)
+            #this will match  something like 1.0.0-14-g123456 and 1.0.0-14-g123456-dirty and 1.0.0-dirty
+            m_dev = re.match("^(\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?)(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?$", git_version)
             if m_rel:
                 # release build -> return as is
                 return git_version
