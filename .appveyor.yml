@@ -1,0 +1,54 @@
+environment:
+  matrix:
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+    # The list here is complete (excluding Python 2.6, which
+    # isn't covered by this document) at the time of writing.
+
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python33"
+    - PYTHON: "C:\\Python33-x64"
+      DISTUTILS_USE_SDK: "1"
+    - PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python34-x64"
+      DISTUTILS_USE_SDK: "1"
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+  # We need wheel installed to build wheels
+  - "%PYTHON%\\python.exe -m pip install wheel"
+  # install swig and put it on the path
+  - curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip
+  - 7z x swigwin.zip -oC:\ > NUL
+  - set PATH=C:\swigwin-3.0.12;%PATH%
+  # install pylon
+  - ps: Start-FileDownload $env:PYLON_INSTALLER_URL -FileName pylon_installer.exe
+  - pylon_installer.exe /quiet /install
+  # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
+  - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 5\development
+
+build_script:
+  - "scripts\\build\\msvc_build_wrapper.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
+
+test_script:
+# Unit Tests fail to run on python 2.7
+#  - "%PYTHON%\\python.exe -m pip install numpy"
+#  - "scripts\\build\\msvc_build_wrapper.cmd %PYTHON%\\python.exe setup.py test"
+
+artifacts:
+  - path: dist\*
+
+deploy:
+  #release: pypylon-$(appveyor_build_version)
+  provider: GitHub
+  auth_token:
+    secure: j8A/M6GD82ZXpIqm6OhRj1nxQ52/DncI074LXnkBhGFQxPQTt6Hc4ABIfdJ37sIX
+  artifact: /.*\.whl/
+  force_update: true
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true        # deploy on tag push only

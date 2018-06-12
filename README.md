@@ -2,6 +2,7 @@
 The official python wrapper for the pylon Camera Software Suite.
 
 [![Build Status](https://travis-ci.org/basler/pypylon.svg?branch=master)](https://travis-ci.org/basler/pypylon)
+[![Build status](https://ci.appveyor.com/api/projects/status/45j4tydwdr0fv05p/branch/master?svg=true)](https://ci.appveyor.com/project/basler-oss/pypylon/branch/master)
 
 # For the Impatient
  * Install [pylon](https://www.baslerweb.com/pylon).
