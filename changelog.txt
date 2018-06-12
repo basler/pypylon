@@ -14,6 +14,8 @@ Version ?.?.?
         found2 = pylon.TlFactory.GetInstance().EnumerateDevices([single_di])
     - Pylon 5.0.11 and 5.0.12 require that the workaround for DLL loading on
       windows is reactivated (had been removed in 1.0.7).
+    - Search for swig in PATH on windows
+    - Ensure swig version is >= 3.0.12
 
 Version 1.1.0
     - Date 2018-01-15

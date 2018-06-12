@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from setuptools import setup, Extension
-from distutils.util import get_platform
 from distutils import spawn
+from distutils.util import get_platform
+from distutils.version import LooseVersion
 from logging import info, warning, error
 
 import argparse
@@ -92,6 +93,37 @@ class BuildSupport(object):
     def dump(self):
         for a in dir(self):
             info("%s=%s" % (a, getattr(self, a)))
+
+    def find_swig(self):
+        # Find SWIG executable
+        swig_executable = None
+        for candidate in ["swig3.0", "swig"]:
+            swig_executable = spawn.find_executable(candidate)
+            if self.is_supported_swig_version(swig_executable):
+                info("Found swig: %s" % (swig_executable,))
+                return swig_executable
+
+        raise RuntimeError("swig executable not found on path!")
+
+    def is_supported_swig_version(self, swig_executable):
+        if swig_executable is None:
+            return False
+            
+        try:
+            output = subprocess.check_output([swig_executable, "-version"], universal_newlines=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+
+        res = re.search("SWIG Version ([\d\.]+)", output)
+        if res is None:
+            return False
+
+        if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
+            warning("The version of swig is %s which is too old. Minimum required version is 3.0.12", res.group(1))
+            return False
+
+        return True
+
 
     def call_swig(self, sourcedir, source, version):
 
@@ -330,8 +362,10 @@ class BuildSupportWindows(BuildSupport):
         self.ExtraLinkArgs.append('/DEBUG')     # create pdb file
 
     def find_swig(self):
+        #this searches for swigwin-<version>\swig.exe at the usual places
         env_names = ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMW6432']
         search = [os.environ[n] for n in env_names if n in os.environ]
+
         for prg in search:
             for swig_version in self.SwigVersions:
                 candidate = os.path.join(
@@ -339,11 +373,12 @@ class BuildSupportWindows(BuildSupport):
                     "swigwin-%s" % swig_version,
                     "swig.exe"
                     )
-                if os.path.exists(candidate):
+                if self.is_supported_swig_version(candidate):
+                    info("Found swig: %s" % (candidate,))
                     return candidate
 
-        error("swig executable not found!")
-        return None
+        #fallback to the standard implementation
+        return BuildSupport.find_swig(self)
 
     def copy_runtime(self):
         super(BuildSupportWindows, self).copy_runtime()
@@ -518,15 +553,6 @@ class BuildSupportLinux(BuildSupport):
         self.ExtraCompileArgs.append('-g3')
         self.ExtraLinkArgs.append('-g3')
 
-    def find_swig(self):
-        # Find SWIG executable
-        swig_executable = None
-        for candidate in ["swig3.0", "swig"]:
-            swig_executable = spawn.find_executable(candidate)
-            if swig_executable is not None:
-                return swig_executable
-
-        raise RuntimeError("swig executable not found!")
 
     def get_swig_includes(self):
         # add compiler include paths to list
