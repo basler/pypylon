@@ -177,7 +177,7 @@ static void FixPylonDllLoadingIfNecessary()
     }
 
     // Get HMODULE of this function
-    HMODULE hmod = nullptr;
+    HMODULE hmod = NULL;
     GetModuleHandleExW(
         GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
