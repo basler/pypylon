@@ -16,6 +16,8 @@ import shutil
 import subprocess
 import sys
 
+ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
+
 ################################################################################
 
 class BuildSupport(object):
@@ -108,10 +110,10 @@ class BuildSupport(object):
     def is_supported_swig_version(self, swig_executable):
         if swig_executable is None:
             return False
-            
+
         try:
             output = subprocess.check_output([swig_executable, "-version"], universal_newlines=True)
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, ErrFileNotFound):
             return False
 
         res = re.search("SWIG Version ([\d\.]+)", output)
