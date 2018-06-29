@@ -1,5 +1,8 @@
 Version ?.?.?
-    - Date ???
+
+Version 1.2.0
+    - Date 2018-07-06
+    - Remove the pylon build number from the python package name
     - Fixed a bug in GrabResult.GetArrayZeroCopy (accessing a non-existent
       attribute). Added a zero-copy sample.
     - fix image format converter
