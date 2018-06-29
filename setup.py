@@ -580,7 +580,6 @@ class BuildSupportLinux(BuildSupport):
         params = [self.PylonConfig]
         params.extend(args)
         res = subprocess.check_output(params, universal_newlines=True)
-        print("Res: %s" % res)
         return res.strip()[3:] if res.strip().startswith("-n ") else res.strip()
 
     def get_pylon_version(self):
