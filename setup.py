@@ -31,7 +31,8 @@ class BuildSupport(object):
         'linux-i686': 'lib',
         'linux-x86_64': 'lib64',
         'linux-armv7l': 'lib',
-        'linux-aarch64': 'lib64'
+        'linux-aarch64': 'lib64',
+        'macosx-10.9-x86_64': 'lib'
         }[get_platform()]
 
     # Compatible swig versions
@@ -236,7 +237,7 @@ class BuildSupport(object):
     def make():
         if get_platform() in ["win32", "win-amd64"]:
             return BuildSupportWindows()
-        elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64"]:
+        elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64", "macosx-10.9-x86_64"]:
             return BuildSupportLinux()
 
 ################################################################################
@@ -453,7 +454,7 @@ class BuildSupportWindows(BuildSupport):
 class BuildSupportLinux(BuildSupport):
 
     PylonConfig = os.path.join(
-        os.getenv('PYLON_ROOT', '/opt/pylon5'),
+        os.getenv('PYLON_ROOT', '/Users/mphair/programming/saiga/pypylon/pylon-5.0.11.10914-x86_64/pylon5'),
         'bin/pylon-config'
         )
 
@@ -472,7 +473,7 @@ class BuildSupportLinux(BuildSupport):
 
     ExtraLinkArgs = [
         '-g0',
-        '-Wl,--enable-new-dtags',
+        #'-Wl,--enable-new-dtags',
         '-Wl,-rpath,$ORIGIN',
         ]
 
@@ -531,6 +532,7 @@ class BuildSupportLinux(BuildSupport):
         print("ExtraCompileArgs:", self.ExtraCompileArgs)
         config_libs = self.call_pylon_config("--libs")
         self.ExtraLinkArgs.extend(config_libs.split())
+        self.ExtraLinkArgs.remove("-Wl,-E")
         print("ExtraLinkArgs:", self.ExtraLinkArgs)
 
 
@@ -578,7 +580,8 @@ class BuildSupportLinux(BuildSupport):
         params = [self.PylonConfig]
         params.extend(args)
         res = subprocess.check_output(params, universal_newlines=True)
-        return res.strip()
+        print("Res: %s" % res)
+        return res.strip()[3:] if res.strip().startswith("-n ") else res.strip()
 
     def get_pylon_version(self):
         return self.call_pylon_config("--version")
