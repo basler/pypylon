@@ -532,7 +532,6 @@ class BuildSupportLinux(BuildSupport):
         print("ExtraCompileArgs:", self.ExtraCompileArgs)
         config_libs = self.call_pylon_config("--libs")
         self.ExtraLinkArgs.extend(config_libs.split())
-        self.ExtraLinkArgs.remove("-Wl,-E")
         print("ExtraLinkArgs:", self.ExtraLinkArgs)
 
 
