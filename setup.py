@@ -227,7 +227,9 @@ class BuildSupport(object):
     def get_version(self):
         git_version = self.get_git_version()
         pylon_version = self.get_pylon_version()
-        return "%s+pylon%s" % (git_version, pylon_version)
+        #strip the build number from the pylon version
+        match = re.match("^(\d+\.\d+\.\d+)", pylon_version)
+        return "%s+pylon%s" % (git_version, match.group(1))
 
     def get_short_version(self, version):
         return version.split('+')[0]
