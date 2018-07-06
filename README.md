@@ -1,5 +1,9 @@
 # pypylon
-The official python wrapper for the pylon Camera Software Suite.
+The official python wrapper for the Basler pylon Camera Software Suite.
+
+**Please Note:**
+This project is offered with no technical support by Basler AG.
+You are welcome to post any questions or issues on [GitHub](https://github.com/basler/pypylon) or on [ImagingHub](https://www.imaginghub.com).
 
 [![Build Status](https://travis-ci.org/basler/pypylon.svg?branch=master)](https://travis-ci.org/basler/pypylon)
 [![Build status](https://ci.appveyor.com/api/projects/status/45j4tydwdr0fv05p/branch/master?svg=true)](https://ci.appveyor.com/project/basler-oss/pypylon/branch/master)
@@ -13,7 +17,7 @@ The official python wrapper for the pylon Camera Software Suite.
 # Installation
 ## Prerequisites
  * Installed [pylon](https://www.baslerweb.com/pylon).
- * Installed python (python 3 recommended).
+ * Installed [python](https://www.python.org/) (python 3 recommended).
  * Installed [pip](https://pip.pypa.io/en/stable/).
 
 ## Binary Installation
