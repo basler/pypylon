@@ -479,6 +479,7 @@ class BuildSupportLinux(BuildSupport):
         "-Wl,-demangle",
         "-Wl,-dynamic",
         '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
+        "-Wl,-framework,pylon",
         ]
 
 
