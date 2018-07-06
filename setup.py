@@ -16,8 +16,6 @@ import shutil
 import subprocess
 import sys
 
-os.environ['LDFLAGS'] = "-framework pylon"
-
 ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
 
 ################################################################################
@@ -239,8 +237,10 @@ class BuildSupport(object):
     def make():
         if get_platform() in ["win32", "win-amd64"]:
             return BuildSupportWindows()
-        elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64", "macosx-10.9-x86_64"]:
+        elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64"]:
             return BuildSupportLinux()
+        elif get_platform() in ["macosx-10.9-x86_64"]:
+            return BuildSupportOSX()
 
 ################################################################################
 
@@ -456,11 +456,9 @@ class BuildSupportWindows(BuildSupport):
 class BuildSupportLinux(BuildSupport):
 
     PylonConfig = os.path.join(
-        os.getenv('PYLON_ROOT', '/Users/mphair/programming/saiga/pypylon/pylon-5.0.11.10914-x86_64/pylon5'),
+        os.getenv('PYLON_ROOT', '/opt/pylon5'),
         'bin/pylon-config'
         )
-
-    #PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
 
     DefineMacros = [
         ("SWIG_TYPE_TABLE", "pylon")
@@ -474,14 +472,10 @@ class BuildSupportLinux(BuildSupport):
         '-O3',
         '-Wno-switch'
         ]
-    pylon_dir = "/Library/Frameworks/pylon.framework"
     ExtraLinkArgs = [
         '-g0',
-        #'-Wl,--enable-new-dtags',
-        "-Wl,-demangle",
-        "-Wl,-dynamic",
-        '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
-        "-Wl,-framework,pylon",
+        '-Wl,--enable-new-dtags',
+        '-Wl,-rpath,$ORIGIN',
         ]
 
 
@@ -533,6 +527,145 @@ class BuildSupportLinux(BuildSupport):
 
     def __init__(self):
         super(BuildSupportLinux, self).__init__()
+        self.SwigExe = self.find_swig()
+        config_cflags = self.call_pylon_config("--cflags")
+        self.ExtraCompileArgs.extend(config_cflags.split())
+        print("ExtraCompileArgs:", self.ExtraCompileArgs)
+        config_libs = self.call_pylon_config("--libs")
+        self.ExtraLinkArgs.extend(config_libs.split())
+        print("ExtraLinkArgs:", self.ExtraLinkArgs)
+
+
+        config_libdir = self.call_pylon_config("--libdir")
+        self.LibraryDirs.extend(config_libdir.split())
+        print("LibraryDirs:", self.LibraryDirs)
+
+    def use_debug_configuration(self):
+        try:
+            self.ExtraCompileArgs.remove('-O3')
+        except ValueError:
+            pass
+        try:
+            self.ExtraCompileArgs.remove('-g0')
+        except ValueError:
+            pass
+        try:
+            self.ExtraLinkArgs.remove('-g0')
+        except ValueError:
+            pass
+        self.ExtraCompileArgs.append('-O0')
+        self.ExtraCompileArgs.append('-g3')
+        self.ExtraLinkArgs.append('-g3')
+
+
+    def get_swig_includes(self):
+        # add compiler include paths to list
+        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
+        return includes
+
+    def copy_runtime(self):
+        runtime_dir = self.call_pylon_config("--libdir")
+        for package in self.RuntimeDefaultDeploy:
+            for src, dst in self.RuntimeFiles[package]:
+                full_dst = os.path.abspath(os.path.join(self.PackageDir, dst))
+                if not os.path.exists(full_dst):
+                    os.makedirs(full_dst)
+
+                src = os.path.join(runtime_dir, src)
+                for f in glob.glob(src):
+                    print("Copy %s => %s" % (f, full_dst))
+                    shutil.copy(f, full_dst)
+
+    def call_pylon_config(self, *args):
+        params = [self.PylonConfig]
+        params.extend(args)
+        res = subprocess.check_output(params, universal_newlines=True)
+        return res.strip()
+
+    def get_pylon_version(self):
+        return self.call_pylon_config("--version")
+
+################################################################################
+
+class BuildSupportOSX(BuildSupport):
+
+    PylonConfig = os.path.join(
+        os.getenv('PYLON_ROOT', '/Users/mphair/programming/saiga/pypylon/pylon-5.0.11.10914-x86_64/pylon5'),
+        'bin/pylon-config'
+        )
+    #PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
+
+    DefineMacros = [
+        ("SWIG_TYPE_TABLE", "pylon")
+        ]
+
+    ExtraCompileArgs = [
+        '-Wno-unknown-pragmas',
+        '-fPIC',
+        '-g0',
+        '-Wall',
+        '-O3',
+        '-Wno-switch'
+        ]
+
+    pylon_dir = "/Library/Frameworks/pylon.framework"
+    ExtraLinkArgs = [
+        '-g0',
+        #'-Wl,--enable-new-dtags',
+        "-Wl,-demangle",
+        "-Wl,-dynamic",
+        '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
+        "-Wl,-framework,pylon",
+        ]
+
+    RuntimeFiles = {
+
+        "base": [
+            ("libpylonbase-*.so", ""),
+            ("libGCBase_*.so", ""),
+            ("libGenApi_*.so", ""),
+            ("liblog4cpp_*.so", ""),
+            ("libLog_*.so", ""),
+            ("libNodeMapData_*.so", ""),
+            ("libXmlParser_*.so", ""),
+            ("libMathParser_*.so", ""),
+            ],
+
+        "gige": [
+            ("libpylon_TL_gige-*.so", ""),
+            ("libgxapi-*.so", ""),
+            ],
+
+        "usb": [
+            ("libpylon_TL_usb-*.so", ""),
+            ("libuxapi-*.so", ""),
+            ("pylon-libusb-*.so", ""),
+            ],
+
+        "camemu": [
+            ("libpylon_TL_camemu-*.so", ""),
+            ],
+
+        "1394": [], # N/A
+
+        "bcon": [
+            ("libbxapi*.so", ""),
+            ("libpylon_TL_bcon-*.so", ""),
+            ],
+
+        "cl": [], # N/A
+
+        "extra": [
+            ("libpylonutility-*.so", ""),
+            ],
+
+        "gentl": [
+            ("libpylon_TL_gtc*.so", ""),
+            ],
+        }
+
+    def __init__(self):
+        super(BuildSupportOSX, self).__init__()
         self.SwigExe = self.find_swig()
         config_cflags = self.call_pylon_config("--cflags")
         self.ExtraCompileArgs.extend(config_cflags.split())
