@@ -159,4 +159,4 @@
 %}
 }
 
-%include <pylon/GrabResultPtr.h>;
+%include <GrabResultPtr.h>;

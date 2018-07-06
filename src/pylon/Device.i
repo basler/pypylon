@@ -1,5 +1,5 @@
 %rename (Device) Pylon::IDevice;
-%include<pylon/Device.h>;
+%include<Device.h>;
 %pythoncode %{
     IDevice = Device
 %}

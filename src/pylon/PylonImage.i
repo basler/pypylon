@@ -70,4 +70,4 @@
 // Ignore original 'GetBuffer' overloads.
 %ignore GetBuffer;
 
-%include <pylon/PylonImage.h>;
+%include <PylonImage.h>;

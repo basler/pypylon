@@ -1,5 +1,5 @@
 %rename (StreamGrabber) Pylon::IStreamGrabber;
-%include <pylon/StreamGrabber.h>;
+%include <StreamGrabber.h>;
 %pythoncode %{
     IStreamGrabber = StreamGrabber
 %}

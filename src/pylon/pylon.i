@@ -72,9 +72,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // python defines own version of COMPILER macro which collides with genicam logic
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
-#include <pylon/PylonIncludes.h>
+#include <PylonIncludes.h>
 #ifdef _MSC_VER
-#include <pylon/PylonGUI.h>
+#include <PylonGUI.h>
 #endif
 #include <GenApi/GenApiNamespace.h>
 #include <GenICam.h>

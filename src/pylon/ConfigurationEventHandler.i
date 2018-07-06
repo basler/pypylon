@@ -3,4 +3,4 @@
 %feature("director") Pylon::CConfigurationEventHandler;
 
 %ignore Pylon::CConfigurationEventHandler::DebugGetEventHandlerRegistrationCount;
-%include <pylon/ConfigurationEventHandler.h>
+%include <ConfigurationEventHandler.h>

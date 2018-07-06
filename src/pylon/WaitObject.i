@@ -8,6 +8,6 @@
 #define PYLON_UNIX_BUILD
 #endif
 
-%include <pylon/WaitObject.h>
+%include <WaitObject.h>
 
 

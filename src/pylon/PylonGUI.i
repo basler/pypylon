@@ -30,5 +30,5 @@
 }
 
 #define IImage CGrabResultPtr
-%include <pylon/PylonGUI.h>;
+%include <PylonGUI.h>;
 #undef IImage

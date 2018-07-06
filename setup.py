@@ -589,11 +589,7 @@ class BuildSupportLinux(BuildSupport):
 
 class BuildSupportOSX(BuildSupport):
 
-    PylonConfig = os.path.join(
-        os.getenv('PYLON_ROOT', '/Users/mphair/programming/saiga/pypylon/pylon-5.0.11.10914-x86_64/pylon5'),
-        'bin/pylon-config'
-        )
-    #PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
+    PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
 
     DefineMacros = [
         ("SWIG_TYPE_TABLE", "pylon")
@@ -611,7 +607,6 @@ class BuildSupportOSX(BuildSupport):
     pylon_dir = "/Library/Frameworks/pylon.framework"
     ExtraLinkArgs = [
         '-g0',
-        #'-Wl,--enable-new-dtags',
         "-Wl,-demangle",
         "-Wl,-dynamic",
         '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
@@ -667,18 +662,11 @@ class BuildSupportOSX(BuildSupport):
     def __init__(self):
         super(BuildSupportOSX, self).__init__()
         self.SwigExe = self.find_swig()
-        config_cflags = self.call_pylon_config("--cflags")
-        self.ExtraCompileArgs.extend(config_cflags.split())
-        print("ExtraCompileArgs:", self.ExtraCompileArgs)
-        config_libs = self.call_pylon_config("--libs")
-        self.ExtraLinkArgs.extend(config_libs.split())
-        self.ExtraLinkArgs.remove("-Wl,-E")
-        self.ExtraLinkArgs.append("-Wl,-export_dynamic")
-        print("ExtraLinkArgs:", self.ExtraLinkArgs)
-
-
-        config_libdir = self.call_pylon_config("--libdir")
-        self.LibraryDirs.extend(config_libdir.split())
+        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers")
+        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers/GenICam")
+        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers/pylon")
+        config_libdir = "/Library/Frameworks/pylon.framework/Libraries"
+        self.LibraryDirs.append(config_libdir)
         print("LibraryDirs:", self.LibraryDirs)
 
     def use_debug_configuration(self):
@@ -705,7 +693,7 @@ class BuildSupportOSX(BuildSupport):
         return includes
 
     def copy_runtime(self):
-        runtime_dir = self.call_pylon_config("--libdir")
+        runtime_dir = "/Library/Frameworks/pylon.framework/Libraries"
         for package in self.RuntimeDefaultDeploy:
             for src, dst in self.RuntimeFiles[package]:
                 full_dst = os.path.abspath(os.path.join(self.PackageDir, dst))

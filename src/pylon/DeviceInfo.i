@@ -4,7 +4,7 @@
 
 %ignore ManufacturerInfoKeyIGNORE;
 %ignore DeviceIdxKey;
-%include <pylon/DeviceInfo.h>;
+%include <DeviceInfo.h>;
 
 %pythoncode %{
     CDeviceInfo = DeviceInfo

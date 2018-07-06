@@ -64,4 +64,4 @@
 }
 
 %ignore Pylon::CCameraEventHandler::DebugGetEventHandlerRegistrationCount;
-%include <pylon/CameraEventHandler.h>
+%include <CameraEventHandler.h>

@@ -8,4 +8,4 @@
 %rename(__getitem__) Pylon::CInstantCameraArray::operator[]( size_t index);
 
 
-%include <pylon/InstantCameraArray.h>;
+%include <InstantCameraArray.h>;

@@ -1,2 +1,2 @@
 %rename(TlInfo) Pylon::CTlInfo;
-%include <pylon/TlInfo.h>;
+%include <TlInfo.h>;

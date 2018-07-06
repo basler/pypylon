@@ -11,7 +11,7 @@ namespace Pylon
 %ignore String_t;
 %ignore StringList_t;
 
-#include<pylon/TypeMappings.h>
+#include<TypeMappings.h>
 
 // The exceptions are only imported from genicam into the pylon namespace.
 // We therefore want to reuse the wrapped types from genicam.
