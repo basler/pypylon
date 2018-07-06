@@ -16,6 +16,8 @@ import shutil
 import subprocess
 import sys
 
+os.environ['LDFLAGS'] = "-framework pylon"
+
 ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
 
 ################################################################################
