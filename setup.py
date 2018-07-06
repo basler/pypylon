@@ -458,6 +458,8 @@ class BuildSupportLinux(BuildSupport):
         'bin/pylon-config'
         )
 
+    #PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
+
     DefineMacros = [
         ("SWIG_TYPE_TABLE", "pylon")
         ]
@@ -470,11 +472,13 @@ class BuildSupportLinux(BuildSupport):
         '-O3',
         '-Wno-switch'
         ]
-
+    pylon_dir = "/Library/Frameworks/pylon.framework"
     ExtraLinkArgs = [
         '-g0',
         #'-Wl,--enable-new-dtags',
-        '-Wl,-rpath,$ORIGIN',
+        "-Wl,-demangle",
+        "-Wl,-dynamic",
+        '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
         ]
 
 
@@ -532,6 +536,8 @@ class BuildSupportLinux(BuildSupport):
         print("ExtraCompileArgs:", self.ExtraCompileArgs)
         config_libs = self.call_pylon_config("--libs")
         self.ExtraLinkArgs.extend(config_libs.split())
+        self.ExtraLinkArgs.remove("-Wl,-E")
+        self.ExtraLinkArgs.append("-Wl,-export_dynamic")
         print("ExtraLinkArgs:", self.ExtraLinkArgs)
 
 
