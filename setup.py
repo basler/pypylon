@@ -474,6 +474,7 @@ class BuildSupportLinux(BuildSupport):
         '-O3',
         '-Wno-switch'
         ]
+
     ExtraLinkArgs = [
         '-g0',
         '-Wl,--enable-new-dtags',
