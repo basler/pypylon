@@ -33,6 +33,11 @@ You need a few more things to compile pypylon:
  * [swig](http://www.swig.org) >= 3.0.12
 
 To build pypylon from source:
+
+(On Ubuntu: You would need Python header files. 
+
+To install Python Header files : ```sudo apt-get install python-dev``` )
+
 ```
 git clone https://github.com/basler/pypylon.git
 cd pypylon
