@@ -24,6 +24,9 @@ class BuildSupport(object):
 
     # --- Constants ---
 
+    # The pylon version this source tree was designed for
+    ReferencePylonVersion = "5.0.12"
+
     # Mapping from python platform to pylon platform dirname
     BinPath = {
         'win32': 'Win32',
@@ -227,9 +230,16 @@ class BuildSupport(object):
     def get_version(self):
         git_version = self.get_git_version()
         pylon_version = self.get_pylon_version()
+
         #strip the build number from the pylon version
         match = re.match("^(\d+\.\d+\.\d+)", pylon_version)
-        return "%s+pylon%s" % (git_version, match.group(1))
+        pylon_version_no_build = match.group(1)
+
+        # Skip the local version label if pylon is the ReferencePylonVersion
+        if pylon_version_no_build == self.ReferencePylonVersion:
+            return git_version
+        else:
+            return "%s+pylon%s" % (git_version, pylon_version_no_build)
 
     def get_short_version(self, version):
         return version.split('+')[0]
