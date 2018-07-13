@@ -232,14 +232,17 @@ class BuildSupport(object):
         pylon_version = self.get_pylon_version()
 
         #strip the build number from the pylon version
-        match = re.match("^(\d+\.\d+\.\d+)", pylon_version)
+        #on linux an optional tag might be included in the version
+        match = re.match("^(\d+\.\d+\.\d+)\.\d+(.*)", pylon_version)
         pylon_version_no_build = match.group(1)
+        pylon_version_tag = match.group(2)
 
-        # Skip the local version label if pylon is the ReferencePylonVersion
-        if pylon_version_no_build == self.ReferencePylonVersion:
+        if pylon_version_no_build == self.ReferencePylonVersion and pylon_version_tag == '':
             return git_version
-        else:
-            return "%s+pylon%s" % (git_version, pylon_version_no_build)
+        
+        #remove all characters forbidden in a local version (- and _ get normalized anyways)
+        pylon_version_tag_cleaned=re.sub("[^a-zA-Z0-9\.-_]",'',pylon_version_tag)
+        return "%s+pylon%s%s" % (git_version, pylon_version_no_build, pylon_version_tag_cleaned)
 
     def get_short_version(self, version):
         return version.split('+')[0]
