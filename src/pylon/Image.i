@@ -1,6 +1,6 @@
 %rename (Image) Pylon::IImage;
 %ignore GetBuffer() const;
-%include <Image.h>;
+%include <pylon/Image.h>;
 
 %pythoncode %{
     IImage = Image

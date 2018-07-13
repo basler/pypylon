@@ -5,7 +5,7 @@
 %ignore GetFrameNumber;
 %ignore GetBuffer() const;
 
-%include <GrabResultData.h>;
+%include <pylon/GrabResultData.h>;
 %extend Pylon::CGrabResultData {
     PyObject * GetBuffer()
     {

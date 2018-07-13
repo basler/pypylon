@@ -15,7 +15,7 @@
     GENICAM_ENUM_PROP(OutputOrientation);
     GENICAM_PROP(OutputPaddingX);
 }
-%include <_ImageFormatConverterParams.h>;
+%include <pylon/_ImageFormatConverterParams.h>;
 
 %pythoncode %{
     CImageFormatConverterParams_Params = ImageFormatConverterParams_Params

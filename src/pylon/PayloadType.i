@@ -1,3 +1,3 @@
 %ignore PayloadType;
-%include <PayloadType.h>;
+%include <pylon/PayloadType.h>;
 

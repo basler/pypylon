@@ -9,4 +9,4 @@
 %ignore Pylon::CPylonImageBase::CanSaveWithoutConversion;
 #endif
 
-%include <PylonImageBase.h>;
+%include <pylon/PylonImageBase.h>;

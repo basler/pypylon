@@ -25,7 +25,7 @@
     GENICAM_PROP(NumEmptyBuffers);
     GENICAM_PROP(OutputQueueSize);
 }
-%include <_InstantCameraParams.h>;
+%include <pylon/_InstantCameraParams.h>;
 
 %pythoncode %{
     CInstantCameraParams_Params = InstantCameraParams_Params

@@ -116,7 +116,7 @@ const Pylon::DeviceInfoList_t&
 
 
 
-%include <TlFactory.h>;
+%include <pylon/TlFactory.h>;
 
 // now that the local typemaps are no longer needed, clear them.
 

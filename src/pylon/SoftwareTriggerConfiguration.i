@@ -1,3 +1,3 @@
 %rename(InstantCamera) Pylon::CInstantCamera;
 %rename(SoftwareTriggerConfiguration) Pylon::CSoftwareTriggerConfiguration;
-%include <SoftwareTriggerConfiguration.h>;
+%include <pylon/SoftwareTriggerConfiguration.h>;

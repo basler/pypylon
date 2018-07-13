@@ -8,7 +8,7 @@ namespace Pylon
     PROP_GET(TlInfo)
     PROP_GET(NodeMap)
 }
-%include <TransportLayer.h>;
+%include <pylon/TransportLayer.h>;
 
 %pythoncode %{
     ITransportLayer = TransportLayer

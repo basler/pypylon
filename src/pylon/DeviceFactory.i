@@ -1,3 +1,3 @@
 
 %ignore Pylon::IPylonDevice;
-%include <DeviceFactory.h>;
+%include <pylon/DeviceFactory.h>;

@@ -3,7 +3,7 @@
 
 %ignore Pylon::CImageEventHandler::DebugGetEventHandlerRegistrationCount;
 %clear Pylon::CGrabResultPtr& grabResult;
-%include <ImageEventHandler.h>
+%include <pylon/ImageEventHandler.h>
 
 // =========================================
 // = GrabResult smart ptr output

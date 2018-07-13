@@ -85,4 +85,4 @@ namespace Pylon {
         pass
 %}
 
-%include <InstantCamera.h>;
+%include <pylon/InstantCamera.h>;

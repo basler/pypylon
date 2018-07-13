@@ -2,4 +2,4 @@
 %ignore IsValidBGR;
 %ignore PixelSize;
 %ignore PixelType;
-%include<PixelType.h>;
+%include<pylon/PixelType.h>;

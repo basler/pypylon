@@ -2,4 +2,4 @@
 
 %nodefaultctor Pylon::CFeaturePersistence;
 %nodefaultdtor Pylon::CFeaturePersistence;
-%include <FeaturePersistence.h>;
+%include <pylon/FeaturePersistence.h>;

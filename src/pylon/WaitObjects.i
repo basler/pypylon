@@ -1,2 +1,2 @@
 %ignore WaitObjectsImpl;
-%include <WaitObjects.h>;
+%include <pylon/WaitObjects.h>;

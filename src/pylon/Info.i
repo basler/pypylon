@@ -1,4 +1,4 @@
 
 %ignore CInfoImpl;
-%include <Info.h>;
+%include <pylon/Info.h>;
 

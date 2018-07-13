@@ -48,4 +48,4 @@
 %ignore Pylon::CImageFormatConverter::ImageHasDestinationFormat;
 %ignore Pylon::CImageFormatConverter::OutputPixelFormat;
 
-%include <ImageFormatConverter.h>;
+%include <pylon/ImageFormatConverter.h>;
