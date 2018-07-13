@@ -665,9 +665,16 @@ class BuildSupportOSX(BuildSupport):
     def __init__(self):
         super(BuildSupportOSX, self).__init__()
         self.SwigExe = self.find_swig()
-        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers")
+        includes_dir = os.path.abspath(os.path.join(self.PackageDir, "includes"))
+        old_cwd = os.getcwd()
+        if not os.path.isdir(includes_dir):
+            os.makedirs(includes_dir)
+        os.chdir(includes_dir)
+        if not os.path.exists("pylon"):
+            os.symlink("/Library/Frameworks/pylon.framework/Headers", "pylon")
+        os.chdir(old_cwd)
+        self.ExtraCompileArgs.append("-I/{}".format(includes_dir))
         self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers/GenICam")
-        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers/pylon")
         config_libdir = "/Library/Frameworks/pylon.framework/Libraries"
         self.LibraryDirs.append(config_libdir)
         print("LibraryDirs:", self.LibraryDirs)
