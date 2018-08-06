@@ -31,7 +31,8 @@ class BuildSupport(object):
         'linux-i686': 'lib',
         'linux-x86_64': 'lib64',
         'linux-armv7l': 'lib',
-        'linux-aarch64': 'lib64'
+        'linux-aarch64': 'lib64',
+        'macosx-10.9-x86_64': 'lib'
         }[get_platform()]
 
     # Compatible swig versions
@@ -240,6 +241,8 @@ class BuildSupport(object):
             return BuildSupportWindows()
         elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64"]:
             return BuildSupportLinux()
+        elif get_platform() in ["macosx-10.9-x86_64"]:
+            return BuildSupportOSX()
 
 ################################################################################
 
@@ -581,6 +584,142 @@ class BuildSupportLinux(BuildSupport):
         params.extend(args)
         res = subprocess.check_output(params, universal_newlines=True)
         return res.strip()
+
+    def get_pylon_version(self):
+        return self.call_pylon_config("--version")
+
+################################################################################
+
+class BuildSupportOSX(BuildSupport):
+
+    PylonConfig = "/Library/Frameworks/pylon.framework/Resources/Tools/pylon-config"
+
+    DefineMacros = [
+        ("SWIG_TYPE_TABLE", "pylon")
+        ]
+
+    ExtraCompileArgs = [
+        '-Wno-unknown-pragmas',
+        '-fPIC',
+        '-g0',
+        '-Wall',
+        '-O3',
+        '-Wno-switch'
+        ]
+
+    pylon_dir = "/Library/Frameworks/pylon.framework"
+    ExtraLinkArgs = [
+        '-g0',
+        "-Wl,-demangle",
+        "-Wl,-dynamic",
+        '-Wl,-rpath,%s' % (os.path.join(*os.path.split(pylon_dir)[:-1])),
+        "-Wl,-framework,pylon",
+        ]
+
+    RuntimeFiles = {
+
+        "base": [
+            ("libpylonbase-*.so", ""),
+            ("libGCBase_*.so", ""),
+            ("libGenApi_*.so", ""),
+            ("liblog4cpp_*.so", ""),
+            ("libLog_*.so", ""),
+            ("libNodeMapData_*.so", ""),
+            ("libXmlParser_*.so", ""),
+            ("libMathParser_*.so", ""),
+            ],
+
+        "gige": [
+            ("libpylon_TL_gige-*.so", ""),
+            ("libgxapi-*.so", ""),
+            ],
+
+        "usb": [
+            ("libpylon_TL_usb-*.so", ""),
+            ("libuxapi-*.so", ""),
+            ("pylon-libusb-*.so", ""),
+            ],
+
+        "camemu": [
+            ("libpylon_TL_camemu-*.so", ""),
+            ],
+
+        "1394": [], # N/A
+
+        "bcon": [
+            ("libbxapi*.so", ""),
+            ("libpylon_TL_bcon-*.so", ""),
+            ],
+
+        "cl": [], # N/A
+
+        "extra": [
+            ("libpylonutility-*.so", ""),
+            ],
+
+        "gentl": [
+            ("libpylon_TL_gtc*.so", ""),
+            ],
+        }
+
+    def __init__(self):
+        super(BuildSupportOSX, self).__init__()
+        self.SwigExe = self.find_swig()
+        includes_dir = os.path.abspath(os.path.join(self.PackageDir, "includes"))
+        old_cwd = os.getcwd()
+        if not os.path.isdir(includes_dir):
+            os.makedirs(includes_dir)
+        os.chdir(includes_dir)
+        if not os.path.exists("pylon"):
+            os.symlink("/Library/Frameworks/pylon.framework/Headers", "pylon")
+        os.chdir(old_cwd)
+        self.ExtraCompileArgs.append("-I/{}".format(includes_dir))
+        self.ExtraCompileArgs.append("-I/Library/Frameworks/pylon.framework/Headers/GenICam")
+        config_libdir = "/Library/Frameworks/pylon.framework/Libraries"
+        self.LibraryDirs.append(config_libdir)
+        print("LibraryDirs:", self.LibraryDirs)
+
+    def use_debug_configuration(self):
+        try:
+            self.ExtraCompileArgs.remove('-O3')
+        except ValueError:
+            pass
+        try:
+            self.ExtraCompileArgs.remove('-g0')
+        except ValueError:
+            pass
+        try:
+            self.ExtraLinkArgs.remove('-g0')
+        except ValueError:
+            pass
+        self.ExtraCompileArgs.append('-O0')
+        self.ExtraCompileArgs.append('-g3')
+        self.ExtraLinkArgs.append('-g3')
+
+
+    def get_swig_includes(self):
+        # add compiler include paths to list
+        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
+        return includes
+
+    def copy_runtime(self):
+        runtime_dir = "/Library/Frameworks/pylon.framework/Libraries"
+        for package in self.RuntimeDefaultDeploy:
+            for src, dst in self.RuntimeFiles[package]:
+                full_dst = os.path.abspath(os.path.join(self.PackageDir, dst))
+                if not os.path.exists(full_dst):
+                    os.makedirs(full_dst)
+
+                src = os.path.join(runtime_dir, src)
+                for f in glob.glob(src):
+                    print("Copy %s => %s" % (f, full_dst))
+                    shutil.copy(f, full_dst)
+
+    def call_pylon_config(self, *args):
+        params = [self.PylonConfig]
+        params.extend(args)
+        res = subprocess.check_output(params, universal_newlines=True)
+        return res.strip()[3:] if res.strip().startswith("-n ") else res.strip()
 
     def get_pylon_version(self):
         return self.call_pylon_config("--version")
