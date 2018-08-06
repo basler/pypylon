@@ -1,9 +1,12 @@
 environment:
   TWINE_USERNAME: basler
-  TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+  #Enable this for testing purposes
+  #TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
   TWINE_PASSWORD:
-    secure: qtg34Wv7b/cdAuvvAnqDZA==
-    #secure: pLJjpvmtL1FeCwdEWzqH1hHBsNvJTa7nxkj4lhVEKVY=
+    #test.pypi password
+    #secure: qtg34Wv7b/cdAuvvAnqDZA==
+    #pypi passwd
+    secure: pLJjpvmtL1FeCwdEWzqH1hHBsNvJTa7nxkj4lhVEKVY=
 
   matrix:
     # For Python versions available on Appveyor, see
@@ -60,6 +63,5 @@ deploy:
 
 deploy_script:
   - echo "Starting Artifact Deployment"
-  #- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
-  - ps: Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*"
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
   - echo "Finished Artifact Deployment"
