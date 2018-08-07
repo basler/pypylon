@@ -1,4 +1,7 @@
 Version ?.?.?
+    - The pylon version is no longer contained in the local version tag of pypylon,
+      when building with the reference pylon version (currently 5.0.12)
+    - Better package metadata
 
 Version 1.2.0
     - Date 2018-07-06
