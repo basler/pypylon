@@ -1,4 +1,13 @@
 environment:
+  TWINE_USERNAME: basler
+  #Enable this for testing purposes
+  #TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+  TWINE_PASSWORD:
+    #test.pypi password
+    #secure: qtg34Wv7b/cdAuvvAnqDZA==
+    #pypi passwd
+    secure: pLJjpvmtL1FeCwdEWzqH1hHBsNvJTa7nxkj4lhVEKVY=
+
   matrix:
     # For Python versions available on Appveyor, see
     # http://www.appveyor.com/docs/installed-software#python
@@ -20,13 +29,13 @@ environment:
 
 install:
   # We need wheel installed to build wheels
-  - "%PYTHON%\\python.exe -m pip install wheel"
-  # install swig and put it on the path
-  - curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip
+  - "%PYTHON%\\python.exe -m pip install wheel twine"
+  # install swig and put it on the path. Retry because of network issues with sourceforge
+  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip
   - 7z x swigwin.zip -oC:\ > NUL
   - set PATH=C:\swigwin-3.0.12;%PATH%
   # install pylon
-  - ps: Start-FileDownload $env:PYLON_INSTALLER_URL -FileName pylon_installer.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_INSTALLER_URL%
   - pylon_installer.exe /quiet /install
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
   - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 5\development
@@ -51,3 +60,8 @@ deploy:
   force_update: true
   on:
     appveyor_repo_tag: true        # deploy on tag push only
+
+deploy_script:
+  - echo "Starting Artifact Deployment"
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  - echo "Finished Artifact Deployment"

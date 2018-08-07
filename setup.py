@@ -24,6 +24,9 @@ class BuildSupport(object):
 
     # --- Constants ---
 
+    # The pylon version this source tree was designed for
+    ReferencePylonVersion = "5.0.12"
+
     # Mapping from python platform to pylon platform dirname
     BinPath = {
         'win32': 'Win32',
@@ -227,9 +230,19 @@ class BuildSupport(object):
     def get_version(self):
         git_version = self.get_git_version()
         pylon_version = self.get_pylon_version()
+
         #strip the build number from the pylon version
-        match = re.match("^(\d+\.\d+\.\d+)", pylon_version)
-        return "%s+pylon%s" % (git_version, match.group(1))
+        #on linux an optional tag might be included in the version
+        match = re.match("^(\d+\.\d+\.\d+)\.\d+(.*)", pylon_version)
+        pylon_version_no_build = match.group(1)
+        pylon_version_tag = match.group(2)
+
+        if pylon_version_no_build == self.ReferencePylonVersion and pylon_version_tag == '':
+            return git_version
+        
+        #remove all characters forbidden in a local version (- and _ get normalized anyways)
+        pylon_version_tag_cleaned=re.sub("[^a-zA-Z0-9\.-_]",'',pylon_version_tag)
+        return "%s+pylon%s%s" % (git_version, pylon_version_no_build, pylon_version_tag_cleaned)
 
     def get_short_version(self, version):
         return version.split('+')[0]
@@ -710,18 +723,38 @@ if __name__ == "__main__":
         extra_link_args=bs.ExtraLinkArgs,
         )
 
+    with open("README.md", "r") as fh:
+        long_description = fh.read()
+
     # Now everything is in place to call setup...
     #we must not use package_dir to allow develop installs
     setup(
         name='pypylon',
         version=version,
+        author="Basler AG",
+        author_email="oss@baslerweb.com",
+        description="The python wrapper for the Basler pylon Camera Software Suite.",
+        long_description=long_description,
+        long_description_content_type="text/markdown",
+        url="https://github.com/basler/pypylon",
         ext_modules=[genicam_ext, pylon_ext],
         test_suite='tests.all_emulated_tests',
         packages=["pypylon"],
         package_data={
             "pypylon": ["*.dll", "*.zip", "*.so"]
-            }
+        },
+        classifiers=(
+            "License :: Other/Proprietary License", #Proprietary license as the resulting install contains pylon which is under the pylon license
+            "Programming Language :: C++",
+            "Operating System :: Microsoft :: Windows :: Windows 7",
+            "Operating System :: Microsoft :: Windows :: Windows 8",
+            "Operating System :: Microsoft :: Windows :: Windows 10",
+            "Operating System :: POSIX :: Linux",
+            "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
+            "Topic :: Multimedia :: Video :: Capture",
+            "Topic :: Scientific/Engineering",
         )
+    )
 
     if args.generate_python_doc:
         print("Generating doc for python API")
