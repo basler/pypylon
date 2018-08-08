@@ -42,15 +42,22 @@ PYLON_ARCH=""
 PYLON=""
 
 case $ABI_TAG in
-    cp34m) BASE_IMAGE="python:3.4.8-wheezy" 
+    cp27m)
+        case $PLATFORM_TAG in
+            linux_aarch64) BASE_IMAGE="python:2.7.15-jessie" ;;
+            *) BASE_IMAGE="python:2.7.15-wheezy" ;;
+        esac
+        ;;
+    cp34m)
         case $PLATFORM_TAG in 
             linux_aarch64) BASE_IMAGE="python:3.4.8-jessie" ;;
+            *) BASE_IMAGE="python:3.4.8-wheezy" ;;
         esac
         ;;
     cp35m) BASE_IMAGE="python:3.5.5-jessie" ;;
     cp36m) BASE_IMAGE="python:3.6.5-jessie" ;;
     *)
-    echo "Unsupported abi '$ABI_TAG'. Supported tags: cp34m,cp35m,cp36m"
+    echo "Unsupported abi '$ABI_TAG'. Supported tags: cp27m,cp34m,cp35m,cp36m"
     exit 1
 esac
 

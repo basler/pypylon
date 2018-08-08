@@ -4,15 +4,19 @@ services:
 language: cpp
 
 env:
+- P=linux_x86_64 A=cp27m
 - P=linux_x86_64 A=cp35m
 - P=linux_x86_64 A=cp36m
 - P=linux_x86_64 A=cp34m
+- P=linux_i686 A=cp27m
 - P=linux_i686 A=cp34m
 - P=linux_i686 A=cp35m
 - P=linux_i686 A=cp36m
+- P=linux_armv7l A=cp27m
 - P=linux_armv7l A=cp34m
 - P=linux_armv7l A=cp35m
 - P=linux_armv7l A=cp36m
+- P=linux_aarch64 A=cp27m
 - P=linux_aarch64 A=cp34m
 - P=linux_aarch64 A=cp35m
 - P=linux_aarch64 A=cp36m
