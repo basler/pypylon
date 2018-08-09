@@ -592,7 +592,11 @@ class BuildSupportLinux(BuildSupport):
     def call_pylon_config(self, *args):
         params = [self.PylonConfig]
         params.extend(args)
-        res = subprocess.check_output(params, universal_newlines=True)
+        try:
+            res = subprocess.check_output(params, universal_newlines=True)
+        except ErrFileNotFound:
+            error("Couldn't find pylon. Please install pylon in /opt/pylon5 or tell us the installation location using the PYLON_ROOT env variable")
+            raise
         return res.strip()
 
     def get_pylon_version(self):
