@@ -26,7 +26,7 @@ install:
 - mkdir pylon_installer && cd pylon_installer
 - |
   for PYLON_ARCH in armhf arm64 x86 x86_64 ; do
-      curl -O "${PYLON_DOWNLOAD_URL_BASE}pylon-5.0.12.11829-${PYLON_ARCH}.tar.gz"
+      travis_retry curl -sSfL -O "${PYLON_DOWNLOAD_URL_BASE}pylon-5.0.12.11829-${PYLON_ARCH}.tar.gz"
   done
 - echo "Pylon Installer:" && ls
 

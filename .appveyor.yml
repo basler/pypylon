@@ -63,5 +63,5 @@ deploy:
 
 deploy_script:
   - echo "Starting Artifact Deployment"
-  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag, won't deploy to pypi"}
   - echo "Finished Artifact Deployment"
