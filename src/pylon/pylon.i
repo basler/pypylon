@@ -222,7 +222,22 @@ static void FixPylonDllLoadingIfNecessary()
     // Need to import TranslateGenicamException from _genicam in order to be
     // able to translate C++ Genicam exceptions to the correct Python exceptions.
 
-    PyObject* mod = PyImport_ImportModule("pypylon._genicam"); // new obj
+    // The correct way of importing _genicam is to import "pypylon._genicam".
+    PyObject* mod = PyImport_ImportModule("pypylon._genicam");
+    if (mod == NULL)
+    {
+        // But that does not work, if pypylon is used in an executable that
+        // was created with PyInstaller. PyInstaller installs various import
+        // hooks, but obviously none that handles our case.
+
+        // Very important: Clear the error state from the previous failure.
+        // Without this the following retry will always fail.
+        PyErr_Clear();
+
+        // In the PyInstaller case the name of the imported module has to be:
+        mod = PyImport_ImportModule("_genicam");
+    }
+
     if (mod)
     {
         _genicam_translate = PyObject_GetAttrString(    // new obj
