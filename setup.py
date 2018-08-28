@@ -23,7 +23,14 @@ ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
 ################################################################################
 
 def get_machinewidth():
-    if platform.machine().endswith('64'):
+    # From the documentation of 'platform.architecture()':
+    #   "Note:
+    #    On Mac OS X (and perhaps other platforms), executable files may be
+    #    universal files containing multiple architectures. To get at the
+    #    '64-bitness# of the current interpreter, it is more reliable to query
+    #    the sys.maxsize attribute.
+    #   "
+    if sys.maxsize > 2147483647:
         return 64
     else:
         return 32
@@ -70,7 +77,6 @@ class BuildSupport(object):
         "gentl",
         "extra",
         "bcon",
-        "cl"
         }
 
     # --- Attributes to be set by init (may be platform specific ---
@@ -297,67 +303,50 @@ class BuildSupportWindows(BuildSupport):
     RuntimeFiles = {
 
         "base": [
-            "PylonBase_MD_VC120_v5_0.dll",
-            "GCBase_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "GenApi_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "log4cpp_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "Log_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "NodeMapData_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "XmlParser_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "MathParser_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
+            "PylonBase_*.dll",
+            "GCBase_MD_*.dll",
+            "GenApi_MD_*.dll",
+            "log4cpp_MD_*.dll",
+            "Log_MD_*.dll",
+            "NodeMapData_MD_*.dll",
+            "XmlParser_MD_*.dll",
+            "MathParser_MD_*.dll",
             ],
 
         "gige": [
-            "PylonGigE_MD_VC120_v5_0_TL.dll",
+            "PylonGigE_*.dll",
             "gxapi*.dll",
             ],
 
         "usb": [
-            "PylonUsb_MD_VC120_v5_0_TL.dll",
+            "PylonUsb_*.dll",
             "uxapi*.dll",
             ],
 
         "camemu": [
-            "PylonCamEmu_MD_VC120_V5_0_TL.dll"
+            "PylonCamEmu_*.dll"
             ],
 
         "1394": [
-            "Pylon1394_MD_VC120_v5_0_TL.dll",
-            "BcamError_v5_0.dll",
+            "Pylon1394_*.dll",
+            "BcamError_*.dll",
             "Basler_A1_A3_A6_1394.zip",
             "Basler_scout_1394.zip",
             ],
 
         "bcon": [
             "BconAdapterPleora.dll",
-            "bxapi_MD_VC120_v5_0.dll",
-            "PylonBcon_MD_VC120_V5_0_TL.dll",
-            ],
-
-        # TODO: Test CL!!!
-        "cl": [
-            "PylonCLSer_MD_VC120_V5_0_TL.dll",
-            "CLAllSerial_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "CLProtocol_MD_VC120_v3_0_Basler_pylon_v5_0.dll",
-            "CLSerCOM.dll",
-            "Basler_CameraLink.zip",
-            # ARGHHH => seperate subdir!!!
-            # cl lives up to its bad reputation by requiring special handling
-            os.path.join(
-                "..",
-                "CLProtocol",
-                "Win64_x64" if get_machinewidth()==64 else 'Win32_i86',
-                "BaslerCLProtocol.dll"
-                ),
+            "bxapi_*.dll",
+            "PylonBcon_*.dll",
             ],
 
         "extra": [
-            "PylonGUI_MD_VC120_v5_0.dll",
-            "PylonUtility_MD_VC120_v5_0.dll"
+            "PylonGUI_*.dll",
+            "PylonUtility_*.dll"
             ],
 
         "gentl": [
-            "PylonGtc_MD_VC120_V5_0_TL.dll"
+            "PylonGtc_*.dll"
             ],
         }
 
@@ -422,34 +411,13 @@ class BuildSupportWindows(BuildSupport):
         tgt_bits = get_machinewidth()
 
         # Copy msvc runtime for pylon
-        runtime_dlls = ["msvcr120.dll", "msvcp120.dll"]
+        runtime_dlls = ["vcruntime140.dll", "msvcp140.dll"]
         sysname = "System32" if tgt_bits == 64 or os_bits == 32 else "SysWOW64"
         sysdir = os.path.join(os.environ["windir"], sysname)
         for dll in runtime_dlls:
-            shutil.copy(os.path.join(sysdir, dll), self.PackageDir)
-
-        # Copy msvcp runtime for _pylon.pyd and _genicam.pyd if that is needed.
-        #
-        #   Prior to VS2015 / Python 3.5 the Python setup installs the
-        #   redistributable package of the runtime library and that also
-        #   installed the corresponding msvcp DLL that pypylon depends upon.
-        #   In those cases we do not need to do anything special.
-        #
-        #   With the new organisation of the VS2015 runtime library things
-        #   changed. Python 3.5 installs the OS update package that adds
-        #   ucrtbase.dll to the system, but it does not install vcruntime140.dll
-        #   and msvcp140.dll system-wide. It simply places a copy of
-        #   vcruntime140.dll alongside to python.exe. So we have to supply
-        #   the msvcp140.dll that pypylon can use. We do so by copying it into
-        #   the pypylon directory.
-
-        m = re.search(r"\sv\.(\d+)\s", sys.version)
-        if m:
-            ver = m.group(1)[:2]
-            if ver == '19':
-                msvcp = os.path.join(sysdir, 'msvcp140.dll')
-                shutil.copy(msvcp, self.PackageDir)
-
+            src = os.path.join(sysdir, dll)
+            print("Copy %s => %s" % (src, self.PackageDir))
+            shutil.copy(src, self.PackageDir)
 
     def get_pylon_version(self):
         dll_dir = os.path.realpath(
@@ -460,7 +428,12 @@ class BuildSupportWindows(BuildSupport):
                 self.BinPath
                 )
             )
-        dll_path = os.path.join(dll_dir, "PylonBase_MD_VC120_v5_0.dll")
+        dll_pattern = os.path.join(dll_dir, "PylonBase_*.dll")
+        lst = glob.glob(dll_pattern)
+        if lst:
+            dll_path = lst[0]
+        else:
+            raise EnvironmentError("could not find PylonBase")
 
         # temporarily add dll dir to path
         prev_path = os.environ['PATH']
@@ -538,8 +511,6 @@ class BuildSupportLinux(BuildSupport):
             ("libbxapi*.so", ""),
             ("libpylon_TL_bcon-*.so", ""),
             ],
-
-        "cl": [], # N/A
 
         "extra": [
             ("libpylonutility-*.so", ""),

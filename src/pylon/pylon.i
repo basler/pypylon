@@ -147,8 +147,9 @@ void TranslateGenicamException(const GenericException* e)
 //   - Request that the TL DLLs (including gxapi and uxapi) are loaded NOW.
 //   - Restore the previous PATH.
 //
-//  We implement this workaround for Pylon versions < 5.0.5, == 5.0.11 and
-//  == 5.0.12. This list might have to be expanded in the future.
+//  We implement this workaround for Pylon versions < 5.0.5, == 5.0.11,
+//  == 5.0.12, == 5.1.0 and == 5.1.1. Version 5.2.0 has a fix that makes this
+// workaround superfluous.
 
 #ifdef WIN32
 #define NEED_PYLON_DLL_WORKAROUND 1
@@ -166,10 +167,13 @@ static void FixPylonDllLoadingIfNecessary()
 
     unsigned int major, minor, subminor, build;
     Pylon::GetPylonVersion(&major, &minor, &subminor, &build);
+    if (major != 5)
+    {
+        return;
+    }
     bool necessary = (
-        major == 5 &&
-        minor == 0 &&
-        (subminor < 5 || subminor == 11 || subminor == 12)
+        (minor == 0 && (subminor < 5 || subminor == 11 || subminor == 12)) ||
+        (minor == 1 && (subminor == 0 || subminor == 1))
         );
     if (!necessary)
     {
@@ -201,8 +205,30 @@ static void FixPylonDllLoadingIfNecessary()
     SetEnvironmentVariableW(L"PATH", new_PATH);
 
     // Try to load TLs
-    Pylon::TlInfoList_t tli;
-    Pylon::CTlFactory::GetInstance().EnumerateTls(tli);
+    try
+    {
+        Pylon::CTlFactory& tlf = Pylon::CTlFactory::GetInstance();
+        Pylon::TlInfoList_t tli;
+
+        tlf.EnumerateTls(tli);
+        for (unsigned int i = 0; i < tli.size(); i++)
+        {
+            try
+            {
+                ITransportLayer *pTL = tlf.CreateTl(tli[i]);
+                tlf.ReleaseTl(pTL);
+            }
+            catch (Pylon::GenericException&)
+            {
+                // Ignore TL loading failure and keep on trying other TLs.
+            }
+        }
+    }
+    catch (Pylon::GenericException&)
+    {
+        // Ignore failure of enumerating TLs and carry on loading this
+        // module. The user will notice later if he doesn't find any cameras.
+    }
 
     // restore p_Previous_PATH
     SetEnvironmentVariableW(L"PATH", p_Previous_PATH);
