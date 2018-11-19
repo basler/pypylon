@@ -10,9 +10,8 @@ You are welcome to post any questions or issues on [GitHub](https://github.com/b
 
 # For the Impatient
  * Install [pylon](https://www.baslerweb.com/pylon).
- * Download a binary wheel from the [releases](https://github.com/Basler/pypylon/releases) page.
- * Install the wheel using ```pip3 install <your downloaded wheel>.whl```
- * Look at samples/grab.py in this repository
+ * Install pypylon from the Python Package Index using ```pip install pypylon```
+ * Look at samples/grab.py in the [GitHub repository](https://github.com/basler/pypylon) for this python wrapper.
 
 # Installation
 ## Prerequisites
@@ -23,7 +22,7 @@ You are welcome to post any questions or issues on [GitHub](https://github.com/b
 ## Binary Installation
 The easiest way to get pypylon is to install a prebuild wheel.
 
-Binary releases are available on the [releases](https://github.com/Basler/pypylon/releases) page.
+Binary releases are available on the [Python Package Index (PyPI)](https://pypi.org/project/pypylon/) and the [GitHub releases](https://github.com/Basler/pypylon/releases) page.
 
 ## Installation from Source
 Building the pypylon bindings is supported and tested on Windows and Linux.
