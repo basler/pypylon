@@ -2,7 +2,7 @@
 from __future__ import print_function
 from setuptools import setup, Extension
 from distutils import spawn
-from distutils.util import get_platform
+from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
 from logging import info, warning, error
 
@@ -15,27 +15,36 @@ import re
 import shutil
 import subprocess
 import sys
+import platform
 
 ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
 
 ################################################################################
+
+def get_machinewidth():
+    if platform.machine().endswith('64'):
+        return 64
+    else:
+        return 32
+
+def get_platform():
+    return platform.system()
 
 class BuildSupport(object):
 
     # --- Constants ---
 
     # The pylon version this source tree was designed for
-    ReferencePylonVersion = "5.0.12"
+    ReferencePylonVersion = "5.1.1"
 
     # Mapping from python platform to pylon platform dirname
     BinPath = {
-        'win32': 'Win32',
-        'win-amd64': 'x64',
-        'linux-i686': 'lib',
-        'linux-x86_64': 'lib64',
-        'linux-armv7l': 'lib',
-        'linux-aarch64': 'lib64'
-        }[get_platform()]
+        ('Windows', 32): 'Win32',
+        ('Windows', 64): 'x64',
+        ('Linux', 32): 'lib',
+        ('Linux', 64): 'lib64',
+        ('Darwin', 64): 'lib64'
+        } [ (get_platform(), get_machinewidth()) ]
 
     # Compatible swig versions
     SwigVersions = ["3.0.12"]
@@ -249,10 +258,15 @@ class BuildSupport(object):
 
     @staticmethod
     def make():
-        if get_platform() in ["win32", "win-amd64"]:
+        if get_platform() == "Windows":
             return BuildSupportWindows()
-        elif get_platform() in ["linux-i686", "linux-x86_64", "linux-armv7l", "linux-aarch64"]:
+        elif get_platform() == "Linux":
             return BuildSupportLinux()
+        elif get_platform() == "Darwin":
+            return BuildSupportMacOS()
+        else:
+            error("Unsupported platform")
+
 
 ################################################################################
 
@@ -334,7 +348,7 @@ class BuildSupportWindows(BuildSupport):
             os.path.join(
                 "..",
                 "CLProtocol",
-                "Win64_x64" if get_platform() == 'win-amd64' else 'Win32_i86',
+                "Win64_x64" if get_machinewidth()==64 else 'Win32_i86',
                 "BaslerCLProtocol.dll"
                 ),
             ],
@@ -354,7 +368,7 @@ class BuildSupportWindows(BuildSupport):
         self.SwigExe = self.find_swig()
         self.SwigOptions.append("-DHAVE_PYLON_GUI")
         self.SwigOptions.append("-D_WIN32")
-        if get_platform() != "win32":
+        if get_machinewidth() != 32:
             self.SwigOptions.append("-D_WIN64")
 
         self.PylonDevDir = os.environ.get("PYLON_DEV_DIR")
@@ -407,7 +421,7 @@ class BuildSupportWindows(BuildSupport):
             wow = os.environ.get('PROCESSOR_ARCHITEW6432', False)
             if not wow:
                 os_bits = 32
-        tgt_bits = (32 if get_platform() == "win32" else 64)
+        tgt_bits = get_machinewidth()
 
         # Copy msvc runtime for pylon
         runtime_dlls = ["msvcr120.dll", "msvcp120.dll"]
@@ -603,6 +617,92 @@ class BuildSupportLinux(BuildSupport):
         return self.call_pylon_config("--version")
 
 ################################################################################
+
+
+class BuildSupportMacOS(BuildSupport):
+
+    FrameworkPath = os.getenv('PYLON_ROOT', '/Library/Frameworks/')
+
+    FrameworkName = 'pylon.framework'
+
+    PylonConfig = os.path.join(FrameworkPath, FrameworkName, 'Versions/Current/Resources/Tools/pylon-config.sh')
+
+    DefineMacros = [
+                   ("SWIG_TYPE_TABLE", "pylon")
+                   ]
+
+    ExtraCompileArgs = [
+                       '-Wno-unknown-pragmas',
+                       '-fPIC',
+                       '-g0',
+                       '-Wall',
+                       '-O3',
+                       '-Wno-switch'
+                       ]
+
+    ExtraLinkArgs = [
+                    '-g0',
+                    '-Wl,-rpath,@loader_path',
+                    '-Wl,-framework,pylon',
+                    '-F' + FrameworkPath
+                    ]
+
+    def __init__(self):
+        super(BuildSupportMacOS, self).__init__()
+        self.SwigExe = self.find_swig()
+        includes_dir = os.path.abspath(os.path.join(self.PackageDir, "includes"))
+        old_cwd = os.getcwd()
+        if not os.path.isdir(includes_dir):
+            os.makedirs(includes_dir)
+        os.chdir(includes_dir)
+
+        # simulate implicit include path as swig is unaware of frameworks
+        fakeframeinclude = 'pylon'
+        if (os.path.islink(fakeframeinclude)):
+            os.remove(fakeframeinclude)
+
+        os.symlink(os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'), 'pylon')
+
+        os.chdir(old_cwd)
+        self.ExtraCompileArgs.append("-I{}".format(includes_dir))
+        self.ExtraCompileArgs.append('-I' + os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers', 'GenICam'))
+
+    def call_pylon_config(self, *args):
+        params = [self.PylonConfig]
+        params.extend(args)
+        try:
+            res = subprocess.check_output(params, universal_newlines=True)
+        except ErrFileNotFound:
+            error("Couldn't find pylon. Please install pylon in %s or tell us the installation location using the PYLON_ROOT environment variable", self.FrameworkPath)
+            raise
+
+        # work around simple shells
+        badprefix='-n '
+        if res.startswith(badprefix):
+            res = res[len(badprefix):]
+
+        return res.strip()
+
+    def get_pylon_version(self):
+        return self.call_pylon_config("--version")
+
+    def get_swig_includes(self):
+        # add compiler include paths to list
+        includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
+        # append framework paths manually
+        includes += [
+                     os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'),
+                     os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers', 'GenICam')
+                     ]
+        return includes
+
+    def copy_runtime(self):
+        full_dst = os.path.join(os.path.abspath(self.PackageDir), self.FrameworkName)
+
+        if not os.path.exists(full_dst):
+            copy_tree(os.path.join(self.FrameworkPath, self.FrameworkName), full_dst, preserve_symlinks=1, update=1)
+
+################################################################################
 ################################################################################
 ################################################################################
 
@@ -745,7 +845,13 @@ if __name__ == "__main__":
         test_suite='tests.all_emulated_tests',
         packages=["pypylon"],
         package_data={
-            "pypylon": ["*.dll", "*.zip", "*.so"]
+            "pypylon": ["*.dll", "*.zip", "*.so",
+                        "*.framework/Versions/[A-Z]/*",
+                        "*.framework/Versions/[A-Z]/Libraries/*",
+                        "*.framework/Versions/[A-Z]/Resources/*",
+                        "*.framework/Versions/[A-Z]/Resources/*/*",
+                        "*.framework/Versions/[A-Z]/Resources/*/*/*",
+                        "*.framework/Versions/[A-Z]/Resources/*/*/*/*"]
         },
         classifiers=(
             "License :: Other/Proprietary License", #Proprietary license as the resulting install contains pylon which is under the pylon license
