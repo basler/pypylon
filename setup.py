@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import platform
+import VersionInfo;
 
 ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
 
@@ -33,9 +34,6 @@ def get_platform():
 class BuildSupport(object):
 
     # --- Constants ---
-
-    # The pylon version this source tree was designed for
-    ReferencePylonVersion = "5.1.1"
 
     # Mapping from python platform to pylon platform dirname
     BinPath = {
@@ -246,7 +244,7 @@ class BuildSupport(object):
         pylon_version_no_build = match.group(1)
         pylon_version_tag = match.group(2)
 
-        if pylon_version_no_build == self.ReferencePylonVersion and pylon_version_tag == '':
+        if pylon_version_no_build == VersionInfo.ReferencePylonVersion[get_platform()] and pylon_version_tag == '':
             return git_version
         
         #remove all characters forbidden in a local version (- and _ get normalized anyways)
