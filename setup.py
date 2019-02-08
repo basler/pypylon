@@ -126,7 +126,7 @@ class BuildSupport(object):
         except (subprocess.CalledProcessError, ErrFileNotFound):
             return False
 
-        res = re.search("SWIG Version ([\d\.]+)", output)
+        res = re.search(r"SWIG Version ([\d\.]+)", output)
         if res is None:
             return False
 
@@ -214,9 +214,9 @@ class BuildSupport(object):
                 universal_newlines=True
                 )
             git_version = git_version.strip()
-            m_rel = re.match("^\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?$", git_version)
+            m_rel = re.match(r"^\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?$", git_version)
             #this will match  something like 1.0.0-14-g123456 and 1.0.0-14-g123456-dirty and 1.0.0-dirty
-            m_dev = re.match("^(\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?)(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?$", git_version)
+            m_dev = re.match(r"^(\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?)(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?$", git_version)
             if m_rel:
                 # release build -> return as is
                 return git_version
@@ -240,15 +240,15 @@ class BuildSupport(object):
 
         #strip the build number from the pylon version
         #on linux an optional tag might be included in the version
-        match = re.match("^(\d+\.\d+\.\d+)\.\d+(.*)", pylon_version)
+        match = re.match(r"^(\d+\.\d+\.\d+)\.\d+(.*)", pylon_version)
         pylon_version_no_build = match.group(1)
         pylon_version_tag = match.group(2)
 
         if pylon_version_no_build == VersionInfo.ReferencePylonVersion[get_platform()] and pylon_version_tag == '':
             return git_version
-        
+
         #remove all characters forbidden in a local version (- and _ get normalized anyways)
-        pylon_version_tag_cleaned=re.sub("[^a-zA-Z0-9\.-_]",'',pylon_version_tag)
+        pylon_version_tag_cleaned=re.sub(r"[^a-zA-Z0-9\.-_]",'',pylon_version_tag)
         return "%s+pylon%s%s" % (git_version, pylon_version_no_build, pylon_version_tag_cleaned)
 
     def get_short_version(self, version):
@@ -851,7 +851,7 @@ if __name__ == "__main__":
                         "*.framework/Versions/[A-Z]/Resources/*/*/*",
                         "*.framework/Versions/[A-Z]/Resources/*/*/*/*"]
         },
-        classifiers=(
+        classifiers=[
             "License :: Other/Proprietary License", #Proprietary license as the resulting install contains pylon which is under the pylon license
             "Programming Language :: C++",
             "Operating System :: Microsoft :: Windows :: Windows 7",
@@ -861,7 +861,7 @@ if __name__ == "__main__":
             "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
             "Topic :: Multimedia :: Video :: Capture",
             "Topic :: Scientific/Engineering",
-        )
+        ]
     )
 
     if args.generate_python_doc:
