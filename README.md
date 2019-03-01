@@ -72,7 +72,7 @@ Pull requests to pypylon are very welcome. To help you getting started with pypy
 
 ## Starting Development
 ```
-python setup.py development
+python setup.py develop
 ```
 This will "link" the local pypylon source directory into your python installation. It will not package the pylon libraries and always use the installed pylon.
 After changing pypylon, execute `python setup.py build` and test...
