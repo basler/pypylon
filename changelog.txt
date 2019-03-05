@@ -5,6 +5,7 @@ Version ?.?.?
     - Fixed PylonImageBase so that the methods CanSaveWithoutConversion, Save
       and Load can be used. Added a sample that shows how images can be saved.
     - Added macOS platform support
+    - Switched to Pylon 5.2.0 for windows builds
 
 Version 1.3.1
     - Date 2018-08-13
