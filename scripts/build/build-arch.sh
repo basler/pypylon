@@ -56,8 +56,9 @@ case $ABI_TAG in
         ;;
     cp35m) BASE_IMAGE="python:3.5.5-jessie" ;;
     cp36m) BASE_IMAGE="python:3.6.5-jessie" ;;
+    cp37m) BASE_IMAGE="python:3.7.2-stretch" ;;
     *)
-    echo "Unsupported abi '$ABI_TAG'. Supported tags: cp27m,cp34m,cp35m,cp36m"
+    echo "Unsupported abi '$ABI_TAG'. Supported tags: cp27m,cp34m,cp35m,cp36m,cp37m"
     exit 1
 esac
 
