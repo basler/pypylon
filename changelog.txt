@@ -1,5 +1,8 @@
 Version ?.?.?
     - Date ????-??-??
+
+Version 1.4.0
+    - Date 2019-03-13
     - Fixed a regression introduced in version 1.1.0 where pypylon stopped being
       importable when used in an application built with PyInstaller.
     - Fixed PylonImageBase so that the methods CanSaveWithoutConversion, Save
