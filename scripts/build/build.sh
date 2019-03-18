@@ -59,6 +59,7 @@ echo "Using pylon SDK from $PYLON_ROOT"
 export PYLON_ROOT
 
 $PYTHON setup.py clean
+$PYTHON setup.py test
 $PYTHON setup.py bdist_wheel
 
 rm -r "$BUILD_DIR"
