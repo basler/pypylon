@@ -52,8 +52,14 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         camera.StartGrabbing()
 
         self.assertEqual(10, camera.NumQueuedBuffers.Value)
-        time.sleep(0.5)
-        self.assertTrue(camera.NumReadyBuffers.Value > 0)
+        
+        #Busy waiting to work around a bug in python 3.4 that allows sleep to be interrupted
+        #https://bugs.python.org/issue32057
+        timeout = time.time() + 2
+        while time.time() < timeout and camera.NumReadyBuffers.Value == 0:
+            time.sleep(0.1)
+
+        self.assertGreater(camera.NumReadyBuffers.Value, 0)
         self.assertEqual(0, camera.NumEmptyBuffers.Value)
         camera.Close()
 
