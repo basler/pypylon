@@ -205,16 +205,10 @@ namespace GENAPI_NAMESPACE
 
             def _read(self, size):
                 assert(self.isopen)
-                buf = ""
-                for ofs in xrange(0, size, self.fpa_bufsize):
-                    read_len, data  = self.fpa.read(self.fpa_bufsize, self.fpos + ofs, self.filename)
-                    if read_len <= 0:
-                        break
-                    else:
-                        buf += data[:min(size-ofs,read_len)]
-
-                self.fpos += len(buf)
-                return buf
+                read_len, data  = self.fpa.read(size, self.fpos, self.filename)
+                data = data[:read_len]
+                self.fpos += read_len
+                return data
 
             def read(self, size = -1):
                 assert(self.isopen)
