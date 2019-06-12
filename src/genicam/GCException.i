@@ -86,7 +86,7 @@ namespace GENICAM_NAMESPACE
 if (p##x && dynamic_cast<const x*>(_gcex_e) != NULL) \
 { PyErr_SetString(p##x, _gcex_e->what()); return; }
 
-// Since 'TranslateGenicamException' mutates the Python state, is must not be
+// Since 'TranslateGenicamException' mutates the Python state, it must not be
 // called without the GIL being held. Therefore we have to tell SWIG not to
 // release the GIL when calling it.
 %nothread TranslateGenicamException;

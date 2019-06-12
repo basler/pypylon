@@ -7,6 +7,15 @@
 
 %include <pylon/GrabResultData.h>;
 %extend Pylon::CGrabResultData {
+
+    // Since 'GetBuffer', 'GetMemoryView' and '_Unpack12BitPacked' allocate
+    // memory, they must not be called without the GIL being held. Therefore we
+    // have to tell SWIG not to release the GIL when calling them (%nothread).
+
+    %nothread GetBuffer;
+    %nothread GetMemoryView;
+    %nothread _Unpack12BitPacked;
+
     PyObject * GetBuffer()
     {
         void * buf = $self->GetBuffer();
