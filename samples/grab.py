@@ -3,7 +3,7 @@
 #    The images are grabbed and processed asynchronously, i.e.,
 #    while the application is processing a buffer, the acquisition of the next buffer is done
 #    in parallel.
-# 
+#
 #    The CInstantCamera class uses a pool of buffers to retrieve image data
 #    from the camera device. Once a buffer is filled and ready,
 #    the buffer can be retrieved from the camera object for processing. The buffer
@@ -25,9 +25,15 @@ exitCode = 0
 try:
     # Create an instant camera object with the camera device found first.
     camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+    camera.Open()
 
     # Print the model name of the camera.
     print("Using device ", camera.GetDeviceInfo().GetModelName())
+
+    # demonstrate some feature access
+    new_width = camera.Width.GetValue() - camera.Width.GetInc()
+    if new_width >= camera.Width.GetMin():
+        camera.Width.SetValue(new_width)
 
     # The parameter MaxNumBuffer can be used to control the count of buffers
     # allocated for grabbing. The default value of this parameter is 10.
@@ -54,6 +60,8 @@ try:
         else:
             print("Error: ", grabResult.ErrorCode, grabResult.ErrorDescription)
         grabResult.Release()
+    camera.Close()
+
 except genicam.GenericException as e:
     # Error handling.
     print("An exception occurred.")
