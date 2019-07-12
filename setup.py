@@ -52,14 +52,12 @@ class BuildSupport(object):
         } [ (get_platform(), get_machinewidth()) ]
 
     # Compatible swig versions
-    SwigVersions = ["3.0.12"]
+    SwigVersions = ["4.0.0"]
     SwigOptions = [
         "-c++",
         "-Wextra",
         "-Wall",
         "-threads",
-        "-modern",
-        "-DSWIG_PYTHON_LEGACY_BOOL",
         ]
 
     # Where to place generated code
