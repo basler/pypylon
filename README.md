@@ -49,6 +49,12 @@ Excerpt:
 from pypylon import pylon
 
 camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+camera.Open()
+
+# demonstrate some feature access
+new_width = camera.Width.GetValue() - camera.Width.GetInc()
+if new_width >= camera.Width.GetMin():
+    camera.Width.SetValue(new_width)
 
 numberOfImagesToGrab = 100
 camera.StartGrabbingMax(numberOfImagesToGrab)
@@ -62,8 +68,9 @@ while camera.IsGrabbing():
         print("SizeY: ", grabResult.Height)
         img = grabResult.Array
         print("Gray value of first pixel: ", img[0, 0])
-    
+
     grabResult.Release()
+camera.Close()
 ```
 
 # Development
@@ -79,10 +86,10 @@ After changing pypylon, execute `python setup.py build` and test...
 
 ## Running Unit Tests
 > NOTE: The unit tests try to import `pypylon....`, so they run against the *installed* version of pypylon.
-``` 
+```
 python -m unittest tests/....
 python tests/....
 ```
 # Known Issues
- * For USB 3.0 cameras to work on Linux, you need to install appropriate udev rules. 
+ * For USB 3.0 cameras to work on Linux, you need to install appropriate udev rules.
    The easiest way to get them is to install an official pylon package from http://www.baslerweb.com/pylon.

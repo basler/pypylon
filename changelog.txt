@@ -1,6 +1,8 @@
 Version ?.?.?
     - Date ????-??-??
     - fixed read part of GenICam file access (FileProtocolAdapter.i)
+    - fixed a bug where Pythons memory allocation was used without holding the GIL
+    - amended readme.md
 
 Version 1.4.0
     - Date 2019-03-13
