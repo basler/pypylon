@@ -20,6 +20,8 @@ Version ?.?.?
         - issuing action commands
     - Fixed creation of numpy arrays for pixel type BayerGB12Packed. Added
       support for 10 bit packed formats.
+    - Use Pylon 6.0.0 on windows. There is no more support for 1394 in Pylon 6,
+      but support for CXP and other GenTL producers has been added.
 
 Version 1.4.0
     - Date 2019-03-13
