@@ -116,6 +116,45 @@ const Pylon::DeviceInfoList_t&
     }
 }
 
+// the downcast TL access to specific implementation
+%typemap(out) Pylon::ITransportLayer* 
+%{
+    // Need a new scope here, so this block can be skipped
+    // by a 'goto' or 'SWIG_fail'.
+    {
+        swig_type_info *outtype = 0;
+        void * outptr = 0;
+        if (0 == $1)
+        {
+            GENICAM_NAMESPACE::LogicalErrorException except(
+                "Invalid TL",
+                __FILE__,
+                __LINE__
+                );
+            TranslateGenicamException(&except);
+            SWIG_fail;
+        }
+        else
+        {
+                if ( (outptr  = dynamic_cast<Pylon::IGigETransportLayer*>($1)) ){
+                    outtype = $descriptor(Pylon::IGigETransportLayer*);
+                } else if ( (outptr  = dynamic_cast<Pylon::ITransportLayer*>($1)) ){
+                    outtype = $descriptor(Pylon::ITransportLayer*);
+                } else {
+                    GENICAM_NAMESPACE::LogicalErrorException except(
+                        "Python TL binding not implemented",
+                        __FILE__,
+                        __LINE__
+                        );
+                    TranslateGenicamException(&except);
+                    SWIG_fail;
+                        };
+        };
+        $result = SWIG_NewPointerObj(outptr, outtype, $owner);
+    };
+%}
+
+
 
 
 %include <pylon/TlFactory.h>;

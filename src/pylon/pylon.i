@@ -73,6 +73,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
 #include <pylon/PylonIncludes.h>
+#include <pylon/gige/GigETransportLayer.h>
 #ifdef _MSC_VER
 #include <pylon/PylonGUI.h>
 #endif
@@ -502,6 +503,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "TlInfo.i"
 %include "DeviceFactory.i"
 %include "TransportLayer.i"
+%include "GigETransportLayer.i"
 %include "TlFactory.i"
 %include "GrabResultData.i"
 %include "GrabResultPtr.i"
