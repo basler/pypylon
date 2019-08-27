@@ -347,32 +347,6 @@ class BuildSupportWindows(BuildSupport):
     # Base directory for pylon SDK on Windows
     PylonDevDir = None
 
-    DefineMacros = [
-        ("UNICODE", None),
-        ("_UNICODE", None),
-
-        # let swig share its type information between the 'genicam' and the
-        # 'pylon' module by using the same name for the type table.
-        ("SWIG_TYPE_TABLE", "pylon")
-        ]
-
-    ExtraCompileArgs = [
-        '/Gy',      # separate functions for linker
-        '/GL',      # enable link-time code generation
-        '/EHsc',    # set execption handling model
-        ]
-
-    if sys.version_info[:2] >= (3, 7):
-        # add '/permissive-' to detect skipping initialization with goto
-        # (available since VS 2017)
-        ExtraCompileArgs.append('/permissive-')
-
-    ExtraLinkArgs = [
-        '/OPT:REF',     # eliminate unused functions
-        '/OPT:ICF',     # eliminate identical COMDAT
-        '/LTCG'         # link time code generation
-        ]
-
     RuntimeFiles = {
 
         "base": [
@@ -419,11 +393,40 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
+    GENTL_CXP_PRODUCER_DIR = "pylonCXP"
+
     RuntimeFolders = {
         "cxp": [
-            ("pylonCXP", "pylonCXP"),
+            (GENTL_CXP_PRODUCER_DIR, GENTL_CXP_PRODUCER_DIR),
             ],
         }
+
+    DefineMacros = [
+        ("UNICODE", None),
+        ("_UNICODE", None),
+        ("GENTL_CXP_PRODUCER_DIR", r'L\"%s\\bin\"' % GENTL_CXP_PRODUCER_DIR),
+
+        # let swig share its type information between the 'genicam' and the
+        # 'pylon' module by using the same name for the type table.
+        ("SWIG_TYPE_TABLE", "pylon")
+        ]
+
+    ExtraCompileArgs = [
+        '/Gy',      # separate functions for linker
+        '/GL',      # enable link-time code generation
+        '/EHsc',    # set execption handling model
+        ]
+    if sys.version_info[:2] >= (3, 7):
+        # add '/permissive-' to detect skipping initialization with goto
+        # (available since VS 2017)
+        ExtraCompileArgs.append('/permissive-')
+
+    ExtraLinkArgs = [
+        '/OPT:REF',     # eliminate unused functions
+        '/OPT:ICF',     # eliminate identical COMDAT
+        '/LTCG'         # link time code generation
+        ]
+
 
     def __init__(self):
         super(BuildSupportWindows, self).__init__()
@@ -592,6 +595,9 @@ class BuildSupportLinux(BuildSupport):
         "gentl": [
             ("libpylon_TL_gtc*.so", ""),
             ],
+        "cxp": [
+            ],
+ 
         }
     RuntimeFolders = {}
 
