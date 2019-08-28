@@ -1,6 +1,5 @@
 
 %ignore CSimpleMutex;
-%ignore ITransportLayer;
 %ignore TlMap;
 %ignore ImplicitTlRefs;
 
@@ -103,7 +102,7 @@ const Pylon::DeviceInfoList_t&
                     PyExc_TypeError,
                     "list must contain DeviceInfo objects"
                     );
-                return NULL;
+                SWIG_fail;
             }
             di_list.push_back(*reinterpret_cast<Pylon::CDeviceInfo*>(w));
         }
@@ -112,49 +111,33 @@ const Pylon::DeviceInfoList_t&
     else
     {
         PyErr_SetString(PyExc_TypeError,"not a list");
-        return NULL;
+        SWIG_fail;
     }
 }
 
-// the downcast TL access to specific implementation
-%typemap(out) Pylon::ITransportLayer* 
+// This out-typemap tries to downcast the TL to the specific implementation.
+// Currently the only TL with an extended interface is GigE.
+%typemap(out) Pylon::ITransportLayer*
 %{
-    // Need a new scope here, so this block can be skipped
-    // by a 'goto' or 'SWIG_fail'.
+    if (0 == $1)
     {
-        swig_type_info *outtype = 0;
-        void * outptr = 0;
-        if (0 == $1)
+        PyErr_SetString(PyExc_ValueError, "invalid TL specification");
+        SWIG_fail;
+    }
+    else
+    {
+        swig_type_info *outtype = $descriptor(Pylon::IGigETransportLayer*);
+        void *outptr = dynamic_cast<Pylon::IGigETransportLayer*>($1);
+        if (!outptr)
         {
-            GENICAM_NAMESPACE::LogicalErrorException except(
-                "Invalid TL",
-                __FILE__,
-                __LINE__
-                );
-            TranslateGenicamException(&except);
-            SWIG_fail;
-        }
-        else
-        {
-                if ( (outptr  = dynamic_cast<Pylon::IGigETransportLayer*>($1)) ){
-                    outtype = $descriptor(Pylon::IGigETransportLayer*);
-                } else if ( (outptr  = dynamic_cast<Pylon::ITransportLayer*>($1)) ){
-                    outtype = $descriptor(Pylon::ITransportLayer*);
-                } else {
-                    GENICAM_NAMESPACE::LogicalErrorException except(
-                        "Python TL binding not implemented",
-                        __FILE__,
-                        __LINE__
-                        );
-                    TranslateGenicamException(&except);
-                    SWIG_fail;
-                        };
+            outptr = $1;
+            outtype = $descriptor(Pylon::ITransportLayer*);
         };
-        $result = SWIG_NewPointerObj(outptr, outtype, $owner);
+        // Must not own TL object, since calling delete on it is forbidden
+        // by the pylon API. The user has to call tl.Release().
+        $result = SWIG_NewPointerObj(outptr, outtype, 0);
     };
 %}
-
-
 
 
 %include <pylon/TlFactory.h>;
@@ -168,3 +151,4 @@ const Pylon::DeviceInfoList_t&
 %typemap(argout) const Pylon::DeviceInfoList_t&;
 %typemap(typecheck) const Pylon::DeviceInfoList_t&;
 %typemap(in) const Pylon::DeviceInfoList_t&;
+%typemap(out) Pylon::ITransportLayer*;

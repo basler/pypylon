@@ -434,13 +434,13 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %#endif
             else {
                 PyErr_SetString(PyExc_TypeError,"list must contain strings");
-                return NULL;
+                SWIG_fail;
             }
         }
         $1 = &str_list;
     } else {
         PyErr_SetString(PyExc_TypeError,"not a list");
-        return NULL;
+        SWIG_fail;
     }
 }
 

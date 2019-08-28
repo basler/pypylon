@@ -1,15 +1,9 @@
 %rename (TransportLayer) Pylon::ITransportLayer;
-namespace Pylon
+%nodefaultdtor Pylon::ITransportLayer;
+%extend Pylon::ITransportLayer
 {
-    typedef interfaceinfo_vector InterfaceInfoList_t;
-}
-%extend Pylon::ITransportLayer {
-    public:
     PROP_GET(TlInfo)
     PROP_GET(NodeMap)
 }
-%include <pylon/TransportLayer.h>;
 
-%pythoncode %{
-    ITransportLayer = TransportLayer
-%}
+%include <pylon/TransportLayer.h>;
