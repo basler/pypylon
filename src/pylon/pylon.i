@@ -74,6 +74,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef COMPILER
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/GigETransportLayer.h>
+#include <pylon/gige/ActionTriggerConfiguration.h>
 #ifdef _MSC_VER
 #include <pylon/PylonGUI.h>
 #endif
@@ -518,6 +519,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "SoftwareTriggerConfiguration.i"
 %include "AcquireContinuousConfiguration.i"
 %include "AcquireSingleFrameConfiguration.i"
+%include "ActionTriggerConfiguration.i"
 %include "Image.i"
 %include "ReusableImage.i"
 %include "PylonImageBase.i"
