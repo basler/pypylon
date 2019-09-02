@@ -38,13 +38,13 @@ namespace Pylon {
     TransportLayer = property(lambda self: self.GetTLNodeMap())
 
     def __getattr__(self, attribute):
-        if hasattr(CInstantCameraParams_Params, attribute) or attribute in ( "thisown","this"):
+        if hasattr(InstantCameraParams_Params, attribute) or attribute in ( "thisown","this"):
             return object.__getattr__(self, attribute)
         else:
             return self.GetNodeMap().GetNode(attribute)
 
     def __setattr__(self, attribute, val):
-        if hasattr(CInstantCameraParams_Params, attribute) or attribute in ( "thisown","this"):
+        if hasattr(InstantCameraParams_Params, attribute) or attribute in ( "thisown","this"):
             object.__setattr__(self, attribute, val)
         else:
             self.GetNodeMap().GetNode(attribute).SetValue(val)

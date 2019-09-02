@@ -459,35 +459,59 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 #define APIIMPORT
 #define APIEXPORT
 
+// for properties that have a standard genicam type like IInteger or IBoolean
 %define GENICAM_PROP(name)
     %rename(_##name) name;
 
-    %pythoncode %{
+    %pythoncode
+    %{
         def _Get_## name(self):
            return self._ ## name
         def _Set_ ## name(self, value):
            self._ ## name.SetValue(value)
         name = property(_Get_ ## name, _Set_ ## name )
     %}
-
 %enddef
 
+// for properties whose type is derived IEnumeration
 %define GENICAM_ENUM_PROP(name)
     %rename(_##name) name;
 
-    GENAPI_NAMESPACE::IEnumeration * _getEnum ## name(){
-        return dynamic_cast<GenApi::IEnumeration*>(&($self->##name));
+    GENAPI_NAMESPACE::IEnumeration& _GetEnum_##name()
+    {
+        return static_cast<GENAPI_NAMESPACE::IEnumeration&>($self->##name);
     }
 
-    %pythoncode %{
-        def _Get_## name(self):
-           return self._getEnum ## name()
+    %pythoncode
+    %{
+        def _Get_##name(self):
+           return self._GetEnum_##name()
         def _Set_ ## name(self, value):
-           if isinstance(value,int):
-            self._getEnum ## name().SetIntValue(value)
+           if isinstance(value, int):
+            self._GetEnum_##name().SetIntValue(value)
            else:
-            self._getEnum ## name().SetValue(value)
+            self._GetEnum_##name().SetValue(value)
         name = property(_Get_ ## name, _Set_ ## name )
+    %}
+
+%enddef
+
+// for properties with one of those extended types like IIntegerEx or IBooleanEx
+%define GENICAM_EX_PROP(name, type)
+    %ignore name;
+
+    type& _GetBaseType_##name()
+    {
+        return static_cast<type&>($self->name);
+    }
+
+    %pythoncode
+    %{
+        def _Get_##name(self):
+           return self._GetBaseType_##name()
+        def _Set_##name(self, value):
+           self._GetBaseType_##name().SetValue(value)
+        name = property(_Get_##name, _Set_##name )
     %}
 
 %enddef
