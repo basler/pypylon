@@ -42,12 +42,12 @@ class BooleanTestSuite(GenicamTestCase):
             pass
 
         self.assertEqual(1, value.GetValue())
-        value.SetValue(0)
+        value.SetValue(False)
         self.assertEqual(0, value.GetValue())
         # once again with verification
         self.assertEqual(0, value.GetValue(True))
 
-        value.SetValue(1)
+        value.SetValue(True)
         self.assertEqual(1, value.GetValue())
 
         value.FromString("0")
@@ -64,11 +64,11 @@ class BooleanTestSuite(GenicamTestCase):
         self.assertEqual(RW, value.GetAccessMode())
 
         # operators
-        value.SetValue(0)
+        value.SetValue(False)
         self.assertEqual(0, value())
 
         # Check IBoolean operators
-        value.SetValue(1)
+        value.SetValue(True)
         self.assertEqual(1, value())
 
         # access without verification
@@ -111,10 +111,10 @@ class BooleanTestSuite(GenicamTestCase):
 
         value = Camera._GetNode("Trigger")
         self.assertEqual(0, value.GetValue())
-        value.SetValue(1)
+        value.SetValue(True)
         self.assertEqual(1, value.GetValue())
 
-        value.SetValue(0)
+        value.SetValue(False)
         self.assertEqual(0, value.GetValue())
 
         value.FromString("1")
@@ -188,11 +188,11 @@ class BooleanTestSuite(GenicamTestCase):
 
         self.assertEqual(1, value.GetValue())
 
-        with self.assertRaises(AccessException):   value.SetValue(0)
+        with self.assertRaises(AccessException):   value.SetValue(False)
 
         # now the WO value
         valueWO = Camera._GetNode("TriggerWO")
-        valueWO.SetValue(1)
+        valueWO.SetValue(True)
         with self.assertRaises(GenericException):   valueWO.GetValue()
 
     def test_CornerCases(self):

@@ -222,7 +222,7 @@ class CallbackTestSuite(GenicamTestCase):
         CallbackUtility.Reset()
 
         for i in range(0, numCalls):
-            Bool.SetValue(i & 0x1)
+            Bool.SetValue((i & 0x1) != 0)
 
         self.assertEqual(numCalls, CallbackUtility.Count())
         self.assertEqual(numCalls, O1.Count())
