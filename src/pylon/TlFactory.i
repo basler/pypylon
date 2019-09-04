@@ -17,13 +17,14 @@
 }
 
 %typemap(argout,fragment="t_output_helper") Pylon::TlInfoList_t & {
+  Py_DECREF($result);
   PyObject *tpl = PyTuple_New($1->size());
   for (unsigned int i = 0; i < $1->size(); i++) {
     CTlInfo *ti = new CTlInfo((*$1)[i]);
     PyObject *item = SWIG_NewPointerObj(
         SWIG_as_voidptr(ti),
         SWIGTYPE_p_Pylon__CTlInfo,
-        0
+        SWIG_POINTER_OWN
         );
     PyTuple_SetItem(tpl, i, item);
   }
@@ -42,13 +43,14 @@
 }
 
 %typemap(argout,fragment="t_output_helper") Pylon::DeviceInfoList_t & {
+  Py_DECREF($result);
   PyObject *tpl = PyTuple_New($1->size());
   for (unsigned int i = 0; i < $1->size(); i++) {
     CDeviceInfo *di = new CDeviceInfo((*$1)[i]);
     PyObject *item = SWIG_NewPointerObj(
         SWIG_as_voidptr(di),
         SWIGTYPE_p_Pylon__CDeviceInfo,
-        0
+        SWIG_POINTER_OWN
         );
     PyTuple_SetItem(tpl, i, item);
   }

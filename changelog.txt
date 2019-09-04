@@ -9,6 +9,8 @@ Version ?.?.?
       'bool()'), NO LONGER accept anything other than true Python 'bool' objects.
       E.g. where in the past 'IBoolean.SetValue("Hello")' was OK, it is now
       required to use code like this 'IBoolean.SetValue(bool("Hello"))'.
+    - Fixed a memory leak: Info objects returned by EnumerateDevices and
+      EnumerateTls were not released.
 
 Version 1.4.0
     - Date 2019-03-13

@@ -550,23 +550,6 @@ namespace GENICAM_NAMESPACE {
 }
 
 
-
-%typemap(in, numinputs=0) GENAPI_NAMESPACE::ValueList_t & {
-    $1 = new ValueList_t();
-}
-
-%typemap(argout,fragment="t_output_helper") GENAPI_NAMESPACE::ValueList_t & {
-    PyObject *o = PyTuple_New($1->size());
-    for( unsigned int i = 0; i < $1->size(); i++){
-        PyObject *o_item;
-        IValue* n = (*$1)[i];
-        o_item = SWIG_NewPointerObj(SWIG_as_voidptr(n), SWIGTYPE_p_GENAPI_NAMESPACE__IValue, 0 |  0 );
-        PyTuple_SetItem(o,i,o_item);
-    }
-    $result = t_output_helper($result,o);
-    delete $1;
-}
-
 %typemap(in, numinputs=0) GENAPI_NAMESPACE::FeatureList_t & {
     $1 = new FeatureList_t();
 }
