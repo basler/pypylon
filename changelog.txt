@@ -22,6 +22,9 @@ Version ?.?.?
       support for 10 bit packed formats.
     - Use Pylon 6.0.0 on windows. There is no more support for 1394 in Pylon 6,
       but support for CXP and other GenTL producers has been added.
+    - Add support for dealing with Interfaces and their node maps. A sample
+      demonstrates how to use the interface node map of a Basler CXP-Interface-
+      Card to toggle the state of 'Power over CoaXPress'.
 
 Version 1.4.0
     - Date 2019-03-13
