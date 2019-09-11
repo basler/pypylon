@@ -283,20 +283,39 @@ typedef unsigned long long int  uintmax_t;
     delete [] (char*)$1;
 }
 
-
 %define %pybuffer_binary_input(TYPEMAP, SIZE)
-%typemap(in) (TYPEMAP, SIZE)
-    (int res, Py_ssize_t size = 0, const void *buf = 0) {
-    res = PyObject_AsReadBuffer($input, &buf, &size);
-    if (res<0) {
+%typemap(in, noblock=1) (TYPEMAP, SIZE)
+{
+%#if PY_VERSION_HEX >= 0x03000000
+    Py_buffer buffer_view;
+    int get_buf_res = PyObject_GetBuffer($input, &buffer_view, PyBUF_SIMPLE);
+    if (get_buf_res < 0)
+    {
         PyErr_Clear();
-        %argument_fail(res, "(TYPEMAP, SIZE)", $symname, $argnum);
+        %argument_fail(get_buf_res, "(TYPEMAP, SIZE)", $symname, $argnum);
+    }
+    $1 = ($1_ltype) buffer_view.buf;
+    $2 = ($2_ltype) buffer_view.len;
+%#else
+    Py_ssize_t size = 0;
+    const void *buf = 0;
+    int get_buf_res = PyObject_AsReadBuffer($input, &buf, &size);
+    if (get_buf_res < 0)
+    {
+        PyErr_Clear();
+        %argument_fail(get_buf_res, "(TYPEMAP, SIZE)", $symname, $argnum);
     }
     $1 = ($1_ltype) buf;
     $2 = ($2_ltype) (size);
+%#endif
+}
+%typemap(freearg, noblock=1) (TYPEMAP, SIZE)
+{
+%#if PY_VERSION_HEX >= 0x03000000
+    PyBuffer_Release(&buffer_view);
+%#endif
 }
 %enddef
-
 
 
 %pybuffer_binary_input(const uint8_t *pBuffer, int64_t Length);

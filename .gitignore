@@ -21,6 +21,8 @@ python*/
 /linux-build-tools/
 
 # Ignore Genicamtest XML Stuff
+/xml
+scripts/xml
 tests/genicam/xml/
 
 # Ignore .idea folder
@@ -31,9 +33,6 @@ scripts/reference_types.txt
 
 # Ignore NodeMap.pfs
 NodeMap.pfs
-
-#ignore temporary xml folder in scripts
-scripts/xml
 
 #ignore generated html
 pypylon.*.html
