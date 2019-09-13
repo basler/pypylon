@@ -12,6 +12,12 @@ Version ?.?.?
     - Fixed a memory leak: Info objects returned by EnumerateDevices and
       EnumerateTls were not released.
     - Added support for accessing ITransportLayer (especially GigETransportLayer).
+      Samples have been added that demonstrate using these GigE-specific methods:
+        - AnnounceRemoteDevice
+        - RenounceRemoteDevice
+        - ForceIp
+        - RestartIpConfiguration
+        - issuing action commands
 
 Version 1.4.0
     - Date 2019-03-13
