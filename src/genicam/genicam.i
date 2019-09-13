@@ -288,7 +288,8 @@ typedef unsigned long long int  uintmax_t;
 {
 %#if PY_VERSION_HEX >= 0x03000000
     Py_buffer buffer_view;
-    int get_buf_res = PyObject_GetBuffer($input, &buffer_view, PyBUF_SIMPLE);
+    int get_buf_res;
+    get_buf_res = PyObject_GetBuffer($input, &buffer_view, PyBUF_SIMPLE);
     if (get_buf_res < 0)
     {
         PyErr_Clear();
@@ -297,9 +298,12 @@ typedef unsigned long long int  uintmax_t;
     $1 = ($1_ltype) buffer_view.buf;
     $2 = ($2_ltype) buffer_view.len;
 %#else
-    Py_ssize_t size = 0;
-    const void *buf = 0;
-    int get_buf_res = PyObject_AsReadBuffer($input, &buf, &size);
+    Py_ssize_t size;
+    const void *buf;
+    int get_buf_res;
+    size = 0;
+    buf = 0;
+    get_buf_res = PyObject_AsReadBuffer($input, &buf, &size);
     if (get_buf_res < 0)
     {
         PyErr_Clear();
