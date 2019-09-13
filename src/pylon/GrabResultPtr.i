@@ -51,7 +51,7 @@
             shape, dtype, format = self.GetImageFormat(new_pt)
         else:
             shape, dtype, format = self.GetImageFormat(pt)
-            buf = self.GetBuffer()
+            buf = self.GetImageBuffer()
 
         # Now we will copy the data into an array:
         return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
@@ -138,7 +138,7 @@
             #  6. check the number of exports of the encapsuled buffer
             #     => if this is > 0 => somebody else still has a reference!
 
-            mv = self.GetMemoryView()
+            mv = self.GetImageMemoryView()
             if not raw:
                 shape, dtype, format = self.GetImageFormat()
                 mv = mv.cast(format, shape)
