@@ -1,14 +1,23 @@
 Version ?.?.?
     - Date ????-??-??
-    - fixed read part of GenICam file access (FileProtocolAdapter.i)
-    - fixed a bug where Pythons memory allocation was used without holding the GIL
-    - amended readme.md
+    - Fixed read part of GenICam file access (FileProtocolAdapter.i)
+    - Fixed a bug where Pythons memory allocation was used without holding the GIL
+    - Amended readme.md
     - Use SWIG 4.0.0 and removed SWIGs legacy handling for boolean parameters.
       This means that APIs that expect a boolean parameter and had accepted
       any Python type in the past (since any Python type can be fed into
       'bool()'), NO LONGER accept anything other than true Python 'bool' objects.
       E.g. where in the past 'IBoolean.SetValue("Hello")' was OK, it is now
       required to use code like this 'IBoolean.SetValue(bool("Hello"))'.
+    - Fixed a memory leak: Info objects returned by EnumerateDevices and
+      EnumerateTls were not released.
+    - Added support for accessing ITransportLayer (especially GigETransportLayer).
+      Samples have been added that demonstrate using these GigE-specific methods:
+        - AnnounceRemoteDevice
+        - RenounceRemoteDevice
+        - ForceIp
+        - RestartIpConfiguration
+        - issuing action commands
 
 Version 1.4.0
     - Date 2019-03-13

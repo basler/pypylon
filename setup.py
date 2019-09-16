@@ -58,6 +58,7 @@ class BuildSupport(object):
         "-Wextra",
         "-Wall",
         "-threads",
+        #lots of debug output "-debug-tmsearch",
         ]
 
     # Where to place generated code
@@ -291,6 +292,11 @@ class BuildSupportWindows(BuildSupport):
         '/GL',      # enable link-time code generation
         '/EHsc',    # set execption handling model
         ]
+
+    if sys.version_info[:2] >= (3, 7):
+        # add '/permissive-' to detect skipping initialization with goto
+        # (available since VS 2017)
+        ExtraCompileArgs.append('/permissive-')
 
     ExtraLinkArgs = [
         '/OPT:REF',     # eliminate unused functions
@@ -806,7 +812,6 @@ if __name__ == "__main__":
         author_email="oss@baslerweb.com",
         description="The python wrapper for the Basler pylon Camera Software Suite.",
         long_description=long_description,
-        long_description_content_type="text/markdown",
         url="https://github.com/basler/pypylon",
         ext_modules=[genicam_ext, pylon_ext],
         test_suite='tests.all_emulated_tests',

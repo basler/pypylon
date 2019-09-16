@@ -73,6 +73,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
 #include <pylon/PylonIncludes.h>
+#include <pylon/gige/GigETransportLayer.h>
+#include <pylon/gige/ActionTriggerConfiguration.h>
 #ifdef _MSC_VER
 #include <pylon/PylonGUI.h>
 #endif
@@ -433,13 +435,13 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %#endif
             else {
                 PyErr_SetString(PyExc_TypeError,"list must contain strings");
-                return NULL;
+                SWIG_fail;
             }
         }
         $1 = &str_list;
     } else {
         PyErr_SetString(PyExc_TypeError,"not a list");
-        return NULL;
+        SWIG_fail;
     }
 }
 
@@ -502,6 +504,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "TlInfo.i"
 %include "DeviceFactory.i"
 %include "TransportLayer.i"
+%include "GigETransportLayer.i"
 %include "TlFactory.i"
 %include "GrabResultData.i"
 %include "GrabResultPtr.i"
@@ -516,6 +519,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "SoftwareTriggerConfiguration.i"
 %include "AcquireContinuousConfiguration.i"
 %include "AcquireSingleFrameConfiguration.i"
+%include "ActionTriggerConfiguration.i"
 %include "Image.i"
 %include "ReusableImage.i"
 %include "PylonImageBase.i"

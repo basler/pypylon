@@ -1,6 +1,5 @@
 
 %ignore CSimpleMutex;
-%ignore ITransportLayer;
 %ignore TlMap;
 %ignore ImplicitTlRefs;
 
@@ -17,13 +16,14 @@
 }
 
 %typemap(argout,fragment="t_output_helper") Pylon::TlInfoList_t & {
+  Py_DECREF($result);
   PyObject *tpl = PyTuple_New($1->size());
   for (unsigned int i = 0; i < $1->size(); i++) {
     CTlInfo *ti = new CTlInfo((*$1)[i]);
     PyObject *item = SWIG_NewPointerObj(
         SWIG_as_voidptr(ti),
         SWIGTYPE_p_Pylon__CTlInfo,
-        0
+        SWIG_POINTER_OWN
         );
     PyTuple_SetItem(tpl, i, item);
   }
@@ -42,13 +42,14 @@
 }
 
 %typemap(argout,fragment="t_output_helper") Pylon::DeviceInfoList_t & {
+  Py_DECREF($result);
   PyObject *tpl = PyTuple_New($1->size());
   for (unsigned int i = 0; i < $1->size(); i++) {
     CDeviceInfo *di = new CDeviceInfo((*$1)[i]);
     PyObject *item = SWIG_NewPointerObj(
         SWIG_as_voidptr(di),
         SWIGTYPE_p_Pylon__CDeviceInfo,
-        0
+        SWIG_POINTER_OWN
         );
     PyTuple_SetItem(tpl, i, item);
   }
@@ -101,7 +102,7 @@ const Pylon::DeviceInfoList_t&
                     PyExc_TypeError,
                     "list must contain DeviceInfo objects"
                     );
-                return NULL;
+                SWIG_fail;
             }
             di_list.push_back(*reinterpret_cast<Pylon::CDeviceInfo*>(w));
         }
@@ -110,10 +111,33 @@ const Pylon::DeviceInfoList_t&
     else
     {
         PyErr_SetString(PyExc_TypeError,"not a list");
-        return NULL;
+        SWIG_fail;
     }
 }
 
+// This out-typemap tries to downcast the TL to the specific implementation.
+// Currently the only TL with an extended interface is GigE.
+%typemap(out) Pylon::ITransportLayer*
+%{
+    if (0 == $1)
+    {
+        PyErr_SetString(PyExc_ValueError, "invalid TL specification");
+        SWIG_fail;
+    }
+    else
+    {
+        swig_type_info *outtype = $descriptor(Pylon::IGigETransportLayer*);
+        void *outptr = dynamic_cast<Pylon::IGigETransportLayer*>($1);
+        if (!outptr)
+        {
+            outptr = $1;
+            outtype = $descriptor(Pylon::ITransportLayer*);
+        };
+        // Must not own TL object, since calling delete on it is forbidden
+        // by the pylon API. The user has to call tl.Release().
+        $result = SWIG_NewPointerObj(outptr, outtype, 0);
+    };
+%}
 
 
 %include <pylon/TlFactory.h>;
@@ -127,3 +151,4 @@ const Pylon::DeviceInfoList_t&
 %typemap(argout) const Pylon::DeviceInfoList_t&;
 %typemap(typecheck) const Pylon::DeviceInfoList_t&;
 %typemap(in) const Pylon::DeviceInfoList_t&;
+%typemap(out) Pylon::ITransportLayer*;
