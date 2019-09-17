@@ -18,6 +18,8 @@ Version ?.?.?
         - ForceIp
         - RestartIpConfiguration
         - issuing action commands
+    - Fixed creation of numpy arrays for pixel type BayerGB12Packed. Added
+      support for 10 bit packed formats.
 
 Version 1.4.0
     - Date 2019-03-13

@@ -9,7 +9,7 @@
 %extend Pylon::CGrabResultData {
 
     // Since 'GetBuffer', 'GetImageBuffer', 'GetMemoryView', 'GetImageMemoryView'
-    // and '_Unpack12BitPacked' allocate memory, they must not be called without
+    // and '_Unpack10or12BitPacked' allocate memory, they must not be called without
     // the GIL being held. Therefore we have to tell SWIG not to release the GIL
     // when calling them (%nothread).
 
@@ -17,7 +17,7 @@
     %nothread GetImageBuffer;
     %nothread GetMemoryView;
     %nothread GetImageMemoryView;
-    %nothread _Unpack12BitPacked;
+    %nothread _Unpack10or12BitPacked;
 
     PyObject * GetBuffer()
     {
@@ -76,7 +76,7 @@
 %#endif
     }
 
-    PyObject * _Unpack12BitPacked()
+    PyObject * _Unpack10or12BitPacked()
     {
         // Current pixel type of our data
         EPixelType cur_pt = $self->GetPixelType();
@@ -123,7 +123,7 @@
         case PixelType_BayerGB12Packed:
             conv_src_pt = PixelType_Mono12packed;
             conv_dst_pt = PixelType_Mono16;
-            ret_pt = PixelType_Mono12;
+            ret_pt = PixelType_BayerGB12;
             break;
 
         case PixelType_BayerGB12p:
@@ -154,6 +154,42 @@
             conv_src_pt = PixelType_Mono12p;
             conv_dst_pt = PixelType_Mono16;
             ret_pt = PixelType_BayerGR12;
+            break;
+
+        case PixelType_Mono10packed:
+            conv_src_pt = PixelType_Mono10packed;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_Mono10;
+            break;
+
+        case PixelType_Mono10p:
+            conv_src_pt = PixelType_Mono10p;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_Mono10;
+            break;
+
+        case PixelType_BayerBG10p:
+            conv_src_pt = PixelType_Mono10p;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_BayerBG10;
+            break;
+
+        case PixelType_BayerGB10p:
+            conv_src_pt = PixelType_Mono10p;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_BayerGB10;
+            break;
+
+        case PixelType_BayerRG10p:
+            conv_src_pt = PixelType_Mono10p;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_BayerRG10;
+            break;
+
+        case PixelType_BayerGR10p:
+            conv_src_pt = PixelType_Mono10p;
+            conv_dst_pt = PixelType_Mono16;
+            ret_pt = PixelType_BayerGR10;
             break;
 
         default:

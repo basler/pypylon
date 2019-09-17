@@ -54,7 +54,7 @@
 
         pt = self.GetPixelType()
         if IsPacked(pt):
-            buf, new_pt = self._Unpack12BitPacked()
+            buf, new_pt = self._Unpack10or12BitPacked()
             shape, dtype, format = self.GetImageFormat(new_pt)
         else:
             shape, dtype, format = self.GetImageFormat(pt)
