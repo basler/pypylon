@@ -56,7 +56,7 @@ case $PLATFORM_TAG in
     linux_x86_64)  QEMU_ARCH="x86_64";  BASE_IMAGE="amd64/$BASE_IMAGE";   PYLON_ARCH=x86_64 ;;
     linux_i686)    QEMU_ARCH="i386";    BASE_IMAGE="i386/$BASE_IMAGE";    PYLON_ARCH=x86 ;;
     linux_armv7l)  QEMU_ARCH="arm";     BASE_IMAGE="arm32v7/$BASE_IMAGE"; PYLON_ARCH=armhf ;;
-    linux_aarch64) QEMU_ARCH="aarch64"; BASE_IMAGE="arm64v8/$BASE_IMAGE"; PYLON_ARCH=arm64 ;;
+    linux_aarch64) QEMU_ARCH="aarch64"; BASE_IMAGE="arm64v8/$BASE_IMAGE"; PYLON_ARCH=aarch64 ;;
     manylinux1_*) echo "manylinux is not yet supported :-("; exit 1 ;;
     *)
     echo "Unsupported platform tag '$PLATFORM_TAG'. Supported platforms: linux_x86_64, linux_i686, linux_armv7l, linux_aarch64"
@@ -64,15 +64,27 @@ case $PLATFORM_TAG in
 esac
 
 if [ -n "$PYLON_DIR" ]; then
-    pattern="*.txt"
     files=( $PYLON_DIR/pylon-*-$PYLON_ARCH.tar.gz )
     PYLON="${files[0]}"
+
+    #special case for pylon 5.x where aarch64 was named arm64
+    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64"]; then
+        files=( $PYLON_DIR/pylon-*-arm64.txar.gz )
+        PYLON="${files[0]}"
+    fi
+
     if [ ! -f "$PYLON" ]; then
         echo "Couldn't find pylon installer in $PYLON_DIR"
         exit 1
     fi
 else
     PYLON=$PYLON_BASE-$PYLON_ARCH.tar.gz
+
+    #special case for pylon 5.x where aarch64 was named arm64
+    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64" ]; then
+        PYLON="$PYLON_BASE-arm64.tar.gz"
+    fi
+
     if [ ! -f "$PYLON" ]; then
         echo "Pylon installer $PYLON doesn't exist"
         exit 1
