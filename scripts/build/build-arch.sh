@@ -13,6 +13,7 @@ usage()
     echo "  --pylon-dir <name>            Directory where to look for pylon installers. This script then tries to find the correct one. This is not needed, if pylon-base is given"
     echo "  --platform-tag <name>         The python platform tag to build"
     echo "  --abi-tag <package>           The python abi tag to build"
+    echo "  --disable-tests               Disable automatic unittests"
     echo "  -h                            This usage help"
 }
 
@@ -21,6 +22,7 @@ PLATFORM_TAG=""
 PYLON_TGZ_DIR=""
 PYLON_BASE=""
 PYLON_DIR=""
+DISABLE_TESTS=""
 
 while [ $# -gt 0 ]; do
     arg="$1"
@@ -29,6 +31,7 @@ while [ $# -gt 0 ]; do
         --pylon-dir) PYLON_DIR="$2" ; shift ;;
         --platform-tag) PLATFORM_TAG="$2" ; shift ;;
         --abi-tag) ABI_TAG="$2" ; shift ;;
+        --disable-tests) DISABLE_TESTS=1 ;;
         -h|--help) usage ; exit 1 ;;
         *)         echo "Unknown argument $arg" ; usage ; exit 1 ;;
     esac
@@ -91,6 +94,10 @@ else
     fi
 fi
 
+ARGS=""
+if [ -n "$DISABLE_TESTS" ]; then
+    ARGS="$ARGS --disable-tests"
+fi
 
-echo "build-with-docker.sh --qemu-target-arch $QEMU_ARCH --docker-base-image $BASE_IMAGE --python $PYTHON --pylon-tgz $PYLON"
-$THISDIR/build-with-docker.sh --qemu-target-arch $QEMU_ARCH --docker-base-image $BASE_IMAGE --python $PYTHON --pylon-tgz $PYLON
+echo "build-with-docker.sh --qemu-target-arch $QEMU_ARCH --docker-base-image $BASE_IMAGE --python $PYTHON --pylon-tgz $PYLON $ARGS"
+$THISDIR/build-with-docker.sh --qemu-target-arch $QEMU_ARCH --docker-base-image $BASE_IMAGE --python $PYTHON --pylon-tgz $PYLON $ARGS
