@@ -10,6 +10,7 @@ import argparse
 import ctypes
 import datetime
 import glob
+import stat
 import os
 import re
 import shutil
@@ -76,6 +77,7 @@ class BuildSupport(object):
         "gentl",
         "extra",
         "bcon",
+        "cxp",
         }
 
     # --- Attributes to be set by init (may be platform specific ---
@@ -102,7 +104,6 @@ class BuildSupport(object):
         raise RuntimeError("Must be implemented by platform build support!")
 
     def __init__(self):
-
         self.SwigExe = "swig"
         if sys.version_info[0] == 3:
             self.SwigOptions.append("-py3")
@@ -127,7 +128,10 @@ class BuildSupport(object):
             return False
 
         try:
-            output = subprocess.check_output([swig_executable, "-version"], universal_newlines=True)
+            output = subprocess.check_output(
+                [swig_executable, "-version"],
+                universal_newlines=True
+                )
         except (subprocess.CalledProcessError, ErrFileNotFound):
             return False
 
@@ -136,47 +140,47 @@ class BuildSupport(object):
             return False
 
         if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
-            warning("The version of swig is %s which is too old. Minimum required version is 3.0.12", res.group(1))
+            msg = (
+                "The version of swig is %s which is too old. " +
+                "Minimum required version is 3.0.12"
+                )
+            warning(msg, res.group(1))
             return False
 
         return True
 
 
-    def call_swig(self, sourcedir, source, version):
+    def call_swig(self, sourcedir, source, version, skip=False):
+        if skip:
+            return ""
 
         name = os.path.splitext(source)[0]
         cpp_name = os.path.abspath(
             os.path.join(self.GeneratedDir, "%s_wrap.cpp" % name)
             )
 
-        if not os.path.exists(self.GeneratedDir):
-            os.makedirs(self.GeneratedDir)
-
         outdir = os.path.abspath(self.PackageDir)
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
 
         for inc in self.get_swig_includes():
             self.SwigOptions.append("-I%s" % inc)
 
-        if not args.skip_swig:
-            call_args = [self.SwigExe]
-            call_args.extend(["-python"])
-            call_args.extend(["-outdir", outdir])
-            call_args.extend(["-o", cpp_name])
-            call_args.extend(self.SwigOptions)
-            call_args.append(source)
+        call_args = [self.SwigExe]
+        call_args.extend(["-python"])
+        call_args.extend(["-outdir", outdir])
+        call_args.extend(["-o", cpp_name])
+        call_args.extend(self.SwigOptions)
+        call_args.append(source)
 
-            print("call", " ".join(call_args))
-            subprocess.check_call(call_args, cwd=os.path.abspath(sourcedir))
+        print("call", " ".join(call_args))
+        subprocess.check_call(call_args, cwd=os.path.abspath(sourcedir))
 
-            # append module version property
-            with open(os.path.join(outdir, "%s.py" % name), 'at') as gpf:
-                gpf.write("\n__version__ = '%s'\n" % version)
+        # append module version property
+        with open(os.path.join(outdir, "%s.py" % name), 'at') as gpf:
+            gpf.write("\n__version__ = '%s'\n" % version)
 
-            # Python needs an __init__.py inside the package directory...
-            with open(os.path.join(bs.PackageDir, "__init__.py"), "a"):
-                pass
+        # Python needs an __init__.py inside the package directory...
+        with open(os.path.join(bs.PackageDir, "__init__.py"), "a"):
+            pass
 
         return cpp_name
 
@@ -188,21 +192,38 @@ class BuildSupport(object):
             "runtime",
             self.BinPath
             )
-
+        package_dir = os.path.abspath(self.PackageDir)
         for package in self.RuntimeDefaultDeploy:
-            for pattern in self.RuntimeFiles[package]:
-                full_p = os.path.abspath(os.path.join(runtime_dir, pattern))
-                for f in glob.glob(full_p):
-                    print("Copy %s => %s" % (f, self.PackageDir))
-                    shutil.copy(f, self.PackageDir)
+            for src, dst in self.RuntimeFiles[package]:
+                dst = os.path.join(package_dir, dst)
+                if not os.path.exists(dst):
+                    os.makedirs(dst)
+                src = os.path.join(runtime_dir, src)
+                for f in glob.glob(src):
+                    print("Copy %s => %s" % (f, dst))
+                    shutil.copy(f, dst)
+            if package in self.RuntimeFolders:
+                for src, dst in self.RuntimeFolders[package]:
+                    dst = os.path.join(package_dir, dst)
+                    src = os.path.join(runtime_dir, src)
+                    shutil.rmtree(dst, ignore_errors=True)
+                    print("Copy tree %s => %s" % (src, dst))
+                    shutil.copytree(src, dst)
 
-    def clean(self, additional_dirs=None):
+
+    def clean(self, mode, additional_dirs=None):
+        if mode == 'skip':
+            return
         clean_dirs = [self.GeneratedDir, self.PackageDir]
         if additional_dirs:
             clean_dirs.extend(additional_dirs)
         for cdir in clean_dirs:
             print("Remove:", cdir)
             shutil.rmtree(cdir, ignore_errors=True)
+        if mode == 'keep':
+            os.makedirs(self.GeneratedDir)
+            os.makedirs(self.PackageDir)
+
 
     def get_pylon_version(self):
         raise RuntimeError("Must be implemented by platform build support!")
@@ -219,9 +240,22 @@ class BuildSupport(object):
                 universal_newlines=True
                 )
             git_version = git_version.strip()
-            m_rel = re.match(r"^\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?$", git_version)
-            #this will match  something like 1.0.0-14-g123456 and 1.0.0-14-g123456-dirty and 1.0.0-dirty
-            m_dev = re.match(r"^(\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?)(?:-(\d+)-g[0-9a-f]+)?(?:-dirty)?$", git_version)
+            m_rel = re.match(
+                r"^\d+(?:\.\d+){2,3}(?:(?:a|b|rc)\d*)?$",
+                git_version
+                )
+            #this will match  something like 1.0.0-14-g123456 and
+            # 1.0.0-14-g123456-dirty and 1.0.0-dirty
+            rx_git_ver = re.compile(
+                r"""
+                ^(\d+(?:\.\d+){2,3}
+                (?:(?:a|b|rc)\d*)?)
+                (?:-(\d+)-g[0-9a-f]+)?
+                (?:-dirty)?$
+                """,
+                re.VERBOSE
+                )
+            m_dev = rx_git_ver.match(git_version)
             if m_rel:
                 # release build -> return as is
                 return git_version
@@ -237,7 +271,12 @@ class BuildSupport(object):
             now = datetime.datetime.now()
             midnight = datetime.datetime(now.year, now.month, now.day)
             todays_seconds = (now - midnight).seconds
-            return "%d.%d.%d.dev%d" % (now.year, now.month, now.day, todays_seconds)
+            return "%d.%d.%d.dev%d" % (
+                now.year,
+                now.month,
+                now.day,
+                todays_seconds
+                )
 
     def get_version(self):
         git_version = self.get_git_version()
@@ -249,12 +288,25 @@ class BuildSupport(object):
         pylon_version_no_build = match.group(1)
         pylon_version_tag = match.group(2)
 
-        if pylon_version_no_build == VersionInfo.ReferencePylonVersion[get_platform()] and pylon_version_tag == '':
+        reference_version = VersionInfo.ReferencePylonVersion[get_platform()]
+        if (
+            pylon_version_no_build == reference_version and
+            pylon_version_tag == ''
+            ):
             return git_version
 
-        #remove all characters forbidden in a local version (- and _ get normalized anyways)
-        pylon_version_tag_cleaned=re.sub(r"[^a-zA-Z0-9\.-_]",'',pylon_version_tag)
-        return "%s+pylon%s%s" % (git_version, pylon_version_no_build, pylon_version_tag_cleaned)
+        # remove all characters forbidden in a local version
+        # (- and _ get normalized anyways)
+        pylon_version_tag_cleaned=re.sub(
+            r"[^a-zA-Z0-9\.-_]",
+            '',
+            pylon_version_tag
+            )
+        return "%s+pylon%s%s" % (
+            git_version,
+            pylon_version_no_build,
+            pylon_version_tag_cleaned
+            )
 
     def get_short_version(self, version):
         return version.split('+')[0]
@@ -270,6 +322,23 @@ class BuildSupport(object):
         else:
             error("Unsupported platform")
 
+    def get_package_data_files(self):
+        # patterns for files in self.PackageDir
+        data_files = ["*.dll", "*.zip", "*.so"]
+
+        # also add all files of any sub-directories recursively
+        pdir = self.PackageDir
+        for entry in os.listdir(self.PackageDir):
+            jentry = os.path.join(pdir, entry)
+            if stat.S_ISDIR(os.stat(jentry).st_mode):
+                for (root, _, fnames) in os.walk(jentry):
+                    for fname in fnames:
+                        # file names have to be relative to self.PackageDir
+                        jname = os.path.join(root, fname)
+                        pdir_rel = os.path.relpath(jname, self.PackageDir)
+                        data_files.append(pdir_rel)
+
+        return data_files
 
 ################################################################################
 
@@ -278,9 +347,64 @@ class BuildSupportWindows(BuildSupport):
     # Base directory for pylon SDK on Windows
     PylonDevDir = None
 
+    RuntimeFiles = {
+
+        "base": [
+            ("PylonBase_*.dll", ""),
+            ("GCBase_MD_*.dll", ""),
+            ("GenApi_MD_*.dll", ""),
+            ("log4cpp_MD_*.dll", ""),
+            ("Log_MD_*.dll", ""),
+            ("NodeMapData_MD_*.dll", ""),
+            ("XmlParser_MD_*.dll", ""),
+            ("MathParser_MD_*.dll", ""),
+            ],
+
+        "gige": [
+            ("PylonGigE_*.dll", ""),
+            ("gxapi*.dll", ""),
+            ],
+
+        "usb": [
+            ("PylonUsb_*.dll", ""),
+            ("uxapi*.dll", ""),
+            ],
+
+        "camemu": [
+            ("PylonCamEmu_*.dll", ""),
+            ],
+
+        "bcon": [
+            ("BconAdapterPleora.dll", ""),
+            ("bxapi_*.dll", ""),
+            ("PylonBcon_*.dll", ""),
+            ],
+
+        "extra": [
+            ("PylonGUI_*.dll", ""),
+            ("PylonUtility_*.dll", ""),
+            ],
+
+        "gentl": [
+            ("PylonGtc_*.dll", ""),
+            ],
+
+        "cxp": [
+            ],
+        }
+
+    GENTL_CXP_PRODUCER_DIR = "pylonCXP"
+
+    RuntimeFolders = {
+        "cxp": [
+            (GENTL_CXP_PRODUCER_DIR, GENTL_CXP_PRODUCER_DIR),
+            ],
+        }
+
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
+        ("GENTL_CXP_PRODUCER_DIR", r'L\"%s\\bin\"' % GENTL_CXP_PRODUCER_DIR),
 
         # let swig share its type information between the 'genicam' and the
         # 'pylon' module by using the same name for the type table.
@@ -292,7 +416,6 @@ class BuildSupportWindows(BuildSupport):
         '/GL',      # enable link-time code generation
         '/EHsc',    # set execption handling model
         ]
-
     if sys.version_info[:2] >= (3, 7):
         # add '/permissive-' to detect skipping initialization with goto
         # (available since VS 2017)
@@ -304,55 +427,6 @@ class BuildSupportWindows(BuildSupport):
         '/LTCG'         # link time code generation
         ]
 
-    RuntimeFiles = {
-
-        "base": [
-            "PylonBase_*.dll",
-            "GCBase_MD_*.dll",
-            "GenApi_MD_*.dll",
-            "log4cpp_MD_*.dll",
-            "Log_MD_*.dll",
-            "NodeMapData_MD_*.dll",
-            "XmlParser_MD_*.dll",
-            "MathParser_MD_*.dll",
-            ],
-
-        "gige": [
-            "PylonGigE_*.dll",
-            "gxapi*.dll",
-            ],
-
-        "usb": [
-            "PylonUsb_*.dll",
-            "uxapi*.dll",
-            ],
-
-        "camemu": [
-            "PylonCamEmu_*.dll"
-            ],
-
-        "1394": [
-            "Pylon1394_*.dll",
-            "BcamError_*.dll",
-            "Basler_A1_A3_A6_1394.zip",
-            "Basler_scout_1394.zip",
-            ],
-
-        "bcon": [
-            "BconAdapterPleora.dll",
-            "bxapi_*.dll",
-            "PylonBcon_*.dll",
-            ],
-
-        "extra": [
-            "PylonGUI_*.dll",
-            "PylonUtility_*.dll"
-            ],
-
-        "gentl": [
-            "PylonGtc_*.dll"
-            ],
-        }
 
     def __init__(self):
         super(BuildSupportWindows, self).__init__()
@@ -509,8 +583,6 @@ class BuildSupportLinux(BuildSupport):
             ("libpylon_TL_camemu-*.so", ""),
             ],
 
-        "1394": [], # N/A
-
         "bcon": [
             ("libbxapi*.so", ""),
             ("libpylon_TL_bcon-*.so", ""),
@@ -523,7 +595,11 @@ class BuildSupportLinux(BuildSupport):
         "gentl": [
             ("libpylon_TL_gtc*.so", ""),
             ],
+        "cxp": [
+            ],
+ 
         }
+    RuntimeFolders = {}
 
     def __init__(self):
         super(BuildSupportLinux, self).__init__()
@@ -582,7 +658,12 @@ class BuildSupportLinux(BuildSupport):
         try:
             res = subprocess.check_output(params, universal_newlines=True)
         except ErrFileNotFound:
-            error("Couldn't find pylon. Please install pylon in /opt/pylon5 or tell us the installation location using the PYLON_ROOT env variable")
+            msg = (
+                "Couldn't find pylon. Please install pylon in /opt/pylon5 " +
+                "or tell us the installation location using the PYLON_ROOT " +
+                "env variable"
+                )
+            error(msg)
             raise
         return res.strip()
 
@@ -598,7 +679,11 @@ class BuildSupportMacOS(BuildSupport):
 
     FrameworkName = 'pylon.framework'
 
-    PylonConfig = os.path.join(FrameworkPath, FrameworkName, 'Versions/Current/Resources/Tools/pylon-config.sh')
+    PylonConfig = os.path.join(
+        FrameworkPath,
+        FrameworkName,
+        'Versions/Current/Resources/Tools/pylon-config.sh'
+        )
 
     DefineMacros = [
                    ("SWIG_TYPE_TABLE", "pylon")
@@ -620,10 +705,14 @@ class BuildSupportMacOS(BuildSupport):
                     '-F' + FrameworkPath
                     ]
 
+    RuntimeFolders = {}
+
     def __init__(self):
         super(BuildSupportMacOS, self).__init__()
         self.SwigExe = self.find_swig()
-        includes_dir = os.path.abspath(os.path.join(self.PackageDir, "includes"))
+        includes_dir = os.path.abspath(
+            os.path.join(self.PackageDir, "includes")
+            )
         old_cwd = os.getcwd()
         if not os.path.isdir(includes_dir):
             os.makedirs(includes_dir)
@@ -634,11 +723,21 @@ class BuildSupportMacOS(BuildSupport):
         if (os.path.islink(fakeframeinclude)):
             os.remove(fakeframeinclude)
 
-        os.symlink(os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'), 'pylon')
+        os.symlink(
+            os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'),
+            'pylon'
+            )
 
         os.chdir(old_cwd)
         self.ExtraCompileArgs.append("-I{}".format(includes_dir))
-        self.ExtraCompileArgs.append('-I' + os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers', 'GenICam'))
+        self.ExtraCompileArgs.append(
+            '-I' + os.path.join(
+                self.FrameworkPath,
+                self.FrameworkName,
+                'Headers',
+                'GenICam'
+                )
+            )
 
     def call_pylon_config(self, *args):
         params = [self.PylonConfig]
@@ -646,7 +745,12 @@ class BuildSupportMacOS(BuildSupport):
         try:
             res = subprocess.check_output(params, universal_newlines=True)
         except ErrFileNotFound:
-            error("Couldn't find pylon. Please install pylon in %s or tell us the installation location using the PYLON_ROOT environment variable", self.FrameworkPath)
+            msg = (
+                "Couldn't find pylon. Please install pylon in %s or tell us " +
+                "the installation location using the PYLON_ROOT environment " +
+                "variable"
+                )
+            error(msg, self.FrameworkPath)
             raise
 
         # work around simple shells
@@ -664,16 +768,29 @@ class BuildSupportMacOS(BuildSupport):
         includes = [i[2:] for i in self.ExtraCompileArgs if i.startswith("-I")]
         # append framework paths manually
         includes += [
-                     os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'),
-                     os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers', 'GenICam')
-                     ]
+            os.path.join(self.FrameworkPath, self.FrameworkName, 'Headers'),
+            os.path.join(
+                self.FrameworkPath,
+                self.FrameworkName,
+                'Headers',
+                'GenICam'
+                )
+            ]
         return includes
 
     def copy_runtime(self):
-        full_dst = os.path.join(os.path.abspath(self.PackageDir), self.FrameworkName)
+        full_dst = os.path.join(
+            os.path.abspath(self.PackageDir),
+            self.FrameworkName
+            )
 
         if not os.path.exists(full_dst):
-            copy_tree(os.path.join(self.FrameworkPath, self.FrameworkName), full_dst, preserve_symlinks=1, update=1)
+            copy_tree(
+                os.path.join(self.FrameworkPath, self.FrameworkName),
+                full_dst,
+                preserve_symlinks=1,
+                update=1
+                )
 
 ################################################################################
 ################################################################################
@@ -708,7 +825,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skip-swig",
         action='store_true',
-        help="skip swig to allow compiling code that was patched after SWIG generated it."
+        help="skip swig to allow patching code after SWIG generated it."
         )
     parser.add_argument(
         "--rebuild-doxygen",
@@ -740,7 +857,7 @@ if __name__ == "__main__":
     if "clean" in remainder:
         # Remove everything, including the "build" dir from setuptools
         print("Cleaning...")
-        bs.clean(["build", "pypylon.egg-info"])
+        bs.clean("std", ["build", "pypylon.egg-info", "dist"])
         sys.exit(0)
 
     if not help_mode:
@@ -753,23 +870,34 @@ if __name__ == "__main__":
 
     # Call swig for genicam and pylon extensions
     if not help_mode:
+
+        # start with fresh 'pypylon' and 'generated' dirs if not skipping swig
+        bs.clean("skip" if args.skip_swig else "keep")
+
         genicam_wrapper_src = bs.call_swig(
             "src/genicam",
             "genicam.i",
-            version
+            version,
+            args.skip_swig
             )
+        print('\n')
         pylon_wrapper_src = bs.call_swig(
             "src/pylon",
             "pylon.i",
-            version
+            version,
+            args.skip_swig
             )
+        print('\n')
 
         if args.swig_only:
             print("Stopping after swig...")
             sys.exit(0)
 
-        # Copy the runtime DLLs
+        # copy_runtime is responsible for putting all those files and directories
+        # into the package directory, that need to be distributed and were not
+        # placed there by 'call_swig'.
         bs.copy_runtime()
+        print('\n')
 
     else:
         # mock to allow calling "--help" on setup
@@ -787,7 +915,7 @@ if __name__ == "__main__":
         extra_compile_args=bs.ExtraCompileArgs,
         extra_link_args=bs.ExtraLinkArgs,
         )
-
+    print('\n')
     pylon_ext = Extension(
         'pypylon._pylon',
         [pylon_wrapper_src],
@@ -799,12 +927,16 @@ if __name__ == "__main__":
         extra_compile_args=bs.ExtraCompileArgs,
         extra_link_args=bs.ExtraLinkArgs,
         )
+    print('\n')
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
-    # Now everything is in place to call setup...
-    #we must not use package_dir to allow develop installs
+    # While copy_runtime sets up the package directory, get_package_data_files'
+    # responsibility is to express the content of that directory in a way, that
+    # is understood by 'setup()'.
+    package_data_files = bs.get_package_data_files()
+
     setup(
         name='pypylon',
         version=version,
@@ -816,17 +948,11 @@ if __name__ == "__main__":
         ext_modules=[genicam_ext, pylon_ext],
         test_suite='tests.all_emulated_tests',
         packages=["pypylon"],
-        package_data={
-            "pypylon": ["*.dll", "*.zip", "*.so",
-                        "*.framework/Versions/[A-Z]/*",
-                        "*.framework/Versions/[A-Z]/Libraries/*",
-                        "*.framework/Versions/[A-Z]/Resources/*",
-                        "*.framework/Versions/[A-Z]/Resources/*/*",
-                        "*.framework/Versions/[A-Z]/Resources/*/*/*",
-                        "*.framework/Versions/[A-Z]/Resources/*/*/*/*"]
-        },
+        package_data={"pypylon": package_data_files },
         classifiers=[
-            "License :: Other/Proprietary License", #Proprietary license as the resulting install contains pylon which is under the pylon license
+            # Proprietary license as the resulting install contains pylon which
+            # is under the pylon license
+            "License :: Other/Proprietary License",
             "Programming Language :: C++",
             "Operating System :: Microsoft :: Windows :: Windows 7",
             "Operating System :: Microsoft :: Windows :: Windows 8",

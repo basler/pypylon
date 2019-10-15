@@ -97,7 +97,7 @@ using namespace Pylon;
 
 static PyObject* _genicam_translate = NULL;
 
-// Tranlates the C++ exception to a Python exception by calling into _genicam.
+// Translates the C++ exception to a Python exception by calling into _genicam.
 // The wrapped function in _genicam expects to receive the pointer as a PyLong.
 void TranslateGenicamException(const GenericException* e)
 {
@@ -157,6 +157,7 @@ void TranslateGenicamException(const GenericException* e)
 #define NEED_PYLON_DLL_WORKAROUND 1
 #include <Shlwapi.h>    // for PathRemoveFileSpec()
 #pragma comment(lib, "Shlwapi")
+#pragma comment(lib, "user32.lib")
 #else
 #define NEED_PYLON_DLL_WORKAROUND 0
 #endif
@@ -193,7 +194,8 @@ static void FixPylonDllLoadingIfNecessary()
 
     // get module file name and remove file spec
     const DWORD ENV_MAX = UNICODE_STRING_MAX_CHARS;
-    WCHAR new_PATH[ENV_MAX];
+    // ENV_MAX is so large that it should not be allocated on the stack
+    PWSTR new_PATH = new WCHAR[ENV_MAX];
     GetModuleFileNameW(hmod, new_PATH, ENV_MAX);
     PathRemoveFileSpecW(new_PATH);
 
@@ -234,12 +236,118 @@ static void FixPylonDllLoadingIfNecessary()
 
     // restore p_Previous_PATH
     SetEnvironmentVariableW(L"PATH", p_Previous_PATH);
+
+    delete[] new_PATH;
 }
 #endif
+
+
+#ifdef GENTL_CXP_PRODUCER_DIR
+
+// ExtendGenTLPathForCXP extends the GenTL path, so that
+// <path to this module>/<GENTL_CXP_PRODUCER_DIR> becomes part of that path.
+// While doing that, we do NOT want the resulting path to contain a reference
+// to the producer in this pypylon installation AND a reference to the one of
+// a Pylon installation that might be present. Therefore we filter out any
+// portion of the original path, that also contains GENTL_CXP_PRODUCER_DIR,
+// since the directory name for the producer of an installed Pylon will be
+// the same.
+
+#ifdef _WIN32
+
+static void ExtendGenTLPathForCXP()
+{
+#ifdef _WIN64
+    static const WCHAR var_name[] = L"GENICAM_GENTL64_PATH";
+#else
+    static const WCHAR var_name[] = L"GENICAM_GENTL32_PATH";
+#endif
+
+    const DWORD ENV_MAX = UNICODE_STRING_MAX_CHARS;
+    // ENV_MAX is so large that it should not be allocated on the stack
+    PWSTR new_PATH = new WCHAR[ENV_MAX];
+    PWSTR prev_PATH = new WCHAR[ENV_MAX];
+
+    // get module file name and remove file spec
+    HMODULE hmod = NULL;
+    GetModuleHandleExW(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<PWSTR>(ExtendGenTLPathForCXP),
+        &hmod
+        );
+    GetModuleFileNameW(hmod, new_PATH, ENV_MAX);
+    PathRemoveFileSpecW(new_PATH); // also removes trailing '\'
+
+    // concatenate 'GENTL_CXP_PRODUCER_DIR'
+    PWSTR new_end = new_PATH + lstrlenW(new_PATH);
+    *new_end++ = L'\\';
+     StrCpyW(new_end, GENTL_CXP_PRODUCER_DIR);
+     new_end = new_end + lstrlenW(new_end);
+     *new_end++ = L';';
+     *new_end = 0;
+
+    // append portions of previous path to new path
+    prev_PATH[0] = 0;
+    GetEnvironmentVariableW(var_name, prev_PATH, ENV_MAX);
+    PWSTR portion = prev_PATH;
+    PWSTR semicolon = StrChrW(portion, L';');
+    for(;;)
+    {
+        if (semicolon)
+        {
+            *semicolon = 0;
+        }
+
+        // only add next portion if it does not countain GENTL_CXP_PRODUCER_DIR
+        if (!StrStrIW(portion, GENTL_CXP_PRODUCER_DIR))
+        {
+            int len = lstrlenW(portion);
+            StrCpyW(new_end, portion);
+            new_end += len;
+            *new_end++ = L';';
+            *new_end = 0;
+        }
+
+        if (!semicolon)
+        {
+            break;
+        }
+        else
+        {
+            portion = semicolon + 1;
+            semicolon = wcschr(portion, L';');
+        }
+    }
+
+    // set new path
+    SetEnvironmentVariableW(var_name, new_PATH);
+
+    #if 0
+        char msg[1025];
+        wsprintfA(msg, "%S is now: %S\n", var_name, new_PATH);
+        OutputDebugStringA(msg);
+    #endif
+
+    delete[] new_PATH;
+    delete[] prev_PATH;
+}
+
+#else // _WIN32
+
+#error You have to implement ExtendGenTLPathForCXP for this platform!
+
+#endif // _WIN32
+
+#endif // GENTL_CXP_PRODUCER_DIR
 
 %}
 
 %init %{
+
+#ifdef GENTL_CXP_PRODUCER_DIR
+    ExtendGenTLPathForCXP();
+#endif
 
     Pylon::PylonInitialize();
 
@@ -459,35 +567,59 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 #define APIIMPORT
 #define APIEXPORT
 
+// for properties that have a standard genicam type like IInteger or IBoolean
 %define GENICAM_PROP(name)
     %rename(_##name) name;
 
-    %pythoncode %{
+    %pythoncode
+    %{
         def _Get_## name(self):
            return self._ ## name
         def _Set_ ## name(self, value):
            self._ ## name.SetValue(value)
         name = property(_Get_ ## name, _Set_ ## name )
     %}
-
 %enddef
 
+// for properties whose type is derived IEnumeration
 %define GENICAM_ENUM_PROP(name)
     %rename(_##name) name;
 
-    GENAPI_NAMESPACE::IEnumeration * _getEnum ## name(){
-        return dynamic_cast<GenApi::IEnumeration*>(&($self->##name));
+    GENAPI_NAMESPACE::IEnumeration& _GetEnum_##name()
+    {
+        return static_cast<GENAPI_NAMESPACE::IEnumeration&>($self->##name);
     }
 
-    %pythoncode %{
-        def _Get_## name(self):
-           return self._getEnum ## name()
+    %pythoncode
+    %{
+        def _Get_##name(self):
+           return self._GetEnum_##name()
         def _Set_ ## name(self, value):
-           if isinstance(value,int):
-            self._getEnum ## name().SetIntValue(value)
+           if isinstance(value, int):
+            self._GetEnum_##name().SetIntValue(value)
            else:
-            self._getEnum ## name().SetValue(value)
+            self._GetEnum_##name().SetValue(value)
         name = property(_Get_ ## name, _Set_ ## name )
+    %}
+
+%enddef
+
+// for properties with one of those extended types like IIntegerEx or IBooleanEx
+%define GENICAM_EX_PROP(name, type)
+    %ignore name;
+
+    type& _GetBaseType_##name()
+    {
+        return static_cast<type&>($self->name);
+    }
+
+    %pythoncode
+    %{
+        def _Get_##name(self):
+           return self._GetBaseType_##name()
+        def _Set_##name(self, value):
+           self._GetBaseType_##name().SetValue(value)
+        name = property(_Get_##name, _Set_##name )
     %}
 
 %enddef
@@ -501,8 +633,10 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "PayloadType.i"
 %include "Info.i"
 %include "DeviceInfo.i"
+%include "InterfaceInfo.i"
 %include "TlInfo.i"
 %include "DeviceFactory.i"
+%include "Interface.i"
 %include "TransportLayer.i"
 %include "GigETransportLayer.i"
 %include "TlFactory.i"

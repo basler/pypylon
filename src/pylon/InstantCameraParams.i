@@ -1,34 +1,25 @@
 %rename (InstantCameraParams_Params) Basler_InstantCameraParams::CInstantCameraParams_Params;
-#define GenApi GENAPI_NAMESPACE
-%ignore Basler_InstantCameraParams::CInstantCameraParams_Params::CInstantCameraParams_Params(void);
-%ignore Basler_InstantCameraParams::CInstantCameraParams_Params::~CInstantCameraParams_Params(void);
-%ignore Basler_InstantCameraParams::CInstantCameraParams_Params::_Initialize(GenApi::INodeMap*);
-%ignore Basler_InstantCameraParams::CInstantCameraParams_Params::_GetVendorName(void);
-%ignore Basler_InstantCameraParams::CInstantCameraParams_Params::_GetModelName(void);
+%ignore CInstantCameraParams_ParamsData;
 
-%extend Basler_InstantCameraParams::CInstantCameraParams_Params {
-    GENICAM_PROP(MaxNumBuffer);
-    GENICAM_PROP(MaxNumQueuedBuffer);
-    GENICAM_PROP(MaxNumGrabResults);
-    GENICAM_PROP(ChunkNodeMapsEnable);
-    GENICAM_PROP(StaticChunkNodeMapPoolSize);
-    GENICAM_PROP(GrabCameraEvents);
-    GENICAM_PROP(MonitorModeActive);
-    GENICAM_PROP(InternalGrabEngineThreadPriorityOverride);
-    GENICAM_PROP(InternalGrabEngineThreadPriority);
-    GENICAM_PROP(GrabLoopThreadUseTimeout);
-    GENICAM_PROP(GrabLoopThreadTimeout);
-    GENICAM_PROP(GrabLoopThreadPriorityOverride);
-    GENICAM_PROP(GrabLoopThreadPriority);
-    GENICAM_PROP(NumQueuedBuffers);
-    GENICAM_PROP(NumReadyBuffers);
-    GENICAM_PROP(NumEmptyBuffers);
-    GENICAM_PROP(OutputQueueSize);
+%extend Basler_InstantCameraParams::CInstantCameraParams_Params
+{
+    GENICAM_EX_PROP(MaxNumBuffer,               GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(MaxNumQueuedBuffer,         GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(MaxNumGrabResults,          GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(ChunkNodeMapsEnable,        GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(StaticChunkNodeMapPoolSize, GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(GrabCameraEvents,           GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(MonitorModeActive,          GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(GrabLoopThreadUseTimeout,   GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(GrabLoopThreadTimeout,      GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(NumQueuedBuffers,           GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(NumReadyBuffers,            GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(NumEmptyBuffers,            GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(OutputQueueSize,            GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(InternalGrabEngineThreadPriorityOverride,   GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(InternalGrabEngineThreadPriority,           GENAPI_NAMESPACE::IInteger);
+    GENICAM_EX_PROP(GrabLoopThreadPriorityOverride,             GENAPI_NAMESPACE::IBoolean);
+    GENICAM_EX_PROP(GrabLoopThreadPriority,                     GENAPI_NAMESPACE::IInteger);
 }
+
 %include <pylon/_InstantCameraParams.h>;
-
-%pythoncode %{
-    CInstantCameraParams_Params = InstantCameraParams_Params
-%}
-
-#undef GenApi
