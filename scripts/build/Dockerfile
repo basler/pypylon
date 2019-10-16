@@ -2,14 +2,11 @@ ARG QEMU_TARGET_ARCH
 ARG DOCKER_BASE_IMAGE
 
 #the following lines are used to get a qemu binary only with docker tools
-FROM multiarch/qemu-user-static:x86_64-$QEMU_TARGET_ARCH as qemu
-FROM alpine:3.5 as qemu_extract
-COPY --from=qemu /usr/bin qemu_user_static.tgz
-RUN tar -xzvf qemu_user_static.tgz
-
+FROM multiarch/qemu-user-static:4.1.0-1 as qemu
 
 FROM $DOCKER_BASE_IMAGE
-COPY --from=qemu_extract qemu-* /usr/bin
+COPY --from=qemu /usr/bin/* /usr/bin/
+
 
 RUN pip install wheel
 #build a new swig
