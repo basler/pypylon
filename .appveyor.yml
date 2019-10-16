@@ -37,10 +37,10 @@ install:
   - 7z x swigwin.zip -oC:\ > NUL
   - set PATH=C:\swigwin-3.0.12;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_5.2.0.13457.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.0.0.17906.exe
   - pylon_installer.exe /quiet /install
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
-  - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 5\development
+  - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 6\development
 
 build_script:
   - "scripts\\build\\msvc_build_wrapper.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
