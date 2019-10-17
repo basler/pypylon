@@ -1,3 +1,9 @@
+Version 1.5.1
+    - Date 2019-10-17
+    - Fixed travis and appveyor builds for windows and linux
+    - Added preliminary pylon 6 support for linux
+    - Dropped python 2.7 support
+
 Version 1.5.0
     - Date 2019-09-18
     - Fixed read part of GenICam file access (FileProtocolAdapter.i)
