@@ -627,6 +627,8 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 // ignore assignment operator in all classes
 %ignore *::operator=;
 
+%include <pylon/PylonVersionNumber.h>
+
 %include "TypeMappings.i"
 %include "Container.i"
 %include "PixelType.i"
@@ -636,7 +638,9 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "InterfaceInfo.i"
 %include "TlInfo.i"
 %include "DeviceFactory.i"
+#if PYLON_VERSION_MAJOR >= 6
 %include "Interface.i"
+#endif
 %include "TransportLayer.i"
 %include "GigETransportLayer.i"
 %include "TlFactory.i"

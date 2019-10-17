@@ -1673,8 +1673,12 @@ class SwissKnifeTestSuite(GenicamTestCase):
         # testlogger.info( ss.str().c_str() )
         # ss.clear()
 
-        if not setlocale(LC_ALL, "French"):
-            if not setlocale(LC_ALL, "fr_FR.UTF-8"):
+        try:
+            setlocale(LC_ALL, "French")
+        except:
+            try:
+                setlocale(LC_ALL, "fr_FR.UTF-8")
+            except:
                 setlocale(LC_ALL, "fr_FR")
 
         # ss << "French locale = " << setlocale(LC_A, NU) << "\n"
@@ -1688,7 +1692,7 @@ class SwissKnifeTestSuite(GenicamTestCase):
         Camera = CNodeMapRef()
         Camera._LoadXMLFromFile("GenApiTest", "SwissKnifeTestSuite_TestTheFrenchWay")
 
-        # setlocale(LC_ALL, OldLocale.c_str() )
+        setlocale(LC_ALL, OldLocale )
         # ss << "Restored locale = " << setlocale(LC_ALL, NU) << "\n"
         # testlogger.info( ss.str().c_str() )
 
