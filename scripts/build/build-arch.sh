@@ -71,7 +71,7 @@ if [ -n "$PYLON_DIR" ]; then
     PYLON="${files[0]}"
 
     #special case for pylon 5.x where aarch64 was named arm64
-    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64"]; then
+    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64" ]; then
         files=( $PYLON_DIR/pylon-*-arm64.txar.gz )
         PYLON="${files[0]}"
     fi
