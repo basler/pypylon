@@ -18,7 +18,8 @@ RUN mkdir /build && \
     rm -rf /build
 
 # numpy is required for the pyplon unittests
-RUN pip install numpy
+# currently disabled because the numpy install exceeds the current travis max duration
+# RUN pip install numpy
 
 # one genicam unittest requires a french locale
 RUN apt-get update && apt-get install -y locales \
