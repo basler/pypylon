@@ -58,7 +58,7 @@
             shape, dtype, format = self.GetImageFormat(new_pt)
         else:
             shape, dtype, format = self.GetImageFormat(pt)
-            buf = self.GetImageBuffer()
+            buf = self.GetBuffer()
 
         # Now we will copy the data into an array:
         return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
