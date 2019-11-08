@@ -668,6 +668,9 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "PylonGUI.i"
 #endif
 %include "FeaturePersistence.i"
+#if (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR >= 1) || PYLON_VERSION_MAJOR > 6
+%include "ImageDecompressor.i"
+#endif
 
 ADD_PROP_GET(GrabResult, ErrorDescription)
 ADD_PROP_GET(GrabResult, ErrorCode)
@@ -689,6 +692,21 @@ ADD_PROP_GET(GrabResult, ID)
 ADD_PROP_GET(GrabResult, ImageNumber)
 ADD_PROP_GET(GrabResult, NumberOfSkippedImages)
 ADD_PROP_GET(GrabResult, ChunkDataNodeMap)
+
+ADD_PROP_GET(PylonImage, AllocatedBufferSize)
+ADD_PROP_GET(PylonImage, Aoi)
+ADD_PROP_GET(PylonImage, Array)
+ADD_PROP_GET(PylonImage, Buffer)
+ADD_PROP_GET(PylonImage, Height)
+ADD_PROP_GET(PylonImage, ImageFormat)
+ADD_PROP_GET(PylonImage, ImageSize)
+ADD_PROP_GET(PylonImage, Orientation)
+ADD_PROP_GET(PylonImage, PaddingX)
+ADD_PROP_GET(PylonImage, PixelData)
+ADD_PROP_GET(PylonImage, PixelType)
+ADD_PROP_GET(PylonImage, Plane)
+ADD_PROP_GET(PylonImage, Stride)
+ADD_PROP_GET(PylonImage, Width)
 
 %apply unsigned int *OUTPUT {
     unsigned int* major,
