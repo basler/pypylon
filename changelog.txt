@@ -1,8 +1,9 @@
 Version 1.5.1
-    - Date 2019-10-17
+    - Date 2019-11-12
     - Fixed travis and appveyor builds for windows and linux
     - Added preliminary pylon 6 support for linux
     - Dropped python 2.7 support
+    - Fixed GetBuffer in PylonImage
 
 Version 1.5.0
     - Date 2019-09-18

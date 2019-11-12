@@ -7,6 +7,14 @@ FROM multiarch/qemu-user-static:4.1.0-1 as qemu
 FROM $DOCKER_BASE_IMAGE
 COPY --from=qemu /usr/bin/* /usr/bin/
 
+# Quick fix for the now archived debian jessie. Security updates are also no longer provided for arm64. 
+# We switch all sources to the debian archive servers, See: 
+# https://github.com/debuerreotype/docker-debian-artifacts/issues/66
+# https://stackoverflow.com/questions/55386246/w-failed-to-fetch-http-deb-debian-org-debian-dists-jessie-updates-main-binary
+RUN if cat /etc/debian_version | grep -q "8\." ; then \
+        echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie main" > /etc/apt/sources.list; \
+        apt-get -o Acquire::Check-Valid-Until=false update; \
+    fi
 
 RUN pip install wheel
 #build a new swig
