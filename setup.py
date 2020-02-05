@@ -712,7 +712,7 @@ class BuildSupportMacOS(BuildSupport):
         super(BuildSupportMacOS, self).__init__()
         self.SwigExe = self.find_swig()
         includes_dir = os.path.abspath(
-            os.path.join(self.PackageDir, "includes")
+            os.path.join('.' , "osx_includes")
             )
         old_cwd = os.getcwd()
         if not os.path.isdir(includes_dir):
