@@ -23,6 +23,10 @@
             shape = (self.GetHeight(), self.GetWidth())
             format = "H"
             dtype = _pylon_numpy.uint16
+        elif pt in ( PixelType_Mono16, ):
+            shape = (self.GetHeight(), self.GetWidth())
+            format = "H"
+            dtype = _pylon_numpy.uint16
         elif pt in ( PixelType_RGB8packed, PixelType_BGR8packed ):
             shape = (self.GetHeight(), self.GetWidth(), 3)
             dtype = _pylon_numpy.uint8
