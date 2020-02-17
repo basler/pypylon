@@ -74,13 +74,16 @@ TEST_PAYLOAD_MONO8 = (
     + b"\x37\x38\x39\x3a\x3b\x3c\x3d\x3e"
     + b"\x00\x00\x00\x00\x90\x01\x00\x00"
     + b"\x01\x00\x08\x01\x20\x00\x00\x00"
-    + b"\x20\x00\x00\x00\x96\x84\xad\xed"
-    + b"\x00\x02\x00\x00\xe9\x9a\x90\x2f"
-    + b"\xcc\x01\x00\x00"
+    + b"\x20\x00\x00\x00\x10\x00\x00\x00"
+    + b"\x08\x00\x00\x00\x00\x00\x00\x00"
+    + b"\x96\x84\xad\xed\x00\x02\x00\x00"
+    + b"\xea\x9a\x90\x2f\xd8\x01\x00\x00"
 )
 
 TEST_IMAGE_WIDTH = 32
 TEST_IMAGE_HEIGHT = 32
+TEST_IMAGE_OFFSET_X = 16
+TEST_IMAGE_OFFSET_Y = 8
 
 
 class DecompressionTestSuite(unittest.TestCase):
@@ -102,9 +105,13 @@ class DecompressionTestSuite(unittest.TestCase):
         self.assertEqual(info.hasCompressedImage, True)
         self.assertEqual(info.compressionStatus, pylon.CompressionStatus_Ok)
         self.assertEqual(info.lossy, False)
+        self.assertEqual(info.pixelType, pylon.PixelType_Mono8)
         self.assertEqual(info.width, TEST_IMAGE_WIDTH)
         self.assertEqual(info.height, TEST_IMAGE_HEIGHT)
-        self.assertEqual(info.pixelType, pylon.PixelType_Mono8)
+        self.assertEqual(info.offsetX, TEST_IMAGE_OFFSET_X)
+        self.assertEqual(info.offsetY, TEST_IMAGE_OFFSET_Y)
+        self.assertEqual(info.paddingX, 0)
+        self.assertEqual(info.paddingY, 0)
         self.assertEqual(
             info.decompressedImageSize, TEST_IMAGE_WIDTH * TEST_IMAGE_HEIGHT * 1
         )
