@@ -1,9 +1,10 @@
 Version 1.5.2
-    - Date 2020-02-03
-    - Use pylon 6.1.0.10259 to build for Windows
+    - Date 2020-03-03
+    - Use pylon 6.1.0.10500 to build for Windows
     - Implement support for decompression of Basler Compression Beyond
       payload.
     - Add several properties to PylonImage
+    - Fix a bug in GenICam file access
 
 Version 1.5.1
     - Date 2019-11-12
