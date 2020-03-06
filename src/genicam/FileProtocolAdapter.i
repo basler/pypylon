@@ -24,7 +24,7 @@ namespace GENAPI_NAMESPACE
         */
         FileProtocolAdapter();
 
-        
+
         /*!
         * @brief
         * attach file protocol adapter to nodemap
@@ -175,8 +175,8 @@ namespace GENAPI_NAMESPACE
         bool deleteFile(const char * pFileName);
 
     };
-    
-    
+
+
     %pythoncode {
         class FileAccess(object):
             def __init__(self, read_bufsize = 4096):
@@ -213,7 +213,7 @@ namespace GENAPI_NAMESPACE
             def read(self, size = -1):
                 assert(self.isopen)
                 if size < 0:
-                    buf = ""
+                    buf = b""
                     while True:
                         data  = self._read(self.read_bufsize)
                         buf += data
