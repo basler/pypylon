@@ -1,3 +1,7 @@
+Version ?.?.?
+    - Date ????-??-??
+    - Added support for pixel format Mono16 in GetArray()
+
 Version 1.5.2
     - Date 2020-03-03
     - Use pylon 6.1.0.10500 to build for Windows
