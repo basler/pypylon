@@ -41,7 +41,7 @@ pip install .
 
 # Getting Started
 ## Hello World
-See the [grab sample](https://github.com/Basler/pypylon/samples/grab.py) in the samples directory.
+See the [grab sample](https://github.com/basler/pypylon/blob/master/samples/grab.py) in the samples directory.
 
 Excerpt:
 
