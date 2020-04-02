@@ -945,6 +945,7 @@ if __name__ == "__main__":
         author_email="oss@baslerweb.com",
         description="The python wrapper for the Basler pylon Camera Software Suite.",
         long_description=long_description,
+        long_description_content_type='text/markdown',
         url="https://github.com/basler/pypylon",
         ext_modules=[genicam_ext, pylon_ext],
         test_suite='tests.all_emulated_tests',
