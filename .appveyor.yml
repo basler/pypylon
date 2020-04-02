@@ -14,9 +14,6 @@ environment:
     # The list here is complete (excluding Python 2.6, which
     # isn't covered by this document) at the time of writing.
 
-    - PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python33-x64"
-      DISTUTILS_USE_SDK: "1"
     - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python34-x64"
       DISTUTILS_USE_SDK: "1"
@@ -30,6 +27,11 @@ environment:
     - PYTHON: "C:\\Python38-x64"
 
 install:
+  # Install an outdated version of readme_renderer because it is the last one with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
+  # Otherwise wheel/twine install fails on python 3.4
+  # Install setuptools >= 38.6 because this version introduced long_description_content_type which is required by current pypi
+  - "%PYTHON%\\python.exe -m pip install \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
+
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
   # install swig and put it on the path. Retry because of network issues with sourceforge
