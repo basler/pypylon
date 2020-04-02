@@ -66,5 +66,6 @@ deploy:
 #use after_deploy instead of deploy_script as deploy_script disables the default deployment providers
 after_deploy:
   - echo "Starting Artifact Deployment"
+  - ps: Push-AppveyorArtifact dist/*
   - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag, won't deploy to pypi"}
   - echo "Finished Artifact Deployment"
