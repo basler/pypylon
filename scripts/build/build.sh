@@ -5,15 +5,17 @@ usage()
 {
     echo "Usage: $0 [<options>]"
     echo "Options:"
-    echo "  --pylon-tgz <package>      Use the given pylon installer tgz"
-    echo "  --python <path to binary>  Use the given python binary"
-    echo "  --disable-tests            Disable automatic unittests"
-    echo "  -h                         This usage help"
+    echo "  --pylon-tgz <package>                     Use the given pylon installer tgz"
+    echo "  --python <path to binary>                 Use the given python binary"
+    echo "  --update-platform-tag <platform-tag>      Use auditwheel repair to set the platform tag"
+    echo "  --disable-tests                           Disable automatic unittests"
+    echo "  -h                                        This usage help"
 }
 
 PYLON_TGZ=""
 PYTHON="python"
 DISABLE_TESTS=""
+UPDATE_PLATFORM_TAG=""
 
 # parse args
 while [ $# -gt 0 ]; do
@@ -21,6 +23,7 @@ while [ $# -gt 0 ]; do
     case $arg in
         --pylon-tgz) PYLON_TGZ="$2" ; shift ;;
         --python) PYTHON="$2" ; shift ;;
+        --update-platform-tag) UPDATE_PLATFORM_TAG="$2"; shift ;;
         --disable-tests) DISABLE_TESTS=1 ;;
         -h|--help) usage ; exit 1 ;;
         *)         echo "Unknown argument $arg" ; usage ; exit 1 ;;
@@ -51,14 +54,20 @@ fi
 mkdir -p $BUILD_DIR/pylon
 pushd $BUILD_DIR/pylon
 tar -xzf $PYLON_TGZ
-#we always use the extracted SDK, if you need this script to build against your pylon version add the logic :-)
-PYLON_ROOT=$BUILD_DIR/pylon
 
-#special handling of pylon 5. pylon 6 creates a bin dir. For simplicity we check for that.
-if [ ! -d bin ]; then
-    #extract the inner tar from pylon 5
+# cope with different pylon tarball structures
+if [ -f pylon*.tar.gz ]; then #pylon 6.1 structure
+    tar -xzf pylon*.tar.gz
+    PYLON_ROOT=$BUILD_DIR/pylon
+elif [ -d bin ]; then #the pylon 6.0 nightly that was released for dart-mipi didn't contain an second tarball
+    PYLON_ROOT=$BUILD_DIR/pylon
+elif [ -f pylon-*/pylonSDK-*.tar.gz ]; then # pylon < 6
+     #extract the inner tar from pylon 5
     tar -xzf pylon-*/pylonSDK-*.tar.gz
     PYLON_ROOT=$BUILD_DIR/pylon/pylon5
+else
+    echo "Failed to detect and extract the pylon version."
+    exit 1
 fi
 
 popd
@@ -74,6 +83,13 @@ if [ -z "$DISABLE_TESTS" ]; then
 fi
 
 $PYTHON setup.py bdist_wheel
+
+#try to use auditwheel to update the platform tag
+if [ -n "$UPDATE_PLATFORM_TAG" ]; then
+    mkdir $BUILD_DIR/dist
+    mv dist/*.whl $BUILD_DIR/dist/
+    auditwheel repair --plat $UPDATE_PLATFORM_TAG --wheel-dir dist $BUILD_DIR/dist/*.whl
+fi
 
 rm -r "$BUILD_DIR"
 
