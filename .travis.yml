@@ -56,7 +56,7 @@ install:
 script:
 - cd $TRAVIS_BUILD_DIR
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer"
+- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer --disable-tests"
 
 deploy:
   provider: releases
