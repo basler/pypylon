@@ -4,6 +4,25 @@ services:
 language: cpp
 
 env:
+- P=manylinux2014_x86_64 A=cp35m
+- P=manylinux2014_x86_64 A=cp36m
+- P=manylinux2014_x86_64 A=cp37m
+- P=manylinux2014_x86_64 A=cp38
+- P=manylinux2014_i686 A=cp35m
+- P=manylinux2014_i686 A=cp36m
+- P=manylinux2014_i686 A=cp37m
+- P=manylinux2014_i686 A=cp38
+# It is currently not possible to build manylinux packages for linux arm. Reasons are:
+#   - The binary dependencies of pylon are newer than specified in manylinux2014
+#   - There is no manylinux armhf docker container available
+# - P=manylinux2014_armv7l A=cp35m
+# - P=manylinux2014_armv7l A=cp36m
+# - P=manylinux2014_armv7l A=cp37m
+# - P=manylinux2014_armv7l A=cp38
+# - P=manylinux2014_aarch64 A=cp35m
+# - P=manylinux2014_aarch64 A=cp36m
+# - P=manylinux2014_aarch64 A=cp37m
+# - P=manylinux2014_aarch64 A=cp38
 - P=linux_x86_64 A=cp34m
 - P=linux_x86_64 A=cp35m
 - P=linux_x86_64 A=cp36m
