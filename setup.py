@@ -139,10 +139,10 @@ class BuildSupport(object):
         if res is None:
             return False
 
-        if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
+        if LooseVersion(res.group(1)) < LooseVersion("4.0.0"):
             msg = (
                 "The version of swig is %s which is too old. " +
-                "Minimum required version is 3.0.12"
+                "Minimum required version is 4.0.0"
                 )
             warning(msg, res.group(1))
             return False

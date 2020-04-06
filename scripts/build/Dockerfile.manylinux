@@ -11,8 +11,8 @@ COPY --from=qemu /usr/bin/* /usr/bin/
 #build a new swig
 RUN mkdir /build && \
     cd /build && \
-    curl -sSfL -O http://prdownloads.sourceforge.net/swig/swig-3.0.12.tar.gz && \
-    tar -xzf swig-3.0.12.tar.gz && cd swig-3.0.12 && \
+    curl -sSfL -O http://prdownloads.sourceforge.net/swig/swig-4.0.1.tar.gz && \
+    tar -xzf swig-4.0.1.tar.gz && cd swig-4.0.1 && \
     ./configure --with-python3 && make -j2 && make install && \
     rm -rf /build
 

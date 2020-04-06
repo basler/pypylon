@@ -35,9 +35,9 @@ install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
   # install swig and put it on the path. Retry because of network issues with sourceforge
-  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip
+  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-4.0.1.zip
   - 7z x swigwin.zip -oC:\ > NUL
-  - set PATH=C:\swigwin-3.0.12;%PATH%
+  - set PATH=C:\swigwin-4.0.1;%PATH%
   # install pylon
   - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.1.0.19674.exe
   - pylon_installer.exe /quiet /install
