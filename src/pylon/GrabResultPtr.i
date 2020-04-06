@@ -65,7 +65,7 @@
 
     def __getattr__(self, attribute):
         # Check "normal" attributes first
-        if attribute in self.__dict__ or attribute in ("thisown", "this"):
+        if attribute in self.__dict__ or attribute in ("thisown", "this") or attribute.startswith("__"):
             return object.__getattr__(self, attribute)
 
         # If chunk data is available, maybe "attribute" is a chunk node?
@@ -80,7 +80,7 @@
 
     def __setattr__(self, attribute, val):
         # Check "normal" attributes first
-        if attribute in self.__dict__ or attribute in ("thisown", "this"):
+        if attribute in self.__dict__ or attribute in ("thisown", "this") or attribute.startswith("__"):
             object.__setattr__(self, attribute, val)
             return
 
