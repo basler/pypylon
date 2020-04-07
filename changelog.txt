@@ -1,8 +1,11 @@
+Version ?.?.?
+    - Date ???-??-??
+    - Fix interaction with ipython jedi autocompleter
+
 Version 1.5.3
     - Date 2020-03-23
     - Use pylon 6.1.0.19674 to build for Windows
     - Added support for pixel format Mono16 in GetArray()
-
 Version 1.5.2
     - Date 2020-03-03
     - Use pylon 6.1.0.10500 to build for Windows

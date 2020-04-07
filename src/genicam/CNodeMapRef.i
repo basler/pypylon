@@ -104,13 +104,13 @@ namespace GENAPI_NAMESPACE
 
         %pythoncode %{
         def __getattr__(self, attribute):
-            if attribute in self.__dict__ or attribute in ( "thisown","this"):
+            if attribute in self.__dict__ or attribute in ( "thisown","this") or attribute.startswith("__"):
                 return object.__getattr__(self, attribute)
             else:
                 return self.GetNode(attribute)
 
         def __setattr__(self, attribute, val):
-            if attribute in self.__dict__ or attribute in ( "thisown","this"):
+            if attribute in self.__dict__ or attribute in ( "thisown","this") or attribute.startswith("__"):
                 object.__setattr__(self, attribute, val)
             else:
                 self.GetNode(attribute).SetValue(val)
