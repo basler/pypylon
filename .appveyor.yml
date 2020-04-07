@@ -14,9 +14,6 @@ environment:
     # The list here is complete (excluding Python 2.6, which
     # isn't covered by this document) at the time of writing.
 
-    - PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python33-x64"
-      DISTUTILS_USE_SDK: "1"
     - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python34-x64"
       DISTUTILS_USE_SDK: "1"
@@ -26,16 +23,23 @@ environment:
     - PYTHON: "C:\\Python36-x64"
     - PYTHON: "C:\\Python37"
     - PYTHON: "C:\\Python37-x64"
+    - PYTHON: "C:\\Python38"
+    - PYTHON: "C:\\Python38-x64"
 
 install:
+  # Install an outdated version of readme_renderer because it is the last one with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
+  # Otherwise wheel/twine install fails on python 3.4
+  # Install setuptools >= 38.6 because this version introduced long_description_content_type which is required by current pypi
+  - "%PYTHON%\\python.exe -m pip install \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
+
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
   # install swig and put it on the path. Retry because of network issues with sourceforge
-  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-3.0.12.zip
+  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-4.0.1.zip
   - 7z x swigwin.zip -oC:\ > NUL
-  - set PATH=C:\swigwin-3.0.12;%PATH%
+  - set PATH=C:\swigwin-4.0.1;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.0.0.17906.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.1.0.19674.exe
   - pylon_installer.exe /quiet /install
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
   - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 6\development
@@ -64,5 +68,6 @@ deploy:
 #use after_deploy instead of deploy_script as deploy_script disables the default deployment providers
 after_deploy:
   - echo "Starting Artifact Deployment"
+  - ps: Push-AppveyorArtifact dist/*
   - ps: If ($env:APPVEYOR_REPO_TAG -eq "true") { Invoke-Expression "$env:PYTHON\\Scripts\\twine upload --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag, won't deploy to pypi"}
   - echo "Finished Artifact Deployment"

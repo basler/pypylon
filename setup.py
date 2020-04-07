@@ -139,10 +139,10 @@ class BuildSupport(object):
         if res is None:
             return False
 
-        if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
+        if LooseVersion(res.group(1)) < LooseVersion("4.0.0"):
             msg = (
                 "The version of swig is %s which is too old. " +
-                "Minimum required version is 3.0.12"
+                "Minimum required version is 4.0.0"
                 )
             warning(msg, res.group(1))
             return False
@@ -945,6 +945,7 @@ if __name__ == "__main__":
         author_email="oss@baslerweb.com",
         description="The python wrapper for the Basler pylon Camera Software Suite.",
         long_description=long_description,
+        long_description_content_type='text/markdown',
         url="https://github.com/basler/pypylon",
         ext_modules=[genicam_ext, pylon_ext],
         test_suite='tests.all_emulated_tests',
