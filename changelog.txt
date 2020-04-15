@@ -3,7 +3,7 @@ Version ?.?.?
     - Fix interaction with ipython jedi autocompleter
     - Dropped python 3.3 binary releases
     - Added python 3.8 binary releases
-    - Check for swig >= 4.0.0
+    - Use swig 4.0 for linux binary releases
 
 Version 1.5.3
     - Date 2020-03-23
