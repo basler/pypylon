@@ -120,7 +120,7 @@ script:
   if [ "$TRAVIS_CPU_ARCH" == "amd64" ]; then
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
   fi
-- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer --disable-tests"
+- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer"
 
 deploy:
   provider: releases
