@@ -1,3 +1,6 @@
+Version ?.?.?
+    - Date ????-??-??
+
 Version 1.5.4
     - Date 2020-04-16
     - Fix interaction with ipython jedi autocompleter
