@@ -37,5 +37,8 @@ RUN apt-get update && apt-get install -y locales \
 
 RUN mkdir /work
 RUN mkdir /pylon_installer
+RUN mkdir /worker_home && chmod go+rwx /worker_home
+ENV HOME=/worker_home
+
 
 RUN uname -a
