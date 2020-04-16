@@ -16,6 +16,8 @@ RUN mkdir /build && \
     ./configure --with-python3 && make -j2 && make install && \
     rm -rf /build
 
+# one genicam unittest requires a french locale
+RUN yum -y reinstall glibc-common
 
 RUN mkdir /work
 RUN mkdir /pylon_installer
