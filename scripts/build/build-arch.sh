@@ -54,10 +54,10 @@ if [ $BUILD_DISTRO = "debian" ]; then
 
     #Note: Be careful when changing the base image. Not every image is available for every architecture.
     case $ABI_TAG in
-        cp27m) BASE_IMAGE="python:2.7.16-jessie" ;;
-        cp34m) BASE_IMAGE="python:3.4.8-jessie" ;;
-        cp35m) BASE_IMAGE="python:3.5.5-jessie" ;;
-        cp36m) BASE_IMAGE="python:3.6.5-jessie" ;;
+        cp27m) BASE_IMAGE="python:2.7.16-stretch" ;;
+        cp34m) BASE_IMAGE="python:3.4.8-stretch" ;;
+        cp35m) BASE_IMAGE="python:3.5.5-stretch" ;;
+        cp36m) BASE_IMAGE="python:3.6.5-stretch" ;;
         cp37m) BASE_IMAGE="python:3.7.5-stretch" ;;
         cp38) BASE_IMAGE="python:3.8.2-buster" ;;
         *)

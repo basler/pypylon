@@ -39,6 +39,9 @@ def get_machinewidth():
 def get_platform():
     return platform.system()
 
+def get_machine():
+    return platform.machine()
+
 class BuildSupport(object):
 
     # --- Constants ---
@@ -291,6 +294,12 @@ class BuildSupport(object):
         pylon_version_tag = match.group(2)
 
         reference_version = VersionInfo.ReferencePylonVersion[get_platform()]
+
+        # check for a more specialized reference version
+        platform_machine = get_platform() + "_" + get_machine()
+        if platform_machine in VersionInfo.ReferencePylonVersion:
+            reference_version = VersionInfo.ReferencePylonVersion[platform_machine]
+
         if (
             pylon_version_no_build == reference_version and
             pylon_version_tag == ''
