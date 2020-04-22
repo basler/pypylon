@@ -1,5 +1,6 @@
 Version ?.?.?
     - Date ????-??-??
+    - Fix issues with callbacks due to intptr_t truncation on linux
 
 Version 1.5.4
     - Date 2020-04-16
