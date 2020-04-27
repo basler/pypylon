@@ -81,6 +81,27 @@ jobs:
       env: P=linux_aarch64 A=cp37m
     - arch: arm64
       env: P=linux_aarch64 A=cp38
+  allow_failures:
+    # manylinux fails, because the runtime dependencies of current pylon are higher than manylinux2014.
+    # The jobs are still kept in here to keep the mechanics alive.
+    # manylinux2014_x86_64
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp35m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp36m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp37m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp38
+    # manylinux2014_i686
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp35m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp36m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp37m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp38
 
 
 install:
