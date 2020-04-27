@@ -1,6 +1,7 @@
 Version ?.?.?
     - Date ????-??-??
     - Fix issues with callbacks due to intptr_t truncation on linux
+    - Fix unittests that failed in python 3.8
 
 Version 1.5.4
     - Date 2020-04-16
