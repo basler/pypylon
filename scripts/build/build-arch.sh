@@ -77,13 +77,18 @@ else
     esac
 fi
 
+# When running a armv7 container on a native aarch64 machine, uname -a still outputs aarch64 instead of armv7
+# Python assumes it should buid for aarch64. Wrapping everything with linux32 fixes the issue.
+# linux64 is the default
+CMD_WRAPPER=linux64
+
 case $PLATFORM_TAG in
     linux_x86_64)           QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE";                    PYLON_ARCH=x86_64 ;;
-    linux_i686)             QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE";                     PYLON_ARCH=x86 ;;
-    linux_armv7l)           QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE";                  PYLON_ARCH=armhf ;;
+    linux_i686)             QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE";                     PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
+    linux_armv7l)           QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE";                  PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
     linux_aarch64)          QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE";                  PYLON_ARCH=aarch64 ;;
     manylinux2014_x86_64)   QEMU_ARCH="x86_64";   BASE_IMAGE="quay.io/pypa/manylinux2014_x86_64";    PYLON_ARCH=x86_64 ;;
-    manylinux2014_i686)     QEMU_ARCH="i386";     BASE_IMAGE="quay.io/pypa/manylinux2014_i686";      PYLON_ARCH=x86 ;;
+    manylinux2014_i686)     QEMU_ARCH="i386";     BASE_IMAGE="quay.io/pypa/manylinux2014_i686";      PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
     manylinux2014_aarch64)  QEMU_ARCH="aarch64";  BASE_IMAGE="quay.io/pypa/manylinux2014_aarch64";   PYLON_ARCH=aarch64 ;;
     *)
     echo "Unsupported platform tag '$PLATFORM_TAG'. Supported platforms: linux_x86_64, linux_i686, linux_armv7l, linux_aarch64, manylinux2014_x86_64, manylinux2014_i686, manylinux2014_aarch64"
@@ -117,11 +122,11 @@ if [ ! -f "$PYLON" ]; then
     exit 1
 fi
 
-
 DOCKER_TAG="pypylon-$PLATFORM_TAG-$(date +%s)"
 docker build --network host \
                 --build-arg "QEMU_TARGET_ARCH=$QEMU_ARCH" \
                 --build-arg "DOCKER_BASE_IMAGE=$BASE_IMAGE" \
+                --build-arg "CMD_WRAPPER=$CMD_WRAPPER" \
                 --tag "$DOCKER_TAG" - < $THISDIR/Dockerfile.$BUILD_DISTRO
 
 

@@ -5,6 +5,7 @@ ARG DOCKER_BASE_IMAGE
 FROM multiarch/qemu-user-static:4.2.0-6 as qemu
 
 FROM $DOCKER_BASE_IMAGE
+ARG CMD_WRAPPER
 COPY --from=qemu /usr/bin/* /usr/bin/
 
 # Quick fix for the now archived debian jessie. Security updates are also no longer provided for arm64. 
@@ -41,4 +42,10 @@ RUN mkdir /worker_home && chmod go+rwx /worker_home
 ENV HOME=/worker_home
 
 
-RUN uname -a
+# run everything wrapped using CMD_WRAPPER
+# In most cases the wrapper is linux64/32.
+# This is for example required when running the armv7 container on armv8 hardware to ensure that python really builds for armv7
+RUN echo "#!/bin/sh" > /entrypoint.sh; echo exec $CMD_WRAPPER \"\$@\" >> /entrypoint.sh; chmod +x /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+RUN /entrypoint.sh uname -a
