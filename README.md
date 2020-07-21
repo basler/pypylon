@@ -33,7 +33,7 @@ You need a few more things to compile pypylon:
  * [swig](http://www.swig.org) >= 3.0.12
 
 To build pypylon from source:
-```
+```console
 git clone https://github.com/basler/pypylon.git
 cd pypylon
 pip install .
@@ -45,7 +45,7 @@ See the [grab sample](https://github.com/basler/pypylon/blob/master/samples/grab
 
 Excerpt:
 
-```
+```python
 from pypylon import pylon
 
 camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
@@ -78,7 +78,7 @@ camera.Close()
 Pull requests to pypylon are very welcome. To help you getting started with pypylon improvements, here are some hints:
 
 ## Starting Development
-```
+```console
 python setup.py develop
 ```
 This will "link" the local pypylon source directory into your python installation. It will not package the pylon libraries and always use the installed pylon.
@@ -86,7 +86,7 @@ After changing pypylon, execute `python setup.py build` and test...
 
 ## Running Unit Tests
 > NOTE: The unit tests try to import `pypylon....`, so they run against the *installed* version of pypylon.
-```
+```console
 python -m unittest tests/....
 python tests/....
 ```
