@@ -152,13 +152,13 @@ class BuildSupport(object):
 
 
     def call_swig(self, sourcedir, source, version, skip=False):
-        if skip:
-            return ""
-
         name = os.path.splitext(source)[0]
         cpp_name = os.path.abspath(
             os.path.join(self.GeneratedDir, "%s_wrap.cpp" % name)
             )
+
+        if skip:
+            return cpp_name
 
         outdir = os.path.abspath(self.PackageDir)
 
@@ -606,13 +606,15 @@ class BuildSupportLinux(BuildSupport):
     def __init__(self):
         super(BuildSupportLinux, self).__init__()
         self.SwigExe = self.find_swig()
+
+        self.SwigOptions.append("-DSWIGWORDSIZE%i" % (get_machinewidth(),) )
+
         config_cflags = self.call_pylon_config("--cflags")
         self.ExtraCompileArgs.extend(config_cflags.split())
         print("ExtraCompileArgs:", self.ExtraCompileArgs)
         config_libs = self.call_pylon_config("--libs")
         self.ExtraLinkArgs.extend(config_libs.split())
         print("ExtraLinkArgs:", self.ExtraLinkArgs)
-
 
         config_libdir = self.call_pylon_config("--libdir")
         self.LibraryDirs.extend(config_libdir.split())
@@ -712,6 +714,9 @@ class BuildSupportMacOS(BuildSupport):
     def __init__(self):
         super(BuildSupportMacOS, self).__init__()
         self.SwigExe = self.find_swig()
+
+        self.SwigOptions.append("-DSWIGWORDSIZE%i" % (get_machinewidth(),) )
+
         includes_dir = os.path.abspath(
             os.path.join('.' , "osx_includes")
             )

@@ -96,10 +96,8 @@ class PortTestSuite(GenicamTestCase):
         self.assertEqual(MyRegister, cast_buffer("uint32_t", LittleEndian, Buffer))
 
         # try to write at an invalid address
-        self.assertRaises(
-            GenericException,
+        with self.assertRaises(GenericException):
             Port.Write(0x0000, cast_data("uint32_t", LittleEndian, MyRegister))
-        )
 
         # try to write with invalid length
         with self.assertRaises(GenericException):

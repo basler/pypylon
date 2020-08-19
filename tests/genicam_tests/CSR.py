@@ -167,6 +167,10 @@ class CSRServer(object):
         length = len(data)
         for rmap in self.rmaps:
             regset = rmap.findRegisters(addr, length)
+            if not regset:
+                raise genicam.GenericException(
+                        "There is no register at address 0x%x with length %d" % (addr, length), "", 0)
+
             for reg in regset:
                 if addr < reg.addr:
                     # cut access

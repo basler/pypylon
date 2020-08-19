@@ -109,6 +109,10 @@ using namespace GENAPI_NAMESPACE;
 
 #ifdef _WIN32
 
+#if defined(SWIGWORDSIZE64) || defined(SWIGWORDSIZE32)
+#error "On windows SWIGWORDSIZE32/64 must not be used as it is not correctly implemented in swig."
+#endif
+
 typedef signed char        int8_t;
 typedef short              int16_t;
 typedef int                int32_t;
@@ -154,6 +158,10 @@ typedef unsigned long long uintmax_t;
 #else // _WIN32
 
 /* Exact integral types.  */
+
+#if !defined(SWIGWORDSIZE64) && !defined(SWIGWORDSIZE32)
+#error "On linux either SWIGWORDSIZE64 or SWIGWORDSIZE32 must be defined on the command line."
+#endif
 
 /* Signed.  */
 typedef signed char             int8_t;
