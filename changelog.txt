@@ -1,7 +1,9 @@
-Version ?.?.?
-    - Date ????-??-??
-    - Fix issues with callbacks due to intptr_t truncation on linux
-    - Fix unittests that failed in python 3.8
+Version 1.6.0
+    - Date 2020-08-20
+    - Fixed issues with callbacks due to intptr_t truncation on linux
+    - Fixed unittests that failed in python 3.8
+    - Updated to current pylon version for windows and linux
+    - Enabled unittests in CI-builds
 
 Version 1.5.4
     - Date 2020-04-16
