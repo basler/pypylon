@@ -39,12 +39,15 @@ install:
   - 7z x swigwin.zip -oC:\ > NUL
   - set PATH=C:\swigwin-4.0.1;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.1.0.19674.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.1.1.19832.exe
   - pylon_installer.exe /quiet /install
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
   - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 6\development
+  # install numpy for the unittests
+  - "%PYTHON%\\python.exe -m pip install numpy"
 
 build_script:
+  - "scripts\\build\\msvc_build_wrapper.cmd %PYTHON%\\python.exe setup.py test"
   - "scripts\\build\\msvc_build_wrapper.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
 
 test_script:

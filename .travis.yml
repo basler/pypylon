@@ -81,15 +81,37 @@ jobs:
       env: P=linux_aarch64 A=cp37m
     - arch: arm64
       env: P=linux_aarch64 A=cp38
+  allow_failures:
+    # manylinux fails, because the runtime dependencies of current pylon are higher than manylinux2014.
+    # The jobs are still kept in here to keep the mechanics alive.
+    # manylinux2014_x86_64
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp35m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp36m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp37m
+    - arch: amd64
+      env: P=manylinux2014_x86_64 A=cp38
+    # manylinux2014_i686
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp35m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp36m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp37m
+    - arch: amd64
+      env: P=manylinux2014_i686 A=cp38
 
 
 install:
 - cd $TRAVIS_BUILD_DIR
 - mkdir pylon_installer && cd pylon_installer
 - |
-  for PYLON_ARCH in armhf arm64 x86 x86_64 ; do
-      travis_retry curl -sSfL -O "${PYLON_DOWNLOAD_URL_BASE}pylon-5.2.0.13457-${PYLON_ARCH}.tar.gz"
+  for PYLON_VERSION in 6.1.0.19674_x86 6.1.1.19861_x86_64 6.1.3.20159_armhf 6.1.3.20159_aarch64 ; do
+      travis_retry curl -sSfL -O "${PYLON_DOWNLOAD_URL_BASE}pylon_${PYLON_VERSION}_setup.tar.gz"
   done
+
 - echo "Pylon Installer:" && ls
 
 script:
@@ -98,7 +120,7 @@ script:
   if [ "$TRAVIS_CPU_ARCH" == "amd64" ]; then
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
   fi
-- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer --disable-tests"
+- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer"
 
 deploy:
   provider: releases
