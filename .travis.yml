@@ -60,16 +60,18 @@ jobs:
     - arch: amd64
       env: P=linux_i686 A=cp38
     # linux_armv7l
-    - arch: arm64
-      env: P=linux_armv7l A=cp34m
-    - arch: arm64
-      env: P=linux_armv7l A=cp35m
-    - arch: arm64
-      env: P=linux_armv7l A=cp36m
-    - arch: arm64
-      env: P=linux_armv7l A=cp37m
-    - arch: arm64
-      env: P=linux_armv7l A=cp38
+    # armv7l is still build using qemu on x86, because it was not easily possible to build for armv7l (The best was armv8l using linux32 wrapper)
+    # The tests are disabled for armv7l because installing the required numpy took too long and we hit the maximum allowed travis build time.
+    - arch: amd64
+      env: P=linux_armv7l A=cp34m ARGS="--disable-tests"
+    - arch: amd64
+      env: P=linux_armv7l A=cp35m ARGS="--disable-tests"
+    - arch: amd64
+      env: P=linux_armv7l A=cp36m ARGS="--disable-tests"
+    - arch: amd64
+      env: P=linux_armv7l A=cp37m ARGS="--disable-tests"
+    - arch: amd64
+      env: P=linux_armv7l A=cp38 ARGS="--disable-tests"
     # linux_aarch64
     - arch: arm64
       env: P=linux_aarch64 A=cp34m
@@ -120,7 +122,7 @@ script:
   if [ "$TRAVIS_CPU_ARCH" == "amd64" ]; then
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
   fi
-- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer"
+- "./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon_installer $ARGS"
 
 deploy:
   provider: releases
