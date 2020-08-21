@@ -4,6 +4,7 @@ Version 1.6.0
     - Fixed unittests that failed in python 3.8
     - Updated to current pylon version for windows and linux
     - Enabled unittests in CI-builds
+    - Fixed aarch64 binary wheel releases on github
 
 Version 1.5.4
     - Date 2020-04-16
