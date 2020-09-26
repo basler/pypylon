@@ -695,7 +695,7 @@ class BuildSupportMacOS(BuildSupport):
     PylonConfig = os.path.join(
         FrameworkPath,
         FrameworkName,
-        'Versions/Current/Resources/Tools/pylon-config.sh'
+        'Versions/Current/Resources/Tools/pylon-config'
         )
 
     DefineMacros = [
