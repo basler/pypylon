@@ -45,7 +45,7 @@ try:
     # Get all attached devices and exit application if no device is found.
     devices = tlFactory.EnumerateDevices()
     if len(devices) == 0:
-        raise pylon.RUNTIME_EXCEPTION("No camera present.")
+        raise pylon.RuntimeException("No camera present.")
 
     # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
     cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))

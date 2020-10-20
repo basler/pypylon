@@ -62,7 +62,7 @@ try:
     if genicam.IsWritable(camera.ChunkModeActive):
         camera.ChunkModeActive = True
     else:
-        raise pylon.RUNTIME_EXCEPTION("The camera doesn't support chunk features")
+        raise pylon.RuntimeException("The camera doesn't support chunk features")
 
     # Enable time stamp chunks.
     camera.ChunkSelector = "Timestamp"
@@ -103,14 +103,14 @@ try:
 
         # Check to see if a buffer containing chunk data has been received.
         if pylon.PayloadType_ChunkData != grabResult.PayloadType:
-            raise pylon.RUNTIME_EXCEPTION("Unexpected payload type received.")
+            raise pylon.RuntimeException("Unexpected payload type received.")
 
         # Since we have activated the CRC Checksum feature, we can check
         # the integrity of the buffer first.
         # Note: Enabling the CRC Checksum feature is not a prerequisite for using
         # chunks. Chunks can also be handled when the CRC Checksum feature is deactivated.
         if grabResult.HasCRC() and grabResult.CheckCRC() == False:
-            raise pylon.RUNTIME_EXCEPTION("Image was damaged!")
+            raise pylon.RuntimeException("Image was damaged!")
 
         # Access the chunk data attached to the result.
         # Before accessing the chunk data, you should check to see
