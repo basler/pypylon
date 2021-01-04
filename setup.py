@@ -542,7 +542,7 @@ class BuildSupportWindows(BuildSupport):
 class BuildSupportLinux(BuildSupport):
 
     PylonConfig = os.path.join(
-        os.getenv('PYLON_ROOT', '/opt/pylon5'),
+        os.getenv('PYLON_ROOT', '/opt/pylon'),
         'bin/pylon-config'
         )
 
