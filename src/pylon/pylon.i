@@ -258,9 +258,11 @@ static void FixPylonDllLoadingIfNecessary()
 static void ExtendGenTLPathForCXP()
 {
 #ifdef _WIN64
-    static const WCHAR var_name[] = L"GENICAM_GENTL64_PATH";
+    static const WCHAR gtlp_name[] = L"GENICAM_GENTL64_PATH";
+    static const WCHAR hack_name[] = L"BSL_PYPYLON_GENICAM_GENTL64_PATH";
 #else
-    static const WCHAR var_name[] = L"GENICAM_GENTL32_PATH";
+    static const WCHAR gtlp_name[] = L"GENICAM_GENTL32_PATH";
+    static const WCHAR hack_name[] = L"BSL_PYPYLON_GENICAM_GENTL32_PATH";
 #endif
 
     const DWORD ENV_MAX = UNICODE_STRING_MAX_CHARS;
@@ -268,64 +270,73 @@ static void ExtendGenTLPathForCXP()
     PWSTR new_PATH = new WCHAR[ENV_MAX];
     PWSTR prev_PATH = new WCHAR[ENV_MAX];
 
-    // get module file name and remove file spec
-    HMODULE hmod = NULL;
-    GetModuleHandleExW(
-        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        reinterpret_cast<PWSTR>(ExtendGenTLPathForCXP),
-        &hmod
-        );
-    GetModuleFileNameW(hmod, new_PATH, ENV_MAX);
-    PathRemoveFileSpecW(new_PATH); // also removes trailing '\'
-
-    // concatenate 'GENTL_CXP_PRODUCER_DIR'
-    PWSTR new_end = new_PATH + lstrlenW(new_PATH);
-    *new_end++ = L'\\';
-     StrCpyW(new_end, GENTL_CXP_PRODUCER_DIR);
-     new_end = new_end + lstrlenW(new_end);
-     *new_end++ = L';';
-     *new_end = 0;
-
-    // append portions of previous path to new path
-    prev_PATH[0] = 0;
-    GetEnvironmentVariableW(var_name, prev_PATH, ENV_MAX);
-    PWSTR portion = prev_PATH;
-    PWSTR semicolon = StrChrW(portion, L';');
-    for(;;)
+    // Hack: If this special env var is set, use it as the resulting
+    // GenTL path.
+    BOOL ok = GetEnvironmentVariableW(hack_name, new_PATH, ENV_MAX);
+    if (!ok || new_PATH[0] == 0)
     {
-        if (semicolon)
-        {
-            *semicolon = 0;
-        }
+        // default behaviour
 
-        // only add next portion if it does not countain GENTL_CXP_PRODUCER_DIR
-        if (!StrStrIW(portion, GENTL_CXP_PRODUCER_DIR))
-        {
-            int len = lstrlenW(portion);
-            StrCpyW(new_end, portion);
-            new_end += len;
-            *new_end++ = L';';
-            *new_end = 0;
-        }
+        // get module file name and remove file spec
+        HMODULE hmod = NULL;
+        GetModuleHandleExW(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            reinterpret_cast<PWSTR>(ExtendGenTLPathForCXP),
+            &hmod
+            );
+        GetModuleFileNameW(hmod, new_PATH, ENV_MAX);
+        PathRemoveFileSpecW(new_PATH); // also removes trailing '\'
 
-        if (!semicolon)
+        // concatenate 'GENTL_CXP_PRODUCER_DIR'
+        PWSTR new_end = new_PATH + lstrlenW(new_PATH);
+        *new_end++ = L'\\';
+         StrCpyW(new_end, GENTL_CXP_PRODUCER_DIR);
+         new_end = new_end + lstrlenW(new_end);
+         *new_end++ = L';';
+         *new_end = 0;
+
+        // append portions of previous path to new path
+        prev_PATH[0] = 0;
+        GetEnvironmentVariableW(gtlp_name, prev_PATH, ENV_MAX);
+        PWSTR portion = prev_PATH;
+        PWSTR semicolon = StrChrW(portion, L';');
+        for(;;)
         {
-            break;
-        }
-        else
-        {
-            portion = semicolon + 1;
-            semicolon = wcschr(portion, L';');
+            if (semicolon)
+            {
+                *semicolon = 0;
+            }
+
+            // only add next portion if it does not contain
+            // GENTL_CXP_PRODUCER_DIR
+            if (!StrStrIW(portion, GENTL_CXP_PRODUCER_DIR))
+            {
+                int len = lstrlenW(portion);
+                StrCpyW(new_end, portion);
+                new_end += len;
+                *new_end++ = L';';
+                *new_end = 0;
+            }
+
+            if (!semicolon)
+            {
+                break;
+            }
+            else
+            {
+                portion = semicolon + 1;
+                semicolon = wcschr(portion, L';');
+            }
         }
     }
 
     // set new path
-    SetEnvironmentVariableW(var_name, new_PATH);
+    SetEnvironmentVariableW(gtlp_name, new_PATH);
 
     #if 0
         char msg[1025];
-        wsprintfA(msg, "%S is now: %S\n", var_name, new_PATH);
+        wsprintfA(msg, "%S is now: %S\n", gtlp_name, new_PATH);
         OutputDebugStringA(msg);
     #endif
 
