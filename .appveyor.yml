@@ -1,3 +1,4 @@
+image: Visual Studio 2019
 environment:
   TWINE_USERNAME: basler
   #Enable this for testing purposes
@@ -15,8 +16,10 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python34"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python34-x64"
       DISTUTILS_USE_SDK: "1"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python35"
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
@@ -25,6 +28,8 @@ environment:
     - PYTHON: "C:\\Python37-x64"
     - PYTHON: "C:\\Python38"
     - PYTHON: "C:\\Python38-x64"
+    - PYTHON: "C:\\Python39"
+    - PYTHON: "C:\\Python39-x64"
 
 install:
   # Install an outdated version of readme_renderer because it is the last one with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
