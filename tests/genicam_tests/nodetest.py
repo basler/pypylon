@@ -1202,7 +1202,7 @@ class NodeTestSuite(GenicamTestCase):
 
         TheNodeE = Camera.GetNode("TheNodeE").Node
         print("!!!!!! Check manually : ", TheNodeE.GetDocuURL(), "\n")
-        self.assertTrue("python.exe" in TheNodeE.GetDocuURL() or "python" in TheNodeE.GetDocuURL())
+        self.assertTrue("python" in TheNodeE.GetDocuURL().lower())
 
         TheNodeF = Camera.GetNode("TheNodeF").Node
         self.assertEqual("http://www.mycompany.com/docu.php?Namespace=GEV", TheNodeF.GetDocuURL())
