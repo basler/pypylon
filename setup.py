@@ -4,6 +4,7 @@ from setuptools import setup, Extension
 from distutils import spawn
 from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
+from distutils.ccompiler import new_compiler
 from logging import info, warning, error
 
 import argparse
@@ -447,6 +448,13 @@ class BuildSupportWindows(BuildSupport):
         '/LTCG'         # link time code generation
         ]
 
+    def _detect_msvc_ver(self):
+        msvc = new_compiler(compiler='msvc')
+        msvc.initialize()
+        run, PIPE = subprocess.run, subprocess.PIPE
+        kw = {'check': True, 'stdout': PIPE, 'stderr': PIPE, 'text': True}
+        m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", run([msvc.cc], **kw).stderr)
+        return tuple(map(int, m.group(1).split('.'))) if m else ()
 
     def __init__(self):
         super(BuildSupportWindows, self).__init__()
@@ -468,6 +476,12 @@ class BuildSupportWindows(BuildSupport):
             ]
         for inc in self.get_swig_includes():
             self.ExtraCompileArgs.append('/I%s' % inc)
+
+        self.msvc_ver = self._detect_msvc_ver()
+        if self.msvc_ver >= (19, 0):
+            # Avoid dependency on vcruntime140_1.dll by deselecting
+            # 'FH4'-style of exception handling (__CxxFrameHandler4).
+            self.ExtraCompileArgs.append('/d2FH4-')
 
     def get_swig_includes(self):
         return [os.path.join(self.PylonDevDir, "include")]
