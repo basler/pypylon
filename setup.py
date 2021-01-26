@@ -4,6 +4,7 @@ from setuptools import setup, Extension
 from distutils import spawn
 from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
+from distutils.ccompiler import new_compiler
 from logging import info, warning, error
 
 import argparse
@@ -412,10 +413,19 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
+    # Up to py 3.8 distutils (the one in lib as well as the one included in
+    # setuptools) did its own layman's qouting of commandline parameters, that
+    # had to be amended with a 'hack'. From 3.9 on quoting parameters is
+    # now left to subprocess, which does the right thing.
+    gentl_dir_fmt = (
+        r'L"%s\\bin"'
+        if sys.version_info[:2] >= (3, 9) else
+        r'L\"%s\\bin\"'
+        )
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
-        ("GENTL_CXP_PRODUCER_DIR", r'L\"%s\\bin\"' % GENTL_CXP_PRODUCER_DIR),
+        ("GENTL_CXP_PRODUCER_DIR", gentl_dir_fmt % GENTL_CXP_PRODUCER_DIR),
 
         # let swig share its type information between the 'genicam' and the
         # 'pylon' module by using the same name for the type table.
@@ -438,6 +448,13 @@ class BuildSupportWindows(BuildSupport):
         '/LTCG'         # link time code generation
         ]
 
+    def _detect_msvc_ver(self):
+        msvc = new_compiler(compiler='msvc')
+        msvc.initialize()
+        run, PIPE = subprocess.run, subprocess.PIPE
+        kw = {'check': True, 'stdout': PIPE, 'stderr': PIPE, 'text': True}
+        m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", run([msvc.cc], **kw).stderr)
+        return tuple(map(int, m.group(1).split('.'))) if m else ()
 
     def __init__(self):
         super(BuildSupportWindows, self).__init__()
@@ -459,6 +476,12 @@ class BuildSupportWindows(BuildSupport):
             ]
         for inc in self.get_swig_includes():
             self.ExtraCompileArgs.append('/I%s' % inc)
+
+        self.msvc_ver = self._detect_msvc_ver()
+        if self.msvc_ver >= (19, 0):
+            # Avoid dependency on vcruntime140_1.dll by deselecting
+            # 'FH4'-style of exception handling (__CxxFrameHandler4).
+            self.ExtraCompileArgs.append('/d2FH4-')
 
     def get_swig_includes(self):
         return [os.path.join(self.PylonDevDir, "include")]
@@ -608,7 +631,7 @@ class BuildSupportLinux(BuildSupport):
             ],
         "cxp": [
             ],
- 
+
         }
     RuntimeFolders = {}
 

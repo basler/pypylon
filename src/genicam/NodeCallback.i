@@ -121,7 +121,11 @@ namespace GENAPI_NAMESPACE
                     node = SWIG_NewPointerObj(outptr, outtype, 0 );
                     arglist = Py_BuildValue("(O)", node);
 
-                    result = PyEval_CallObject(m_pyfunc, arglist);
+                    #if PY_VERSION_HEX < 0x03090000
+                        result = PyEval_CallObject(m_pyfunc, arglist);
+                    #else
+                        result = PyObject_Call(m_pyfunc, arglist, NULL);
+                    #endif
                     Py_DECREF(arglist);
 
                     if (!result){

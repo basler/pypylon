@@ -1,3 +1,11 @@
+Version ?.?.?
+    - Date ????-??-??
+    - Adapted to python 3.9.
+    - Added a way to force a certain GenTL search path (used for frame grabber
+      development).
+    - Avoided the dependency on vcruntime140_1.dll when building with Visual
+      Studio 2019.
+
 Version 1.6.0
     - Date 2020-08-20
     - Fixed issues with callbacks due to intptr_t truncation on linux
