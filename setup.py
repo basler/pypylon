@@ -437,10 +437,6 @@ class BuildSupportWindows(BuildSupport):
         '/GL',      # enable link-time code generation
         '/EHsc',    # set execption handling model
         ]
-    if sys.version_info[:2] >= (3, 7):
-        # add '/permissive-' to detect skipping initialization with goto
-        # (available since VS 2017)
-        ExtraCompileArgs.append('/permissive-')
 
     ExtraLinkArgs = [
         '/OPT:REF',     # eliminate unused functions
@@ -449,12 +445,18 @@ class BuildSupportWindows(BuildSupport):
         ]
 
     def _detect_msvc_ver(self):
-        msvc = new_compiler(compiler='msvc')
-        msvc.initialize()
-        run, PIPE = subprocess.run, subprocess.PIPE
-        kw = {'check': True, 'stdout': PIPE, 'stderr': PIPE, 'text': True}
-        m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", run([msvc.cc], **kw).stderr)
-        return tuple(map(int, m.group(1).split('.'))) if m else ()
+        stderr = ""
+        try:
+            msvc = new_compiler(compiler='msvc')
+            msvc.initialize()
+            PIPE = subprocess.PIPE
+            kw = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
+            with subprocess.Popen([msvc.cc], **kw) as process:
+                _, stderr = process.communicate()
+        except Exception:
+            pass
+        m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", stderr)
+        return tuple(map(int, m.group(1).split('.'))) if m else (16, 0)
 
     def __init__(self):
         super(BuildSupportWindows, self).__init__()
@@ -478,10 +480,17 @@ class BuildSupportWindows(BuildSupport):
             self.ExtraCompileArgs.append('/I%s' % inc)
 
         self.msvc_ver = self._detect_msvc_ver()
-        if self.msvc_ver >= (19, 0):
+
+        if self.msvc_ver >= (19, 13):
+            # add '/permissive-' to detect skipping initialization with goto
+            # (available since VS 2017)
+            self.ExtraCompileArgs.append('/permissive-')
+
+        if self.msvc_ver >= (19, 20):
             # Avoid dependency on vcruntime140_1.dll by deselecting
             # 'FH4'-style of exception handling (__CxxFrameHandler4).
             self.ExtraCompileArgs.append('/d2FH4-')
+
 
     def get_swig_includes(self):
         return [os.path.join(self.PylonDevDir, "include")]
