@@ -60,8 +60,9 @@ if [ $BUILD_DISTRO = "debian" ]; then
         cp36m) BASE_IMAGE="python:3.6.5-stretch" ;;
         cp37m) BASE_IMAGE="python:3.7.5-stretch" ;;
         cp38) BASE_IMAGE="python:3.8.2-buster" ;;
+        cp39) BASE_IMAGE="python:3.9.1-buster" ;;
         *)
-        echo "Unsupported abi '$ABI_TAG'. Supported tags: cp27m,cp34m,cp35m,cp36m,cp37m,cp38"
+        echo "Unsupported abi '$ABI_TAG'. Supported tags: cp27m, cp34m, cp35m, cp36m, cp37m, cp38, cp39"
         exit 1
     esac
 else
@@ -71,8 +72,9 @@ else
         cp36m) PYTHON="/opt/python/cp36-cp36m/bin/python" ;;
         cp37m) PYTHON="/opt/python/cp37-cp37m/bin/python" ;;
         cp38) PYTHON="/opt/python/cp38-cp38/bin/python" ;;
+        cp39) PYTHON="/opt/python/cp39-cp39/bin/python" ;;
         *)
-        echo "Unsupported manylinux abi '$ABI_TAG'. Supported tags: cp35m,cp36m,cp37m,cp38"
+        echo "Unsupported manylinux abi '$ABI_TAG'. Supported tags: cp35m, cp36m, cp37m, cp38, cp39"
         exit 1
     esac
 fi

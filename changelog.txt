@@ -5,6 +5,8 @@ Version ?.?.?
       development).
     - Avoided the dependency on vcruntime140_1.dll when building with Visual
       Studio 2019.
+    - Added macos CI builds.
+    - Migrated from travis to gh-actions for linux and macos.
 
 Version 1.6.0
     - Date 2020-08-20

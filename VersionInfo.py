@@ -5,5 +5,5 @@ ReferencePylonVersion = {
     # which is not equal to the version on the outer tar.gz
     "Linux": "6.1.0",
     "Linux_x86_64": "6.1.1",
-    "Darwin": "5.1.1"
+    "Darwin": "6.1.2"
 }
