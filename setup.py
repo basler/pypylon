@@ -704,7 +704,7 @@ class BuildSupportLinux(BuildSupport):
             res = subprocess.check_output(params, universal_newlines=True)
         except ErrFileNotFound:
             msg = (
-                "Couldn't find pylon. Please install pylon in /opt/pylon5 " +
+                "Couldn't find pylon. Please install pylon in /opt/pylon " +
                 "or tell us the installation location using the PYLON_ROOT " +
                 "env variable"
                 )
