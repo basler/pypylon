@@ -8,6 +8,8 @@ Version 1.7.0rc1
     - Added macOS CI builds.
     - Migrated from travis to gh-actions for linux and macOS.
     - Added pypi deployments for linux and macOS
+    - Expanded samples/gige_ip_config.py to include demonstrations of
+      BroadcastIpConfiguration
 
 Version 1.6.0
     - Date 2020-08-20
