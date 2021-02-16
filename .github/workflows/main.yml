@@ -5,7 +5,8 @@ name: build
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches:
+      - '**'
     tags:
       - '*.*.*' 
   pull_request:
@@ -13,6 +14,13 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+env:
+  TWINE_USERNAME: __token__
+  # Uncomment the relevant lines to switch between deployment to test.pypi.org or pypi.org
+  TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+  # TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+  # TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
 jobs:
   prepare:
@@ -62,13 +70,23 @@ jobs:
   build-linux:
     needs: prepare
     runs-on: ubuntu-18.04
-    # all manylinux builds are expected to fail the verification. Keep them alive nevertheless
-    continue-on-error: ${{ startsWith( matrix.p, 'manylinux' ) }}
     strategy:
       fail-fast: false
       matrix:
-        a: [cp34m, cp35m, cp36m, cp37m, cp38, cp39]
-        p: [linux_x86_64, linux_i686, linux_aarch64, linux_armv7l, manylinux2014_x86_64, manylinux2014_i686]
+        a: [cp36m, cp37m, cp38, cp39]
+        p: [manylinux_2_24_x86_64, manylinux_2_24_i686, manylinux_2_24_aarch64, manylinux_2_24_armv7l]
+
+        include:
+          #legacy builds without (out-of-the-box) manylinux/pep-600 support
+          - {a: cp34m, p: linux_x86_64  }
+          - {a: cp34m, p: linux_i686    }
+          - {a: cp34m, p: linux_aarch64 }
+          - {a: cp34m, p: linux_armv7l  }
+          - {a: cp35m, p: linux_x86_64  }
+          - {a: cp35m, p: linux_i686    }
+          - {a: cp35m, p: linux_aarch64 }
+          - {a: cp35m, p: linux_armv7l  }
+
     env:
       P: ${{ matrix.p }}
       A: ${{ matrix.a }}
@@ -103,6 +121,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: dist/*
+
+      - name: Publish package to (Test)PyPI
+        if: needs.prepare.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
+        run: |
+          sudo pip3 install twine
+          python3 -m twine upload --non-interactive --skip-existing dist/*
           
           
   build-macos:
@@ -178,5 +202,11 @@ jobs:
         with:
           files: dist/*
       
+      - name: Publish package to (Test)PyPI
+        if: needs.prepare.outputs.is_release_build == 'true'
+        run: |
+          sudo pip3 install twine
+          python3 -m twine upload --non-interactive --skip-existing dist/*
+
 
      

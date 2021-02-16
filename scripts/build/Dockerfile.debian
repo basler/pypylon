@@ -17,7 +17,7 @@ RUN if cat /etc/debian_version | grep -q "8\." ; then \
         apt-get -o Acquire::Check-Valid-Until=false update; \
     fi
 
-RUN pip install wheel
+RUN pip install wheel auditwheel
 #build a new swig
 RUN mkdir /build && \
     cd /build && \
@@ -31,7 +31,8 @@ RUN mkdir /build && \
 # RUN pip install numpy
 
 # one genicam unittest requires a french locale
-RUN apt-get update && apt-get install -y locales \
+# patchelf, unzip are needed for auditwheel
+RUN apt-get update && apt-get install -y locales patchelf unzip\
  && rm -rf /var/lib/apt/lists/* \
  && sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen
