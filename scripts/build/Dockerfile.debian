@@ -26,7 +26,7 @@ RUN mkdir /build && \
     ./configure --with-python3 && make -j2 && make install && \
     rm -rf /build
 
-# numpy is required for the pyplon unittests
+# numpy is required for the pypylon unittests
 # currently disabled because the numpy install exceeds the current travis max duration
 # RUN pip install numpy
 

@@ -3,7 +3,7 @@ set -e
 #This is a rather hacky script to build pypylon for the current architecture.
 #it automatically searches and extracts the correct sdk from the directory given by $1
 #this is needed for the jenkins build
-#if you want to build pyplon for your installed pylon, don't use this script. You can do:
+#if you want to build pypylon for your installed pylon, don't use this script. You can do:
 # PYLON_ROOT=/path/to/your/pylon/install python3 setup.py bdist_wheel
 
 if [ $# -ne 1 ]; then

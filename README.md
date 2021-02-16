@@ -12,7 +12,7 @@ You are welcome to post any questions or issues on [GitHub](https://github.com/b
 
  * Install [pylon](https://www.baslerweb.com/pylon)  
    This is strongly recommended but not mandatory. See [known issues](#known-issues) for further details.
- * Install pypylon: ```pip3 install pyplon```   
+ * Install pypylon: ```pip3 install pypylon```   
    For more installation options and the supported systems please read the [Installation](#installation) paragraph.
  * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/grab.py) or use the following snippet:
 
@@ -53,9 +53,9 @@ camera.Close()
 ## Binary Installation
 The easiest way to get pypylon is to install a prebuild wheel.
 Binary releases for most architectures are available on [pypi](https://pypi.org).
-To install pyplon open your favourite terminal and run:
+To install pypylon open your favourite terminal and run:
 
-```pip3 install pyplon```
+```pip3 install pypylon```
 
 The following versions are available on pypi:
 
