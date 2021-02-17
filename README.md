@@ -47,12 +47,12 @@ camera.Close()
 # Installation
 ## Prerequisites
  * Installed [pylon](https://www.baslerweb.com/pylon)   
-   For the binary installation this is not mandator but strongly recommended. See [known issues](#known-issues) for further details.
+   For the binary installation this is not mandatory but strongly recommended. See [known issues](#known-issues) for further details.
  * Installed [python](https://www.python.org/) with [pip](https://pip.pypa.io/en/stable/)
 
 ## Binary Installation
 The easiest way to get pypylon is to install a prebuild wheel.
-Binary releases for most architectures are available on [pypi](https://pypi.org).
+Binary releases for most architectures are available on [pypi](https://pypi.org)**.
 To install pypylon open your favourite terminal and run:
 
 ```pip3 install pypylon```
@@ -74,7 +74,8 @@ The following versions are available on pypi:
 > * (*) The linux wheels for python 3.4 and 3.5 are not available on pypi.  
     You can get them from [Github Releases](https://github.com/basler/pypylon/releases).  
 > * (**) The linux binaries are manylinux_2_24 conformant.  
-    This is roughly equivalent to a minimum glibc version >= 2.24  
+    This is roughly equivalent to a minimum glibc version >= 2.24.  
+    :warning: You need at least pip 20.3 to install them.
 > * (***) MacOS binaries are built for macOS >= 10.14 (Mojave)  
 
 ## Installation from Source
@@ -82,6 +83,7 @@ Building the pypylon bindings is supported and tested on Windows and Linux.
 
 You need a few more things to compile pypylon:
  * A compiler for your system (Visual Studio on Windows, gcc on linux)
+ * Python development files (e.g. `sudo apt install python-dev` on linux)
  * [swig](http://www.swig.org) >= 4.0
 
 To build pypylon from source:
