@@ -1,5 +1,5 @@
-Version 1.7.0rc1
-    - Date 2021-02-16
+Version 1.7.0rc2
+    - Date 2021-02-18
     - Adapted to python 3.9.
     - Added a way to force a certain GenTL search path (used for frame grabber
       development).
