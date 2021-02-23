@@ -1,4 +1,5 @@
-# pypylon
+![pypylon](docs/images/Pypylon_grey_RZ_400px.png "pypylon")
+
 The official python wrapper for the Basler pylon Camera Software Suite.
 
 **Please Note:**
