@@ -1,5 +1,6 @@
-Version 1.7.2rc1
-    - Fixed runtime error on windows with python 3.5 - 3.8
+Version 1.7.2
+    - Date 2021-03-03
+    - Fixed runtime error in binary windows releases with python 3.5 - 3.8
     
 Version 1.7.1
     - Date 2021-02-22
