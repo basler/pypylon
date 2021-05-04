@@ -1,10 +1,6 @@
 #!/usr/bin/env python
-from __future__ import print_function
 from setuptools import setup, Extension
-from distutils import spawn
-from distutils.dir_util import copy_tree
-from distutils.version import LooseVersion
-from distutils.ccompiler import new_compiler
+from setuptools.command.build_ext import new_compiler
 from logging import info, warning, error
 
 import argparse
@@ -18,9 +14,7 @@ import shutil
 import subprocess
 import sys
 import platform
-import VersionInfo;
-
-ErrFileNotFound = FileNotFoundError if sys.version_info.major >= 3 else OSError
+import VersionInfo
 
 ################################################################################
 
@@ -121,7 +115,7 @@ class BuildSupport(object):
         # Find SWIG executable
         swig_executable = None
         for candidate in ["swig3.0", "swig"]:
-            swig_executable = spawn.find_executable(candidate)
+            swig_executable = shutil.which(candidate)
             if self.is_supported_swig_version(swig_executable):
                 info("Found swig: %s" % (swig_executable,))
                 return swig_executable
@@ -137,14 +131,14 @@ class BuildSupport(object):
                 [swig_executable, "-version"],
                 universal_newlines=True
                 )
-        except (subprocess.CalledProcessError, ErrFileNotFound):
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
         res = re.search(r"SWIG Version ([\d\.]+)", output)
         if res is None:
             return False
 
-        if LooseVersion(res.group(1)) < LooseVersion("3.0.12"):
+        if tuple(map(int, res.group(1).split('.'))) < (3, 0, 12):
             msg = (
                 "The version of swig is %s which is too old. " +
                 "Minimum required version is 3.0.12"
@@ -702,7 +696,7 @@ class BuildSupportLinux(BuildSupport):
         params.extend(args)
         try:
             res = subprocess.check_output(params, universal_newlines=True)
-        except ErrFileNotFound:
+        except FileNotFoundError:
             msg = (
                 "Couldn't find pylon. Please install pylon in /opt/pylon " +
                 "or tell us the installation location using the PYLON_ROOT " +
@@ -792,7 +786,7 @@ class BuildSupportMacOS(BuildSupport):
         params.extend(args)
         try:
             res = subprocess.check_output(params, universal_newlines=True)
-        except ErrFileNotFound:
+        except FileNotFoundError:
             msg = (
                 "Couldn't find pylon. Please install pylon in %s or tell us " +
                 "the installation location using the PYLON_ROOT environment " +
@@ -833,11 +827,10 @@ class BuildSupportMacOS(BuildSupport):
             )
 
         if not os.path.exists(full_dst):
-            copy_tree(
+            shutil.copytree(
                 os.path.join(self.FrameworkPath, self.FrameworkName),
                 full_dst,
-                preserve_symlinks=1,
-                update=1
+                symlinks=True
                 )
 
 ################################################################################
