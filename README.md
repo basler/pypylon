@@ -66,7 +66,6 @@ The following versions are available on pypi:
  |------------------|-----|-----|-----|-----|-----|-----|-----|
  | Windows 32bit    | x   | x   | x   | x   | x   | x   | x   |
  | Windows 64bit    | x   | x   | x   | x   | x   | x   | x   |
- | Linux i686**     | -*  | -*  | x   | x   | x   | x   | x   |
  | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   | x   |
  | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   | x   |
  | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   | x   |

@@ -5,6 +5,8 @@ Version ?.?.?
     - setup.py: Include vcruntime140_1.dll into the package for current MVSC
       compiler.
     - Fixed double enumeration bug on linux
+    - Updated to pylon 6.2 on windows and linux
+    - Dropped linux x86 (32bit) support as it is no longer supported by pylon
 
 Version 1.7.2
     - Date 2021-03-03

@@ -30,14 +30,12 @@ jobs:
     steps:
       - name: Installer list
         run: |
-          tee pylon-installer.txt <<EOF
-          pylon_6.1.0.19674_x86_setup.tar.gz
-          pylon_6.1.1.19861_x86_64_setup.tar.gz
-          pylon_6.1.3.20159_armhf_setup.tar.gz
-          pylon_6.1.3.20159_aarch64_setup.tar.gz
-          pylon-6.1.2.19990.zip
+          tee pylon-installer.txt <<"EOF"
+          ${PYLON_DOWNLOAD_URL_BASE_6_2}pylon_6.2.0.21487_x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_6_2}pylon_6.2.0.21487_aarch64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
           EOF
-
       - uses: actions/cache@v2
         id: cache
         with:
@@ -48,11 +46,13 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         env:
           PYLON_DOWNLOAD_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}
+          PYLON_DOWNLOAD_URL_BASE_6_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_2 }}
         run: |
           mkdir pylon-installer && cd pylon-installer
           while read line; do
-            echo "download $line"
-            curl -sSfL -O "${PYLON_DOWNLOAD_URL_BASE}${line}"
+            url=$(eval echo "$line")
+            echo "download $url"
+            curl -sSfL -O "$url"
           done <../pylon-installer.txt
 
       - uses: actions/upload-artifact@v2
@@ -74,16 +74,14 @@ jobs:
       fail-fast: false
       matrix:
         a: [cp36m, cp37m, cp38, cp39]
-        p: [manylinux_2_24_x86_64, manylinux_2_24_i686, manylinux_2_24_aarch64, manylinux_2_24_armv7l]
+        p: [manylinux_2_24_x86_64, manylinux_2_24_aarch64, manylinux_2_24_armv7l]
 
         include:
           #legacy builds without (out-of-the-box) manylinux/pep-600 support
           - {a: cp34m, p: linux_x86_64  }
-          - {a: cp34m, p: linux_i686    }
           - {a: cp34m, p: linux_aarch64 }
           - {a: cp34m, p: linux_armv7l  }
           - {a: cp35m, p: linux_x86_64  }
-          - {a: cp35m, p: linux_i686    }
           - {a: cp35m, p: linux_aarch64 }
           - {a: cp35m, p: linux_armv7l  }
 
