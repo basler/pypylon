@@ -12,7 +12,9 @@ class GrabTestSuite(PylonEmuTestCase):
         camera.ExposureTimeAbs.SetValue(10000.0)
         self.assertEqual(10000, camera.ExposureTimeAbs.GetValue())
         result = camera.GrabOne(1000)
-        self.assertEqual(9.5, numpy.mean(result.Array[0:20, 0]))
+        actual = list(result.Array[0:20, 0])
+        expected = [actual[0] + i for i in range(20)]
+        self.assertEqual(actual, expected)
         camera.Close()
 
     def test_grab(self):
