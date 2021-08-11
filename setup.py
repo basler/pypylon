@@ -480,12 +480,6 @@ class BuildSupportWindows(BuildSupport):
             # (available since VS 2017)
             self.ExtraCompileArgs.append('/permissive-')
 
-        if self.msvc_ver >= (19, 20):
-            # Avoid dependency on vcruntime140_1.dll by deselecting
-            # 'FH4'-style of exception handling (__CxxFrameHandler4).
-            self.ExtraCompileArgs.append('/d2FH4-')
-
-
     def get_swig_includes(self):
         return [os.path.join(self.PylonDevDir, "include")]
 
@@ -527,6 +521,8 @@ class BuildSupportWindows(BuildSupport):
 
         # Copy msvc runtime for pylon
         runtime_dlls = ["vcruntime140.dll", "msvcp140.dll"]
+        if tgt_bits == 64 and self.msvc_ver >= (19, 20):
+            runtime_dlls.append("vcruntime140_1.dll")
         sysname = "System32" if tgt_bits == 64 or os_bits == 32 else "SysWOW64"
         sysdir = os.path.join(os.environ["windir"], sysname)
         for dll in runtime_dlls:
