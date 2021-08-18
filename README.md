@@ -2,6 +2,8 @@
 
 The official python wrapper for the Basler pylon Camera Software Suite.
 
+Background information about usage of pypylon, programming samples and jupyter notebooks can also be found at [pypylon-samples](https://github.com/basler/pypylon-samples).
+
 **Please Note:**
 This project is offered with no technical support by Basler AG.
 You are welcome to post any questions or issues on [GitHub](https://github.com/basler/pypylon) or on [ImagingHub](https://www.imaginghub.com).
