@@ -40,10 +40,10 @@ environment:
     - PYTHON: "C:\\Python39-x64"
 
 install:
-  # Install an outdated version of readme_renderer because it is the last one with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
+  # Install an outdated version of colorama and readme_renderer because these are the last ones with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
   # Otherwise wheel/twine install fails on python 3.4
   # Install setuptools >= 38.6 because this version introduced long_description_content_type which is required by current pypi
-  - "%PYTHON%\\python.exe -m pip install \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
+  - "%PYTHON%\\python.exe -m pip install \"colorama==0.4.1\" \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
 
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
