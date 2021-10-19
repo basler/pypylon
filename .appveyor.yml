@@ -40,10 +40,10 @@ environment:
     - PYTHON: "C:\\Python39-x64"
 
 install:
-  # Install an outdated version of readme_renderer because it is the last one with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
+  # Install an outdated version of colorama and readme_renderer because these are the last ones with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
   # Otherwise wheel/twine install fails on python 3.4
   # Install setuptools >= 38.6 because this version introduced long_description_content_type which is required by current pypi
-  - "%PYTHON%\\python.exe -m pip install \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
+  - "%PYTHON%\\python.exe -m pip install \"colorama==0.4.1\" \"readme_renderer==24.0\" \"setuptools>=38.6.0\""
 
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
@@ -52,7 +52,7 @@ install:
   - 7z x swigwin.zip -oC:\ > NUL
   - set PATH=C:\swigwin-4.0.1;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.1.1.19832.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.2.0.21487.exe
   - pylon_installer.exe /quiet /install
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
   - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 6\development

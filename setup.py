@@ -626,7 +626,7 @@ class BuildSupportLinux(BuildSupport):
             ],
 
         "gentl": [
-            ("libpylon_TL_gtc*.so", ""),
+            ("libpylon_TL_gtc-*.so", ""),
             ],
         "cxp": [
             ],

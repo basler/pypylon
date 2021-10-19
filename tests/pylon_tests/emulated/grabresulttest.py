@@ -27,7 +27,9 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(1040, height)
         self.assertEqual(1024, width)
         self.assertEqual("B", form)
-        self.assertTrue(grabResult.GetArray()[0, 1] == 1)
+        actual = list(grabResult.Array[0:20, 0])
+        expected = [actual[0] + i for i in range(20)]
+        self.assertEqual(actual, expected)
         grabResult.Release()
         self.assertFalse(grabResult.IsValid())
         self.assertFalse(grabResult.IsUnique())
@@ -51,7 +53,9 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(1040, height)
         self.assertEqual(1024, width)
         self.assertEqual("B", form)
-        self.assertTrue(grabResult.GetArray()[0, 1] == 1)
+        actual = list(grabResult.Array[0:20, 0])
+        expected = [actual[0] + i for i in range(20)]
+        self.assertEqual(actual, expected)
 
         cameraGrab.Release()
         self.assertTrue(grabResult.IsValid())
@@ -60,7 +64,9 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(1040, height)
         self.assertEqual(1024, width)
         self.assertEqual("B", form)
-        self.assertTrue(grabResult.GetArray()[0, 1] == 1)
+        actual = list(grabResult.Array[0:20, 0])
+        expected = [actual[0] + i for i in range(20)]
+        self.assertEqual(actual, expected)
 
         grabResult.Release()
         self.assertFalse(grabResult.IsValid())

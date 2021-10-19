@@ -36,7 +36,9 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         cam.Open()
         self.assertTrue(cam.GrabOne(1000))
         result = cam.GrabOne(1000)
-        self.assertEqual(9.5, numpy.mean(result.Array[0:20, 0]))
+        actual = list(result.Array[0:20, 0])
+        expected = [actual[0] + i for i in range(20)]
+        self.assertEqual(actual, expected)
         cam.Close()
 
     def test_grabbing(self):
