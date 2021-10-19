@@ -1,4 +1,4 @@
-Version 1.7.4rc1
+Version 1.7.4
     - Date 2021-10-19
     - setup.py: Some python2 relics have been removed and distutils is no
       longer used because distutils is deprecated in python 3.10.
