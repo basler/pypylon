@@ -75,7 +75,6 @@ class BuildSupport(object):
         "camemu",
         "gentl",
         "extra",
-        "bcon",
         "cxp",
         }
 
@@ -380,12 +379,6 @@ class BuildSupportWindows(BuildSupport):
             ("PylonCamEmu_*.dll", ""),
             ],
 
-        "bcon": [
-            ("BconAdapterPleora.dll", ""),
-            ("bxapi_*.dll", ""),
-            ("PylonBcon_*.dll", ""),
-            ],
-
         "extra": [
             ("PylonGUI_*.dll", ""),
             ("PylonUtility_*.dll", ""),
@@ -614,11 +607,6 @@ class BuildSupportLinux(BuildSupport):
 
         "camemu": [
             ("libpylon_TL_camemu-*.so", ""),
-            ],
-
-        "bcon": [
-            ("libbxapi*.so", ""),
-            ("libpylon_TL_bcon-*.so", ""),
             ],
 
         "extra": [

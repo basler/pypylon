@@ -1,3 +1,8 @@
+Version 1.8.0rc1
+    - Date 2022-01-31
+    - Adapted linux and windows 64 bit builds to pylon 6.3.0 (which includes
+      the removal of BCON support).
+
 Version 1.7.4
     - Date 2021-10-19
     - setup.py: Some python2 relics have been removed and distutils is no

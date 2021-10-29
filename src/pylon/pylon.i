@@ -640,6 +640,18 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 
 %include <pylon/PylonVersionNumber.h>
 
+// The entire functionality of GenApi is placed in a namespace. The actual name
+// of this namespace is formed by a macro called 'GENAPI_NAMESPACE'. But there
+// is also the alias 'namespace GenApi = GENAPI_NAMESPACE;'. For a long time,
+// pylon used the macro exclusively. With version 6.3.0, pylon has started to
+// use the alias. In the genicam sources, however, the macro is used. While
+// these two have the same meaning for the actual C++ compiler, SWIG treats them
+// differently. This is important to us because we want SWIG to use the data
+// types it learned when parsing the Genicam sources when parsing the Pylon
+// sources. The following macro ensures that SWIG again uses 'GENAPI_NAMESPACE'
+// in all the places where pylon uses 'GenApi'.
+#define GenApi GENAPI_NAMESPACE
+
 %include "TypeMappings.i"
 %include "Container.i"
 %include "PixelType.i"
