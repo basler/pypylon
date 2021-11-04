@@ -62,14 +62,14 @@ To install pypylon open your favourite terminal and run:
 
 The following versions are available on pypi:
 
- |                  | 3.4 | 3.5 | 3.6 | 3.6 | 3.7 | 3.8 | 3.9 |
- |------------------|-----|-----|-----|-----|-----|-----|-----|
- | Windows 32bit    | x   | x   | x   | x   | x   | x   | x   |
- | Windows 64bit    | x   | x   | x   | x   | x   | x   | x   |
- | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   | x   |
- | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   | x   |
- | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   | x   |
- | Mac OS***        | -   | -   | x   | x   | x   | x   | x   |
+ |                  | 3.4 | 3.5 | 3.6 | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 |
+ |------------------|-----|-----|-----|-----|-----|-----|-----|------|
+ | Windows 32bit    | x   | x   | x   | x   | x   | x   | x   |  x   |
+ | Windows 64bit    | x   | x   | x   | x   | x   | x   | x   |  x   |
+ | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   | x   |  x   |
+ | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   | x   |  x   |
+ | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   | x   |  x   |
+ | Mac OS***        | -   | -   | x   | x   | x   | x   | x   |  x   |
 
 
 > Additional Notes on binary packages:  

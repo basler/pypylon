@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        a: [cp36m, cp37m, cp38, cp39]
+        a: [cp36m, cp37m, cp38, cp39, cp3_10]
         p: [manylinux_2_24_x86_64, manylinux_2_24_aarch64, manylinux_2_24_armv7l]
 
         include:
@@ -137,7 +137,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        a: [cp36, cp37, cp38, cp39]
+        a: [cp36, cp37, cp38, cp39, cp3_10]
     env:
       P: macosx-10.15-intel
       A: ${{ matrix.a }}
@@ -170,6 +170,10 @@ jobs:
             cp39)
               PYENV_VERSION="3.9"
               curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.9.1/python-3.9.1-macosx10.9.pkg"
+              ;;
+            cp3_10)
+              PYENV_VERSION="3.10"
+              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.10.2/python-3.10.2-macos11.pkg"
               ;;
             *)
               echo "Invalid python version $A"

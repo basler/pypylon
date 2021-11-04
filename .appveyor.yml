@@ -38,6 +38,8 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python39"
     - PYTHON: "C:\\Python39-x64"
+    - PYTHON: "C:\\Python310"
+    - PYTHON: "C:\\Python310-x64"
 
 install:
   # Install an outdated version of colorama and readme_renderer because these are the last ones with python 3.4 support (https://github.com/pypa/readme_renderer/releases/tag/25.0)
