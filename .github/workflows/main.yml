@@ -31,7 +31,7 @@ jobs:
       - name: Installer list
         run: |
           tee pylon-installer.txt <<"EOF"
-          ${PYLON_DOWNLOAD_URL_BASE_6_2}pylon_6.2.0.21487_x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_6_3}pylon_6.3.0.23157_x86_64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE_6_2}pylon_6.2.0.21487_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
@@ -47,6 +47,7 @@ jobs:
         env:
           PYLON_DOWNLOAD_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}
           PYLON_DOWNLOAD_URL_BASE_6_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_2 }}
+          PYLON_DOWNLOAD_URL_BASE_6_3: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_3 }}
         run: |
           mkdir pylon-installer && cd pylon-installer
           while read line; do
@@ -54,6 +55,9 @@ jobs:
             echo "download $url"
             curl -sSfL -O "$url"
           done <../pylon-installer.txt
+          echo "Download result"
+          ls -l
+          md5sum *
 
       - uses: actions/upload-artifact@v2
         with:
