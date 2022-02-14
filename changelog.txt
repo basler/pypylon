@@ -1,5 +1,5 @@
-Version 1.8.0rc1
-    - Date 2022-01-31
+Version 1.8.0
+    - Date 2022-02-14
     - Adapted linux and windows 64 bit builds to pylon 6.3.0 (which includes
       the removal of BCON support).
     - Added python 3.10 binary releases
