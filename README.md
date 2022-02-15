@@ -13,9 +13,9 @@ You are welcome to post any questions or issues on [GitHub](https://github.com/b
 
 # Getting Started
 
- * Install [pylon](https://www.baslerweb.com/pylon)  
+ * Install [pylon](https://www.baslerweb.com/pylon)
    This is strongly recommended but not mandatory. See [known issues](#known-issues) for further details.
- * Install pypylon: ```pip3 install pypylon```   
+ * Install pypylon: ```pip3 install pypylon```
    For more installation options and the supported systems please read the [Installation](#installation) paragraph.
  * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/grab.py) or use the following snippet:
 
@@ -49,7 +49,7 @@ camera.Close()
 
 # Installation
 ## Prerequisites
- * Installed [pylon](https://www.baslerweb.com/pylon)   
+ * Installed [pylon](https://www.baslerweb.com/pylon)
    For the binary installation this is not mandatory but strongly recommended. See [known issues](#known-issues) for further details.
  * Installed [python](https://www.python.org/) with [pip](https://pip.pypa.io/en/stable/)
 
@@ -62,23 +62,22 @@ To install pypylon open your favourite terminal and run:
 
 The following versions are available on pypi:
 
- |                  | 3.4 | 3.5 | 3.6 | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 |
- |------------------|-----|-----|-----|-----|-----|-----|-----|------|
- | Windows 32bit    | x   | x   | x   | x   | x   | x   | x   |  x   |
- | Windows 64bit    | x   | x   | x   | x   | x   | x   | x   |  x   |
- | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   | x   |  x   |
- | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   | x   |  x   |
- | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   | x   |  x   |
- | Mac OS***        | -   | -   | x   | x   | x   | x   | x   |  x   |
+ |                  | 3.4 | 3.5 | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 |
+ |------------------|-----|-----|-----|-----|-----|-----|------|
+ | Windows 64bit    | -   | -   | x   | x   | x   | x   |  x   |
+ | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   |  x   |
+ | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   |  x   |
+ | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   |  x   |
+ | Mac OS***        | -   | -   | x   | x   | x   | x   |  x   |
 
 
-> Additional Notes on binary packages:  
-> * (*) The linux wheels for python 3.4 and 3.5 are not available on pypi.  
-    You can get them from [Github Releases](https://github.com/basler/pypylon/releases).  
-> * (**) The linux binaries are manylinux_2_24 conformant.  
-    This is roughly equivalent to a minimum glibc version >= 2.24.  
+> Additional Notes on binary packages:
+> * (*) The linux wheels for python 3.4 and 3.5 are not available on pypi.
+    You can get them from [Github Releases](https://github.com/basler/pypylon/releases).
+> * (**) The linux binaries are manylinux_2_24 conformant.
+    This is roughly equivalent to a minimum glibc version >= 2.24.
     :warning: You need at least pip 20.3 to install them.
-> * (***) MacOS binaries are built for macOS >= 10.14 (Mojave)  
+> * (***) MacOS binaries are built for macOS >= 10.14 (Mojave)
 
 ## Installation from Source
 Building the pypylon bindings is supported and tested on Windows and Linux.

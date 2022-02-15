@@ -15,30 +15,13 @@ environment:
     # The list here is complete (excluding Python 2.6, which
     # isn't covered by this document) at the time of writing.
 
-    - PYTHON: "C:\\Python34"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python34-x64"
-      DISTUTILS_USE_SDK: "1"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python35"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python35-x64"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python36"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python36-x64"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python37"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python37-x64"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python38"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python38-x64"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    - PYTHON: "C:\\Python39"
     - PYTHON: "C:\\Python39-x64"
-    - PYTHON: "C:\\Python310"
     - PYTHON: "C:\\Python310-x64"
 
 install:
