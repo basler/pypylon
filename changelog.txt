@@ -1,3 +1,9 @@
+Version ?.?.?
+    - Date ????-??-??
+    - Reduced the number of the python versions that are used for CI on
+      Windows: Dropped 3.4 and 3.5 completely and the 32 bit builds of the
+      remaining versions.
+
 Version 1.8.0
     - Date 2022-02-14
     - Adapted linux and windows 64 bit builds to pylon 6.3.0 (which includes
