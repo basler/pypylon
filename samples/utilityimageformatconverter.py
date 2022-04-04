@@ -28,7 +28,8 @@ def show_image(image, message):
 try:
     # Create the converter and set parameters.
     converter = pylon.ImageFormatConverter()
-    converter.OutputPixelFormat = pylon.PixelType_Mono8
+    converter.OutputPixelFormat = pylon.PixelType_RGB8packed
+    converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
     # Try to get a grab result for demonstration purposes.
     print("Waiting for an image to be grabbed.")
@@ -47,8 +48,10 @@ try:
         else:
             # Conversion is needed.
             show_image(grabResult, "Grabbed image.")
-
+            targetImage=converter.Convert(grabResult)
             show_image(targetImage, "Converted image.")
+            filename = "saved_pypylon_converted.png"
+            targetImage.Save(pylon.ImageFileFormat_Png, filename)
 
     except genicam.GenericException as e:
         print("Could not grab an image: ", e.GetDescription())
