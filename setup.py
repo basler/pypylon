@@ -406,7 +406,7 @@ class BuildSupportWindows(BuildSupport):
     # now left to subprocess, which does the right thing.
     gentl_dir_fmt = (
         r'L"%s\\bin"'
-        if sys.version_info[:2] >= (3, 9) else
+        if sys.version_info >= (3, 8, 10) else
         r'L\"%s\\bin\"'
         )
     DefineMacros = [
