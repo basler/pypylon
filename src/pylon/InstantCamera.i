@@ -85,4 +85,15 @@ namespace Pylon {
         pass
 %}
 
+// These enums used to be part of InstantCamera.h in pylon <= 6.3.0.18933.
+// Now they are placed in seperate headers.
+#if  PYLON_VERSION_MAJOR > 6 || \
+    (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR > 3) || \
+    (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR == 3 && PYLON_VERSION_SUBMINOR > 0) || \
+    (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR == 3 && PYLON_VERSION_SUBMINOR == 0 && PYLON_VERSION_BUILD > 18933)
+%include <pylon/ECleanup.h>;
+%include <pylon/ERegistrationMode.h>;
+%include <pylon/ETimeoutHandling.h>;
+#endif
+
 %include <pylon/InstantCamera.h>;
