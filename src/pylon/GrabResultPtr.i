@@ -23,7 +23,7 @@
             shape = (self.GetHeight(), self.GetWidth())
             format = "H"
             dtype = _pylon_numpy.uint16
-        elif pt in ( PixelType_Mono16, ):
+        elif pt in ( PixelType_Mono16, PixelType_BayerGR16, PixelType_BayerRG16, PixelType_BayerGB16, PixelType_BayerBG16 ):
             shape = (self.GetHeight(), self.GetWidth())
             format = "H"
             dtype = _pylon_numpy.uint16
