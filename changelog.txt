@@ -4,6 +4,7 @@ Version ?.?.?
       Windows: Dropped 3.4 and 3.5 completely and the 32 bit builds of the
       remaining versions.
     - Added support for pixel formats Bayer**16 in GetArray()
+    - Fixed decoding problems when detecting MSVC version.
 
 Version 1.8.0
     - Date 2022-02-14

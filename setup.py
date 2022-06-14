@@ -451,16 +451,16 @@ class BuildSupportWindows(BuildSupport):
         ]
 
     def _detect_msvc_ver(self):
-        stderr = ""
+        stderr = b""
         try:
             msvc = new_compiler(compiler='msvc')
             msvc.initialize()
-            PIPE = subprocess.PIPE
-            kw = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
+            kw = {'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
             with subprocess.Popen([msvc.cc], **kw) as process:
                 _, stderr = process.communicate()
         except Exception:
             pass
+        stderr = stderr.decode("ascii", errors="backslashreplace")
         m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", stderr)
         return tuple(map(int, m.group(1).split('.'))) if m else (16, 0)
 
