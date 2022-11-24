@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import platform
+from pathlib import Path
 import VersionInfo
 
 ################################################################################
@@ -36,6 +37,17 @@ def get_platform():
 
 def get_machine():
     return platform.machine()
+
+def rxglob(path, pattern, recursive=False):
+    if isinstance(pattern, str):
+        if not pattern.endswith("$"):
+            pattern += "$"
+        pattern = re.compile(pattern)
+    for entry in Path(path).iterdir():
+        if pattern.match(entry.name):
+            yield entry
+        if recursive and entry.is_dir():
+            yield from rxglob(entry, pattern, recursive)
 
 class BuildSupport(object):
 
@@ -329,7 +341,7 @@ class BuildSupport(object):
 
     def get_package_data_files(self):
         # patterns for files in self.PackageDir
-        data_files = ["*.dll", "*.zip", "*.so"]
+        data_files = ["*.dll", "*.zip", "*.so", "*.so.*"]
 
         # also add all files of any sub-directories recursively
         pdir = self.PackageDir
@@ -344,6 +356,13 @@ class BuildSupport(object):
                         data_files.append(pdir_rel)
 
         return data_files
+
+    def get_pylon_version_tuple(self):
+        parts = self.get_pylon_version().split(".")
+        # parts[3] (patchlevel) might contain non numeric characters. We just
+        # take the leading numerals.
+        parts[3] = re.search(r'\d+', parts[3]).group()
+        return tuple(map(int, parts))
 
 ################################################################################
 
@@ -406,7 +425,7 @@ class BuildSupportWindows(BuildSupport):
     # now left to subprocess, which does the right thing.
     gentl_dir_fmt = (
         r'L"%s\\bin"'
-        if sys.version_info[:2] >= (3, 9) else
+        if sys.version_info >= (3, 8, 10) else
         r'L\"%s\\bin\"'
         )
     DefineMacros = [
@@ -432,16 +451,16 @@ class BuildSupportWindows(BuildSupport):
         ]
 
     def _detect_msvc_ver(self):
-        stderr = ""
+        stderr = b""
         try:
             msvc = new_compiler(compiler='msvc')
             msvc.initialize()
-            PIPE = subprocess.PIPE
-            kw = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
+            kw = {'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
             with subprocess.Popen([msvc.cc], **kw) as process:
                 _, stderr = process.communicate()
         except Exception:
             pass
+        stderr = stderr.decode("ascii", errors="backslashreplace")
         m = re.search(r"\s+(\d+(?:\.\d+)+)\s+", stderr)
         return tuple(map(int, m.group(1).split('.'))) if m else (16, 0)
 
@@ -580,45 +599,101 @@ class BuildSupportLinux(BuildSupport):
         '-Wl,-rpath,$ORIGIN',
         ]
 
+    # N.B.: For libraries pylons library folder does not just contain an shared
+    #       object file but also symlinks that refer to that shared object (
+    #       possibly through a cascade of several links).
+    #       When pypylon links to these libraries, the linker will follow the
+    #       first symlink and will record the target of that link as a
+    #       dependency in the pypylon binary. Since the copy operations that are
+    #       necessary to build pypylon follow symlinks, the result of these
+    #       copy operations - in the presence of symlinks - would be that we
+    #       get several copies of the shared object, which of course is
+    #       undesirable.
+    #       So we have to ensure that the following patterns include at least
+    #       the shared object itself. If there is no or only one symlink for
+    #       this file, nothing more is needed. This is the case for all pylon
+    #       versions up to 6.3.0.18933. Later versions use up to two symlinks
+    #       and in that case we have to copy the second symlink with
+    #       'follow_symlinks=True' so that we get the contents of the shared
+    #       object and the name of the dependency that was recorded in the
+    #       pypylon binary.
+    #       In addition to the change in the number of symlinks there was also
+    #       a change in the naming scheme:
+    #        - old: <basename>-<dotted-version>.so
+    #        - new: <basename>.so.<dotted-version>, no more version numbers in
+    #          TL libraries
+    #
+    #       While it was sufficent to use glob patterns in the past, this does
+    #       not work for the new naming scheme anymore - there simply is no glob
+    #       pattern that matches <basename>.so.<major>.<minor> but NOT
+    #       <basename>.so.<major>.<minor>.<subminor>. Therefore we have to
+    #       switch to using 'real' regular expressions.
 
+    # no differences between versions, no symlinks involved
     RuntimeFiles = {
-
         "base": [
-            ("libpylonbase-*.so", ""),
-            ("libGCBase_*.so", ""),
-            ("libGenApi_*.so", ""),
-            ("liblog4cpp_*.so", ""),
-            ("libLog_*.so", ""),
-            ("libNodeMapData_*.so", ""),
-            ("libXmlParser_*.so", ""),
-            ("libMathParser_*.so", ""),
+            (r"libGCBase_.*\.so", ""),
+            (r"libGenApi_.*\.so", ""),
+            (r"liblog4cpp_.*\.so", ""),
+            (r"libLog_.*\.so", ""),
+            (r"libNodeMapData_.*\.so", ""),
+            (r"libXmlParser_.*\.so", ""),
+            (r"libMathParser_.*\.so", ""),
             ],
-
-        "gige": [
-            ("libpylon_TL_gige-*.so", ""),
-            ("libgxapi-*.so", ""),
-            ],
-
         "usb": [
-            ("libpylon_TL_usb-*.so", ""),
-            ("libuxapi-*.so", ""),
-            ("pylon-libusb-*.so", ""),
-            ],
-
-        "camemu": [
-            ("libpylon_TL_camemu-*.so", ""),
-            ],
-
-        "extra": [
-            ("libpylonutility-*.so", ""),
-            ],
-
-        "gentl": [
-            ("libpylon_TL_gtc-*.so", ""),
+            (r"pylon-libusb-.*\.so", ""),
             ],
         "cxp": [
             ],
+        }
 
+    # up to one symlink per library -> match shared objects only
+    RuntimeFiles_up_to_6_3_0_18933 = {
+        "base": [
+            (r"libpylonbase-.*\.so", ""),
+            ],
+        "gige" : [
+            (r"libpylon_TL_gige-.*\.so", ""),
+            (r"libgxapi-.*\.so", ""),
+            ],
+        "usb": [
+            (r"libpylon_TL_usb-.*\.so", ""),
+            (r"libuxapi-.*\.so", ""),
+            ],
+        "camemu": [
+            (r"libpylon_TL_camemu-.*\.so", ""),
+            ],
+        "extra": [
+            (r"libpylonutility-.*\.so", ""),
+            ],
+        "gentl": [
+            (r"libpylon_TL_gtc-.*\.so", ""),
+            ],
+        }
+
+    # match those shared objects without symlinks directly and where there are
+    # symlinks, match the second one (*.so.<major>.<minor>)
+    RuntimeFiles_after_6_3_0_18933 = {
+        "base": [
+            (r"libpylonbase\.so\.\d+\.\d+", ""),
+            ],
+        "gige": [
+            (r"libpylon_TL_gige\.so", ""),
+            (r"libgxapi\.so\.\d+\.\d+", "")
+            ],
+        "usb": [
+            (r"libpylon_TL_usb\.so", ""),
+            (r"libuxapi\.so\.\d+\.\d+", ""),
+            ],
+        "camemu": [
+            (r"libpylon_TL_camemu\.so", "")
+            ],
+        "extra": [
+            (r"libpylonutility\.so\.\d+\.\d+", ""),
+            ],
+        "gentl": [
+            ("libpylon_TL_gtc\.so", ""),
+            ],
         }
     RuntimeFolders = {}
 
@@ -638,6 +713,18 @@ class BuildSupportLinux(BuildSupport):
         config_libdir = self.call_pylon_config("--libdir")
         self.LibraryDirs.extend(config_libdir.split())
         print("LibraryDirs:", self.LibraryDirs)
+
+        # adjust runtime files according to pylon version
+        olden_days = self.get_pylon_version_tuple() <= (6, 3, 0, 18933)
+        add_runtime = (
+            self.RuntimeFiles_up_to_6_3_0_18933 if olden_days
+            else self.RuntimeFiles_after_6_3_0_18933
+            )
+        for package in add_runtime:
+            if package in self.RuntimeFiles:
+                self.RuntimeFiles[package].extend(add_runtime[package])
+            else:
+                self.RuntimeFiles[package] = add_runtime[package]
 
     def use_debug_configuration(self):
         try:
@@ -670,10 +757,12 @@ class BuildSupportLinux(BuildSupport):
                 if not os.path.exists(full_dst):
                     os.makedirs(full_dst)
 
-                src = os.path.join(runtime_dir, src)
-                for f in glob.glob(src):
+                for f in rxglob(runtime_dir, src):
                     print("Copy %s => %s" % (f, full_dst))
-                    shutil.copy(f, full_dst)
+                    # Although 'True' is the default value for 'follow_symlinks'
+                    # we set it explicitly to clarify that we depend on
+                    # following symlinks.
+                    shutil.copy(f, full_dst, follow_symlinks=True)
 
     def call_pylon_config(self, *args):
         params = [self.PylonConfig]
