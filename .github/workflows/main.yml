@@ -218,5 +218,18 @@ jobs:
           sudo pip3 install twine
           python3 -m twine upload --non-interactive --skip-existing dist/*
 
+  cleanup:
+    if: always()
+    needs: [
+            prepare,
+            build-linux,
+            build-macos
+           ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: geekyeggo/delete-artifact@v1
+      continue-on-error: true
+      with:
+        name: pylon-installer
 
      
