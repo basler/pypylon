@@ -1,5 +1,5 @@
-Version ?.?.?
-    - Date ????-??-??
+Version 1.9.0rc1
+    - Date 2022-12-13
     - Reduced the number of the python versions that are used for CI on
       Windows: Dropped 3.4 and 3.5 completely and the 32 bit builds of the
       remaining versions.
