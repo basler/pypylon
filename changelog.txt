@@ -5,6 +5,7 @@ Version ?.?.?
       remaining versions.
     - Added support for pixel formats Bayer**16 in GetArray()
     - Fixed decoding problems when detecting MSVC version.
+    - Added CI builds for python 3.11
 
 Version 1.8.0
     - Date 2022-02-14

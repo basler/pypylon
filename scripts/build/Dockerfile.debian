@@ -17,8 +17,10 @@ RUN if cat /etc/debian_version | grep -q "8\." ; then \
         apt-get -o Acquire::Check-Valid-Until=false update; \
     fi
 
-RUN pip install wheel auditwheel
-#build a new swig
+# auditwheel is limited to 5.1.2 because since 5.2.1 it requires patchelf >= 0.14 which is not available on our debian base images
+RUN pip install wheel 'auditwheel<=5.1.2'
+
+# build a new swig
 RUN mkdir /build && \
     cd /build && \
     wget http://prdownloads.sourceforge.net/swig/swig-4.0.1.tar.gz && \

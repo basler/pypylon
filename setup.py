@@ -762,7 +762,7 @@ class BuildSupportLinux(BuildSupport):
                     # Although 'True' is the default value for 'follow_symlinks'
                     # we set it explicitly to clarify that we depend on
                     # following symlinks.
-                    shutil.copy(f, full_dst, follow_symlinks=True)
+                    shutil.copy(str(f), full_dst, follow_symlinks=True)
 
     def call_pylon_config(self, *args):
         params = [self.PylonConfig]
