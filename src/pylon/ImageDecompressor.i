@@ -1,6 +1,29 @@
 %rename(ImageDecompressor) Pylon::CImageDecompressor;
 %rename(CompressionInfo) Pylon::CompressionInfo_t;
 
+%typemap(out) Pylon::CPylonImage*
+    %{
+        $result = SWIG_NewPointerObj($1, $descriptor(Pylon::CPylonImage*), SWIG_POINTER_OWN );
+    %}
+
+%typemap(typecheck,precedence=SWIG_TYPECHECK_CHAR)  (const void* pGrabBuffer, size_t payloadSize)
+   %{
+       $1 = (PyBytes_Check($input) || PyByteArray_Check($input)) ? 1 : 0;
+   %}
+
+%typemap(in) (const void* pGrabBuffer, size_t payloadSize)
+    %{
+        if (PyBytes_Check($input)) {
+            $1 = PyBytes_AsString($input);
+            $2 = PyBytes_Size($input);
+        } else if (PyByteArray_Check($input)) {
+            $1 = PyByteArray_AsString($input);
+            $2 = PyByteArray_Size($input);
+        } else {
+            throw INVALID_ARGUMENT_EXCEPTION("Invalid type of buffer (bytes and bytearray are supported)!.");
+        }
+    %}
+
 %extend Pylon::CompressionInfo_t {
     %pythoncode %{
         def to_dict(self):
@@ -135,24 +158,17 @@
         return result;
     }
 
-    Pylon::CPylonImage * DecompressImage(PyObject * pData)
+    Pylon::CPylonImage * DecompressImage(const CGrabResultPtr& grabResult)
     {
-        PyObject * pGrabBuffer = NULL;
-
-        if (PyObject_HasAttrString(pData, "GetBuffer"))
-        {
-            // if this is something that supports "GetBuffer", we better use it.
-            pGrabBuffer = PyObject_CallMethod(pData, "GetBuffer", NULL);
-        } else {
-            // we have to assume that this is some kind of byte-like thing
-            pGrabBuffer = pData;
-        }
-
-        const char * payloadBuffer = NULL;
-        size_t payloadSize = extractByteLikePyObject(pGrabBuffer, payloadBuffer);
-
         Pylon::CPylonImage * image = new Pylon::CPylonImage();
-        $self->DecompressImage(*image, payloadBuffer, payloadSize);
+        $self->DecompressImage(*image, grabResult);
+        return image;
+    }
+
+    Pylon::CPylonImage * DecompressImage(const void* pGrabBuffer, size_t payloadSize)
+    {
+        Pylon::CPylonImage * image = new Pylon::CPylonImage();
+        $self->DecompressImage(*image, pGrabBuffer, payloadSize);
         return image;
     }
 }
