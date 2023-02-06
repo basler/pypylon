@@ -1,11 +1,12 @@
-Version 1.9.0rc1
-    - Date 2022-12-13
+Version 1.9.0rc2
+    - Date 2023-02-06
     - Reduced the number of the python versions that are used for CI on
       Windows: Dropped 3.4 and 3.5 completely and the 32 bit builds of the
       remaining versions.
     - Added support for pixel formats Bayer**16 in GetArray()
     - Fixed decoding problems when detecting MSVC version.
     - Added CI builds for python 3.11
+    - Fixed memory leak in ImageDecompressor
 
 Version 1.8.0
     - Date 2022-02-14
