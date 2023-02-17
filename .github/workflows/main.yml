@@ -31,9 +31,9 @@ jobs:
       - name: Installer list
         run: |
           tee pylon-installer.txt <<"EOF"
-          ${PYLON_DOWNLOAD_URL_BASE_6_3}pylon_6.3.0.23157_x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE_6_2}pylon_6.2.0.21487_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
           EOF
       - uses: actions/cache@v2
@@ -48,6 +48,7 @@ jobs:
           PYLON_DOWNLOAD_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}
           PYLON_DOWNLOAD_URL_BASE_6_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_2 }}
           PYLON_DOWNLOAD_URL_BASE_6_3: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_3 }}
+          PYLON_DOWNLOAD_URL_BASE_7_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_7_2 }}
         run: |
           mkdir pylon-installer && cd pylon-installer
           while read line; do
@@ -78,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         a: [cp36m, cp37m, cp38, cp39, cp3_10, cp3_11]
-        p: [manylinux_2_24_x86_64, manylinux_2_24_aarch64, manylinux_2_24_armv7l]
+        p: [manylinux_2_27_x86_64, manylinux_2_27_aarch64, manylinux_2_24_armv7l]
 
         include:
           #legacy builds without (out-of-the-box) manylinux/pep-600 support

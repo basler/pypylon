@@ -1,4 +1,4 @@
-image: Visual Studio 2019
+image: Visual Studio 2022
 environment:
   TWINE_USERNAME: basler
   #Enable this for testing purposes
@@ -16,11 +16,8 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python36-x64"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python37-x64"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python38-x64"
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     - PYTHON: "C:\\Python39-x64"
     - PYTHON: "C:\\Python310-x64"
     - PYTHON: "C:\\Python311-x64"
@@ -34,14 +31,14 @@ install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel twine"
   # install swig and put it on the path. Retry because of network issues with sourceforge
-  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-4.0.1.zip
+  - appveyor-retry curl -sSfL -o swigwin.zip https://prdownloads.sourceforge.net/swig/swigwin-4.1.1.zip
   - 7z x swigwin.zip -oC:\ > NUL
-  - set PATH=C:\swigwin-4.0.1;%PATH%
+  - set PATH=C:\swigwin-4.1.1;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_6.3.0.23157.exe
-  - pylon_installer.exe /quiet /install
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_7.2.1.25747.exe
+  - pylon_installer.exe /quiet /install="Runtime;GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs"
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
-  - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 6\development
+  - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 7\Development
   # install numpy for the unittests
   - "%PYTHON%\\python.exe -m pip install numpy"
 
