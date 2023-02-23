@@ -3393,18 +3393,6 @@ determined as shown in the following example.
 This method is synchronized using the lock provided by GetLock().  
 ";
 
-%feature("docstring") Pylon::CInstantCamera::Is1394 "
-
-Returns true if an IEEE 1394 Pylon device is attached to the Instant Camera
-object.  
-
-This method is provided for convenience only. The device type can also be
-determined as shown in the following example.  
-
-
-This method is synchronized using the lock provided by GetLock().  
-";
-
 %feature("docstring") Pylon::CInstantCamera::GetEventGrabberNodeMap "
 
 Provides access to the event grabber node map of the attached Pylon device.  

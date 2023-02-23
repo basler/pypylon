@@ -67,7 +67,6 @@ class CallTestSuite(PylonTestCase):
         cam = self.create_first()
         cam.Open()
 
-        self.assertFalse(cam.Is1394())
         self.assertTrue(cam.IsUsb())
         self.assertFalse(cam.IsCameraLink())
         self.assertFalse(cam.IsGigE())
