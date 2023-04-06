@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from setuptools import setup, Extension
+from setuptools import setup, Extension, __version__ as setuptools_version
 from setuptools.command.build_ext import new_compiler
+from pkg_resources import parse_version
 from logging import info, warning, error
 
 import argparse
@@ -419,15 +420,15 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
-    # Up to py 3.8 distutils (the one in lib as well as the one included in
-    # setuptools) did its own layman's qouting of commandline parameters, that
-    # had to be amended with a 'hack'. From 3.9 on quoting parameters is
-    # now left to subprocess, which does the right thing.
-    gentl_dir_fmt = (
-        r'L"%s\\bin"'
-        if sys.version_info >= (3, 8, 10) else
-        r'L\"%s\\bin\"'
-        )
+    # Below version 60.0.0 setuptools use the layman's qouting of commandline
+    # parameters from distutils, that had to be amended with a 'hack'. From
+    # 60.0.0 on quoting parameters is now left to subprocess, which
+    # does the right thing.
+
+    actual = parse_version(setuptools_version)
+    correct = parse_version("58.1.0")
+
+    gentl_dir_fmt = r'L"%s\\bin"' if actual >= correct else r'L\"%s\\bin\"'
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
