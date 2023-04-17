@@ -74,8 +74,8 @@ The following versions are available on pypi:
 > Additional Notes on binary packages:
 > * (*) The linux wheels for python 3.4 and 3.5 are not available on pypi.
     You can get them from [Github Releases](https://github.com/basler/pypylon/releases).
-> * (**) The linux binaries are manylinux_2_24 conformant.
-    This is roughly equivalent to a minimum glibc version >= 2.24.
+> * (**) The linux binaries are manylinux_2_27 conformant.
+    This is roughly equivalent to a minimum glibc version >= 2.27.
     :warning: You need at least pip 20.3 to install them.
 > * (***) MacOS binaries are built for macOS >= 10.14 (Mojave)
 

@@ -91,10 +91,10 @@ case $PLATFORM_TAG in
     linux_i686)             QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE";                     PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
     linux_armv7l)           QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE";                  PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
     linux_aarch64)          QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE";                  PYLON_ARCH=aarch64 ;;
-    manylinux_2_24_x86_64)  QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE";                    PYLON_ARCH=x86_64 ;;
+    manylinux_2_27_x86_64)  QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE";                    PYLON_ARCH=x86_64 ;;
     manylinux_2_24_i686)    QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE";                     PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
     manylinux_2_24_armv7l)  QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE";                  PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
-    manylinux_2_24_aarch64) QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE";                  PYLON_ARCH=aarch64 ;;
+    manylinux_2_27_aarch64) QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE";                  PYLON_ARCH=aarch64 ;;
     manylinux2014_x86_64)   QEMU_ARCH="x86_64";   BASE_IMAGE="quay.io/pypa/manylinux2014_x86_64";    PYLON_ARCH=x86_64 ;;
     manylinux2014_i686)     QEMU_ARCH="i386";     BASE_IMAGE="quay.io/pypa/manylinux2014_i686";      PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
     manylinux2014_aarch64)  QEMU_ARCH="aarch64";  BASE_IMAGE="quay.io/pypa/manylinux2014_aarch64";   PYLON_ARCH=aarch64 ;;

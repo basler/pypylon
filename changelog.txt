@@ -1,3 +1,7 @@
+Version 2.?.?
+    - Date xxxx-xx-xx
+    - Update to pylon 7.2
+
 Version 1.9.0
     - Date 2023-02-07
     - Reduced the number of the python versions that are used for CI on
