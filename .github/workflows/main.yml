@@ -24,7 +24,7 @@ env:
 
 jobs:
   prepare:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     outputs:
       is_release_build: ${{ env.RELEASE_BUILD == '1' }}
     steps:
@@ -36,7 +36,7 @@ jobs:
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
           EOF
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: cache
         with:
           path: pylon-installer
@@ -60,7 +60,7 @@ jobs:
           ls -l
           md5sum *
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: pylon-installer
           path: pylon-installer
@@ -74,7 +74,7 @@ jobs:
 
   build-linux:
     needs: prepare
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -88,9 +88,11 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: pylon-installer
           path: pylon-installer
@@ -103,7 +105,7 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static:register --reset
           ./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon-installer $ARGS
           
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: build-results-${{ matrix.p }}-${{ matrix.a }}
           path: dist/*
@@ -134,9 +136,9 @@ jobs:
       P: macosx-10.15-intel
       A: ${{ matrix.a }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: pylon-installer
           path: pylon-installer
@@ -191,7 +193,7 @@ jobs:
           python3 setup.py test
           python3 setup.py bdist_wheel
           
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: build-results-macosx-${{ matrix.a }}
           path: dist/*
@@ -219,7 +221,7 @@ jobs:
            ]
     runs-on: ubuntu-latest
     steps:
-    - uses: geekyeggo/delete-artifact@v1
+    - uses: geekyeggo/delete-artifact@v2
       continue-on-error: true
       with:
         name: pylon-installer
