@@ -62,22 +62,20 @@ To install pypylon open your favourite terminal and run:
 
 The following versions are available on pypi:
 
- |                  | 3.4 | 3.5 | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 | 3.11 |
- |------------------|-----|-----|-----|-----|-----|-----|------|------|
- | Windows 64bit    | -   | -   | x   | x   | x   | x   |  x   |  x   |
- | Linux x86_64**   | -*  | -*  | x   | x   | x   | x   |  x   |  x   |
- | Linux armv7l**   | -*  | -*  | x   | x   | x   | x   |  x   |  x   |
- | Linux aarch64**  | -*  | -*  | x   | x   | x   | x   |  x   |  x   |
- | Mac OS***        | -   | -   | x   | x   | x   | x   |  x   |  x   |
+ |                  | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 | 3.11 |
+ |------------------|-----|-----|-----|-----|------|------|
+ | Windows 64bit    | x   | x   | x   | x   |  x   |  x   |
+ | Linux x86_64*    | x   | x   | x   | x   |  x   |  x   |
+ | Linux armv7l*    | x   | x   | x   | x   |  x   |  x   |
+ | Linux aarch64*   | x   | x   | x   | x   |  x   |  x   |
+ | Mac OS**         | x   | x   | x   | x   |  x   |  x   |
 
 
 > Additional Notes on binary packages:
-> * (*) The linux wheels for python 3.4 and 3.5 are not available on pypi.
-    You can get them from [Github Releases](https://github.com/basler/pypylon/releases).
-> * (**) The linux binaries are manylinux_2_27 conformant.
-    This is roughly equivalent to a minimum glibc version >= 2.27.
+> * (*) The linux binaries are manylinux_2_28 conformant.
+    This is roughly equivalent to a minimum glibc version >= 2.28.
     :warning: You need at least pip 20.3 to install them.
-> * (***) MacOS binaries are built for macOS >= 10.14 (Mojave)
+> * (**) MacOS binaries are built for macOS >= 10.14 (Mojave)
 
 ## Installation from Source
 Building the pypylon bindings is supported and tested on Windows and Linux.
