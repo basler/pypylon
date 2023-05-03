@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from setuptools import setup, Extension
+from setuptools import setup, Extension, __version__ as setuptools_version
 from setuptools.command.build_ext import new_compiler
+from pkg_resources import parse_version
 from logging import info, warning, error
 
 import argparse
@@ -310,20 +311,26 @@ class BuildSupport(object):
             pylon_version_no_build == reference_version and
             pylon_version_tag == ''
             ):
-            return git_version
+            pypylon_version = git_version
+        else:
+            # Build is against a non-reference version of pylon.
+            # Se we add that info to the pypylon version.
 
-        # remove all characters forbidden in a local version
-        # (- and _ get normalized anyways)
-        pylon_version_tag_cleaned=re.sub(
-            r"[^a-zA-Z0-9\.-_]",
-            '',
-            pylon_version_tag
-            )
-        return "%s+pylon%s%s" % (
-            git_version,
-            pylon_version_no_build,
-            pylon_version_tag_cleaned
-            )
+            # Remove all characters forbidden in a local version
+            # (- and _ get normalized anyways)
+            pylon_version_tag_cleaned=re.sub(
+                r"[^a-zA-Z0-9\.-_]",
+                '',
+                pylon_version_tag
+                )
+            pypylon_version = "%s+pylon%s%s" % (
+                git_version,
+                pylon_version_no_build,
+                pylon_version_tag_cleaned
+                )
+            warning("pylon version differs from the reference version (got: %s, expected: %s)" % (pylon_version_no_build, reference_version))
+
+        return pypylon_version
 
     def get_short_version(self, version):
         return version.split('+')[0]
@@ -419,15 +426,14 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
-    # Up to py 3.8 distutils (the one in lib as well as the one included in
-    # setuptools) did its own layman's qouting of commandline parameters, that
-    # had to be amended with a 'hack'. From 3.9 on quoting parameters is
-    # now left to subprocess, which does the right thing.
-    gentl_dir_fmt = (
-        r'L"%s\\bin"'
-        if sys.version_info >= (3, 8, 10) else
-        r'L\"%s\\bin\"'
+    # Old versions of distutils use a layman's qouting of commandline
+    # parameters, that has to be amended with a 'hack'. Newer and fixed
+    # distutils are used if either (py >= 3.9.0) or (setuptools >= 60.0.0)
+    correct_qouting = (
+        sys.version_info >= (3, 9, 0) or
+        parse_version(setuptools_version) >= parse_version("60.0.0")
         )
+    gentl_dir_fmt = r'L"%s\\bin"' if correct_qouting else r'L\"%s\\bin\"'
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),

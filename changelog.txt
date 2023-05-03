@@ -1,3 +1,10 @@
+Version 2.?.?
+    - Date xxxx-xx-xx
+    - Updated to pylon 7.2 on linux and windows
+    - Dropped support for python 3.4 and 3.5 on linux
+    - Linux binaries are now manylinux_2_28 compliant and therefore 
+      require glibc >= 2.28
+
 Version 1.9.0
     - Date 2023-02-07
     - Reduced the number of the python versions that are used for CI on

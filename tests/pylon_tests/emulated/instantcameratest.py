@@ -67,7 +67,6 @@ class InstantCameraTestSuite(PylonEmuTestCase):
     def test_has_hardware_interface(self):
         cam = self.create_first()
         cam.Open()
-        self.assertFalse(cam.Is1394())
         self.assertFalse(cam.IsUsb())
         self.assertFalse(cam.IsCameraLink())
         self.assertFalse(cam.IsGigE())
