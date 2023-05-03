@@ -35,7 +35,7 @@ install:
   - 7z x swigwin.zip -oC:\ > NUL
   - set PATH=C:\swigwin-4.1.1;%PATH%
   # install pylon
-  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_7.2.1.25747.exe
+  - appveyor-retry curl -sSfL -o pylon_installer.exe %PYLON_DOWNLOAD_URL_BASE%Basler_pylon_7.3.0.27189.exe
   - pylon_installer.exe /quiet /install="Runtime;GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs"
   # PYLON_DEV_DIR is not available in the shell after installation, so we set it manually
   - set PYLON_DEV_DIR=%PROGRAMFILES%\Basler\pylon 7\Development

@@ -105,8 +105,8 @@ if [ -z "$PYLON_DIR" ]; then
     exit 1
 fi
 
-#test for pylon 6.1
-files=( $PYLON_DIR/pylon_*_${PYLON_ARCH}_setup.tar.gz )
+#test for pylon 6.1 and pylon 7
+files=( $PYLON_DIR/pylon_*_*${PYLON_ARCH}_setup.tar.gz )
 PYLON="${files[0]}"
 
 #fallback to pre 6.1 naming

@@ -31,8 +31,8 @@ jobs:
       - name: Installer list
         run: |
           tee pylon-installer.txt <<"EOF"
-          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_x86_64_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_aarch64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.3.0.27189_linux-x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.3.0.27189_linux-aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
           EOF
