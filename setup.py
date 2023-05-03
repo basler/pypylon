@@ -311,20 +311,26 @@ class BuildSupport(object):
             pylon_version_no_build == reference_version and
             pylon_version_tag == ''
             ):
-            return git_version
+            pypylon_version = git_version
+        else:
+            # Build is against a non-reference version of pylon.
+            # Se we add that info to the pypylon version.
 
-        # remove all characters forbidden in a local version
-        # (- and _ get normalized anyways)
-        pylon_version_tag_cleaned=re.sub(
-            r"[^a-zA-Z0-9\.-_]",
-            '',
-            pylon_version_tag
-            )
-        return "%s+pylon%s%s" % (
-            git_version,
-            pylon_version_no_build,
-            pylon_version_tag_cleaned
-            )
+            # Remove all characters forbidden in a local version
+            # (- and _ get normalized anyways)
+            pylon_version_tag_cleaned=re.sub(
+                r"[^a-zA-Z0-9\.-_]",
+                '',
+                pylon_version_tag
+                )
+            pypylon_version = "%s+pylon%s%s" % (
+                git_version,
+                pylon_version_no_build,
+                pylon_version_tag_cleaned
+                )
+            warning("pylon version differs from the reference version (got: %s, expected: %s)" % (pylon_version_no_build, reference_version))
+
+        return pypylon_version
 
     def get_short_version(self, version):
         return version.split('+')[0]
