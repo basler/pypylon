@@ -1,5 +1,5 @@
-Version 2.0.0rc1
-    - Date 2023-05-03
+Version 2.0.0
+    - Date 2023-05-24
     - Updated to pylon 7.2 on linux and windows
     - Dropped support for python 3.4 and 3.5 on linux
     - Linux binaries are now manylinux_2_28 compliant and therefore 
