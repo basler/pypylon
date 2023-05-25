@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=42", "swig>=4.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel]
+build = "*-macos*"
+skip  = "cp36-* cp37-* cp38-* cp39-* cp311-* pp*"
+build-verbosity = "1"
+archs = "x86_64 arm64"
+test-skip = "*_universal2:arm64"
+
+[tool.cibuildwheel.macos]
+before-all = 'echo "Building: $CIBW_BUILD"'
+repair-wheel-command = ""
+
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_arm64"
+before-build = [
+             '''
+             echo "arm framework"
+             if [ -z "${PYLON_FRAMEWORK_ARM64}" ]; then
+                 echo "Set PYLON_FRAMEWORK_ARM64 to the directory where pylon.framework for arm64 is installed"
+             exit -1
+             fi
+             '''
+            ]
+environment = { PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_ARM64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+before-build = [
+             '''
+             echo "intel framework"
+             if [ -z "${PYLON_FRAMEWORK_X86_64}" ]; then
+                 echo "Set PYLON_FRAMEWORK_X86_64 to the directory where pylon.framework for x86_64 is installed"
+                 echo "default of /Library/Frameworks will be used"
+             fi
+             '''
+            ]
+environment = { PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
+
