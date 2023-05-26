@@ -7,4 +7,7 @@
 // former to the latter with this macro:
 #define AllGroupMask(x) AllGroupMask=x
 
+%ignore ActionParameter;
+
+
 %include <pylon/gige/ActionTriggerConfiguration.h>
