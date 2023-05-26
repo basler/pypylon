@@ -1,6 +1,6 @@
 %define DOCSTRING
 "
-Copyright (C) 2017-2018 Basler AG
+Copyright (C) 2017-2023 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
@@ -58,7 +58,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # endif
 %}
 
-%include "exception.i"
+%include <exception.i>
+%include <std_container.i>
 
 // PylonIncludes.h will include DeviceFactory.h. We want to ignore
 // IDeviceFactory that is declared there.
