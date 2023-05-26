@@ -73,6 +73,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // python defines own version of COMPILER macro which collides with genicam logic
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
+
+#ifdef _MSC_VER  // MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4265)
+#elif __GNUC__  // GCC, CLANG, MinGW
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#  pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#  pragma GCC diagnostic ignored "-Wunused-variable"
+#  ifdef __clang__
+#    pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#  endif
+#endif
+
+
+
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/GigETransportLayer.h>
 #include <pylon/gige/ActionTriggerConfiguration.h>
@@ -90,6 +106,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <GenApi/EventAdapterGeneric.h>
 #include <GenApi/EventAdapterGEV.h>
 #include "genicam/PyPortImpl.h"
+
+#ifdef _MSC_VER  // MSVC
+#  pragma warning(pop)
+#elif __GNUC__  // GCC, CLANG, MinWG
+#  pragma GCC diagnostic pop
+#endif
 
 #define COMPILER _PYTHON_COMPILER
 #undef _PYTHON_COMPILER
