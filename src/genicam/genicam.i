@@ -693,7 +693,7 @@ namespace GENICAM_NAMESPACE {
 }
 
 %typemap(argout) (GENAPI_NAMESPACE::SingleChunkData_t *ChunkData, int64_t NumChunks) {
-    delete $1;
+    delete[] $1;
 }
 
 %typemap(in) (GENAPI_NAMESPACE::SingleChunkDataStr_t *ChunkData, int64_t NumChunks) {
@@ -714,7 +714,7 @@ namespace GENICAM_NAMESPACE {
 }
 
 %typemap(argout) (GENAPI_NAMESPACE::SingleChunkDataStr_t *ChunkData, int64_t NumChunks) {
-    delete $1;
+    delete[] $1;
 }
 
 

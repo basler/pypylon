@@ -206,12 +206,16 @@
     $1 = PyInt_Check($input) ? 1 : 0;
 }
 
+%typemap(arginit, noblock=1)
+(uint32_t *pNumResults, Pylon::GigEActionCommandResult *results)
+{
+   uint32_t num_res_u32 = 0;
+   unsigned long num_res_ul = 0;
+}
 
 %typemap(in, numinputs=1, noblock=1)
 (uint32_t *pNumResults, Pylon::GigEActionCommandResult *results)
 {
-    uint32_t num_res_u32;
-    unsigned long num_res_ul;
     bool ok;
     ok  = SWIG_IsOK(SWIG_AsVal_unsigned_SS_long($input, &num_res_ul));
     num_res_u32 = static_cast<uint32_t>(num_res_ul);
@@ -227,7 +231,7 @@
 %typemap(freearg, numinputs=1)
 (uint32_t *pNumResults, Pylon::GigEActionCommandResult *results)
 {
-    delete $2;
+    delete[] $2;
 }
 
 
