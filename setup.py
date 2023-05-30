@@ -70,7 +70,6 @@ class BuildSupport(object):
         "-Wextra",
         "-Wall",
         "-threads",
-        "-modern",
         #lots of debug output "-debug-tmsearch",
         ]
 
@@ -116,8 +115,6 @@ class BuildSupport(object):
 
     def __init__(self):
         self.SwigExe = "swig"
-        if sys.version_info[0] == 3:
-            self.SwigOptions.append("-py3")
 
     def dump(self):
         for a in dir(self):
