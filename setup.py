@@ -912,7 +912,8 @@ class BuildSupportMacOS(BuildSupport):
             shutil.copytree(
                 os.path.join(self.FrameworkPath, self.FrameworkName),
                 full_dst,
-                symlinks=True
+                symlinks=True,
+                ignore = shutil.ignore_patterns("*.h","CMake","Tools")
                 )
 
 ################################################################################
