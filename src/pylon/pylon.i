@@ -352,6 +352,8 @@ static void ExtendGenTLPathForCXP()
 
 #endif // GENTL_CXP_PRODUCER_DIR
 
+static void pylon_terminate(void*){ Pylon::PylonTerminate();}
+
 %}
 
 %init %{
@@ -359,6 +361,9 @@ static void ExtendGenTLPathForCXP()
 #ifdef GENTL_CXP_PRODUCER_DIR
     ExtendGenTLPathForCXP();
 #endif
+
+    // register the terminate routine
+    SWIG_module.m_free = &pylon_terminate;
 
     Pylon::PylonInitialize();
 
