@@ -158,17 +158,40 @@
         return result;
     }
 
-    Pylon::CPylonImage * DecompressImage(const CGrabResultPtr& grabResult)
+    Pylon::CPylonImage *DecompressImage(const CGrabResultPtr &grabResult)
     {
-        Pylon::CPylonImage * image = new Pylon::CPylonImage();
-        $self->DecompressImage(*image, grabResult);
+        Pylon::CPylonImage *image = new Pylon::CPylonImage();
+        try
+        {
+            $self->DecompressImage(*image, grabResult);
+        }
+        catch (const GenericException&)
+        {
+            if (image)
+            {
+                delete image;
+            }
+            throw;
+        }
+
         return image;
     }
 
-    Pylon::CPylonImage * DecompressImage(const void* pGrabBuffer, size_t payloadSize)
+    Pylon::CPylonImage *DecompressImage(const void *pGrabBuffer, size_t payloadSize)
     {
-        Pylon::CPylonImage * image = new Pylon::CPylonImage();
-        $self->DecompressImage(*image, pGrabBuffer, payloadSize);
+        Pylon::CPylonImage *image = new Pylon::CPylonImage();
+        try
+        {
+            $self->DecompressImage(*image, pGrabBuffer, payloadSize);
+        }
+        catch(const GenericException&)
+        {
+            if (image)
+            {
+                delete image;
+            }
+            throw;
+        }
         return image;
     }
 }
