@@ -37,7 +37,11 @@ def get_platform():
     return platform.system()
 
 def get_machine():
-    return platform.machine()
+    if get_platform() == "Darwin" and "ARCHFLAGS" in os.environ:
+        # crossbuild settings: ARCHFLAGS="-arch arm64" or ARCHFLAGS="-arch x86_64"
+        return os.environ["ARCHFLAGS"].split()[1]
+    else:
+        return platform.machine()
 
 def rxglob(path, pattern, recursive=False):
     if isinstance(pattern, str):
