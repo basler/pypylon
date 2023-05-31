@@ -70,7 +70,6 @@ class BuildSupport(object):
         "-Wextra",
         "-Wall",
         "-threads",
-        "-modern",
         #lots of debug output "-debug-tmsearch",
         ]
 
@@ -116,8 +115,6 @@ class BuildSupport(object):
 
     def __init__(self):
         self.SwigExe = "swig"
-        if sys.version_info[0] == 3:
-            self.SwigOptions.append("-py3")
 
     def dump(self):
         for a in dir(self):
@@ -126,13 +123,19 @@ class BuildSupport(object):
     def find_swig(self):
         # Find SWIG executable
         swig_executable = None
-        for candidate in ["swig3.0", "swig"]:
-            swig_executable = shutil.which(candidate)
-            if self.is_supported_swig_version(swig_executable):
-                info("Found swig: %s" % (swig_executable,))
-                return swig_executable
+        # swig from pypi
+        try:
+            import swig
+            swig_executable = os.path.join(swig.BIN_DIR, "swig")
+        except ModuleNotFoundError:
+            # swig from path
+            swig_executable = shutil.which("swig")
 
-        raise RuntimeError("swig executable not found on path!")
+        if swig_executable and self.is_supported_swig_version(swig_executable):
+            info("Found swig: %s" % (swig_executable,))
+            return swig_executable
+        else:
+            raise RuntimeError("swig executable not found on path!")
 
     def is_supported_swig_version(self, swig_executable):
         if swig_executable is None:
@@ -150,10 +153,10 @@ class BuildSupport(object):
         if res is None:
             return False
 
-        if tuple(map(int, res.group(1).split('.'))) < (3, 0, 12):
+        if tuple(map(int, res.group(1).split('.'))) < (4, 0, 0):
             msg = (
                 "The version of swig is %s which is too old. " +
-                "Minimum required version is 3.0.12"
+                "Minimum required version is 4.0.0"
                 )
             warning(msg, res.group(1))
             return False

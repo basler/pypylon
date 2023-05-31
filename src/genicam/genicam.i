@@ -1,6 +1,6 @@
 %define DOCSTRING
 "
-Copyright (C) 2017-2018 Basler AG
+Copyright (C) 2017-2023 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
@@ -64,6 +64,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %include "std_vector.i"
 %include "cstring.i"
 %include "std_ios.i"
+%include "std_container.i"
 %include "exception.i"
 %include "pybuffer.i"
 
@@ -692,7 +693,7 @@ namespace GENICAM_NAMESPACE {
 }
 
 %typemap(argout) (GENAPI_NAMESPACE::SingleChunkData_t *ChunkData, int64_t NumChunks) {
-    delete $1;
+    delete[] $1;
 }
 
 %typemap(in) (GENAPI_NAMESPACE::SingleChunkDataStr_t *ChunkData, int64_t NumChunks) {
@@ -713,7 +714,7 @@ namespace GENICAM_NAMESPACE {
 }
 
 %typemap(argout) (GENAPI_NAMESPACE::SingleChunkDataStr_t *ChunkData, int64_t NumChunks) {
-    delete $1;
+    delete[] $1;
 }
 
 

@@ -21,8 +21,9 @@ namespace GENAPI_NAMESPACE
     */
     class  IPort  : virtual public IBase
     {
-	public:
-      };
+        private:
+           IPort();
+    };
 };
 
 

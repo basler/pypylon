@@ -1,6 +1,6 @@
 %define DOCSTRING
 "
-Copyright (C) 2017-2018 Basler AG
+Copyright (C) 2017-2023 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
@@ -58,7 +58,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # endif
 %}
 
-%include "exception.i"
+%include <exception.i>
+%include <std_container.i>
 
 // PylonIncludes.h will include DeviceFactory.h. We want to ignore
 // IDeviceFactory that is declared there.
@@ -72,6 +73,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // python defines own version of COMPILER macro which collides with genicam logic
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
+
+#ifdef _MSC_VER  // MSVC
+#  pragma warning(push)
+#  pragma warning(disable : 4265)
+#elif __GNUC__  // GCC, CLANG, MinGW
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#  pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#  pragma GCC diagnostic ignored "-Wunused-variable"
+#  ifdef __clang__
+#    pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#  endif
+#endif
+
+
+
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/GigETransportLayer.h>
 #include <pylon/gige/ActionTriggerConfiguration.h>
@@ -89,6 +106,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <GenApi/EventAdapterGeneric.h>
 #include <GenApi/EventAdapterGEV.h>
 #include "genicam/PyPortImpl.h"
+
+#ifdef _MSC_VER  // MSVC
+#  pragma warning(pop)
+#elif __GNUC__  // GCC, CLANG, MinWG
+#  pragma GCC diagnostic pop
+#endif
 
 #define COMPILER _PYTHON_COMPILER
 #undef _PYTHON_COMPILER

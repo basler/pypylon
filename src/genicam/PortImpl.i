@@ -50,9 +50,10 @@ namespace GENAPI_NAMESPACE
     */
     class CPortImpl : public IPortConstruct, public IPortReplay
     {
-    public:
+    private:
         //! Constructor
         CPortImpl();
+    public:
         
         //! Destructor
         virtual ~CPortImpl();
