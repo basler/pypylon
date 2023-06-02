@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 build = "*-macos*"
-skip  = "cp36-* cp37-* cp38-* cp39-* cp311-* pp*"
-build-verbosity = "1"
+skip  = "pp*"
+build-verbosity = "0"
 archs = "x86_64 arm64"
 test-skip = "*_universal2:arm64"
 
