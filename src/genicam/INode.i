@@ -34,7 +34,8 @@ namespace GENAPI_NAMESPACE
     typedef intptr_t CallbackHandleType;
     
     %nodefaultctor INodeMap;
-	class INodeMap;
+    class INodeMap;
+    class PyNodeCallback;
 	
     //*************************************************************
     // INode interface
@@ -109,8 +110,8 @@ namespace GENAPI_NAMESPACE
 	PROP_GET(Parents)
 
         //! Register change callback
-        /*! Takes ownership of the CNodeCallback object */
-        virtual CallbackHandleType RegisterCallback( CNodeCallback *INPUT ) = 0;
+        /*! Takes ownership of the PyNodeCallback object */
+        virtual CallbackHandleType RegisterCallback( PyNodeCallback *INPUT ) = 0;
 
         //! De register change callback
         /*! Destroys CNodeCallback object

@@ -165,13 +165,7 @@ namespace GENAPI_NAMESPACE
     }
 
 
-
-    // ignore base class
-    %ignore CNodeCallback;
-    class CNodeCallback{
-    };
-
-    class PyNodeCallback: public CNodeCallback
+    class PyNodeCallback
     {
     public:
         PyNodeCallback( INode *pNode, PyObject *PyFunc, ECallbackType CallbackType);

@@ -20,7 +20,11 @@
             $1 = PyByteArray_AsString($input);
             $2 = PyByteArray_Size($input);
         } else {
-            throw INVALID_ARGUMENT_EXCEPTION("Invalid type of buffer (bytes and bytearray are supported)!.");
+            PyErr_SetString(
+              PyExc_TypeError,
+              "Invalid type of buffer (bytes and bytearray are supported)!."
+            );
+            SWIG_fail;
         }
     %}
 
