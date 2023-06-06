@@ -79,10 +79,11 @@ The following versions are available on pypi:
 > * (**) MacOS binaries are built for macOS >= 11.0 (Big-Sur)
 
 ## Installation from Source
-Building the pypylon bindings is supported and tested on Windows and Linux.
+Building the pypylon bindings is supported and tested on Windows, Linux and macOS
 
 You need a few more things to compile pypylon:
- * A compiler for your system (Visual Studio on Windows, gcc on linux)
+ * An installation of pylon SDK for your platform
+ * A compiler for your system (Visual Studio on Windows, gcc on linux, xCode commandline tools on macOS)
  * Python development files (e.g. `sudo apt install python-dev` on linux)
  * [swig](http://www.swig.org) >= 4.0
    * For all 64bit platforms you can install the tool via `pip install swig`
@@ -93,6 +94,12 @@ git clone https://github.com/basler/pypylon.git
 cd pypylon
 pip install .
 ```
+
+If pylon SDK is not installed in a default location you have to specify the location from the environment
+ * on Linux: `export PYLON_ROOT=<installation directory of pylon SDK>`
+ * on macOS: `export PYLON_FRAMEWORK_LOCATION=<framework base folder that contains pylon.framework>`
+
+
 # Development
 
 Pull requests to pypylon are very welcome. To help you getting started with pypylon improvements, here are some hints:
