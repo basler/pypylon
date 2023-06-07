@@ -3,15 +3,20 @@ requires = ["setuptools>=42", "swig>=4.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-build = "*-macos*"
-skip  = "pp*"
 build-verbosity = "0"
 archs = "x86_64 arm64"
-test-skip = "*_universal2:arm64"
+build = "*-macosx_*"
+skip  = "pp*"
+test-requires = "pytest numpy"
 
 [tool.cibuildwheel.macos]
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
+test-command = [
+             '''
+             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated
+             '''
+             ]
 
 
 [[tool.cibuildwheel.overrides]]

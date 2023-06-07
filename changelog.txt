@@ -4,6 +4,7 @@ Version [next]
     - Call Pylon::PylonTerminate on module unload to free pylon ressources
     - Fix Warnings from swig and c++ compile steps
     - Add support for swig installed via pypi
+    - move tests to pytest format
 
 Version 2.0.0
     - Date 2023-05-24
