@@ -931,6 +931,12 @@ class BuildSupportMacOS(BuildSupport):
                 symlinks=True,
                 ignore = shutil.ignore_patterns("*.h","CMake","Tools")
                 )
+            # cleanup double TL entries in pylon 6.2.0
+            if self.get_pylon_version() == "6.2.0.18677":
+                for p in Path(f"{full_dst}").glob("**/*TL*.so"):
+                    if re.match(".*TL_[a-z]+\.so", p.name):
+                        info(f"DELETE {p}")
+                        os.remove(p)
 
 ################################################################################
 ################################################################################
