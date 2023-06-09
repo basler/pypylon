@@ -43,5 +43,5 @@ before-build = [
              fi
              '''
             ]
-environment = { PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
+environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
 
