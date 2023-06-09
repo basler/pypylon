@@ -34,7 +34,7 @@ jobs:
           ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_x86_64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
+          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.2.0.21487.dmg
           EOF
       - uses: actions/cache@v3
         id: cache
@@ -146,7 +146,6 @@ jobs:
       - name: Setup pylon
         run: |
           cd pylon-installer
-          unzip pylon-*.zip
           hdiutil attach pylon-*.dmg
           sudo installer -pkg /Volumes/pylon\ *\ Camera\ Software\ Suite/pylon-*.pkg  -target /
           hdiutil detach /Volumes/pylon\ *\ Camera\ Software\ Suite
