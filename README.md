@@ -16,7 +16,7 @@ You are welcome to post any questions or issues on [GitHub](https://github.com/b
  * Install [pylon](https://www.baslerweb.com/pylon)
    This is strongly recommended but not mandatory. See [known issues](#known-issues) for further details.
  * Install pypylon: ```pip3 install pypylon```
-   For more installation options and the supported systems please read the [Installation](#installation) paragraph.
+   For more installation options and the supported systems please read the [Installation](#Installation) paragraph.
  * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/grab.py) or use the following snippet:
 
 ```python
