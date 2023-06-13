@@ -5,6 +5,7 @@ Version [next]
     - Fix Warnings from swig and c++ compile steps
     - Add support for swig installed via pypi
     - move tests to pytest format
+    - integrate macos ci build via cibuildwheel for x86_64 and arm64
 
 Version 2.0.0
     - Date 2023-05-24
