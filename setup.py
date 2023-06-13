@@ -887,7 +887,7 @@ class BuildSupportMacOS(BuildSupport):
         except FileNotFoundError:
             msg = (
                 "Couldn't find pylon. Please install pylon in %s or tell us " +
-                "the framwork search path of the pylon.frmamework using the PYLON_FRAMEWORK_LOCATION environment " +
+                "the framwork search path of the pylon.framework using the PYLON_FRAMEWORK_LOCATION environment " +
                 "variable"
                 )
             error(msg, self.FrameworkPath)
