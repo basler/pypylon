@@ -1,8 +1,4 @@
-Version 2.2.0rc2
-    - Date 2023-06-14
-    - Fix upload folder location of macos
-
-Version 2.2.0rc1
+Version 2.2.0
     - Date 2023-06-14
     - Integrate macos build for arm64
     - Fix memory leak if ImageDecompressor is called on invalid data
