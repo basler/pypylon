@@ -36,3 +36,5 @@ NodeMap.pfs
 
 #ignore generated html
 pypylon.*.html
+osx_includes
+wheelhouse

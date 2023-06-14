@@ -84,6 +84,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  pragma GCC diagnostic ignored "-Wunused-variable"
 #  ifdef __clang__
 #    pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#    pragma GCC diagnostic ignored "-Wc++11-extensions"
 #  endif
 #endif
 

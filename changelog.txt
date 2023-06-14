@@ -1,9 +1,11 @@
-Version [next]
-    - Date 2023-MM-DD
+Version 2.2.0rc1
+    - Date 2023-06-14
+    - Integrate macos build for arm64
     - Fix memory leak if ImageDecompressor is called on invalid data
     - Call Pylon::PylonTerminate on module unload to free pylon ressources
     - Fix Warnings from swig and c++ compile steps
     - Add support for swig installed via pypi
+    - move tests to pytest format
 
 Version 2.0.0
     - Date 2023-05-24

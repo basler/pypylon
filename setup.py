@@ -16,7 +16,17 @@ import subprocess
 import sys
 import platform
 from pathlib import Path
-import VersionInfo
+# The pylon version this source tree was designed for, by platform
+ReferencePylonVersion = {
+    "Windows": "7.2.1",
+    # ATTENTION: This version is the pylon core version reported by pylon-config,
+    # which is not equal to the version on the outer tar.gz
+    "Linux": "7.2.1",
+    "Linux_armv7l": "6.2.0",
+    "Darwin": "6.2.0",
+    "Darwin_arm64": "7.3.1"
+}
+
 
 ################################################################################
 
@@ -37,7 +47,11 @@ def get_platform():
     return platform.system()
 
 def get_machine():
-    return platform.machine()
+    if get_platform() == "Darwin" and "ARCHFLAGS" in os.environ:
+        # crossbuild settings: ARCHFLAGS="-arch arm64" or ARCHFLAGS="-arch x86_64"
+        return os.environ["ARCHFLAGS"].split()[1]
+    else:
+        return platform.machine()
 
 def rxglob(path, pattern, recursive=False):
     if isinstance(pattern, str):
@@ -303,12 +317,12 @@ class BuildSupport(object):
         pylon_version_no_build = match.group(1)
         pylon_version_tag = match.group(2)
 
-        reference_version = VersionInfo.ReferencePylonVersion[get_platform()]
+        reference_version = ReferencePylonVersion[get_platform()]
 
         # check for a more specialized reference version
         platform_machine = get_platform() + "_" + get_machine()
-        if platform_machine in VersionInfo.ReferencePylonVersion:
-            reference_version = VersionInfo.ReferencePylonVersion[platform_machine]
+        if platform_machine in ReferencePylonVersion:
+            reference_version = ReferencePylonVersion[platform_machine]
 
         if (
             pylon_version_no_build == reference_version and
@@ -796,7 +810,9 @@ class BuildSupportLinux(BuildSupport):
 
 class BuildSupportMacOS(BuildSupport):
 
-    FrameworkPath = os.getenv('PYLON_ROOT', '/Library/Frameworks/')
+    FrameWorkPath_env = os.getenv('PYLON_FRAMEWORK_LOCATION', 'undef')
+
+    FrameworkPath = "/Library/Frameworks" if (FrameWorkPath_env=='undef' or FrameWorkPath_env=="") else FrameWorkPath_env
 
     FrameworkName = 'pylon.framework'
 
@@ -871,7 +887,7 @@ class BuildSupportMacOS(BuildSupport):
         except FileNotFoundError:
             msg = (
                 "Couldn't find pylon. Please install pylon in %s or tell us " +
-                "the installation location using the PYLON_ROOT environment " +
+                "the framwork search path of the pylon.framework using the PYLON_FRAMEWORK_LOCATION environment " +
                 "variable"
                 )
             error(msg, self.FrameworkPath)
@@ -912,8 +928,15 @@ class BuildSupportMacOS(BuildSupport):
             shutil.copytree(
                 os.path.join(self.FrameworkPath, self.FrameworkName),
                 full_dst,
-                symlinks=True
+                symlinks=True,
+                ignore = shutil.ignore_patterns("*.h","CMake","Tools")
                 )
+            # cleanup double TL entries in pylon 6.2.0
+            if self.get_pylon_version() == "6.2.0.18677":
+                for p in Path(f"{full_dst}").glob("**/*TL*.so"):
+                    if re.match(".*TL_[a-z]+\.so", p.name):
+                        info(f"DELETE {p}")
+                        os.remove(p)
 
 ################################################################################
 ################################################################################

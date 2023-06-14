@@ -1,14 +1,14 @@
 # This is a basic workflow to help you get started with Actions
 name: build
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches:
       - '**'
     tags:
-      - '*.*.*' 
+      - '*.*.*'
   pull_request:
     branches: [ master ]
 
@@ -34,7 +34,8 @@ jobs:
           ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_x86_64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.1.2.19990.zip
+          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.2.0.21487.dmg
+          ${PYLON_DOWNLOAD_ARM64_URL_BASE}pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh
           EOF
       - uses: actions/cache@v3
         id: cache
@@ -49,6 +50,7 @@ jobs:
           PYLON_DOWNLOAD_URL_BASE_6_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_2 }}
           PYLON_DOWNLOAD_URL_BASE_6_3: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_3 }}
           PYLON_DOWNLOAD_URL_BASE_7_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_7_2 }}
+          PYLON_DOWNLOAD_ARM64_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_ARM64_URL_BASE }}
         run: |
           mkdir pylon-installer && cd pylon-installer
           while read line; do
@@ -64,7 +66,7 @@ jobs:
         with:
           name: pylon-installer
           path: pylon-installer
-          
+
       - name: Check for release build
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -104,12 +106,12 @@ jobs:
           ls pylon-installer
           docker run --rm --privileged multiarch/qemu-user-static:register --reset
           ./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon-installer $ARGS
-          
+
       - uses: actions/upload-artifact@v3
         with:
           name: build-results-${{ matrix.p }}-${{ matrix.a }}
           path: dist/*
-          
+
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
@@ -123,89 +125,57 @@ jobs:
         run: |
           sudo pip3 install twine
           python3 -m twine upload --non-interactive --skip-existing dist/*
-          
-          
+
+
   build-macos:
     needs: prepare
-    runs-on: macos-10.15
+    runs-on: macos-11
     strategy:
       fail-fast: false
-      matrix:
-        a: [cp36, cp37, cp38, cp39, cp3_10, cp3_11]
-    env:
-      P: macosx-10.15-intel
-      A: ${{ matrix.a }}
     steps:
       - uses: actions/checkout@v3
-        
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.6 - 3.11"
+
       - uses: actions/download-artifact@v3
         with:
           name: pylon-installer
           path: pylon-installer
 
-
-      - name: Build and test
+      - name: Setup pylon
         run: |
-          eval "$(pyenv init -)"
-          export PATH=$HOME/.pyenv/bin:$PATH
-          case $A in
-            cp36)
-              PYENV_VERSION="3.6"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.6.8/python-3.6.8-macosx10.9.pkg"
-              ;;
-            cp37)
-              PYENV_VERSION="3.7"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.7.9/python-3.7.9-macosx10.9.pkg"
-              ;;
-            cp38)
-              PYENV_VERSION="3.8"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.8.7/python-3.8.7-macosx10.9.pkg"
-              ;;
-            cp39)
-              PYENV_VERSION="3.9"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.9.1/python-3.9.1-macosx10.9.pkg"
-              ;;
-            cp3_10)
-              PYENV_VERSION="3.10"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.10.2/python-3.10.2-macos11.pkg"
-              ;;
-            cp3_11)
-              PYENV_VERSION="3.11"
-              curl -sSfL -o python.pkg "https://www.python.org/ftp/python/3.11.0/python-3.11.0-macos11.pkg"
-              ;;
-            *)
-              echo "Invalid python version $A"
-              exit -1
-              ;;
-          esac
-          sudo installer -pkg python.pkg -target /
+          # install x86_64
           cd pylon-installer
-          unzip pylon-*.zip
           hdiutil attach pylon-*.dmg
           sudo installer -pkg /Volumes/pylon\ *\ Camera\ Software\ Suite/pylon-*.pkg  -target /
           hdiutil detach /Volumes/pylon\ *\ Camera\ Software\ Suite
-          brew install swig
-          cd ${GITHUB_WORKSPACE}
-          pip3 install numpy
-          pip3 install wheel
-          # pylon 6.1 is linked against 10.14
-          export MACOSX_DEPLOYMENT_TARGET=10.14
-          python3 setup.py test
-          python3 setup.py bdist_wheel
-          
+          # install arm64
+          chmod a+x pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh
+          ./pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh --accept
+          mkdir /tmp/pylon_framework
+          cp -pr pylon/Frameworks/* /tmp/pylon_framework
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.13.0
+        env:
+          PYLON_FRAMEWORK_ARM64: /tmp/pylon_framework
+          PYLON_FRAMEWORK_X86_64: /Library/Frameworks
+
       - uses: actions/upload-artifact@v3
         with:
-          name: build-results-macosx-${{ matrix.a }}
-          path: dist/*
-     
+          path: ./wheelhouse/*.whl
+
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: dist/*
-      
+          files: ./wheelhouse/*.whl
+
       - name: Publish package to (Test)PyPI
         if: needs.prepare.outputs.is_release_build == 'true'
         run: |
@@ -226,4 +196,4 @@ jobs:
       with:
         name: pylon-installer
 
-     
+
