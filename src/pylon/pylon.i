@@ -676,6 +676,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 // in all the places where pylon uses 'GenApi'.
 #define GenApi GENAPI_NAMESPACE
 
+%include "PylonVersionInfo.i"
 %include "TypeMappings.i"
 %include "Container.i"
 %include "PixelType.i"
