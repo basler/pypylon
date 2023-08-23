@@ -60,61 +60,6 @@
 // ensure the above typemap will not be applied to const references
 %typemap(argout, noblock=1) const Pylon::DeviceInfoList_t & {}
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// DeviceInfoList intput
-//
-// needed for EnumerateDevices(
-//     DeviceInfoList_t& list,
-//     const DeviceInfoList_t& filter,
-//     bool addToList = false
-//     );
-//
-
-// Type check to make overloading work
-%typemap(typecheck, precedence=SWIG_TYPECHECK_POINTER)
-const Pylon::DeviceInfoList_t&
-{
-    // We need a list
-    $1 = PyList_Check($input) ? 1 : 0;
-}
-
-// Convert a python list of wrapped DeviceInfos to a DeviceInfoList_t
-%typemap(in, numinputs=1, noblock=1)
-const Pylon::DeviceInfoList_t&
-(Pylon::DeviceInfoList_t di_list)
-{
-    if (PyList_Check($input))
-    {
-        Py_ssize_t size = PyList_Size($input);
-        for (Py_ssize_t i = 0; i < size; i++)
-        {
-            // python object possibly wrapping a DeviceInfo
-            PyObject *o = PyList_GetItem($input,i);
-            // pointer to wrapped DeviceInfo
-            void *w = 0;
-            if (!SWIG_IsOK(
-                    SWIG_ConvertPtr(o, &w, SWIGTYPE_p_Pylon__CDeviceInfo, 0)
-                    )
-                )
-            {
-                PyErr_SetString(
-                    PyExc_TypeError,
-                    "list must contain DeviceInfo objects"
-                    );
-                SWIG_fail;
-            }
-            di_list.push_back(*reinterpret_cast<Pylon::CDeviceInfo*>(w));
-        }
-        $1 = &di_list;
-    }
-    else
-    {
-        PyErr_SetString(PyExc_TypeError,"not a list");
-        SWIG_fail;
-    }
-}
-
 // This out-typemap tries to downcast the TL to the specific implementation.
 // Currently the only TL with an extended interface is GigE.
 %typemap(out) Pylon::ITransportLayer*
@@ -146,9 +91,4 @@ const Pylon::DeviceInfoList_t&
 
 %typemap(in) Pylon::TlInfoList_t&;
 %typemap(argout) Pylon::TlInfoList_t&;
-%typemap(in) Pylon::DeviceInfoList_t&;
-%typemap(argout) Pylon::DeviceInfoList_t&;
-%typemap(argout) const Pylon::DeviceInfoList_t&;
-%typemap(typecheck) const Pylon::DeviceInfoList_t&;
-%typemap(in) const Pylon::DeviceInfoList_t&;
 %typemap(out) Pylon::ITransportLayer*;
