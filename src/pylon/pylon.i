@@ -61,11 +61,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %include <exception.i>
 %include <std_container.i>
 
-// PylonIncludes.h will include DeviceFactory.h. We want to ignore
-// IDeviceFactory that is declared there.
-%ignore IDeviceFactory;
-
-
 %{
 
 #include <vector>
@@ -689,6 +684,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "DeviceInfo.i"
 %include "InterfaceInfo.i"
 %include "TlInfo.i"
+%include "DeviceFactory.i"
 %include "DeviceFactory.i"
 #if PYLON_VERSION_MAJOR >= 6
 %include "Interface.i"
