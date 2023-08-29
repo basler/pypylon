@@ -8,7 +8,7 @@ from pypylon import pylon
 
 cam = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
 cam.Open()
-print(cam.GetSfncVersion)
+print(cam.GetSfncVersion())
 cam.MaxNumBuffer = 22
 
 cam.GainRaw.Value = 127
