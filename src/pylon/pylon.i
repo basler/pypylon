@@ -61,11 +61,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %include <exception.i>
 %include <std_container.i>
 
-// PylonIncludes.h will include DeviceFactory.h. We want to ignore
-// IDeviceFactory that is declared there.
-%ignore IDeviceFactory;
-
-
 %{
 
 #include <vector>
