@@ -32,7 +32,7 @@ def main():
 
         return 0
     except genicam.GenericException as e:
-        print("Error ", e.GetDescription())
+        print("Error ", e)
 
         return -1
 

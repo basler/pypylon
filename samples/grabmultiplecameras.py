@@ -93,7 +93,7 @@ try:
 
 except genicam.GenericException as e:
     # Error handling
-    print("An exception occurred.", e.GetDescription())
+    print("An exception occurred.", e)
     exitCode = 1
 
 # Comment the following two lines to disable waiting on exit.

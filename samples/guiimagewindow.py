@@ -41,4 +41,4 @@ try:
 except genicam.GenericException as e:
     # Error handling.
     print("An exception occurred.")
-    print(e.GetDescription())
+    print(e)

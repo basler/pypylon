@@ -54,6 +54,6 @@ try:
             targetImage.Save(pylon.ImageFileFormat_Png, filename)
 
     except genicam.GenericException as e:
-        print("Could not grab an image: ", e.GetDescription())
+        print("Could not grab an image: ", e)
 except genicam.GenericException as e:
-    print("An exception occurred. ", e.GetDescription())
+    print("An exception occurred. ", e)
