@@ -65,7 +65,7 @@ try:
 except genicam.GenericException as e:
     # Error handling.
     print("An exception occurred.")
-    print(e.GetDescription())
+    print(e)
     exitCode = 1
 
 sys.exit(exitCode)
