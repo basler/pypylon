@@ -1,8 +1,9 @@
-Version 2.3.0rc1
+Version 2.3.0
     - Date 2023-09-01
     - Add binding for VersionInfo
     - Add bindings to device factory methods on transport layers
     - Fix usage of Exception.GetDescription() in the samples
+
 Version 2.2.0
     - Date 2023-06-14
     - Integrate macos build for arm64
