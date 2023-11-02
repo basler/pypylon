@@ -47,6 +47,41 @@ while camera.IsGrabbing():
 camera.Close()
 ```
 
+## Getting Started with pylon Data Processing
+
+ * pypylon additionally supports the pylon data processing API extension.
+ * The [pylon Workbench](https://docs.baslerweb.com/overview-of-the-workbench) allows you to create image processing designs using a graphical editor.
+ * Hint: The [pylondataprocessing_tests](https://github.com/basler/pypylon/blob/master/tests/pylondataprocessing_tests) can optionally be used as a source of information about the syntax of the API.
+ * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/dataprocessing_barcode.py) or use the following snippet:
+
+```python
+from pypylon import pylondataprocessing
+import os
+
+resultCollector = pylondataprocessing.GenericOutputObserver()
+recipe = pylondataprocessing.Recipe()
+recipe.Load('dataprocessing_barcode.precipe')
+recipe.RegisterAllOutputsObserver(resultCollector, pylon.RegistrationMode_Append);
+recipe.Start()
+
+for i in range(0, 100):
+    if resultCollector.GetWaitObject().Wait(5000):
+        result = resultCollector.RetrieveResult()
+        # Print the barcodes
+        variant = result["Barcodes"]
+        if not variant.HasError():
+            # Print result data
+            for barcodeIndex in range(0, variant.NumArrayValues):
+                print(variant.GetArrayValue(barcodeIndex).ToString())
+        else:
+            print("Error: " + variant.GetErrorDescription())
+    else:
+        print("Result timeout")
+        break
+
+recipe.Unload()
+```
+
 # Installation
 ## Prerequisites
  * Installed [pylon](https://www.baslerweb.com/pylon)
