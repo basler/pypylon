@@ -434,6 +434,7 @@ try:
 except:
   pass
 
+import warnings
 def needs_numpy(func):
  def func_wrapper(*args, **kwargs):
     e = None

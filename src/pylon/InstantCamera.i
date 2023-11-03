@@ -47,6 +47,7 @@ namespace Pylon {
         if hasattr(InstantCameraParams_Params, attribute) or attribute in ( "thisown","this") or attribute.startswith("__"):
             object.__setattr__(self, attribute, val)
         else:
+            warnings.warn(f"Setting a feature value by direct assignment is deprecated. Use <nodemap>.{attribute}.Value = {val}", DeprecationWarning, stacklevel=2)
             self.GetNodeMap().GetNode(attribute).SetValue(val)
 
     def __dir__(self):
