@@ -44,7 +44,7 @@ def createXMLSnippet(file_content):
 
     footer = "</RegisterDescription>\n"
 
-    start_rule = re.compile("^\\s*\"\"\"\[?\\s*(\\S+)@(\\S+)\\|(\\S+)")
+    start_rule = re.compile("^\\s*\"\"\"\\[?\\s*(\\S+)@(\\S+)\\|(\\S+)")
     end_rule = re.compile("^\\s*\"\"\"")
 
     in_snippet = False
