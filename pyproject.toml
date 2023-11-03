@@ -9,6 +9,14 @@ build = "*-macosx_*"
 skip  = "pp*"
 test-requires = "pytest numpy"
 
+[tool.cibuildwheel.windows]
+before-all = 'echo "Building: %CIBW_BUILD%"'
+test-command = [
+             '''
+             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated {project}/tests/pylondataprocessing_tests
+             '''
+             ]
+
 [tool.cibuildwheel.macos]
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
