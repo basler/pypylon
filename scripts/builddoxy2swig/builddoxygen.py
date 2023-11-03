@@ -27,7 +27,7 @@ shutil.rmtree(path+"\\xml")
 os.system("( type "+path+"\\Doxyfile & echo INPUT=\""+pylonDevDir+"\\include\\GenApi\" & echo OUTPUT_DIRECTORY=\""+path+"\") | doxygen.exe -")
 
 #runs doxy2swig for GenApi
-subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.xml\" \""+path[:-22]+"pypylon\\genicam\\DoxyGenApi.i\"");
+subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.xml\" \""+path[:-22]+"src\\genicam\\DoxyGenApi.i\"");
 
 
 
@@ -35,9 +35,19 @@ subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.
 os.system("( type "+path+"\\Doxyfile & echo INPUT=\""+pylonDevDir+"\\include\\pylon\"  & echo OUTPUT_DIRECTORY=\""+path+"\") | doxygen.exe -")
 
 #runs doxy2swig for pylon
-subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.xml\" \""+path[:-22]+"pypylon\\pylon\\DoxyPylon.i\"");
+subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.xml\" \""+path[:-22]+"src\\pylon\\DoxyPylon.i\"");
 
 #deletes the xml folder if present
 shutil.rmtree(path+"\\xml")
 
-print("Successfully generated pylon/DoxyPylon.i and genapi/DoxyGenApi.i")
+
+#runs doxygen over the pylon folder in PYLON_DEV_DIR/includes
+os.system("( type "+path+"\\Doxyfile & echo INPUT=\""+pylonDevDir+"\\include\\pylondataprocessing\"  & echo OUTPUT_DIRECTORY=\""+path+"\") | doxygen.exe -")
+
+#runs doxy2swig for pylon
+subprocess.call("python "+path+"\\doxy2swig\\doxy2swig.py \""+path+"\\xml\index.xml\" \""+path[:-22]+"src\\pylondataprocessing\\DoxyPylonDataProcessing.i\"");
+
+#deletes the xml folder if present
+shutil.rmtree(path+"\\xml")
+
+print("Successfully generated pylon/DoxyPylon.i, genapi/DoxyGenApi.i and pylondataprocessing/DoxyPylonDataProcessing.i")

@@ -1,0 +1,257 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "1.0.0",
+    "MinRequiredSoftwareVersion": "1.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "UiGraphInputOutput": [
+        {
+          "id": "<GraphInput>",
+          "x": 293.0,
+          "y": 402.0
+        },
+        {
+          "id": "<GraphOutput>",
+          "x": 1178.0,
+          "y": 232.0
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "ImageFormatConverter",
+          "x": 751.5,
+          "y": 130.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "ImageFormatConverter",
+              "pinName": "Image",
+              "pinDirection": "Output"
+            }
+          ]
+        },
+        {
+          "id": "ImageLoading",
+          "x": 326.5,
+          "y": 154.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "ImageLoading",
+              "pinName": "Image",
+              "pinDirection": "Output"
+            },
+            {
+              "nodeName": "ImageLoading",
+              "pinName": "ImagePath",
+              "pinDirection": "Output"
+            },
+            {
+              "nodeName": "ImageLoading",
+              "pinName": "RunCount",
+              "pinDirection": "Output"
+            }
+          ]
+        },
+        {
+          "id": "ImageFormatConverter2",
+          "x": 635.5,
+          "y": 522.0020576131687,
+          "WatchNodePins": [
+            {
+              "nodeName": "ImageFormatConverter2",
+              "pinName": "Image",
+              "pinDirection": "Output"
+            }
+          ]
+        }
+      ],
+      "PylonMetaData": {
+        "ObjectVersion": "1.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      }
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "ImageFormatConverter",
+          "Enabled": true,
+          "NodeTypeID": "4049EA56-3827-4FAF-9478-C3BA02E4A0CB",
+          "Type": "Plugin::PylonVToolPackageBase::ImageFormatConverter",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.1.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "OutputPixelFormat": 17301505,
+            "OutputOrientation": "Unchanged",
+            "OutputBitAlignment": "LsbAligned",
+            "OutputPaddingX": 0,
+            "MaxNumThreads": 1
+          }
+        },
+        {
+          "Name": "ImageFormatConverter2",
+          "Enabled": true,
+          "NodeTypeID": "4049EA56-3827-4FAF-9478-C3BA02E4A0CB",
+          "Type": "Plugin::PylonVToolPackageBase::ImageFormatConverter",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.1.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "OutputPixelFormat": 17301505,
+            "OutputOrientation": "Unchanged",
+            "OutputBitAlignment": "LsbAligned",
+            "OutputPaddingX": 0,
+            "MaxNumThreads": 1
+          }
+        },
+        {
+          "Name": "ImageLoading",
+          "Enabled": true,
+          "NodeTypeID": "4F2B72DC-294B-4503-885A-6B73D26EB6D7",
+          "Type": "Plugin::PylonVToolPackageBase::ImageLoading",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.0.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "sourcePath": "",
+            "sortBy": 0,
+            "numberOfImages": 3,
+            "framesPerSecond": 50,
+            "numberOfRuns": 1,
+            "runContinuously": false
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "Connection",
+          "Source": "ImageLoading",
+          "Sink": "ImageFormatConverter",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image",
+          "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "Connection3",
+          "Source": "ImageLoading",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "ImageLoader",
+          "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "Connection2",
+          "Source": "ImageFormatConverter",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image",
+          "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "Connection4",
+          "Source": "ImageLoading",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "ImagePath",
+          "SinkInputPath": "ImagePath",
+          "ValueTypeID": "1F377480-E3BD-5541-AA44-A360C924D6D5"
+        },
+        {
+          "Name": "Connection5",
+          "Source": "ImageLoading",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "RunCount",
+          "SinkInputPath": "RunCount",
+          "ValueTypeID": "9753E13B-1CFD-5299-9A0F-2ECF608666CC"
+        },
+        {
+          "Name": "Connection6",
+          "Source": "<GraphInput>",
+          "Sink": "ImageFormatConverter2",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image",
+          "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "Connection7",
+          "Source": "ImageFormatConverter2",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "ImageConverter2",
+          "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": [
+            {
+              "Name": "Image",
+              "Type": "Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+            }
+          ]
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "Image",
+              "Type": "Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+            },
+            {
+              "Name": "ImageLoader",
+              "Type": "Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+            },
+            {
+              "Name": "ImagePath",
+              "Type": "Pylon::DataProcessing::Core::IString",
+              "ValueTypeID": "1F377480-E3BD-5541-AA44-A360C924D6D5"
+            },
+            {
+              "Name": "RunCount",
+              "Type": "Pylon::DataProcessing::Core::IInteger",
+              "ValueTypeID": "9753E13B-1CFD-5299-9A0F-2ECF608666CC"
+            },
+            {
+              "Name": "ImageConverter2",
+              "Type": "Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "2C893358-0EEF-5260-B262-8CB32DF2C394"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.0.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 2
+        }
+      }
+    }
+  }
+}
