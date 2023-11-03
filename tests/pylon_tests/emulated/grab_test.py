@@ -9,8 +9,8 @@ class GrabTestSuite(PylonEmuTestCase):
 
         camera = self.create_first()
         camera.Open()
-        camera.ExposureTimeAbs.SetValue(10000.0)
-        self.assertEqual(10000, camera.ExposureTimeAbs.GetValue())
+        camera.ExposureTimeAbs.Value = 10000.0
+        self.assertEqual(10000, camera.ExposureTimeAbs.Value)
         result = camera.GrabOne(1000)
         actual = list(result.Array[0:20, 0])
         expected = [actual[0] + i for i in range(20)]
@@ -22,8 +22,8 @@ class GrabTestSuite(PylonEmuTestCase):
         imageCounter = 0
         camera = self.create_first()
         camera.Open()
-        camera.ExposureTimeAbs.SetValue(10000.0)
-        self.assertEqual(10000, camera.ExposureTimeAbs.GetValue())
+        camera.ExposureTimeAbs.Value = 10000.0
+        self.assertEqual(10000, camera.ExposureTimeAbs.Value)
         camera.StartGrabbingMax(countOfImagesToGrab)
         # Camera.StopGrabbing() is called automatically by the RetrieveResult() method
         # when c_countOfImagesToGrab images have been retrieved.

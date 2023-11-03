@@ -26,9 +26,9 @@ camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
 camera.Open()
 
 # demonstrate some feature access
-new_width = camera.Width.GetValue() - camera.Width.GetInc()
-if new_width >= camera.Width.GetMin():
-    camera.Width.SetValue(new_width)
+new_width = camera.Width.Value - camera.Width.Inc
+if new_width >= camera.Width.Min:
+    camera.Width.Value = new_width
 
 numberOfImagesToGrab = 100
 camera.StartGrabbingMax(numberOfImagesToGrab)

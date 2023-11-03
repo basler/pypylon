@@ -27,10 +27,10 @@ for info in iface_infos:
             # Since we are using the CXP TL, we assume there is a node map.
             raise ValueError("node map should be present")
         node = nmap.GetNode('CxpPoCxpStatus')
-        old_value = node.GetValue()
+        old_value = node.Value
         new_value = 'Auto' if old_value == 'Off' else 'Off'
         print("    %s: %s -> %s" % (info.GetFriendlyName(), old_value, new_value))
-        node.SetValue(new_value)
+        node.Value = new_value
 
 # A transport layer object has to be released when it is no longer needed.
 pylon.TlFactory.GetInstance().ReleaseTl(tl)

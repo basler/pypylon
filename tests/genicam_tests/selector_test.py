@@ -91,7 +91,7 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(1, len(selected))
-        Node01 = selected[0].GetNode()
+        Node01 = selected[0].Node
 
         name01 = "catUserSet"
         self.assertEqual(name01, Node01.GetName())
@@ -171,8 +171,8 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(2, len(selected))
-        Node01 = selected[0].GetNode()
-        Node02 = selected[1].GetNode()
+        Node01 = selected[0].Node
+        Node02 = selected[1].Node
 
         name01 = "catUserSet"
         name02 = "UserSetVersion"
@@ -245,8 +245,8 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(2, len(selected))
-        Node01 = selected[0].GetNode()
-        Node02 = selected[1].GetNode()
+        Node01 = selected[0].Node
+        Node02 = selected[1].Node
 
         name01 = "catUserSet"
         name02 = "UserSetVersion"
@@ -257,7 +257,7 @@ class SelectorTestSuite(GenicamTestCase):
         Register(Node01, c.doCount)
         Register(Node02, c.doCount)
 
-        SelectorNode = Selector.GetNode()
+        SelectorNode = Selector.Node
         SelectorNode.InvalidateNode()
 
     # Test selector of int reg type
@@ -326,8 +326,8 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(2, len(selected))
-        Node01 = selected[0].GetNode()
-        Node02 = selected[1].GetNode()
+        Node01 = selected[0].Node
+        Node02 = selected[1].Node
 
         name01 = "regUserSetName"
         name02 = "UserSetVersion"
@@ -391,7 +391,7 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(1, len(selected))
-        Node01 = selected[0].GetNode()
+        Node01 = selected[0].Node
 
         name01 = "Entry"
         self.assertEqual(name01, Node01.GetName())
@@ -399,9 +399,9 @@ class SelectorTestSuite(GenicamTestCase):
         c = cb()
         Register(Node01, c.doCount)
 
-        for i in range(Selector.GetMin(), Selector.GetMax() + 1, Selector.GetInc()):
+        for i in range(Selector.Min, Selector.Max + 1, Selector.Inc):
             print(i)
-            Selector.SetValue(i)
+            Selector.Value = i
             # print(Value.ToString())
 
         self.assertEqual(10, c.Count())
@@ -436,7 +436,7 @@ class SelectorTestSuite(GenicamTestCase):
 
         SelectingFeatures = SelectedFeature.Node.GetSelectingFeatures()
         self.assertEqual(1, len(SelectingFeatures))
-        self.assertEqual(SelectingFeatures[0].GetNode().GetName(), "ASelector")
+        self.assertEqual(SelectingFeatures[0].Node.GetName(), "ASelector")
 
         Category = Camera.GetNode("ACategory")
         SelectingFeatures = Category.Node.GetSelectingFeatures()
@@ -481,19 +481,19 @@ class SelectorTestSuite(GenicamTestCase):
 
         SelectingFeatures = Integer.Node.GetSelectingFeatures()
         self.assertEqual(1, len(SelectingFeatures))
-        self.assertEqual(SelectingFeatures[0].GetNode().GetName(), "Selector")
+        self.assertEqual(SelectingFeatures[0].Node.GetName(), "Selector")
 
         Integer = Camera.GetNode("Min")
 
         SelectingFeatures = Integer.Node.GetSelectingFeatures()
         self.assertEqual(1, len(SelectingFeatures))
-        self.assertEqual(SelectingFeatures[0].GetNode().GetName(), "Selector")
+        self.assertEqual(SelectingFeatures[0].Node.GetName(), "Selector")
 
         Integer = Camera.GetNode("Value")
 
         SelectingFeatures = Integer.Node.GetSelectingFeatures()
         self.assertEqual(1, len(SelectingFeatures))
-        self.assertEqual(SelectingFeatures[0].GetNode().GetName(), "Selector")
+        self.assertEqual(SelectingFeatures[0].Node.GetName(), "Selector")
 
         Integer = Camera.GetNode("Selector")
 
@@ -510,27 +510,27 @@ class SelectorTestSuite(GenicamTestCase):
         # CTestCamera_v1_1 Camera
         # Camera._LoadDLL()
 
-        # Camera.Gain[ GainSelector_Green ].SetValue( 42 )
-        # self.assertEqual( (int64_t) 42LL, dynamic_cast<IInteger*>(Camera.GetNode("GainGreen")).GetValue() )
+        # Camera.Gain[ GainSelector_Green ].Value =  42 
+        # self.assertEqual( (int64_t) 42LL, dynamic_cast<IInteger*>(Camera.GetNode("GainGreen")).Value )
         # self.assertEqual( gcstring("Green"), Camera.GainSelector.ToString() )
-        # Camera.Gain[ GainSelector_Green ].SetValue( 815 )
-        # self.assertEqual( (int64_t) 815LL, dynamic_cast<IInteger*>(Camera.GetNode("GainGreen")).GetValue() )
+        # Camera.Gain[ GainSelector_Green ].Value =  815 
+        # self.assertEqual( (int64_t) 815LL, dynamic_cast<IInteger*>(Camera.GetNode("GainGreen")).Value )
 
-        # Camera.Gain[ GainSelector_Red ].SetValue( 42 )
-        # self.assertEqual( (int64_t) 42LL, dynamic_cast<IInteger*>(Camera.GetNode("GainRed")).GetValue() )
+        # Camera.Gain[ GainSelector_Red ].Value =  42 
+        # self.assertEqual( (int64_t) 42LL, dynamic_cast<IInteger*>(Camera.GetNode("GainRed")).Value )
         # self.assertEqual( gcstring("Red"), Camera.GainSelector.ToString() )
-        # Camera.Gain[ GainSelector_Red ].SetValue( 815 )
-        # self.assertEqual( (int64_t) 815LL, dynamic_cast<IInteger*>(Camera.GetNode("GainRed")).GetValue() )
+        # Camera.Gain[ GainSelector_Red ].Value =  815 
+        # self.assertEqual( (int64_t) 815LL, dynamic_cast<IInteger*>(Camera.GetNode("GainRed")).Value )
 
-        # Camera.Gain[ GainMode_Analog ].SetValue( 42 )
-        # Camera.Gain[ GainSelector_Green ][ GainMode_Analog ].SetValue( 42 )
+        # Camera.Gain[ GainMode_Analog ].Value =  42 
+        # Camera.Gain[ GainSelector_Green ][ GainMode_Analog ].Value =  42 
 
-        # Camera.Gain[ GainMode_Digital ][ GainSelector_Blue ].SetValue( 12345 )
-        # self.assertEqual( (int64_t) 12345LL, dynamic_cast<IInteger*>(Camera.GetNode("GainBlue")).GetValue() )
+        # Camera.Gain[ GainMode_Digital ][ GainSelector_Blue ].Value =  12345 
+        # self.assertEqual( (int64_t) 12345LL, dynamic_cast<IInteger*>(Camera.GetNode("GainBlue")).Value )
         # self.assertEqual( gcstring("Blue"), Camera.GainSelector.ToString() )
         # self.assertEqual( gcstring("Digital"), Camera.GainMode.ToString() )
 
-        # Camera.Gain.SetSelector( GainSelector_Green ).SetSelector( GainMode_Analog ).SetSelector( 3 ).SetValue( 42 )
+        # Camera.Gain.SetSelector( GainSelector_Green ).SetSelector( GainMode_Analog ).SetSelector( 3 ).Value =  42 
         # Camera.Gain[ GainSelector_Green ][ GainMode_Analog ][3] = 42
         # endif
         pass
@@ -584,7 +584,7 @@ class SelectorTestSuite(GenicamTestCase):
         self.assertTrue(Selector.Node.IsSelector())
         selected = Selector.Node.GetSelectedFeatures()
         self.assertEqual(1, len(selected))
-        Node01 = selected[0].GetNode()
+        Node01 = selected[0].Node
 
         name01 = "UserSetVersion"
         self.assertEqual(name01, Node01.GetName())
@@ -675,28 +675,28 @@ class SelectorTestSuite(GenicamTestCase):
 
             SelectedFeatures = Selector.Node.GetSelectedFeatures()
             for Feature in SelectedFeatures:
-                print("pSelected = '", Feature.GetNode().GetName(), "'")
+                print("pSelected = '", Feature.Node.GetName(), "'")
                 pass
 
             SelectingFeatures = Selector.Node.GetSelectingFeatures()
             for Feature in SelectingFeatures:
-                print("pSelecting = '", Feature.GetNode().GetName(), "'")
+                print("pSelecting = '", Feature.Node.GetName(), "'")
                 pass
 
             if Node.Node.GetName() == "NodeA":
                 self.assertTrue(len(SelectedFeatures) == 0 and len(SelectingFeatures) == 1 and SelectingFeatures[
-                    0].GetNode().GetName() == "NodeS")
+                    0].Node.GetName() == "NodeS")
 
             if Node.Node.GetName() == "NodeB":
                 self.assertTrue(len(SelectedFeatures) == 0 and len(SelectingFeatures) == 1 and SelectingFeatures[
-                    0].GetNode().GetName() == "NodeS")
+                    0].Node.GetName() == "NodeS")
 
             if Node.Node.GetName() == "NodeC":
                 self.assertTrue(len(SelectedFeatures) == 0 and len(SelectingFeatures) == 0)
 
             if Node.Node.GetName() == "NodeS":
-                self.assertTrue(len(SelectedFeatures) == 2 and SelectedFeatures[0].GetNode().GetName() == "NodeA"
-                                and SelectedFeatures[1].GetNode().GetName() == "NodeB"
+                self.assertTrue(len(SelectedFeatures) == 2 and SelectedFeatures[0].Node.GetName() == "NodeA"
+                                and SelectedFeatures[1].Node.GetName() == "NodeB"
                                 and len(SelectingFeatures) == 0)
 
 

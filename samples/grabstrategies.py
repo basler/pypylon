@@ -33,7 +33,7 @@ print("Using device ", camera.GetDeviceInfo().GetModelName())
 
 # The parameter MaxNumBuffer can be used to control the count of buffers
 # allocated for grabbing. The default value of this parameter is 10.
-camera.MaxNumBuffer = 15
+camera.MaxNumBuffer.Value = 15
 
 # Open the camera.
 camera.Open()
@@ -120,7 +120,7 @@ print("Grab using strategy GrabStrategy_LatestImages:")
 
 # The size of the output queue can be adjusted.
 # When using this strategy the OutputQueueSize parameter can be changed during grabbing.
-camera.OutputQueueSize = 2
+camera.OutputQueueSize.Value = 2
 
 camera.StartGrabbing(pylon.GrabStrategy_LatestImages)
 
@@ -152,10 +152,10 @@ while True:
 print("Retrieved ", buffersInQueue, " grab results from output queue.")
 
 # When setting the output queue size to 1 this strategy is equivalent to grab strategy GrabStrategy_LatestImageOnly.
-camera.OutputQueueSize = 1
+camera.OutputQueueSize.Value = 1
 
 # When setting the output queue size to CInstantCamera::MaxNumBuffer this strategy is equivalent to GrabStrategy_OneByOne.
-camera.OutputQueueSize = camera.MaxNumBuffer.Value
+camera.OutputQueueSize.Value = camera.MaxNumBuffer.Value
 
 # Stop the grabbing.
 camera.StopGrabbing()

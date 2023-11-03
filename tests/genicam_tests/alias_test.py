@@ -50,16 +50,16 @@ class AliasTestSuite(GenicamTestCase):
         # CPPUNIT_ASSERT( (bool) NoAlias )
 
         # retrieving the alias manually
-        Alias = Abs.GetNode().GetCastAlias()
+        Alias = Abs.Node.GetCastAlias()
         # CPPUNIT_ASSERT( (bool) ptrAlias )
         self.assertEqual("Raw", Alias.Node.GetName())
 
         # CIntegerPtr ptrIntAlias(ptrAlias)
         # CPPUNIT_ASSERT( (bool) ptrIntAlias )
-        # self.assertEqual( ptrRaw.GetValue(), ptrIntAlias.GetValue() )
+        # self.assertEqual( ptrRaw.Value, ptrIntAlias.Value )
 
         # retrieving the alias via helper function
-        self.assertEqual(Raw.GetValue(), Abs.GetIntAlias().GetValue())
+        self.assertEqual(Raw.Value, Abs.GetIntAlias().Value)
 
         # the same with references
 
@@ -71,7 +71,7 @@ class AliasTestSuite(GenicamTestCase):
     #         CIntegerRef refNoAlias
     #         refNoAlias.SetReference( ptrNoAlias )
     #         {
-    #             self.assertEqual( refRaw.GetValue(), refAbs.GetIntAlias().GetValue() )
+    #             self.assertEqual( refRaw.Value, refAbs.GetIntAlias().Value )
     #             self.assertEqual( (IEnumeration*)NULL, refAbs.GetEnumAlias() )
     #         }
 
@@ -114,7 +114,7 @@ class AliasTestSuite(GenicamTestCase):
         # CPPUNIT_ASSERT( (bool) ptrRaw )
 
         # *ptrAbs = 0.01 # 10 ms
-        # self.assertEqual( (int64_t) 500LL, ptrAbs.GetIntAlias().GetValue() )
+        # self.assertEqual( (int64_t) 500LL, ptrAbs.GetIntAlias().Value )
 
     def test_SliderUseCases(self):
         # if(GenApiSchemaVersion == v1_0)
@@ -201,7 +201,7 @@ class AliasTestSuite(GenicamTestCase):
         self.assertIsNotNone(Gain.GetIntAlias())
 
         # compute the number of ticks to draw on the slider
-        NumberOfTicks = (Gain.GetIntAlias().GetMax() - Gain.GetIntAlias().GetMin()) / Gain.GetIntAlias().GetInc()
+        NumberOfTicks = (Gain.GetIntAlias().Max - Gain.GetIntAlias().Min) / Gain.GetIntAlias().Inc
         self.assertEqual(4, NumberOfTicks)
 
         # initialize the gain
@@ -220,13 +220,13 @@ class AliasTestSuite(GenicamTestCase):
         self.assertEqual("8", Gain.ToString())
 
         # Tick the slider up
-        TickUp = min(Gain.GetIntAlias().GetValue() + Gain.GetIntAlias().GetInc(), Gain.GetIntAlias().GetMax())
-        Gain.GetIntAlias().SetValue(TickUp)
+        TickUp = min(Gain.GetIntAlias().Value + Gain.GetIntAlias().Inc, Gain.GetIntAlias().Max)
+        Gain.GetIntAlias().Value = TickUp
         self.assertEqual("16", Gain.ToString())
 
         # Try again (but now the maximum is already reached)
-        TickUp = min(Gain.GetIntAlias().GetValue() + Gain.GetIntAlias().GetInc(), Gain.GetIntAlias().GetMax())
-        Gain.GetIntAlias().SetValue(TickUp)
+        TickUp = min(Gain.GetIntAlias().Value + Gain.GetIntAlias().Inc, Gain.GetIntAlias().Max)
+        Gain.GetIntAlias().Value = TickUp
         self.assertEqual("16", Gain.ToString())
 
     def test_JoeCustomer(self):
@@ -305,23 +305,23 @@ class AliasTestSuite(GenicamTestCase):
 
         self.assertEqual(GainList.Node.Name, GainL.Node.Alias.Node.Name)
 
-        GainA.SetValue(41.6)
-        self.assertAlmostEqual(41.6, GainA.GetValue(), delta=self.FLOAT64_EPSILON)
+        GainA.Value = 41.6
+        self.assertAlmostEqual(41.6, GainA.Value, delta=self.FLOAT64_EPSILON)
 
-        GainR1.SetValue(41.6)
-        self.assertAlmostEqual(42.0, GainR1.GetValue(), delta=self.FLOAT64_EPSILON)
-        GainR1.SetValue(17.1)
-        self.assertAlmostEqual(17.0, GainR1.GetValue(), delta=self.FLOAT64_EPSILON)
+        GainR1.Value = 41.6
+        self.assertAlmostEqual(42.0, GainR1.Value, delta=self.FLOAT64_EPSILON)
+        GainR1.Value = 17.1
+        self.assertAlmostEqual(17.0, GainR1.Value, delta=self.FLOAT64_EPSILON)
 
-        GainR2.SetValue(5.2)
-        self.assertAlmostEqual(4.0, GainR2.GetValue(), delta=self.FLOAT64_EPSILON)
-        GainR2.SetValue(15.1)
-        self.assertAlmostEqual(16.0, GainR2.GetValue(), delta=self.FLOAT64_EPSILON)
+        GainR2.Value = 5.2
+        self.assertAlmostEqual(4.0, GainR2.Value, delta=self.FLOAT64_EPSILON)
+        GainR2.Value = 15.1
+        self.assertAlmostEqual(16.0, GainR2.Value, delta=self.FLOAT64_EPSILON)
 
-        GainL.SetValue(41.6)
-        self.assertAlmostEqual(50.0, GainL.GetValue(), delta=self.FLOAT64_EPSILON)
-        GainL.SetValue(76.0)
-        self.assertAlmostEqual(100.0, GainL.GetValue(), delta=self.FLOAT64_EPSILON)
+        GainL.Value = 41.6
+        self.assertAlmostEqual(50.0, GainL.Value, delta=self.FLOAT64_EPSILON)
+        GainL.Value = 76.0
+        self.assertAlmostEqual(100.0, GainL.Value, delta=self.FLOAT64_EPSILON)
 
     def test_VeronicaVendor(self):
         # if(GenApiSchemaVersion == v1_0)
@@ -407,33 +407,33 @@ class AliasTestSuite(GenicamTestCase):
         if (GainRaw):
             print("==> Gain with IInteger alias" + "\n")
 
-            print("GainMin = ", Gain.GetMin(), "\n")
+            print("GainMin = ", Gain.Min, "\n")
 
-            print("GainMax = ", Gain.GetMax(), "\n")
+            print("GainMax = ", Gain.Max, "\n")
 
-            NumTics = (GainRaw.GetMax() - GainRaw.GetMin()) / GainRaw.GetInc()
+            NumTics = (GainRaw.Max - GainRaw.Min) / GainRaw.Inc
             print("NumTics = ", NumTics, "\n")
 
-            GainRaw.SetValue(GainRaw.GetMin() + int(float(GainRaw.GetInc()) * float(NumTics) * 0.1))
-            print(GainRaw.GetValue(), "\n")
-            print("10% slider range = ", Gain.GetValue(), "\n")
+            GainRaw.Value = GainRaw.Min + int(float(GainRaw.Inc) * float(NumTics) * 0.1)
+            print(GainRaw.Value, "\n")
+            print("10% slider range = ", Gain.Value, "\n")
 
-            GainRaw.SetValue(GainRaw.GetValue() + GainRaw.GetInc())
-            print("+ 1 Tic = ", Gain.GetValue(), "\n")
+            GainRaw.Value = GainRaw.Value + GainRaw.Inc
+            print("+ 1 Tic = ", Gain.Value, "\n")
         elif (GainList):
             print("==> Gain with IEnumeration alias\n")
 
             EnumEntries = None
             for EnumEntry in GainList.GetEntries():
-                print(EnumEntry.GetSymbolic(), ", IntValue = ", EnumEntry.GetValue(), ", NumericValue = ",
+                print(EnumEntry.GetSymbolic(), ", IntValue = ", EnumEntry.Value, ", NumericValue = ",
                       EnumEntry.GetNumericValue(), "\n")
 
             GainList.FromString("High")
-            print("High Gain = ", Gain.GetValue(), "\n")
+            print("High Gain = ", Gain.Value, "\n")
         else:
             print("==> Gain with no alias\n")
 
-            print("Gain = ", Gain.GetValue(), "\n")
+            print("Gain = ", Gain.Value, "\n")
 
 
 if __name__ == "__main__":

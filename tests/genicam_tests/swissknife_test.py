@@ -159,24 +159,24 @@ class SwissKnifeTestSuite(GenicamTestCase):
         negSgnDbl = -0.5
 
         with self.assertRaises(GenericException):
-            SwsNoVarInt.SetValue(77)
-        self.assertEqual(noVarInt, SwsNoVarInt.GetValue())
-        self.assertEqual(multDivInt, SwsMultDivInt.GetValue())
-        self.assertEqual(addSubInt, SwsAddSubInt.GetValue())
-        self.assertEqual(bitsInt, SwsBitsInt.GetValue())
+            SwsNoVarInt.Value = 77
+        self.assertEqual(noVarInt, SwsNoVarInt.Value)
+        self.assertEqual(multDivInt, SwsMultDivInt.Value)
+        self.assertEqual(addSubInt, SwsAddSubInt.Value)
+        self.assertEqual(bitsInt, SwsBitsInt.Value)
 
         with self.assertRaises(GenericException):
-            SwsNoVarDbl.SetValue(7.7)
-        self.assertEqual(noVarDbl, SwsNoVarDbl.GetValue())
-        self.assertEqual(multDivDbl, SwsMultDivDbl.GetValue())
-        self.assertEqual(addSubDbl, SwsAddSubDbl.GetValue())
-        self.assertEqual(trigDbl, SwsTrigDbl.GetValue())
-        self.assertEqual(truncFracDbl, SwsTruncFracDbl.GetValue())
-        self.assertEqual(ceilFloorDbl, SwsCeilFloorDbl.GetValue())
-        self.assertEqual(roundDbl, SwsRoundDbl.GetValue())
-        self.assertEqual(sqrtDbl, SwsSqrtDbl.GetValue())
-        self.assertEqual(powersDbl, SwsPowersDbl.GetValue())
-        self.assertEqual(negSgnDbl, SwsNegSgnDbl.GetValue())
+            SwsNoVarDbl.Value = 7.7
+        self.assertEqual(noVarDbl, SwsNoVarDbl.Value)
+        self.assertEqual(multDivDbl, SwsMultDivDbl.Value)
+        self.assertEqual(addSubDbl, SwsAddSubDbl.Value)
+        self.assertEqual(trigDbl, SwsTrigDbl.Value)
+        self.assertEqual(truncFracDbl, SwsTruncFracDbl.Value)
+        self.assertEqual(ceilFloorDbl, SwsCeilFloorDbl.Value)
+        self.assertEqual(roundDbl, SwsRoundDbl.Value)
+        self.assertEqual(sqrtDbl, SwsSqrtDbl.Value)
+        self.assertEqual(powersDbl, SwsPowersDbl.Value)
+        self.assertEqual(negSgnDbl, SwsNegSgnDbl.Value)
 
     def test_Minimum(self):
         """[ GenApiTest@SwissKnifeTestSuite_TestMinimum.xml|gxml
@@ -190,12 +190,12 @@ class SwissKnifeTestSuite(GenicamTestCase):
         Camera = CNodeMapRef()
         Camera._LoadXMLFromFile("GenApiTest", "SwissKnifeTestSuite_TestMinimum")
         SwsConstFormula = Camera.GetNode("SwsConstFormula")
-        minimum = SwsConstFormula.GetMin()
-        maximum = SwsConstFormula.GetMax()
-        value = SwsConstFormula.GetValue()
+        minimum = SwsConstFormula.Min
+        maximum = SwsConstFormula.Max
+        value = SwsConstFormula.Value
         self.assertAlmostEqual(-minimum, maximum, delta=1e-6)
         self.assertEqual(value, 1)
-        self.assertEqual(intfIFloat, SwsConstFormula.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfIFloat, SwsConstFormula.Node.GetPrincipalInterfaceType())
 
     def test_SwissKnifeBrokenBitOps(self):
         """[ GenApiTest@SwissKnifeTestSuite_TestSwissKnifeBrokenBitOps.xml|gxml
@@ -338,19 +338,19 @@ class SwissKnifeTestSuite(GenicamTestCase):
         mVal = ""
         mAttribute = ""
 
-        mVal, mAttribute = Result.GetNode().GetProperty("Name")
+        mVal, mAttribute = Result.Node.GetProperty("Name")
         self.assertTrue(mVal == "Result")
 
-        mVal, mAttribute = Result.GetNode().GetProperty("Unit")
+        mVal, mAttribute = Result.Node.GetProperty("Unit")
         self.assertTrue(mVal == "s")
 
-        mVal, mAttribute = Result.GetNode().GetProperty("Representation")
+        mVal, mAttribute = Result.Node.GetProperty("Representation")
         self.assertTrue(mVal == "Linear")
 
-        mVal, mAttribute = Result.GetNode().GetProperty("DisplayNotation")
+        mVal, mAttribute = Result.Node.GetProperty("DisplayNotation")
         self.assertTrue(mVal == "Fixed")
 
-        mVal, mAttribute = Result.GetNode().GetProperty("DisplayPrecision")
+        mVal, mAttribute = Result.Node.GetProperty("DisplayPrecision")
         self.assertTrue(mVal == "1")
 
     def test_ValueAccess(self):
@@ -501,9 +501,9 @@ class SwissKnifeTestSuite(GenicamTestCase):
         self.assertTrue(SwsAdd.GetAccessMode() == RO)
         self.assertTrue(SwsAdd.GetRepresentation() == Linear)
         """double lMin = """
-        SwsAdd.GetMin()
+        SwsAdd.Min
         """double lMax = """
-        SwsAdd.GetMax()
+        SwsAdd.Max
         lUnit = SwsAdd.GetUnit()
         with self.assertRaises(AccessException):
             SwsAdd.SetValue(1.0)

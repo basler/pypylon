@@ -58,11 +58,11 @@ class CommandTestSuite(GenicamTestCase):
         Cmd = Node
         self.assertTrue(bool(Node))
         self.assertTrue(bool(Cmd))
-        self.assertEqual(intfICommand, Cmd.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfICommand, Cmd.Node.GetPrincipalInterfaceType())
 
         ##### getproperty of command pointer -
         try:
-            ValueStr, AttributeStr = Cmd.GetNode().GetProperty("CommandValue")
+            ValueStr, AttributeStr = Cmd.Node.GetProperty("CommandValue")
         except:
             pass
 
@@ -113,7 +113,7 @@ class CommandTestSuite(GenicamTestCase):
         Value.FromString(strExec)
         # function is executing => value is "1"
         self.assertEqual(strExec, Value.ToString())
-        self.assertTrue(None != Value.GetNode())
+        self.assertTrue(None != Value.Node)
 
         # try to use an illegal string
         with self.assertRaises(InvalidArgumentException):
@@ -201,7 +201,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertTrue(bool(CommandValue))
 
         CallbackTarget = CallbackObject()
-        Register(Command.GetNode(), CallbackTarget.Callback)
+        Register(Command.Node, CallbackTarget.Callback)
 
         # nothing happened so no callback expected
         self.assertEqual(True, Command.IsDone())
@@ -214,11 +214,11 @@ class CommandTestSuite(GenicamTestCase):
         for count in range(10, 0):
             # no callback on IsDone because the value has not changed yet
             self.assertEqual(False, Command.IsDone())
-            # self.assertEqual( (int64_t)42, ptrValue.GetValue() )
+            # self.assertEqual( (int64_t)42, ptrValue.Value )
             # self.assertEqual( 1, CallbackTarget.Count() )
 
         # now the value has changed so we expect a callback
-        Value.SetValue(0)
+        Value.Value = 0
         self.assertEqual(2, CallbackTarget.Count())
 
         # On IsDone the Command node notives that the vale has changed and fires another time
@@ -257,7 +257,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertTrue(bool(CommandValue))
 
         CallbackTarget = CallbackObject()
-        Register(Command.GetNode(), CallbackTarget.Callback)
+        Register(Command.Node, CallbackTarget.Callback)
 
         # due to the execute a callback is fired
         Command.Execute()
@@ -317,7 +317,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertTrue(bool(CommandValue))
 
         CallbackTarget = CallbackObject()
-        Register(Command.GetNode(), CallbackTarget.Callback)
+        Register(Command.Node, CallbackTarget.Callback)
 
         Command.Execute()
         self.assertEqual(1, CallbackTarget.Count())
@@ -332,7 +332,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertEqual(False, Command.IsDone())
 
         # now the self-clearing flag is clearing
-        Value.SetValue(0)
+        Value.Value = 0
         # this is due to the fact that Command is dependent on value
         self.assertEqual(3, CallbackTarget.Count())
 
@@ -345,7 +345,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertTrue(bool(CommandWO))
 
         CallbackTargetWO = CallbackObject()
-        Register(CommandWO.GetNode(), CallbackTargetWO.Callback)
+        Register(CommandWO.Node, CallbackTargetWO.Callback)
 
         CommandWO.Execute()
         self.assertEqual(1, CallbackTargetWO.Count())
@@ -360,7 +360,7 @@ class CommandTestSuite(GenicamTestCase):
         self.assertTrue(bool(Command_ValueWO))
 
         CallbackTarget_ValueWO = CallbackObject()
-        Register(Command_ValueWO.GetNode(), CallbackTarget_ValueWO.Callback)
+        Register(Command_ValueWO.Node, CallbackTarget_ValueWO.Callback)
 
         Command_ValueWO.Execute()
         self.assertEqual(1, CallbackTarget_ValueWO.Count())
@@ -419,8 +419,8 @@ class CommandTestSuite(GenicamTestCase):
         # disable the command value
         CmdValueAvailability = Camera.GetNode("CommandValueIsAvail")
         LockCommand = Camera.GetNode("LockIt")
-        LockCommand.SetValue(0)
-        CmdValueAvailability.SetValue(0)
+        LockCommand.Value = 0
+        CmdValueAvailability.Value = 0
         self.assertEqual(NA, Command.GetAccessMode())
         with self.assertRaises(AccessException):
             Command.FromString("42")
@@ -428,7 +428,7 @@ class CommandTestSuite(GenicamTestCase):
             Command.Execute()
 
         CmdValueImpl = Camera.GetNode("CommandValueIsImpl")
-        CmdValueImpl.SetValue(0)
+        CmdValueImpl.Value = 0
         self.assertEqual(NI, Command.GetAccessMode())
 
     def test_Command07(self):
@@ -525,10 +525,10 @@ class CommandTestSuite(GenicamTestCase):
         Binning = Camera.GetNode("BinningVertical")
 
         CallbackBinning = CallbackObjectMantis250()
-        Register(Binning.GetNode(), CallbackBinning.Callback)
+        Register(Binning.Node, CallbackBinning.Callback)
 
         CallbackCommand = CallbackObjectMantis250()
-        Register(Command.GetNode(), CallbackCommand.Callback)
+        Register(Command.Node, CallbackCommand.Callback)
 
         # this writes 42 to the UserSetLoadReg
         # because VerticalBinningReg has a pInvalidates pointer to UserSetLoadReg it is invalidated
@@ -579,7 +579,7 @@ class CommandTestSuite(GenicamTestCase):
         CommandValue = Camera.GetNode("CommandValue")
 
         CallbackTarget = CallbackObjectMantis257()
-        Register(Command.GetNode(), CallbackTarget.Callback)
+        Register(Command.Node, CallbackTarget.Callback)
 
         # due to the execute a callback is fired
         Command.Execute()
@@ -590,7 +590,7 @@ class CommandTestSuite(GenicamTestCase):
         # BEWARE: inside the callback function (see CallbackObjectMantis257 class)
         # there is a call to IsDone. Since the cale has changed to
         # zero the command is now done and another callback fires
-        Value.SetValue(0)
+        Value.Value = 0
         self.assertEqual(3, CallbackTarget.Count())
 
         # since we have already called IsDone once no additional callback is fired.
@@ -657,10 +657,10 @@ class CommandTestSuite(GenicamTestCase):
         Binning = Camera.GetNode("BinningVertical")
 
         CallbackBinning = CallbackObjectMantis250()
-        Register(Binning.GetNode(), CallbackBinning.Callback)
+        Register(Binning.Node, CallbackBinning.Callback)
 
         CallbackCommand = CallbackObjectMantis250()
-        Register(Command.GetNode(), CallbackCommand.Callback)
+        Register(Command.Node, CallbackCommand.Callback)
 
         Command.Execute()
         self.assertEqual(1, CallbackBinning.Count())
@@ -773,11 +773,11 @@ class CommandTestSuite(GenicamTestCase):
 
         Port.ValueCommand = 1
         Command.Execute()
-        self.assertEqual(1, Value.GetValue())
+        self.assertEqual(1, Value.Value)
 
         Port.ValueCommand = 2
         Command.Execute()
-        self.assertEqual(2, Value.GetValue())
+        self.assertEqual(2, Value.Value)
 
     def test_Ticket768(self):
         """[ GenApiTest@CommandTestSuite_TestTicket768.xml|gxml

@@ -14,15 +14,15 @@ while True:
     # Print the model name of the camera.
     print("Using device ", camera.GetDeviceInfo().GetModelName())
 
-    camera.MaxNumBuffer = 2
+    camera.MaxNumBuffer.Value = 2
     try:
-        camera.Gain = camera.Gain.Max
+        camera.Gain.Value = camera.Gain.Max
     except genicam.LogicalErrorException:
-        camera.GainRaw = camera.GainRaw.Max
-    camera.Width = camera.Width.Max
-    camera.Height = camera.Height.Max
-    # camera.ExposureTime = camera.ExposureTime.Min
-    camera.PixelFormat = "Mono12"
+        camera.GainRaw.Value = camera.GainRaw.Max
+    camera.Width.Value = camera.Width.Max
+    camera.Height.Value = camera.Height.Max
+    # camera.ExposureTime.Value = camera.ExposureTime.Min
+    camera.PixelFormat.Value = "Mono12"
 
     # Start the grabbing of IMAGES_TO_GRAB images.
     # The camera device is parameterized with a default configuration which

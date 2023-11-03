@@ -188,69 +188,69 @@ class NodeTestSuite(GenicamTestCase):
         self.assertEqual(RO, Node0.GetAccessMode())
 
         # Check Implemented
-        Implemented0.SetValue(0)
+        Implemented0.Value = 0
         self.assertEqual(NI, Node00.GetAccessMode())
-        Implemented0.SetValue(1)
+        Implemented0.Value = 1
 
         # Check Available
-        Available.SetValue(0)
+        Available.Value = 0
         self.assertEqual(NA, Node00.GetAccessMode())
-        Available.SetValue(1)
+        Available.Value = 1
 
         # Check Locked
-        Locked.SetValue(1)
+        Locked.Value = 1
         self.assertEqual(RO, Node00.GetAccessMode())
-        Locked.SetValue(0)
+        Locked.Value = 0
 
         # Check Implemented of a <pFeature> node
-        Implemented010.SetValue(0)
+        Implemented010.Value = 0
         self.assertEqual(RO, Node0.GetAccessMode())
 
         # note that the access mode is either NI or RO since NI does not change
         # the access mode can be always(!) cacheable
         # as a consequence this test case is not valid for categories
         self.assertEqual(RO, Node01.GetAccessMode())
-        Implemented010.SetValue(1)
+        Implemented010.Value = 1
 
         # Check Category access mode implied by pFeature
         self.assertEqual(NI, CatFtrNI.GetAccessMode())
         self.assertEqual(RO, CatFtrNA.GetAccessMode())
 
         # Check flag access
-        Implemented0.SetValue(0)
-        Available.SetValue(0)
-        Locked.SetValue(1)
+        Implemented0.Value = 0
+        Available.Value = 0
+        Locked.Value = 1
         self.assertEqual(False, IsImplemented(Node00))
         self.assertEqual(False, IsAvailable(Node00))
-        Implemented0.SetValue(1)
-        Available.SetValue(0)
+        Implemented0.Value = 1
+        Available.Value = 0
         self.assertEqual(True, IsImplemented(Node00))
         self.assertEqual(False, IsAvailable(Node00))
         self.assertEqual(False, IsReadable(Node00))
         self.assertEqual(False, IsWritable(Node00))
-        Available.SetValue(1)
+        Available.Value = 1
         self.assertEqual(True, IsAvailable(Node00))
-        Locked.SetValue(1)
+        Locked.Value = 1
         self.assertEqual(RO, Node00.GetAccessMode())
         self.assertEqual(True, IsReadable(Node00))
         self.assertEqual(False, IsWritable(Node00))
-        Locked.SetValue(0)
+        Locked.Value = 0
         self.assertEqual(True, IsWritable(Node00))
         # and again with the flags made "not available"
         Implemented0Available = Camera.GetNode("Implemented0Available")
         AvailableAvailable = Camera.GetNode("AvailableAvailable")
         LockedAvailable = Camera.GetNode("LockedAvailable")
-        Implemented0Available.SetValue(0)
+        Implemented0Available.Value = 0
         self.assertEqual(True, IsImplemented(Node00))
         self.assertEqual(False, IsAvailable(Node00))
-        Implemented0Available.SetValue(1)
+        Implemented0Available.Value = 1
         self.assertEqual(True, IsImplemented(Node00))
-        AvailableAvailable.SetValue(0)
+        AvailableAvailable.Value = 0
         self.assertEqual(True, IsImplemented(Node00))
         self.assertEqual(False, IsAvailable(Node00))
         self.assertEqual(False, IsReadable(Node00))
         self.assertEqual(False, IsWritable(Node00))
-        AvailableAvailable.SetValue(1)
+        AvailableAvailable.Value = 1
         self.assertEqual(True, IsWritable(Node00))
 
         # WO flags
@@ -259,34 +259,34 @@ class NodeTestSuite(GenicamTestCase):
         self.assertEqual(NA, NodeAvailWO.GetAccessMode())
         self.assertEqual(NA, NodeLockedWO.GetAccessMode())
 
-        LockedAvailable.SetValue(0)
+        LockedAvailable.Value = 0
         self.assertEqual(NA, Node00.GetAccessMode())
         self.assertEqual(False, IsReadable(Node00))
         self.assertEqual(False, IsWritable(Node00))
-        LockedAvailable.SetValue(1)
+        LockedAvailable.Value = 1
         self.assertEqual(True, IsWritable(Node00))
         # Do similar checks for category
-        CatImplemented.SetValue(0)
+        CatImplemented.Value = 0
         self.assertEqual(NI, Cat.GetAccessMode())
-        CatImplemented.SetValue(1)
-        CatAvailable.SetValue(0)
+        CatImplemented.Value = 1
+        CatAvailable.Value = 0
         self.assertEqual(NI, Cat.GetAccessMode())
-        CatAvailable.SetValue(1)
+        CatAvailable.Value = 1
         self.assertEqual(False, IsAvailable(Cat))
         CatImplementedAvailable = Camera.GetNode("CatImplementedAvailable")
         CatAvailableAvailable = Camera.GetNode("CatAvailableAvailable")
-        CatImplementedAvailable.SetValue(0)
+        CatImplementedAvailable.Value = 0
         self.assertEqual(False, IsImplemented(Cat))
         self.assertEqual(False, IsAvailable(Cat))
-        CatImplementedAvailable.SetValue(1)
-        CatAvailableAvailable.SetValue(0)
+        CatImplementedAvailable.Value = 1
+        CatAvailableAvailable.Value = 0
         IsImplemented(Cat)
         IsAvailable(Cat)
         self.assertEqual(False, IsImplemented(Cat))
         self.assertEqual(False, IsAvailable(Cat))
         self.assertEqual(False, IsReadable(Cat))
         self.assertEqual(False, IsWritable(Cat))
-        CatAvailableAvailable.SetValue(1)
+        CatAvailableAvailable.Value = 1
         self.assertEqual(False, IsAvailable(Cat))
 
         # Check visibility
@@ -299,10 +299,10 @@ class NodeTestSuite(GenicamTestCase):
         self.assertEqual(NA, Combine(WO, RO))
 
         # check what happens if a WO node is locked
-        LockedAvailable.SetValue(0)
+        LockedAvailable.Value = 0
         self.assertTrue(IsWritable(WONode2))
         self.assertTrue(not IsReadable(WONode2))
-        LockedAvailable.SetValue(1)
+        LockedAvailable.Value = 1
         self.assertTrue(not IsWritable(WONode2))
         self.assertTrue(not IsReadable(WONode2))
 
@@ -357,7 +357,7 @@ class NodeTestSuite(GenicamTestCase):
         Value = Camera2.GetNode("Value")
 
         with self.assertRaises(AccessException):
-            Value.GetValue()
+            Value.Value
 
         self.assertEqual(False, IsAvailable(Value))
 
@@ -645,26 +645,26 @@ class NodeTestSuite(GenicamTestCase):
 
         # No cache
         Int = Int01
-        Int.SetValue(42)
-        self.assertEqual(42, Int.GetValue())
+        Int.Value = 42
+        self.assertEqual(42, Int.Value)
         # Write through
         Int = Int02
         n1 = 4711
-        Int.SetValue(n1)
-        self.assertEqual(n1, Int.GetValue())
+        Int.Value = n1
+        self.assertEqual(n1, Int.Value)
         # Write around
         Int = Int03
         n2 = 123
-        Int.SetValue(n2)
-        self.assertEqual(n2, Int.GetValue())
+        Int.Value = n2
+        self.assertEqual(n2, Int.Value)
 
         # Let's play directly with the values within the port
         NoCache = Camera.GetNode("Int01")
         Through = Camera.GetNode("Int02")
         Around = Camera.GetNode("Int03")
-        self.assertEqual(genicam.NoCache, NoCache.GetNode().GetCachingMode())
-        self.assertEqual(genicam.WriteThrough, Through.GetNode().GetCachingMode())
-        self.assertEqual(genicam.WriteAround, Around.GetNode().GetCachingMode())
+        self.assertEqual(genicam.NoCache, NoCache.Node.GetCachingMode())
+        self.assertEqual(genicam.WriteThrough, Through.Node.GetCachingMode())
+        self.assertEqual(genicam.WriteAround, Around.Node.GetCachingMode())
         IntNoCache = Camera.GetNode("IntNoCache")
         IntThrough = Camera.GetNode("IntThrough")
         IntAround = Camera.GetNode("IntAround")
@@ -1521,10 +1521,10 @@ class NodeTestSuite(GenicamTestCase):
         fsk = Camera.GetNode("fsk")
         ic = Camera.GetNode("ic")
         fc = Camera.GetNode("fc")
-        self.assertEqual(NoCache, isk.GetNode().GetCachingMode())
-        self.assertEqual(NoCache, fsk.GetNode().GetCachingMode())
-        self.assertEqual(NoCache, ic.GetNode().GetCachingMode())
-        self.assertEqual(NoCache, fc.GetNode().GetCachingMode())
+        self.assertEqual(NoCache, isk.Node.GetCachingMode())
+        self.assertEqual(NoCache, fsk.Node.GetCachingMode())
+        self.assertEqual(NoCache, ic.Node.GetCachingMode())
+        self.assertEqual(NoCache, fc.Node.GetCachingMode())
 
     def test_IsUncached(self):
         # if(GenApiSchemaVersion == v1_0)
@@ -1600,20 +1600,20 @@ class NodeTestSuite(GenicamTestCase):
         # ...until the register is polled
         Camera._Poll(2000)
         # But the polling didn't happen so the cached value is still valid
-        self.assertEqual(42, Value.GetValue())
+        self.assertEqual(42, Value.Value)
 
         # If we invalidate the Value node explicitly...
-        Value.GetNode().InvalidateNode()
+        Value.Node.InvalidateNode()
         # ...nothing happens because the cache of the register node was not invalidated
-        self.assertEqual(42, Value.GetValue())
+        self.assertEqual(42, Value.Value)
 
         # However if we invalidate the ValueReg node explicitely...
-        ValueReg.GetNode().InvalidateNode()
+        ValueReg.Node.InvalidateNode()
         # ... we finally get the value
-        self.assertEqual(13, Value.GetValue())
+        self.assertEqual(13, Value.Value)
 
         # now make the disabler unreadable and repeate similar tests
-        PollingDisablerAvail.SetValue(0)
+        PollingDisablerAvail.Value = 0
         self.assertTrue(not IsAvailable(Value))  ## is this expected?
 
     #
@@ -1704,18 +1704,18 @@ class NodeTestSuite(GenicamTestCase):
         Port.bit2 = 0
 
         # read bit2
-        IOBitSelector.SetValue(2)
+        IOBitSelector.Value = 2
         self.assertEqual(0, Port.GetNumReads())
         self.assertEqual(0, Port.GetNumWrites())
 
         # first time
-        self.assertEqual(False, IOBit.GetValue())
+        self.assertEqual(False, IOBit.Value)
         self.assertEqual(1, Port.GetNumReads())
         self.assertEqual(0, Port.GetNumWrites())
         self.assertTrue(IORegister.IsValueCacheValid())
 
         # second time
-        self.assertEqual(False, IOBit.GetValue())
+        self.assertEqual(False, IOBit.Value)
         self.assertEqual(1, Port.GetNumReads())
         self.assertEqual(0, Port.GetNumWrites())
         self.assertTrue(IORegister.IsValueCacheValid())
@@ -1731,19 +1731,19 @@ class NodeTestSuite(GenicamTestCase):
         self.assertTrue(not IORegister.IsValueCacheValid())
 
         # write bit3
-        IOBitSelector.SetValue(3)
+        IOBitSelector.Value = 3
         self.assertEqual(0, Port.GetNumReads())
         self.assertEqual(0, Port.GetNumWrites())
 
         # first time
-        IOBit.SetValue(False)
+        IOBit.Value = False
         self.assertEqual(1, Port.GetNumReads())
         self.assertEqual(1, Port.GetNumWrites())
         self.assertEqual(0, Port.bit3)
         self.assertTrue(IORegister.IsValueCacheValid())
 
         # second time
-        IOBit.SetValue(True)
+        IOBit.Value = True
         self.assertEqual(1, Port.GetNumReads())
         self.assertEqual(2, Port.GetNumWrites())
         self.assertEqual(True, Port.bit3)

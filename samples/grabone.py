@@ -8,11 +8,11 @@ camera = pylon.InstantCamera(
 camera.Open()
 
 # enable all chunks
-camera.ChunkModeActive = True
+camera.ChunkModeActive.Value = True
 
 for cf in camera.ChunkSelector.Symbolics:
-    camera.ChunkSelector = cf
-    camera.ChunkEnable = True
+    camera.ChunkSelector.Value = cf
+    camera.ChunkEnable.Value = True
 
 result = camera.GrabOne(100)
 print("Mean Gray value:", numpy.mean(result.Array[0:20, 0]))

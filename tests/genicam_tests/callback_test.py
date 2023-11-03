@@ -68,7 +68,7 @@ class CallbackTestSuite(GenicamTestCase):
         # check if callbacks are fired
         numCalls = 42
         for i in range(0, numCalls):
-            Float01.SetValue(i)
+            Float01.Value = i
 
         self.assertEqual(numCalls, CallbackUtility.Count())
 
@@ -98,7 +98,7 @@ class CallbackTestSuite(GenicamTestCase):
         # check if callbacks are fired
         numCalls = 42
         for i in range(0, numCalls):
-            String01.SetValue("...schwimmen auf dem See!")
+            String01.Value = "...schwimmen auf dem See!"
         self.assertEqual(numCalls, CallbackUtility.Count())
 
     # varitant of TestCallback01 for register node
@@ -129,7 +129,7 @@ class CallbackTestSuite(GenicamTestCase):
         Register01 = Camera.GetNode("MyRegister")
 
         # register function pointer
-        Register(Register01.GetNode(), CallbackUtility.Callback)
+        Register(Register01.Node, CallbackUtility.Callback)
 
         # check if callbacks are fired
         numCalls = 42
@@ -169,26 +169,26 @@ class CallbackTestSuite(GenicamTestCase):
         O1 = CallbackObject()
         O2 = CallbackObject()
 
-        hCbk1 = Register(Float01.GetNode(), O1.Callback)
-        hCbk2 = Register(Float01.GetNode(), O2.Callback)
+        hCbk1 = Register(Float01.Node, O1.Callback)
+        hCbk2 = Register(Float01.Node, O2.Callback)
 
         numCalls = 42
         for i in range(0, numCalls):
-            Float01.SetValue(i)
+            Float01.Value = i
 
         self.assertEqual(numCalls, O1.Count())
         self.assertEqual(numCalls, O2.Count())
 
         # de-register callback
         Deregister(hCbk1)
-        self.assertFalse(Float01.GetNode().DeregisterCallback(hCbk1))
+        self.assertFalse(Float01.Node.DeregisterCallback(hCbk1))
 
-        Float01.SetValue(33)
+        Float01.Value = 33
         self.assertEqual(numCalls, O1.Count())
         self.assertEqual(numCalls + 1, O2.Count())
 
         # deregister invalid callback handle
-        self.assertFalse(Float01.GetNode().DeregisterCallback(9999))
+        self.assertFalse(Float01.Node.DeregisterCallback(9999))
 
     # ---------------------------------------------------------------------------
     # def CallbackTestSuite.TestCallback03()
@@ -214,15 +214,15 @@ class CallbackTestSuite(GenicamTestCase):
 
         Bool = Camera.GetNode("MyBoolean")
 
-        Register(Bool.GetNode(), CallbackUtility.Callback)
-        Register(Bool.GetNode(), O1.Callback)
-        Register(Bool.GetNode(), O2.Callback)
+        Register(Bool.Node, CallbackUtility.Callback)
+        Register(Bool.Node, O1.Callback)
+        Register(Bool.Node, O2.Callback)
 
         numCalls = 42
         CallbackUtility.Reset()
 
         for i in range(0, numCalls):
-            Bool.SetValue((i & 0x1) != 0)
+            Bool.Value = (i & 0x1) != 0
 
         self.assertEqual(numCalls, CallbackUtility.Count())
         self.assertEqual(numCalls, O1.Count())
@@ -253,9 +253,9 @@ class CallbackTestSuite(GenicamTestCase):
 
         Cmd = Camera.GetNode("MyCommand")
 
-        Register(Cmd.GetNode(), CallbackUtility.Callback)
-        Register(Cmd.GetNode(), O1.Callback)
-        Register(Cmd.GetNode(), O2.Callback)
+        Register(Cmd.Node, CallbackUtility.Callback)
+        Register(Cmd.Node, O1.Callback)
+        Register(Cmd.Node, O2.Callback)
 
         numCalls = 42
         CallbackUtility.Reset()
@@ -303,9 +303,9 @@ class CallbackTestSuite(GenicamTestCase):
 
         Enum = Camera.GetNode("MyFood")
 
-        Register(Enum.GetNode(), CallbackUtility.Callback)
-        Register(Enum.GetNode(), O1.Callback)
-        Register(Enum.GetNode(), O2.Callback)
+        Register(Enum.Node, CallbackUtility.Callback)
+        Register(Enum.Node, O1.Callback)
+        Register(Enum.Node, O2.Callback)
 
         numCalls = 42
         CallbackUtility.Reset()
@@ -389,52 +389,52 @@ class CallbackTestSuite(GenicamTestCase):
 
         ##### getproperty of boolean pointer - 
         try:
-            ValueStr, AttributeStr = B.GetNode().GetProperty("ValueIndexed")
+            ValueStr, AttributeStr = B.Node.GetProperty("ValueIndexed")
             print("ValueIndexed = " + ValueStr + " : " + AttributeStr + "\n")
         except LogicalErrorException:
             pass
 
-        Register(A.GetNode(), CallbackUtility.Callback)
-        Register(B.GetNode(), CallbackUtility.Callback)
-        Register(C.GetNode(), CallbackUtility.Callback)
-        Register(D.GetNode(), CallbackUtility.Callback)
+        Register(A.Node, CallbackUtility.Callback)
+        Register(B.Node, CallbackUtility.Callback)
+        Register(C.Node, CallbackUtility.Callback)
+        Register(D.Node, CallbackUtility.Callback)
 
-        C.SetValue(0.0)
-        D.SetValue(1.0)
+        C.Value = 0.0
+        D.Value = 1.0
 
         CallbackUtility.Reset()
-        A.SetValue(0.5)
+        A.Value = 0.5
         numCalls = 2
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         CallbackUtility.Reset()
-        B.SetValue(0.5)
+        B.Value = 0.5
         numCalls = 2
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         CallbackUtility.Reset()
-        C.SetValue(-1.0)
+        C.Value = -1.0
         numCalls = 2
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         CallbackUtility.Reset()
-        D.SetValue(2.5)
+        D.Value = 2.5
         numCalls = 2
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         CallbackUtility.Reset()
-        D.GetValue()
+        D.Value
         numCalls = 0
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         numCalls = 2
-        D.GetNode().InvalidateNode()
+        D.Node.InvalidateNode()
         self.assertEqual(numCalls, CallbackUtility.Count())
 
         CallbackUtility.Reset()
         E = Camera.GetNode("E")
         numCalls = 4
-        E.SetValue(0)
+        E.Value = 0
         self.assertEqual(numCalls, CallbackUtility.Count())
 
     # ---------------------------------------------------------------------------
@@ -528,9 +528,9 @@ class CallbackTestSuite(GenicamTestCase):
 
         NumPersons = Camera.GetNode("NumPersons")
 
-        Register(Enum.GetNode(), cbFood.Callback)
-        Register(Price.GetNode(), cbPrice.Callback)
-        Register(NumPersons.GetNode(), cbPerson.Callback)
+        Register(Enum.Node, cbFood.Callback)
+        Register(Price.Node, cbPrice.Callback)
+        Register(NumPersons.Node, cbPerson.Callback)
 
         numCalls = 1
 
@@ -538,7 +538,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbFood.Reset()
         cbPrice.Reset()
         cbPerson.Reset()
-        NumPersons.SetValue(2)
+        NumPersons.Value = 2
         numCalls = 0
         self.assertEqual(numCalls, cbFood.Count())
         numCalls = 1
@@ -549,7 +549,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbFood.Reset()
         cbPrice.Reset()
         cbPerson.Reset()
-        Food.SetValue(2)
+        Food.Value = 2
         numCalls = 0
         self.assertEqual(numCalls, cbPerson.Count())
         numCalls = 1
@@ -557,11 +557,11 @@ class CallbackTestSuite(GenicamTestCase):
         self.assertEqual(numCalls, cbPrice.Count())
 
         # change the dish price . Price changes, number of persons and food not
-        Food.SetValue(0)  # otherwise 'DishPrice's address is incorrect
+        Food.Value = 0  # otherwise 'DishPrice's address is incorrect
         cbFood.Reset()
         cbPrice.Reset()
         cbPerson.Reset()
-        DishPrice.SetValue(2)
+        DishPrice.Value = 2
         numCalls = 0
         self.assertEqual(numCalls, cbPerson.Count())
         self.assertEqual(numCalls, cbFood.Count())
@@ -661,13 +661,13 @@ class CallbackTestSuite(GenicamTestCase):
         F = Camera.GetNode("F")
         G = Camera.GetNode("G")
 
-        Register(A.GetNode(), cbA.Callback)
-        Register(B.GetNode(), cbB.Callback)
-        Register(C.GetNode(), cbC.Callback)
-        Register(D.GetNode(), cbD.Callback)
-        Register(E.GetNode(), cbE.Callback)
-        Register(F.GetNode(), cbF.Callback)
-        Register(G.GetNode(), cbG.Callback)
+        Register(A.Node, cbA.Callback)
+        Register(B.Node, cbB.Callback)
+        Register(C.Node, cbC.Callback)
+        Register(D.Node, cbD.Callback)
+        Register(E.Node, cbE.Callback)
+        Register(F.Node, cbF.Callback)
+        Register(G.Node, cbG.Callback)
 
         # set A => cb of A, B, D, E F, G not C
         numCalls = 1
@@ -679,7 +679,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        A.SetValue(0)
+        A.Value = 0
         self.assertEqual(numCalls, cbA.Count())
         self.assertEqual(numCalls, cbB.Count())
         self.assertEqual(numCalls, cbD.Count())
@@ -698,7 +698,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        B.SetValue(0)
+        B.Value = 0
         self.assertEqual(numCalls, cbB.Count())
         self.assertEqual(numCalls, cbB.Count())
         numCalls = 0
@@ -718,7 +718,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        C.SetValue(0)
+        C.Value = 0
         self.assertEqual(numCalls, cbC.Count())
         numCalls = 0
         self.assertEqual(numCalls, cbA.Count())
@@ -738,7 +738,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        D.SetValue(0)
+        D.Value = 0
         self.assertEqual(numCalls, cbA.Count())
         self.assertEqual(numCalls, cbB.Count())
         self.assertEqual(numCalls, cbD.Count())
@@ -758,7 +758,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        E.SetValue(0)
+        E.Value = 0
         self.assertEqual(numCalls, cbA.Count())
         self.assertEqual(numCalls, cbB.Count())
         self.assertEqual(numCalls, cbD.Count())
@@ -778,7 +778,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        F.SetValue(0)
+        F.Value = 0
         self.assertEqual(numCalls, cbB.Count())
         self.assertEqual(numCalls, cbF.Count())
         numCalls = 0
@@ -798,7 +798,7 @@ class CallbackTestSuite(GenicamTestCase):
         cbE.Reset()
         cbF.Reset()
         cbG.Reset()
-        G.SetValue(0)
+        G.Value = 0
         self.assertEqual(numCalls, cbG.Count())
         numCalls = 0
         self.assertEqual(numCalls, cbA.Count())
@@ -947,8 +947,8 @@ class CallbackTestSuite(GenicamTestCase):
         # }
         # sfvalue[19] |= (1 << 5)
         # Port.Write( &sfvalue, 0x8, 24 )
-        F.GetNode().InvalidateNode()  # invalidate advanced feature lock F
-        B.GetNode().InvalidateNode()  # invalidate smart feature B
+        F.Node.InvalidateNode()  # invalidate advanced feature lock F
+        B.Node.InvalidateNode()  # invalidate smart feature B
         # cbA.Reset(), cbB.Reset(), cbC.Reset(), cbD.Reset(), cbE.Reset(), cbF.Reset()
 
         self.assertEqual(RO, B.GetAccessMode())
@@ -965,7 +965,7 @@ class CallbackTestSuite(GenicamTestCase):
         # self.assertEqual( numCalls, cbF.Count() )
 
         # Set feature C => no callbacks but C itself
-        C.SetValue(0)
+        C.Value = 0
         numCalls = 0
         # self.assertEqual( numCalls, cbA.Count() )
         # self.assertEqual( numCalls, cbB.Count() )
@@ -976,7 +976,7 @@ class CallbackTestSuite(GenicamTestCase):
         # cbC.Reset()
 
         # Set feature D => no callbacks but D itself
-        D.SetValue(0)
+        D.Value = 0
         numCalls = 0
         # self.assertEqual( numCalls, cbA.Count() )
         # self.assertEqual( numCalls, cbB.Count() )
@@ -1065,7 +1065,7 @@ class CallbackTestSuite(GenicamTestCase):
         # Use C und D first, because they serve as pMin and pMax for A
         for o in (obA, obB, obC, obD, obE, obMyPort):
             o.Reset()
-        C.SetValue(0.0)
+        C.Value = 0.0
 
         self.assertEqual(1, obA.Count())
         self.assertEqual(0, obB.Count())
@@ -1076,7 +1076,7 @@ class CallbackTestSuite(GenicamTestCase):
 
         for o in (obA, obB, obC, obD, obE, obMyPort):
             o.Reset()
-        D.SetValue(1.0)
+        D.Value = 1.0
         self.assertEqual(1, obA.Count())
         self.assertEqual(0, obB.Count())
         self.assertEqual(0, obC.Count())
@@ -1086,7 +1086,7 @@ class CallbackTestSuite(GenicamTestCase):
 
         for o in (obA, obB, obC, obD, obE, obMyPort):
             o.Reset()
-        B.SetValue(1.0)
+        B.Value = 1.0
         self.assertEqual(1, obA.Count())
         self.assertEqual(1, obB.Count())
         self.assertEqual(0, obC.Count())
@@ -1096,7 +1096,7 @@ class CallbackTestSuite(GenicamTestCase):
 
         for o in (obA, obB, obC, obD, obE, obMyPort):
             o.Reset()
-        A.SetValue(1.0)
+        A.Value = 1.0
         self.assertEqual(1, obA.Count())
         self.assertEqual(1, obB.Count())
         self.assertEqual(0, obC.Count())
@@ -1106,7 +1106,7 @@ class CallbackTestSuite(GenicamTestCase):
 
         for o in (obA, obB, obC, obD, obE, obMyPort):
             o.Reset()
-        E.SetValue(1)
+        E.Value = 1
         self.assertEqual(1, obA.Count())
         self.assertEqual(1, obB.Count())
         self.assertEqual(1, obC.Count())
@@ -1280,17 +1280,17 @@ class CallbackTestSuite(GenicamTestCase):
         String = Camera.GetNode("MyString")
         Length = Camera.GetNode("StringLength")
 
-        Register(String.GetNode(), CallbackUtility.Callback)
+        Register(String.Node, CallbackUtility.Callback)
 
         Port.ShowMap()
-        self.assertEqual(testvalue, String.GetValue())
+        self.assertEqual(testvalue, String.Value)
 
         # change the length => callback of string
-        Length.SetValue(4)
+        Length.Value = 4
         numCalls = 1
         self.assertEqual(numCalls, CallbackUtility.Count())
         g = testvalue
-        self.assertEqual(g[0:4], String.GetValue())
+        self.assertEqual(g[0:4], String.Value)
         StringReg = String
         self.assertEqual(4, StringReg.GetLength())
 
@@ -1313,10 +1313,10 @@ class CallbackTestSuite(GenicamTestCase):
         Node = Camera.GetNode("Node")
 
         cbEvent = CallbackObject()
-        Register(Node.GetNode(), cbEvent.Callback)
+        Register(Node.Node, cbEvent.Callback)
 
         self.assertEqual(0, cbEvent.Count())
-        Node.SetValue(0)
+        Node.Value = 0
         self.assertEqual(1, cbEvent.Count())
 
     def Callback13_inside(self, Node):
@@ -1355,10 +1355,10 @@ class CallbackTestSuite(GenicamTestCase):
         Node = Camera.GetNode("Node")
 
         cbEvent = CallbackObject()
-        Register(Node.GetNode(), self.Callback13_inside, cbPostInsideLock)
-        Register(Node.GetNode(), self.Callback13_outside, cbPostOutsideLock)
+        Register(Node.Node, self.Callback13_inside, cbPostInsideLock)
+        Register(Node.Node, self.Callback13_outside, cbPostOutsideLock)
 
-        Node.SetValue(0)
+        Node.Value = 0
 
     # ---------------------------------------------------------------------------
     # def CallbackTestSuite.TestCallback14()
@@ -1416,14 +1416,14 @@ class CallbackTestSuite(GenicamTestCase):
         Cmd = Camera.GetNode("MyCommand")
         Feature = Camera.GetNode("Feature")
 
-        Register(Feature.GetNode(), CallbackUtility.Callback)
+        Register(Feature.Node, CallbackUtility.Callback)
         CallbackUtility.Reset()
 
         # Executing writes MyCommandReg which in turn invalidates FeatureReg and Feature
         # thus reading Feature yields the register value 
         Cmd.Execute()
         self.assertEqual(1, CallbackUtility.Count())
-        self.assertEqual(0, Feature.GetValue())
+        self.assertEqual(0, Feature.Value)
 
         # Polling the Command does not invalidate anything because the command is not yet done
         self.assertFalse(Cmd.IsDone())
@@ -1440,7 +1440,7 @@ class CallbackTestSuite(GenicamTestCase):
         # this yields a second callback on the command...
         self.assertEqual(2, CallbackUtility.Count())
         # ... and invalidates the Feature since it has a pInvalidales link to the Command
-        self.assertEqual(1234, Feature.GetValue())
+        self.assertEqual(1234, Feature.Value)
 
     def test_PortInvalidate(self):
         # if(GenApiSchemaVersion < v1_1)
@@ -1494,24 +1494,24 @@ class CallbackTestSuite(GenicamTestCase):
         FloatingInvalidator = Camera.GetNode("FloatingInvalidator")
         Invalidated = Camera.GetNode("Invalidated")
 
-        Register(Invalidated.GetNode(), CallbackUtility.Callback)
+        Register(Invalidated.Node, CallbackUtility.Callback)
 
         # touch the invalidator
-        Invalidator.SetValue(80)
+        Invalidator.Value = 80
         # verify that the values depending on the port were invalidated
         # ie. cache bypassed
 
         Value = 88
         Port.Write(0x04, cast_data("uint32_t", LittleEndian, Value))
-        self.assertEqual(88, Invalidated.GetValue())
+        self.assertEqual(88, Invalidated.Value)
         # check if the callback was fired
         self.assertEqual(1, CallbackUtility.Count())
 
         # the same with floating invalidator
-        FloatingInvalidator.SetValue(80)
+        FloatingInvalidator.Value = 80
         Value = 99
         Port.Write(0x04, cast_data("uint32_t", LittleEndian, Value))
-        self.assertEqual(99, Invalidated.GetValue())
+        self.assertEqual(99, Invalidated.Value)
         self.assertEqual(2, CallbackUtility.Count())
 
 

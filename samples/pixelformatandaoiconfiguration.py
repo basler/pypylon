@@ -9,14 +9,14 @@ class CPixelFormatAndAoiConfiguration(pylon.ConfigurationEventHandler):
         try:
             # Maximize the Image AOI.
             if genicam.IsWritable(camera.OffsetX):
-                camera.OffsetX = camera.OffsetX.Min
+                camera.OffsetX.Value = camera.OffsetX.Min
             if genicam.IsWritable(camera.OffsetY):
-                camera.OffsetY = camera.OffsetY.Min
-            camera.Width = camera.Width.Max
-            camera.Height = camera.Height.Max
+                camera.OffsetY.Value = camera.OffsetY.Min
+            camera.Width.Value = camera.Width.Max
+            camera.Height.Value = camera.Height.Max
 
             # Set the pixel data format.
-            camera.PixelFormat = "Mono8"
+            camera.PixelFormat.Value = "Mono8"
         except genicam.GenericException as e:
             raise genicam.RuntimeException("Could not apply configuration. GenICam::GenericException \
                                             caught in OnOpened method msg=%s" % e.what())

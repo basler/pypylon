@@ -9,7 +9,7 @@ class GrabTestSuite(PylonTestCase):
 
         camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
         camera.Open()
-        camera.ExposureTime.SetValue(camera.ExposureTime.Min)
+        camera.ExposureTime.Value = camera.ExposureTime.Min
         grabResult = camera.GrabOne(1000)
         self.assertEqual(camera.Width.Max, grabResult.Width)
         self.assertEqual(camera.Height.Max, grabResult.Height)
@@ -25,7 +25,7 @@ class GrabTestSuite(PylonTestCase):
 
         camera.Width.Value = camera.Width.Max
         camera.Height.Value = camera.Height.Max
-        camera.ExposureTime.SetValue(camera.ExposureTime.Min)
+        camera.ExposureTime.Value = camera.ExposureTime.Min
 
         camera.StartGrabbingMax(countOfImagesToGrab)
         # Camera.StopGrabbing() is called automatically by the RetrieveResult() method

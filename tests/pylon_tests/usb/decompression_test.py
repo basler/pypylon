@@ -14,23 +14,23 @@ class GrabTestSuite(PylonTestCase):
             pylon.TlFactory.GetInstance().CreateFirstDevice()
         )
         self.camera.Open()
-        self.camera.ExposureTime.SetValue(self.camera.ExposureTime.Min)
+        self.camera.ExposureTime.Value = self.camera.ExposureTime.Min
 
-        self.camera.PixelFormat = "Mono8"
-        self.camera.TestPattern = "Testimage1"
+        self.camera.PixelFormat.Value = "Mono8"
+        self.camera.TestPattern.Value = "Testimage1"
 
-        self.camera.ImageCompressionMode = "Off"
+        self.camera.ImageCompressionMode.Value = "Off"
         with self.camera.GrabOne(10000) as compressed_image:
             self.reference_array = compressed_image.Array
 
         try:
-            self.camera.ImageCompressionMode = "BaslerCompressionBeyond"
+            self.camera.ImageCompressionMode.Value = "BaslerCompressionBeyond"
         except (genicam.RuntimeException, genicam.InvalidArgumentException):
             self.camera.Close()
             self.skipTest("camera does not support baser compression beyond")
 
-        self.camera.ImageCompressionRateOption = "Lossless"
-        self.camera.BslImageCompressionRatio = 100.0
+        self.camera.ImageCompressionRateOption.Value = "Lossless"
+        self.camera.BslImageCompressionRatio.Value = 100.0
 
     def tearDown(self):
         self.camera.Close()
