@@ -82,6 +82,26 @@ for i in range(0, 100):
 recipe.Unload()
 ```
 
+# Update your code to pypylon >= 3.0.0
+
+The current pypylon implementation allows direct feature assignment:
+
+```python
+cam.Gain = 42
+```
+
+This assignment style is deprecated with pypylon 3.0.0, as it prevents full typing support for pypylon.
+
+The recommended assignment style is now:
+
+```python
+cam.Gain.Value = 42
+```
+
+To identify the locations in your code that have to be updated, run with enabled warnings:
+
+`PYTHONWARNINGS=default python script.py`
+
 # Installation
 ## Prerequisites
  * Installed [pylon](https://www.baslerweb.com/pylon)
