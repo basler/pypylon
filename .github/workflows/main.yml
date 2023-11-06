@@ -31,11 +31,10 @@ jobs:
       - name: Installer list
         run: |
           tee pylon-installer.txt <<"EOF"
-          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_x86_64_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE_7_2}pylon_7.2.1.25747_aarch64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_4}pylon_7.4.0.14900_linux_x86_64_setup.tar.gz
+          ${PYLON_DOWNLOAD_URL_BASE_7_4}pylon_7.4.0.14900_linux_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
-          ${PYLON_DOWNLOAD_URL_BASE}pylon-6.2.0.21487.dmg
-          ${PYLON_DOWNLOAD_ARM64_URL_BASE}pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh
+          ${PYLON_DOWNLOAD_URL_BASE}pylon_7_3_1_0011.dmg
           EOF
       - uses: actions/cache@v3
         id: cache
@@ -49,7 +48,7 @@ jobs:
           PYLON_DOWNLOAD_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}
           PYLON_DOWNLOAD_URL_BASE_6_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_2 }}
           PYLON_DOWNLOAD_URL_BASE_6_3: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_6_3 }}
-          PYLON_DOWNLOAD_URL_BASE_7_2: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_7_2 }}
+          PYLON_DOWNLOAD_URL_BASE_7_4: ${{ secrets.PYLON_DOWNLOAD_URL_BASE_7_4 }}
           PYLON_DOWNLOAD_ARM64_URL_BASE: ${{ secrets.PYLON_DOWNLOAD_ARM64_URL_BASE }}
         run: |
           mkdir pylon-installer && cd pylon-installer
@@ -81,7 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         a: [cp36m, cp37m, cp38, cp39, cp3_10, cp3_11]
-        p: [manylinux_2_28_x86_64, manylinux_2_28_aarch64, manylinux_2_28_armv7l]
+        p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64, manylinux_2_28_armv7l]
 
     env:
       P: ${{ matrix.p }}
@@ -147,21 +146,16 @@ jobs:
 
       - name: Setup pylon
         run: |
-          # install x86_64
+          # install universal
           cd pylon-installer
-          hdiutil attach pylon-*.dmg
+          hdiutil attach pylon_*.dmg
           sudo installer -pkg /Volumes/pylon\ *\ Camera\ Software\ Suite/pylon-*.pkg  -target /
           hdiutil detach /Volumes/pylon\ *\ Camera\ Software\ Suite
-          # install arm64
-          chmod a+x pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh
-          ./pylon_7.3.1.0006_Darwin-arm64_SDK.selfsh --accept
-          mkdir /tmp/pylon_framework
-          cp -pr pylon/Frameworks/* /tmp/pylon_framework
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.13.0
         env:
-          PYLON_FRAMEWORK_ARM64: /tmp/pylon_framework
+          PYLON_FRAMEWORK_ARM64: /Library/Frameworks
           PYLON_FRAMEWORK_X86_64: /Library/Frameworks
 
       - uses: actions/upload-artifact@v3

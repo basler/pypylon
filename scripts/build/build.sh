@@ -78,7 +78,13 @@ export PYLON_ROOT
 $PYTHON setup.py clean
 
 if [ -z "$DISABLE_TESTS" ]; then
-    $PYTHON -m pip install --user numpy
+    # Limit numpy version due to issues with build system on armv7l
+    if [[ "$UPDATE_PLATFORM_TAG" == *"armv7l"* ]]; then
+        $PYTHON -m pip install --user "numpy<=1.25.2"
+    else
+        $PYTHON -m pip install --user numpy
+    fi
+
     #For now failed tests are accepted until all are fixed
     $PYTHON setup.py test
 fi

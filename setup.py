@@ -18,12 +18,12 @@ import platform
 from pathlib import Path
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "7.2.1",
+    "Windows": "7.4.0",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "7.2.1",
+    "Linux": "7.4.0",
     "Linux_armv7l": "6.2.0",
-    "Darwin": "6.2.0",
+    "Darwin": "7.3.0",
     "Darwin_arm64": "7.3.1"
 }
 
@@ -777,23 +777,26 @@ class BuildSupportLinux(BuildSupport):
 
         config_cflags = self.call_pylon_config("--cflags")
         self.ExtraCompileArgs.extend(config_cflags.split())
-        config_cflags = self.call_pylon_dataprocessing_config("--cflags")
-        self.ExtraCompileArgs.extend(config_cflags.split())
-        self.ExtraCompileArgs = list(dict.fromkeys(self.ExtraCompileArgs)) #remove duplicates
+        if self.include_pylon_data_processing():
+            config_cflags = self.call_pylon_dataprocessing_config("--cflags")
+            self.ExtraCompileArgs.extend(config_cflags.split())
+            self.ExtraCompileArgs = list(dict.fromkeys(self.ExtraCompileArgs)) #remove duplicates
         print("ExtraCompileArgs:", self.ExtraCompileArgs)
 
         config_libs = self.call_pylon_config("--libs")
         self.ExtraLinkArgs.extend(config_libs.split())
-        config_libs = self.call_pylon_dataprocessing_config("--libs")
-        self.ExtraLinkArgs.extend(config_libs.split())
-        self.ExtraLinkArgs = list(dict.fromkeys(self.ExtraLinkArgs)) #remove duplicates
+        if self.include_pylon_data_processing():
+            config_libs = self.call_pylon_dataprocessing_config("--libs")
+            self.ExtraLinkArgs.extend(config_libs.split())
+            self.ExtraLinkArgs = list(dict.fromkeys(self.ExtraLinkArgs)) #remove duplicates
         print("ExtraLinkArgs:", self.ExtraLinkArgs)
 
         config_libdir = self.call_pylon_config("--libdir")
         self.LibraryDirs.extend(config_libdir.split())
-        config_libdir = self.call_pylon_dataprocessing_config("--libdir")
-        self.LibraryDirs.extend(config_libdir.split())
-        self.LibraryDirs = list(dict.fromkeys(self.LibraryDirs)) #remove duplicates
+        if self.include_pylon_data_processing():
+            config_libdir = self.call_pylon_dataprocessing_config("--libdir")
+            self.LibraryDirs.extend(config_libdir.split())
+            self.LibraryDirs = list(dict.fromkeys(self.LibraryDirs)) #remove duplicates
         print("LibraryDirs:", self.LibraryDirs)
 
         # adjust runtime files according to pylon version
