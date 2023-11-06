@@ -38,3 +38,6 @@ NodeMap.pfs
 pypylon.*.html
 osx_includes
 wheelhouse
+
+# macOS
+.DS_Store

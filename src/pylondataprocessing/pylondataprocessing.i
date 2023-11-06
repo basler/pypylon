@@ -1,4 +1,4 @@
-%define DOCSTRING
+%define PYLONDP_DOCSTRING
 "
 Copyright (C) 2023 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
@@ -25,7 +25,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 "
 %enddef
 
-%module(directors="1", package="pypylon", docstring=DOCSTRING) pylondataprocessing
+%module(directors="1", package="pypylon", docstring=PYLONDP_DOCSTRING) pylondataprocessing
 %include "DoxyPylonDataProcessing.i";
 %begin %{
 // allow debug builds of genicam wrapper against release build of python

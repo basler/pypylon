@@ -1,4 +1,4 @@
-%define DOCSTRING
+%define GENICAM_DOCSTRING
 "
 Copyright (C) 2017-2023 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
@@ -25,7 +25,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 "
 %enddef
 
-%module(directors="1", package="pypylon", docstring=DOCSTRING) genicam
+%module(directors="1", package="pypylon", docstring=GENICAM_DOCSTRING) genicam
 %include "DoxyGenApi.i";
 %begin %{
 

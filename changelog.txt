@@ -1,3 +1,9 @@
+Version X.X.X
+    - Updated to pylon 7.4 on linux and windows
+    - Add support for pylon Data Processing and vTools
+    - Linux (64bit) binaries are now manylinux_2_31 compliant and therefore
+      require glibc >= 2.31
+
 Version 2.3.0
     - Date 2023-09-01
     - Add binding for VersionInfo
