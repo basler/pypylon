@@ -75,25 +75,25 @@ class EnumerationTestSuite(GenicamTestCase):
         Camera._LoadXMLFromFile("GenApiTest", "EnumerationTestSuite_TestValueAccess")
 
         Enum = Camera.GetNode("Enum")
-        self.assertEqual(intfIEnumeration, Enum.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfIEnumeration, Enum.Node.GetPrincipalInterfaceType())
 
         Value = Camera.GetNode("Value")
 
         # happy path
         Enum.FromString("EnumValue1")
         self.assertEqual("EnumValue1", Enum.ToString())
-        self.assertEqual(10, Value.GetValue())
+        self.assertEqual(10, Value.Value)
 
         Enum.FromString("EnumValue2")
         self.assertEqual("EnumValue2", Enum.ToString())
-        self.assertEqual(20, Value.GetValue())
+        self.assertEqual(20, Value.Value)
 
         EnumEntry = Enum.GetCurrentEntry()
         print(EnumEntry)
         self.assertEqual("EnumValue2", EnumEntry.GetSymbolic())
 
         # Ahaem - this should not change over time :-)
-        EnumEntry.GetNode().InvalidateNode()
+        EnumEntry.Node.InvalidateNode()
         self.assertEqual(RO, EnumEntry.GetAccessMode())
         self.assertEqual(RO, EnumEntry.GetAccessMode())
 
@@ -103,11 +103,11 @@ class EnumerationTestSuite(GenicamTestCase):
         # GCLOGINFO( pLogger, "-------------------------------------------------")
         # GCLOGINFO( pLogger, "Setup : Enumeration <=> Integer")
 
-        Value.GetNode().InvalidateNode()
+        Value.Node.InvalidateNode()
         # TEST_BEGIN(1000)
         Enum.FromString("EnumValue1")
         # StopWatch.PauseBegin()
-        Value.GetNode().InvalidateNode()
+        Value.Node.InvalidateNode()
         # StopWatch.PauseEnd()
         # TEST_END( Enumeration::FromString )
 
@@ -220,10 +220,10 @@ class EnumerationTestSuite(GenicamTestCase):
         self.assertEqual(gstr, Value.ToString())
 
         MyEntry = Value.GetEntryByName("MyEnumEntry1")
-        #    self.assertEqual( (gcstring)"1", MyEntry.ToString(MyEntry.GetValue()) ) # *JS* removed warning
-        self.assertEqual("1", MyEntry.ToString(MyEntry.GetValue() != 0))
-        #    gcstring str = MyEntry.ToString( MyEntry.GetValue() ) # *JS* removed warning
-        Str = MyEntry.ToString(MyEntry.GetValue() != 0)
+        #    self.assertEqual( (gcstring)"1", MyEntry.ToString(MyEntry.Value) ) # *JS* removed warning
+        self.assertEqual("1", MyEntry.ToString(MyEntry.Value != 0))
+        #    gcstring str = MyEntry.ToString( MyEntry.Value ) # *JS* removed warning
+        Str = MyEntry.ToString(MyEntry.Value != 0)
         print(Str, type(Str))
         # entries are not writeable
         with self.assertRaises(GenericException):
@@ -235,10 +235,10 @@ class EnumerationTestSuite(GenicamTestCase):
         # CEnumEntryRef refEnumEntry
         # self.assertTrue_NO_THROW(refEnumEntry.SetReference( Value ) )
         # with self.assertRaises( refEnumEntry.GetSymbolic()):  AccessException
-        # with self.assertRaises( refEnumEntry.GetValue()):  AccessException
+        # with self.assertRaises( refEnumEntry.Value):  AccessException
         # self.assertTrue_NO_THROW( refEnumEntry.SetReference( MyEntry ) )
         # self.assertEqual( (gcstring)"MyEnumEntry1", refEnumEntry.GetSymbolic())
-        # self.assertEqual( 1,refEnumEntry.GetValue())
+        # self.assertEqual( 1,refEnumEntry.Value)
         # self.assertEqual (RO, refEnumEntry.GetAccessMode())
 
         # now do some additional tests with the terminal node
@@ -255,7 +255,7 @@ class EnumerationTestSuite(GenicamTestCase):
 
         # what if value points to a NI entry?
         IntVal = Camera.GetNode("Value2")
-        IntVal.SetValue(3)  # this entry is NA
+        IntVal.Value = 3  # this entry is NA
         with self.assertRaises(AccessException):
             Value.ToString(True)
         with self.assertRaises(AccessException):
@@ -381,10 +381,10 @@ class EnumerationTestSuite(GenicamTestCase):
         # self.assertTrue(MyEntry)
         # self.assertEqual((gcstring)"2", MyEntry.ToString())
 
-        #    self.assertEqual(  10LL, refEnumT.GetIntValue(MyEntry.GetValue())) # *JS* removed warning
-        # with self.assertRaises( refEnumT.GetIntValue(MyEntry.GetValue()  not = 0)):   OutOfRangeException
-        #    with self.assertRaises( refFalse.GetIntValue(MyEntry.GetValue())):  AccessException  # *JS* removed warning
-        # with self.assertRaises( refFalse.GetIntValue(MyEntry.GetValue()  not = 0)):  AccessException
+        #    self.assertEqual(  10LL, refEnumT.GetIntValue(MyEntry.Value)) # *JS* removed warning
+        # with self.assertRaises( refEnumT.GetIntValue(MyEntry.Value  not = 0)):   OutOfRangeException
+        #    with self.assertRaises( refFalse.GetIntValue(MyEntry.Value)):  AccessException  # *JS* removed warning
+        # with self.assertRaises( refFalse.GetIntValue(MyEntry.Value  not = 0)):  AccessException
 
         # with self.assertRaises( refEnumT.ToString(0)):   InvalidArgumentException
         # refEnumT.SetIntValue(1)
@@ -397,21 +397,21 @@ class EnumerationTestSuite(GenicamTestCase):
         # refEnumT.FromString("Mono8") # ???
         # with self.assertRaises( refFalse.FromString("Mono8")):  AccessException
 
-        # with self.assertRaises( refEnumT.GetValue()):  AccessException
+        # with self.assertRaises( refEnumT.Value):  AccessException
 
         # refEnumT.SetNumEnums(3)
         #   undef max
-        # with self.assertRaises( refEnumT.SetValue(int(MyEntry.GetValue() & numeric_limits<unsigned>::max() ))):  AccessException
-        # with self.assertRaises( refFalse.SetValue(int(MyEntry.GetValue() & numeric_limits<unsigned>::max() ))):  AccessException
+        # with self.assertRaises( refEnumT.Value = int(MyEntry.Value & numeric_limits<unsigned>::max() )):  AccessException
+        # with self.assertRaises( refFalse.Value = int(MyEntry.Value & numeric_limits<unsigned>::max() )):  AccessException
 
 
         # With the fix of Mantis 376, the following assertion would fail.
-        #    self.assertEqual( 0, refEnumT.GetValue() )
+        #    self.assertEqual( 0, refEnumT.Value )
 
         # Since no enum references are set, GetValue() must throw an exception
-        # with self.assertRaises( refEnumT.GetValue()):   AccessException  # checks if Mantis 376 works
+        # with self.assertRaises( refEnumT.Value):   AccessException  # checks if Mantis 376 works
 
-        # with self.assertRaises( refFalse.GetValue()):  AccessException
+        # with self.assertRaises( refFalse.Value):  AccessException
 
         # refEnumT.SetEnumReference(0, "Mono8")
         # refEnumT.SetEnumReference(1, "Mono16")
@@ -420,8 +420,8 @@ class EnumerationTestSuite(GenicamTestCase):
         # this one does nothing (the call is ignored), it is here just to complete the coverage
         # self.assertTrue_NO_THROW( refFalse.SetEnumReference(0, "FooBar") )
 
-        # refEnumT.SetValue(1)
-        # self.assertEqual( 1, refEnumT.GetValue() )
+        # refEnumT.Value = 1
+        # self.assertEqual( 1, refEnumT.Value )
         # self.assertEqual (True, refEnumT.IsValueCacheValid())
 
         # refEnumT = "Mono16"
@@ -527,11 +527,11 @@ class EnumerationTestSuite(GenicamTestCase):
         # self.assertAlmostEqual( 20.0, refEnumEntry2.GetNumericValue(), delta=self.FLOAT64_EPSILON )
 
         # try setting an enum through an integer
-        IntFromEnum.SetValue(1)
+        IntFromEnum.Value = 1
         self.assertEqual("EnumValue1", Enum.ToString())
-        IntFromEnum.SetValue(2)
+        IntFromEnum.Value = 2
         self.assertEqual("EnumValue3", Enum.ToString())
-        IntFromEnum.SetValue(20)
+        IntFromEnum.Value = 20
         self.assertEqual("EnumValue2", Enum.ToString())
 
     # def TestAutoGain_Callback(INode *pNode)
@@ -622,12 +622,12 @@ class EnumerationTestSuite(GenicamTestCase):
         GainAuto = Camera.GetNode("GainAuto")
 
         self.assertEqual(42, Gain.GetValue(IgnoreCache=True))
-        Gain.SetValue(4711)
-        self.assertEqual(4711, Gain.GetValue())
+        Gain.Value = 4711
+        self.assertEqual(4711, Gain.Value)
         self.assertEqual(4711, GainAutoFeaturePort.Gain)
 
         self.assertEqual("Off", GainAuto.ToString())
-        GainAuto.SetValue("Continuous")
+        GainAuto.Value = "Continuous"
         self.assertEqual("Continuous", GainAuto.ToString())
         self.assertEqual(EGainAuto.Continuous, (GainAutoFeaturePort.GainAutoReg))
 
@@ -645,7 +645,7 @@ class EnumerationTestSuite(GenicamTestCase):
         # Register( GainAuto.GetNode(), TestAutoGain_Callback )
 
         # start one cycle of auto-gain
-        GainAuto.SetValue("Once")
+        GainAuto.Value = "Once"
         self.assertEqual(EGainAuto.Once, (GainAutoFeaturePort.GainAutoReg))
         self.assertTrue(GainAutoCallback.HasFiredOnce())
 
@@ -774,34 +774,34 @@ class EnumerationTestSuite(GenicamTestCase):
         # since Once is self clearing the value is read and Gain's cache is cleard
         self.assertEqual("Off", GainAuto.ToString())
         # this fills the cache
-        self.assertEqual(555, Gain.GetValue())
+        self.assertEqual(555, Gain.Value)
 
         # once again without direct read of GainAuto
-        GainAuto.SetValue("Once")  # this clears the Gain cache
+        GainAuto.Value = "Once"  # this clears the Gain cache
         GainAutoFeaturePort.Gain = 666
         # this fills the cache
-        self.assertEqual(666, Gain.GetValue())
+        self.assertEqual(666, Gain.Value)
         GainAutoFeaturePort.Gain = 777
         # since GainAuto is not read this goes unnotices
         GainAutoFeaturePort.GainAutoReg = EGainAuto.Off
         # value comes form cache
-        self.assertEqual(666, Gain.GetValue())
+        self.assertEqual(666, Gain.Value)
         GainAutoFeaturePort.Gain = 888
         # value comes form cache
-        self.assertEqual(666, Gain.GetValue())  # from cache
+        self.assertEqual(666, Gain.Value)  # from cache
 
         """============ Test auto-reset, read before poll ========== """
 
         # start one cycle of auto-gain
-        Gain.SetValue(123)
-        self.assertEqual(123, Gain.GetValue())
+        Gain.Value = 123
+        self.assertEqual(123, Gain.Value)
         GainAutoCallback.Reset()
         GainCallback.Reset()
-        GainAuto.SetValue("Once")
+        GainAuto.Value = "Once"
         self.assertEqual(EGainAuto.Once, (GainAutoFeaturePort.GainAutoReg))
         self.assertTrue(GainAutoCallback.HasFiredOnce())
         self.assertTrue(GainCallback.HasFiredOnce())
-        self.assertEqual(123, Gain.GetValue())
+        self.assertEqual(123, Gain.Value)
 
         # the camera signals we're ready, get to know that through reading (before any poll)
         GainAutoFeaturePort.Gain = 234
@@ -900,15 +900,15 @@ class EnumerationTestSuite(GenicamTestCase):
 
         # Same questions but triggered using ImposeAccessMode
         self.assertEqual(RW, Enum.GetAccessMode())
-        Enum.GetNode().ImposeAccessMode(RO)
+        Enum.Node.ImposeAccessMode(RO)
         self.assertEqual(RO, Enum.GetAccessMode())
-        EnumEntry1.GetNode().ImposeAccessMode(NA)
+        EnumEntry1.Node.ImposeAccessMode(NA)
         self.assertEqual(RO, Enum.GetAccessMode())
-        EnumEntry2.GetNode().ImposeAccessMode(NA)
+        EnumEntry2.Node.ImposeAccessMode(NA)
         self.assertEqual(NA, Enum.GetAccessMode())
-        EnumEntry1.GetNode().ImposeAccessMode(NI)
+        EnumEntry1.Node.ImposeAccessMode(NI)
         self.assertEqual(NA, Enum.GetAccessMode())
-        EnumEntry2.GetNode().ImposeAccessMode(NI)
+        EnumEntry2.Node.ImposeAccessMode(NI)
         self.assertEqual(NI, Enum.GetAccessMode())
 
     def test_Ticket778(self):
@@ -974,17 +974,17 @@ class EnumerationTestSuite(GenicamTestCase):
         EnumEntry_EnumB_EnumValue2 = Camera.GetNode("EnumEntry_EnumB_EnumValue2")
         AvailableB = Camera.GetNode("AvailableB")
 
-        self.assertEqual(NoCache, AvailableA.GetNode().GetCachingMode())
-        self.assertEqual(WriteThrough, AvailableB.GetNode().GetCachingMode())
+        self.assertEqual(NoCache, AvailableA.Node.GetCachingMode())
+        self.assertEqual(WriteThrough, AvailableB.Node.GetCachingMode())
 
-        self.assertEqual(No, EnumEntry_EnumA_EnumValue1.GetNode().IsAccessModeCacheable())
-        self.assertEqual(Yes, EnumEntry_EnumB_EnumValue1.GetNode().IsAccessModeCacheable())
+        self.assertEqual(No, EnumEntry_EnumA_EnumValue1.Node.IsAccessModeCacheable())
+        self.assertEqual(Yes, EnumEntry_EnumB_EnumValue1.Node.IsAccessModeCacheable())
 
-        self.assertEqual(Yes, EnumEntry_EnumA_EnumValue2.GetNode().IsAccessModeCacheable())
-        self.assertEqual(Yes, EnumEntry_EnumB_EnumValue2.GetNode().IsAccessModeCacheable())
+        self.assertEqual(Yes, EnumEntry_EnumA_EnumValue2.Node.IsAccessModeCacheable())
+        self.assertEqual(Yes, EnumEntry_EnumB_EnumValue2.Node.IsAccessModeCacheable())
 
-        self.assertEqual(No, EnumA.GetNode().IsAccessModeCacheable())
-        self.assertEqual(Yes, EnumB.GetNode().IsAccessModeCacheable())
+        self.assertEqual(No, EnumA.Node.IsAccessModeCacheable())
+        self.assertEqual(Yes, EnumB.Node.IsAccessModeCacheable())
 
 
 if __name__ == "__main__":

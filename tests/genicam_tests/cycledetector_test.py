@@ -106,7 +106,7 @@ class CycleDetectorTestSuite(GenicamTestCase):
 
             self.assertEqual(1000, WidthValue.GetValue(True))
             self.assertEqual(0, OffsetMax.GetValue(True))
-            WidthValue.SetValue(900)
+            WidthValue.Value = 900
             self.assertEqual(100, OffsetMax.GetValue(True))
         else:
             # for all other schema versions it does
@@ -158,8 +158,8 @@ class CycleDetectorTestSuite(GenicamTestCase):
             OffsetX = Camera.GetNode("OffsetXValue")
             OXMax = Camera.GetNode("OffsetXMax")
 
-            Width.SetValue(500)
-            OXMax.GetValue()
+            Width.Value = 500
+            OXMax.Value
         else:
             # for all other schema versions it does
             with self.assertRaises(RuntimeException):

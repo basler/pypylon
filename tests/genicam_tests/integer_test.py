@@ -59,52 +59,52 @@ class IntegerTestSuite(GenicamTestCase):
 
         #         CPPUNIT_ASSERT_NO_THROW(refInteger.SetReference( ptrValue ) )
         #         self.assertEqual( Linear, refInteger.GetRepresentation() )
-        #         self.assertEqual( (int64_t)2, refInteger.GetInc() )
-        #         self.assertEqual( (int64_t)30, refInteger.GetMax() )
-        #         self.assertEqual( (int64_t)10, refInteger.GetMin() )
-        #         refInteger.SetValue(18)
-        #         self.assertEqual( (int64_t)18, refInteger.GetValue() )
-        #         refInteger.SetValue(16)
+        #         self.assertEqual( (int64_t)2, refInteger.Inc )
+        #         self.assertEqual( (int64_t)30, refInteger.Max )
+        #         self.assertEqual( (int64_t)10, refInteger.Min )
+        #         refInteger.Value = 18
+        #         self.assertEqual( (int64_t)18, refInteger.Value )
+        #         refInteger.Value = 16
         #         self.assertEqual( (int64_t)16, refInteger.operator()() )
         #         refInteger.operator=(20)
         #         self.assertEqual( (int64_t)20, refInteger.operator*() )
         #         self.assertEqual( (IFloat*)NULL, refInteger.GetFloatAlias() )
 
-        self.assertEqual(2, value.GetInc())
+        self.assertEqual(2, value.Inc)
 
         # happy path
-        self.assertEqual(20, value.GetValue())
-        value.SetValue(22)
-        self.assertEqual(22, value.GetValue())
+        self.assertEqual(20, value.Value)
+        value.Value = 22
+        self.assertEqual(22, value.Value)
 
         # value too small
 
         with self.assertRaises(OutOfRangeException):
-            value.SetValue(0)
+            value.Value = 0
 
         # value too large
         with self.assertRaises(OutOfRangeException):
-            value.SetValue(40)
+            value.Value = 40
 
         # value not fitting the increment
         with self.assertRaises(OutOfRangeException):
-            value.SetValue(21)
+            value.Value = 21
 
         # With another Min the Value 21 is now fitting
         # remember, the rule is : (Value - Min) % Inc == 0
-        valueMin.SetValue(11)
-        value.SetValue(21)
-        valueMin.SetValue(10)
+        valueMin.Value = 11
+        value.Value = 21
+        valueMin.Value = 10
 
         # set without verify
-        value.SetValue(21, False)
+        value.SetValue(21,  False)
 
         # get with verify
         with self.assertRaises(OutOfRangeException):
             value.GetValue(True)
 
         # make a node in a deeper layer inconsistent (Min = 0)
-        valueValue.SetValue(-1, False)
+        valueValue.SetValue(-1,  False)
 
         # get with verify
         with self.assertRaises(OutOfRangeException):
@@ -118,13 +118,13 @@ class IntegerTestSuite(GenicamTestCase):
 
         # exercise the invalid case of Inc==0
         valueInc = Camera.GetNode("ValueInc")
-        value.SetValue(28)
-        valueInc.SetValue(0)
-        self.assertEqual(0, value.GetInc())
-        with self.assertRaises(OutOfRangeException):   value.SetValue(1)
+        value.Value = 28
+        valueInc.Value = 0
+        self.assertEqual(0, value.Inc)
+        with self.assertRaises(OutOfRangeException):   value.Value = 1
         # note that on reading Inc is only checked if Verify=
         with self.assertRaises(LogicalErrorException):   value.GetValue(True)
-        self.assertEqual(28, value.GetValue())
+        self.assertEqual(28, value.Value)
 
     def test_RegValueAccess(self):
         """[ GenApiTest@IntegerTestSuite_TestRegValueAccess.xml|gxml
@@ -163,14 +163,14 @@ class IntegerTestSuite(GenicamTestCase):
         self.assertEqual(Linear, value.GetRepresentation())
         self.assertEqual(WO, value.GetAccessMode())
         self.assertEqual(WO, value.GetAccessMode())
-        with self.assertRaises(AccessException):   value.GetValue()
+        with self.assertRaises(AccessException):   value.Value
 
-        value.SetValue(0)
+        value.Value = 0
 
-        with self.assertRaises(AccessException):   value.GetValue()
+        with self.assertRaises(AccessException):   value.Value
 
-        with self.assertRaises(OutOfRangeException):   value.SetValue(-1)
-        value.SetValue(-1, False)
+        with self.assertRaises(OutOfRangeException):   value.Value = -1
+        value.SetValue(-1,  False)
 
     def test_RegValueAccessRO(self):
         """[ GenApiTest@IntegerTestSuite_TestRegValueAccessRO.xml|gxml
@@ -209,7 +209,7 @@ class IntegerTestSuite(GenicamTestCase):
         self.assertEqual(1024, value.GetValue(True))
 
         with self.assertRaises(AccessException):
-            value.SetValue(0)
+            value.Value = 0
 
     def test_RepresentationValueAccess(self):
         """[ GenApiTest@IntegerTestSuite_TestRepresentationValueAccess.xml|gxml
@@ -262,7 +262,7 @@ class IntegerTestSuite(GenicamTestCase):
     #
     #         CPPUNIT_ASSERT( !ptrValue.IsValueCacheValid() )
     #         CPPUNIT_ASSERT( !refValue.IsValueCacheValid() )
-    #         ptrValue.GetValue()
+    #         ptrValue.Value
     #         CPPUNIT_ASSERT( ptrValue.IsValueCacheValid() )
     #         CPPUNIT_ASSERT( refValue.IsValueCacheValid() )
 
@@ -346,7 +346,7 @@ class IntegerTestSuite(GenicamTestCase):
 
         intReg = Camera.GetNode("IntReg")
 
-        value.GetValue()
+        value.Value
 
         self.assertEqual("Blubb", value.GetUnit())
         self.assertEqual("Blubb", hiddenValue.GetUnit())
@@ -420,52 +420,52 @@ class IntegerTestSuite(GenicamTestCase):
 
         print("Linear : " + linear.ToString() + "\n")
         self.assertEqual("14", linear.ToString())
-        Result = linear.GetValue()
-        linear.SetValue(0)
+        Result = linear.Value
+        linear.Value = 0
         linear.FromString("14")
-        self.assertEqual(Result, linear.GetValue())
+        self.assertEqual(Result, linear.Value)
 
         print("Logarithmic : " + logarithmic.ToString() + "\n")
         self.assertEqual("14", logarithmic.ToString())
-        Result = logarithmic.GetValue()
-        logarithmic.SetValue(0)
+        Result = logarithmic.Value
+        logarithmic.Value = 0
         logarithmic.FromString("14")
-        self.assertEqual(Result, logarithmic.GetValue())
+        self.assertEqual(Result, logarithmic.Value)
 
         print("Boolean : " + boolean.ToString() + "\n")
         self.assertEqual("true", boolean.ToString())
-        Result = boolean.GetValue()
-        boolean.SetValue(0)
+        Result = boolean.Value
+        boolean.Value = 0
         boolean.FromString("true")
-        self.assertEqual(1, boolean.GetValue())  # note, this is different
+        self.assertEqual(1, boolean.Value)  # note, this is different
 
         print("PureNumber : " + pureNumber.ToString() + "\n")
         self.assertEqual("14", pureNumber.ToString())
-        Result = pureNumber.GetValue()
-        pureNumber.SetValue(0)
+        Result = pureNumber.Value
+        pureNumber.Value = 0
         pureNumber.FromString("14")
-        self.assertEqual(Result, pureNumber.GetValue())
+        self.assertEqual(Result, pureNumber.Value)
 
         print("HexNumber : " + hexNumber.ToString() + "\n")
         self.assertEqual("0x123456789abcdef", hexNumber.ToString())
-        Result = hexNumber.GetValue()
-        hexNumber.SetValue(0)
+        Result = hexNumber.Value
+        hexNumber.Value = 0
         hexNumber.FromString("0X123456789ABCDEF")
-        self.assertEqual(Result, hexNumber.GetValue())
+        self.assertEqual(Result, hexNumber.Value)
 
         print("IPV4Address : " + IPV4Address.ToString() + "\n")
         self.assertEqual("86.120.154.188", IPV4Address.ToString())
-        Result = IPV4Address.GetValue()
-        IPV4Address.SetValue(0)
+        Result = IPV4Address.Value
+        IPV4Address.Value = 0
         IPV4Address.FromString("86.120.154.188")
-        self.assertEqual(Result, IPV4Address.GetValue())
+        self.assertEqual(Result, IPV4Address.Value)
 
         print("MACAddress : " + MACAddress.ToString() + "\n")
         self.assertEqual("12:34:56:78:9a:bc", MACAddress.ToString())
-        Result = MACAddress.GetValue()
-        MACAddress.SetValue(0)
+        Result = MACAddress.Value
+        MACAddress.Value = 0
         MACAddress.FromString("12:34:56:78:9A:BC")
-        self.assertEqual(Result, MACAddress.GetValue())
+        self.assertEqual(Result, MACAddress.Value)
 
         self.assertEqual(Logarithmic, logarithmicKnife.GetRepresentation())
 
@@ -492,7 +492,7 @@ class IntegerTestSuite(GenicamTestCase):
     #         self.assertEqual (False, poly.IsPointer())
     #         self.assertEqual ((INodePrivate*)NULL, poly.GetPointer())
     #         self.assertEqual (WriteThrough, poly.GetCachingMode())
-    #         self.assertEqual ((int64_t)1LL, poly.GetValue())
+    #         self.assertEqual ((int64_t)1LL, poly.Value)
     #         self.assertEqual (True, poly.IsValueCacheValid())
     #         gcstring str
     #         Value2String (poly, str)
@@ -588,57 +588,57 @@ class IntegerTestSuite(GenicamTestCase):
         floatMax = Camera.GetNode("FloatMax")
         floatMin = Camera.GetNode("FloatMin")
 
-        self.assertEqual(3, intFromFloat.GetMax())
-        floatMax.SetValue(1e200)
+        self.assertEqual(3, intFromFloat.Max)
+        floatMax.Value = 1e200
 
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetMax()
+            intFromFloat.Max
 
-        floatMax.SetValue(-1e200)
+        floatMax.Value = -1e200
 
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetMax()
+            intFromFloat.Max
 
-        floatMax.SetValue(3.0)
-        self.assertEqual(0, intFromFloat.GetMin())
-        floatMin.SetValue(1e200)
+        floatMax.Value = 3.0
+        self.assertEqual(0, intFromFloat.Min)
+        floatMin.Value = 1e200
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetMin()
+            intFromFloat.Min
 
-        floatMin.SetValue(-1e200)
+        floatMin.Value = -1e200
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetMin()
+            intFromFloat.Min
 
-        floatMin.SetValue(0.0)
+        floatMin.Value = 0.0
         self.assertEqual(PureNumber, intFromFloat.GetRepresentation())
         self.assertEqual("foo", intFromFloat.GetUnit())
-        self.assertEqual(1, intFromFloat.GetValue())
-        floatMax.SetValue(1e200)
-        floatMin.SetValue(-1e200)
-        floatValue.SetValue(1e200)
+        self.assertEqual(1, intFromFloat.Value)
+        floatMax.Value = 1e200
+        floatMin.Value = -1e200
+        floatValue.Value = 1e200
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetValue()
-        floatValue.SetValue(-1e200)
+            intFromFloat.Value
+        floatValue.Value = -1e200
         with self.assertRaises(RuntimeException):
-            intFromFloat.GetValue()
-        floatValue.SetValue(-1e200)
-        floatMax.SetValue(3.0)
-        floatMin.SetValue(0.0)
-        floatValue.SetValue(1.0)
-        self.assertEqual(1, intFromFloat.GetInc())
-        intFromFloat.SetValue(2)
-        self.assertAlmostEqual(2.0, floatValue.GetValue(), self.FLOAT64_EPSILON)
+            intFromFloat.Value
+        floatValue.Value = -1e200
+        floatMax.Value = 3.0
+        floatMin.Value = 0.0
+        floatValue.Value = 1.0
+        self.assertEqual(1, intFromFloat.Inc)
+        intFromFloat.Value = 2
+        self.assertAlmostEqual(2.0, floatValue.Value, self.FLOAT64_EPSILON)
 
         intFromFloatWithInc = Camera.GetNode("IntFromFloatWithInc")
-        self.assertEqual(2, intFromFloatWithInc.GetInc())
+        self.assertEqual(2, intFromFloatWithInc.Inc)
 
-        floatMax.SetValue(13.0)
-        floatValue.SetValue(11.2)
+        floatMax.Value = 13.0
+        floatValue.Value = 11.2
         #         CIntegerPolyRef polyIntFromFloat
         #         polyIntFromFloat = (IFloat*)ptrFloat
         #         self.assertEqual (True, polyIntFromFloat.IsInitialized())
         #         self.assertEqual (True, polyIntFromFloat.IsPointer())
-        #         self.assertEqual ((int64_t)11LL, polyIntFromFloat.GetValue())
+        #         self.assertEqual ((int64_t)11LL, polyIntFromFloat.Value)
         #         self.assertEqual (True, polyIntFromFloat.IsValueCacheValid())
 
         node = Camera.GetNode("SimpleNode")
@@ -654,18 +654,18 @@ class IntegerTestSuite(GenicamTestCase):
         boolValue = Camera.GetNode("Bool")
 
         self.assertEqual("", intFromBool.GetUnit())
-        self.assertEqual(1, intFromBool.GetValue())
-        intFromBool.SetValue(0)
-        self.assertEqual(False, boolValue.GetValue())
+        self.assertEqual(1, intFromBool.Value)
+        intFromBool.Value = 0
+        self.assertEqual(False, boolValue.Value)
         self.assertEqual(True, intFromBool.IsValueCacheValid())
-        intFromBool.SetValue(-253)
-        self.assertEqual(True, boolValue.GetValue())
+        intFromBool.Value = -253
+        self.assertEqual(True, boolValue.Value)
 
         #         CIntegerPolyRef polyIntFromBool
         #         polyIntFromBool = (IBoolean*)ptrBool
         #         self.assertEqual (True, polyIntFromBool.IsInitialized())
         #         self.assertEqual (True, polyIntFromBool.IsPointer())
-        #         self.assertEqual ((int64_t)1LL, polyIntFromBool.GetValue())
+        #         self.assertEqual ((int64_t)1LL, polyIntFromBool.Value)
         #         self.assertEqual (True, polyIntFromBool.IsValueCacheValid())
 
         # test integer.enum
@@ -673,8 +673,8 @@ class IntegerTestSuite(GenicamTestCase):
         enum = Camera.GetNode("Enum")
 
         self.assertEqual("", intFromEnum.GetUnit())
-        self.assertEqual(1, intFromEnum.GetValue())
-        intFromEnum.SetValue(2)
+        self.assertEqual(1, intFromEnum.Value)
+        intFromEnum.Value = 2
         self.assertEqual("EnumValue2", enum.ToString())
         self.assertEqual(True, intFromEnum.IsValueCacheValid())
 
@@ -682,12 +682,12 @@ class IntegerTestSuite(GenicamTestCase):
         #         polyIntFromEnum = (IEnumeration*)ptrEnum
         #         self.assertEqual (True, polyIntFromEnum.IsInitialized())
         #         self.assertEqual (True, polyIntFromEnum.IsPointer())
-        #         self.assertEqual ((int64_t)2LL, polyIntFromEnum.GetValue())
+        #         self.assertEqual ((int64_t)2LL, polyIntFromEnum.Value)
         #         self.assertEqual (True, polyIntFromEnum.IsValueCacheValid())
 
         intFromEnumWithoutEntry = Camera.GetNode("IntFromEnumWithoutEntry")
         with self.assertRaises(GenericException):
-            intFromEnumWithoutEntry.SetValue(2)
+            intFromEnumWithoutEntry.Value = 2
         enumWithoutEntry = Camera.GetNode("EnumWithoutEntry")
 
     #         CIntegerPolyRef polyIntFromEnumWithoutEntry
@@ -781,13 +781,13 @@ class IntegerTestSuite(GenicamTestCase):
             self.assertEqual(16, valueList[1])
 
             indexNode = Camera.GetNode("index")
-            indexNode.SetValue(2)
+            indexNode.Value = 2
 
             # self.assertEqual(fixedIncrement, value.GetIncMode())
 
             valueList = value.GetListOfValidValues()
             self.assertEqual(0, len(valueList))
-            indexNode.SetValue(0)
+            indexNode.Value = 0
             # self.assertEqual(listIncrement, value.GetIncMode())
 
             valueList = value.GetListOfValidValues()

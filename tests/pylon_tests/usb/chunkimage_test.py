@@ -20,20 +20,20 @@ class ChunkImageTestSuite(PylonTestCase):
         # Open the camera.
         camera.Open()
 
-        camera.StaticChunkNodeMapPoolSize = camera.MaxNumBuffer.GetValue()
+        camera.StaticChunkNodeMapPoolSize.Value = camera.MaxNumBuffer.Value
 
         if genicam.IsWritable(camera.ChunkModeActive):
-            camera.ChunkModeActive = True
+            camera.ChunkModeActive.Value = True
         else:
             self.fail()
 
         # Enable time stamp chunks.
-        camera.ChunkSelector = "Timestamp"
-        camera.ChunkEnable = True
+        camera.ChunkSelector.Value = "Timestamp"
+        camera.ChunkEnable.Value = True
 
         # Enable CRC checksum chunks.
-        camera.ChunkSelector = "PayloadCRC16"
-        camera.ChunkEnable = True
+        camera.ChunkSelector.Value = "PayloadCRC16"
+        camera.ChunkEnable.Value = True
 
         camera.StartGrabbingMax(self.countOfImagesToGrab)
 
@@ -57,7 +57,7 @@ class ChunkImageTestSuite(PylonTestCase):
             if not genicam.IsReadable(grabResult.ChunkTimestamp):
                 self.fail()
 
-        camera.ChunkModeActive = False
+        camera.ChunkModeActive.Value = False
 
 
 if __name__ == "__main__":

@@ -163,7 +163,7 @@ class PortTestSuite(GenicamTestCase):
 
         # Invalidate the port's node cache and test for correct read back
         Port.InvalidateNode()
-        self.assertTrue(testReg.GetValue() == WriteBuffer)
+        self.assertTrue(testReg.Value == WriteBuffer)
 
         # Make sure the failed write didn't modify the value of the node.
         self.assertTrue(testReg.GetValue() == WriteBuffer)

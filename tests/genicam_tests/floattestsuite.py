@@ -57,27 +57,27 @@ class FloatTestSuite(GenicamTestCase):
         # Check IFloat of CFloat
         self.assertEqual("dB", floatValue.GetUnit())
 
-        floatValue.SetValue(0.1)
-        self.assertAlmostEqual(0.1, floatValue.GetValue(), delta=0.001)
+        floatValue.Value = 0.1
+        self.assertAlmostEqual(0.1, floatValue.Value, delta=0.001)
         self.assertAlmostEqual(0.1, floatValue.GetValue(False, True), delta=0.001)
 
-        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), ptrFloat01.GetMin(), std::numeric_limits<double>::epsilon())
-        # CPPUNIT_ASSERT( ptrFloat01.GetMin() <= ptrFloat01.GetMax() )
+        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), ptrFloat01.Min, std::numeric_limits<double>::epsilon())
+        # CPPUNIT_ASSERT( ptrFloat01.Min <= ptrFloat01.Max )
 
         # Check IValue of CFloat
-        node = floatValue.GetNode()
+        node = floatValue.Node
 
         floatValue.FromString("1e-6")
-        self.assertAlmostEqual(1.0e-6, floatValue.GetValue(), delta=0.001)
+        self.assertAlmostEqual(1.0e-6, floatValue.Value, delta=0.001)
         dbl01 = float(floatValue.ToString())
-        self.assertAlmostEqual(dbl01, floatValue.GetValue(), delta=0.001)
+        self.assertAlmostEqual(dbl01, floatValue.Value, delta=0.001)
 
         # Check IBase
         self.assertEqual(RW, floatValue.GetAccessMode())
 
         # Check CFltReg implementation, does not support units
         floatValue2 = Camera.GetNode("MyFloatReg")
-        self.assertEqual(intfIFloat, floatValue2.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfIFloat, floatValue2.Node.GetPrincipalInterfaceType())
         self.assertEqual("", floatValue2.GetUnit())
         self.assertEqual(PureNumber, floatValue2.GetRepresentation())
 
@@ -85,25 +85,25 @@ class FloatTestSuite(GenicamTestCase):
     #             CPPUNIT_ASSERT_NO_THROW(refFloat.SetReference( ptrFloat01 ) )
     #             self.assertEqual( unit, refFloat.GetUnit() )
     #             self.assertEqual( RW, refFloat.GetAccessMode() )
-    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), refFloat.GetMin(), std::numeric_limits<double>::epsilon())
-    #             CPPUNIT_ASSERT( refFloat.GetMin() <= refFloat.GetMax() )
+    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), refFloat.Min, std::numeric_limits<double>::epsilon())
+    #             CPPUNIT_ASSERT( refFloat.Min <= refFloat.Max )
     #             self.assertEqual( PureNumber, refFloat.GetRepresentation() )
-    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( 1.0e-6, refFloat.GetValue() , 0.001 )
+    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( 1.0e-6, refFloat.Value , 0.001 )
     #             # adef problems in precision and representation by converting back to numbers
     #             double dbl01
     #             String2Value( refFloat.ToString(), &dbl01 )
-    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( dbl01, refFloat.GetValue(), 0.001 )
+    #             CPPUNIT_ASSERT_DOUBLES_EQUAL( dbl01, refFloat.Value, 0.001 )
     #             CPPUNIT_ASSERT_NO_THROW( refFloat.SetReference( 0 ) )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.FromString( "2e-005" ), AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.ToString(), AccessException )
     #             self.assertEqual( NI, refFloat.GetAccessMode() )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetMax(), AccessException )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetMin(), AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Max, AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Min, AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetNode(), AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetRepresentation(), AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetUnit(), AccessException )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.GetValue(), AccessException )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.SetValue( 3e-004 ), AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Value, AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Value =  3e-004 , AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.operator ()(), AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.operator =( 4e-004 ), AccessException )
     #             CPPUNIT_ASSERT_THROW_EX( refFloat.operator *(), AccessException )
@@ -119,21 +119,21 @@ class FloatTestSuite(GenicamTestCase):
     #
     #             # Pleora FG - SetValue, valid
     #             refFloat.SetReference( ptrFloat01 )
-    #             CPPUNIT_ASSERT_NO_THROW( refFloat.SetValue( 1.0 ) )
-    #             CPPUNIT_ASSERT_NO_THROW( refFloat.SetValue( 1.0, true ) )
-    #             CPPUNIT_ASSERT_NO_THROW( refFloat.SetValue( 1.0, false ) )
-    #             self.assertEqual( refFloat.GetValue(), ptrFloat01.GetValue() )
+    #             CPPUNIT_ASSERT_NO_THROW( refFloat.Value =  1.0  )
+    #             CPPUNIT_ASSERT_NO_THROW( refFloat.Value =  1.0, true  )
+    #             CPPUNIT_ASSERT_NO_THROW( refFloat.Value =  1.0, false  )
+    #             self.assertEqual( refFloat.Value, ptrFloat01.Value )
     #
     #             # Pleora FG - SetValue, invalid
     #             refFloat.SetReference( NULL )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.SetValue( 0.0 ), AccessException )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.SetValue( 0.0, true ), AccessException )
-    #             CPPUNIT_ASSERT_THROW_EX( refFloat.SetValue( 0.0, false ), AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Value =  0.0 , AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Value =  0.0, true , AccessException )
+    #             CPPUNIT_ASSERT_THROW_EX( refFloat.Value =  0.0, false , AccessException )
     #
     #             # Pleora FG - operator=, valid
     #             refFloat.SetReference( ptrFloat01 )
     #             CPPUNIT_ASSERT_NO_THROW( refFloat = 2.0 )
-    #             CPPUNIT_ASSERT( refFloat.GetValue() == 2.0 )
+    #             CPPUNIT_ASSERT( refFloat.Value == 2.0 )
     #
     #             # Pleora FG - operator=, invalid
     #             refFloat.SetReference( NULL )
@@ -141,8 +141,8 @@ class FloatTestSuite(GenicamTestCase):
     #
     #             # Pleora FG - operator(), valid
     #             refFloat.SetReference( ptrFloat01 )
-    #             ptrFloat01.SetValue( 3.0 )
-    #             CPPUNIT_ASSERT( refFloat() == ptrFloat01.GetValue() )
+    #             ptrFloat01.Value =  3.0 
+    #             CPPUNIT_ASSERT( refFloat() == ptrFloat01.Value )
     #
     #             # Pleora FG - operator(), invalid
     #             refFloat.SetReference( NULL )
@@ -150,12 +150,12 @@ class FloatTestSuite(GenicamTestCase):
     #
     #             # Pleora FG - operator*, valid
     #             refFloat.SetReference( ptrFloat01 )
-    #             ptrFloat01.SetValue( 4.0 )
-    #             CPPUNIT_ASSERT( *refFloat == ptrFloat01.GetValue() )
+    #             ptrFloat01.Value =  4.0 
+    #             CPPUNIT_ASSERT( *refFloat == ptrFloat01.Value )
 
     #         NODE_POINTER( Float, MyFloatingFloat )
-    #         cout << "Min = " << ptrMyFloatingFloat.GetMin() << endl
-    #         cout << "Max = " << ptrMyFloatingFloat.GetMax() << endl
+    #         cout << "Min = " << ptrMyFloatingFloat.Min << endl
+    #         cout << "Max = " << ptrMyFloatingFloat.Max << endl
 
     def test_FloatNodeAccess(self):
         """[ GenApiTest@FloatTestSuite_TestFloatNodeAccess.xml|gxml
@@ -215,36 +215,36 @@ class FloatTestSuite(GenicamTestCase):
         floatValueValue = Camera.GetNode("ValueValue")
 
         # happy path
-        self.assertAlmostEqual(20.0, floatValue.GetValue(), delta=0.0000001)
-        floatValue.SetValue(22.0)
-        self.assertAlmostEqual(22.0, floatValue.GetValue(), delta=0.0000001)
+        self.assertAlmostEqual(20.0, floatValue.Value, delta=0.0000001)
+        floatValue.Value = 22.0
+        self.assertAlmostEqual(22.0, floatValue.Value, delta=0.0000001)
 
         # value too small
-        with self.assertRaises(OutOfRangeException):   floatValue.SetValue(0.0)
+        with self.assertRaises(OutOfRangeException):   floatValue.Value = 0.0
 
         # value too large
-        with self.assertRaises(OutOfRangeException):   floatValue.SetValue(40.0)
+        with self.assertRaises(OutOfRangeException):   floatValue.Value = 40.0
 
         # set without verify
-        floatValue.SetValue(1000.0, False)
+        floatValue.SetValue(1000.0,  False)
 
         # get with verify
         with self.assertRaises(OutOfRangeException):   floatValue.GetValue(True)
 
-        floatValue.SetValue(20.0, False)
+        floatValue.SetValue(20.0,  False)
 
         # make a node in a deeper layer inconsistent (Min = 0)
-        floatValueValue.SetValue(-1.0, False)
+        floatValueValue.SetValue(-1.0,  False)
 
         # get with verify
         with self.assertRaises(OutOfRangeException):   floatValue.GetValue(True)
-        floatValueValue.SetValue(20.0)
+        floatValueValue.Value = 20.0
 
         # play around with strings
         floatValue.FromString("18.4")
         # adef problems in precision and representation by converting back to numbers
         dbl01 = float(floatValue.ToString())
-        self.assertAlmostEqual(dbl01, floatValue.GetValue(), delta=0.001)
+        self.assertAlmostEqual(dbl01, floatValue.Value, delta=0.001)
         with self.assertRaises(InvalidArgumentException):   floatValue.FromString("abc")
 
         # unit
@@ -278,8 +278,8 @@ class FloatTestSuite(GenicamTestCase):
 
         # Pleora FG - FloatT::operator=
         floatValueValue = Camera.GetNode("ValueValue")
-        floatValueValue.SetValue(42.001)
-        self.assertEqual(floatValueValue.GetValue(), 42.001)
+        floatValueValue.Value = 42.001
+        self.assertEqual(floatValueValue.Value, 42.001)
 
         # Pleora FG - FloatT::operator()
         self.assertEqual(floatValueValue(), 42.001)
@@ -289,9 +289,9 @@ class FloatTestSuite(GenicamTestCase):
         # self.assertEqual( *(*ptrValueValue), 42.001 )
 
         # Test value cache valid
-        floatValueValue.SetValue(20.0)
+        floatValueValue.Value = 20.0
         self.assertEqual(False, floatValue.IsValueCacheValid())
-        self.assertEqual(20.0, floatValue.GetValue())
+        self.assertEqual(20.0, floatValue.Value)
         self.assertEqual(True, floatValue.IsValueCacheValid())
 
     def test_FloatRegNodeAccess(self):
@@ -390,24 +390,24 @@ class FloatTestSuite(GenicamTestCase):
 
         doubleValue = Camera.GetNode("Double")
 
-        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), ptrFloatReg.GetMin(), (double)std::numeric_limits<float>::epsilon() )
-        # CPPUNIT_ASSERT_DOUBLES_EQUAL( (double)std::numeric_limits<float>::max(), ptrFloatReg.GetMax(), (double)std::numeric_limits<float>::epsilon() )
+        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -(double)std::numeric_limits<float>::max(), ptrFloatReg.Min, (double)std::numeric_limits<float>::epsilon() )
+        # CPPUNIT_ASSERT_DOUBLES_EQUAL( (double)std::numeric_limits<float>::max(), ptrFloatReg.Max, (double)std::numeric_limits<float>::epsilon() )
 
-        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -std::numeric_limits<double>::max(), ptrDoubleReg.GetMin(), std::numeric_limits<double>::epsilon() )
-        # CPPUNIT_ASSERT_DOUBLES_EQUAL( std::numeric_limits<double>::max(), ptrDoubleReg.GetMax(), std::numeric_limits<double>::epsilon() )
+        # CPPUNIT_ASSERT_DOUBLES_EQUAL( -std::numeric_limits<double>::max(), ptrDoubleReg.Min, std::numeric_limits<double>::epsilon() )
+        # CPPUNIT_ASSERT_DOUBLES_EQUAL( std::numeric_limits<double>::max(), ptrDoubleReg.Max, std::numeric_limits<double>::epsilon() )
 
-        self.assertAlmostEqual(3.12159, floatValue.GetValue(), delta=self.FLOAT32_EPSILON)
-        floatValue.SetValue(42.0)
-        self.assertAlmostEqual(42.0, floatValue.GetValue(), delta=self.FLOAT32_EPSILON)
+        self.assertAlmostEqual(3.12159, floatValue.Value, delta=self.FLOAT32_EPSILON)
+        floatValue.Value = 42.0
+        self.assertAlmostEqual(42.0, floatValue.Value, delta=self.FLOAT32_EPSILON)
 
-        self.assertAlmostEqual(2.71828, doubleValue.GetValue(), delta=self.FLOAT64_EPSILON)
-        doubleValue.SetValue(42.0)
-        self.assertAlmostEqual(42.0, doubleValue.GetValue(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(2.71828, doubleValue.Value, delta=self.FLOAT64_EPSILON)
+        doubleValue.Value = 42.0
+        self.assertAlmostEqual(42.0, doubleValue.Value, delta=self.FLOAT64_EPSILON)
 
         doubleValue.FromString("12.3")
         # adef problems in precision and representation by converting back to numbers
         dbl01 = float(doubleValue.ToString())
-        self.assertAlmostEqual(dbl01, doubleValue.GetValue(), 0.001)
+        self.assertAlmostEqual(dbl01, doubleValue.Value, 0.001)
         with self.assertRaises(InvalidArgumentException):
             doubleValue.FromString("abc")
 
@@ -418,15 +418,15 @@ class FloatTestSuite(GenicamTestCase):
         # Pleora FG - SetValue on non-writable float
         valueRO = Camera.GetNode("ValueReadOnly")
         with self.assertRaises(AccessException):
-            valueRO.SetValue(5.0, True)
+            valueRO.SetValue(5.0,  True)
 
             # Pleora FG - SetValue chache-related execution paths
         valueWriteThrough = Camera.GetNode("ValueWriteThrough")
-        self.assertEqual(42.0, valueWriteThrough.GetValue())
-        valueWriteThrough.SetValue(6.0)
-        self.assertEqual(6.0, valueWriteThrough.GetValue())
+        self.assertEqual(42.0, valueWriteThrough.Value)
+        valueWriteThrough.Value = 6.0
+        self.assertEqual(6.0, valueWriteThrough.Value)
         valueWriteAround = Camera.GetNode("ValueWriteAround")
-        valueWriteAround.SetValue(7.0)
+        valueWriteAround.Value = 7.0
 
         # Pleora FG - GetValue on no-readable float
         valueWO = Camera.GetNode("ValueWriteOnly")
@@ -435,16 +435,16 @@ class FloatTestSuite(GenicamTestCase):
 
         # Pleora FG - GetValue chache-related execution paths - trigs all possible 'if' values
         valueWriteThrough = Camera.GetNode("ValueWriteThrough")
-        valueWriteThrough.GetValue()
+        valueWriteThrough.Value
         valueWriteAround = Camera.GetNode("ValueWriteAround")
-        valueWriteAround.GetValue()
+        valueWriteAround.Value
         valueNoCache = Camera.GetNode("ValueNoCache")
-        valueNoCache.GetValue()
+        valueNoCache.Value
 
         # Pleora FG - Big endian registers
         valueBigEndian = Camera.GetNode("BigFloat")
-        valueBigEndian.SetValue(3.1416)
-        self.assertEqual(valueBigEndian.GetValue(), 3.1416)
+        valueBigEndian.Value = 3.1416
+        self.assertEqual(valueBigEndian.Value, 3.1416)
 
     def test_FloatRegWriteAroundCaching(self):
         """[ GenApiTest@FloatTestSuite_TestFloatRegWriteAroundCaching.xml|gxml
@@ -752,10 +752,10 @@ class FloatTestSuite(GenicamTestCase):
 
         gainWithInc = Camera.GetNode("GainWithInc")
         self.assertAlmostEqual(5.2, gainWithInc.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6, gainWithInc.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0, gainWithInc.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6, gainWithInc.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0, gainWithInc.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainWithInc.HasInc())
-        self.assertAlmostEqual(0.2, gainWithInc.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2, gainWithInc.Inc, delta=self.FLOAT64_EPSILON)
 
         #             CFloatRef refFloatWithInc
         #             CPPUNIT_ASSERT_THROW_EX (refFloatWithInc.HasInc(), AccessException)
@@ -767,7 +767,7 @@ class FloatTestSuite(GenicamTestCase):
         gainWithoutInc = Camera.GetNode("GainWithOutInc")
         self.assertEqual(False, gainWithoutInc.HasInc())
         with self.assertRaises(RuntimeException):
-            gainWithoutInc.GetInc()
+            gainWithoutInc.Inc
 
         #             CFloatRef refFloatWithoutInc
         #             CPPUNIT_ASSERT_NO_THROW(refFloatWithoutInc.SetReference( ptrGainWithoutInc ) )
@@ -775,66 +775,66 @@ class FloatTestSuite(GenicamTestCase):
 
         gainWithpInc = Camera.GetNode("GainWithpInc")
         self.assertAlmostEqual(5.2, gainWithpInc.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6, gainWithpInc.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0, gainWithpInc.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6, gainWithpInc.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0, gainWithpInc.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainWithpInc.HasInc())
-        self.assertAlmostEqual(0.2, gainWithpInc.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2, gainWithpInc.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromFloat = Camera.GetNode("GainFromFloat")
         self.assertAlmostEqual(5.2, gainFromFloat.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6, gainFromFloat.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0, gainFromFloat.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6, gainFromFloat.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0, gainFromFloat.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainFromFloat.HasInc())
-        self.assertAlmostEqual(0.2, gainFromFloat.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2, gainFromFloat.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromInt = Camera.GetNode("GainFromInt")
         self.assertAlmostEqual(0.0, gainFromInt.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(-2.0, gainFromInt.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0, gainFromInt.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(-2.0, gainFromInt.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0, gainFromInt.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainFromInt.HasInc())
-        self.assertAlmostEqual(2.0, gainFromInt.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(2.0, gainFromInt.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromLinearConverter = Camera.GetNode("GainFromLinearConverter")
         self.assertAlmostEqual(5.2 * 2.0, gainFromLinearConverter.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6 * 2.0, gainFromLinearConverter.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0 * 2.0, gainFromLinearConverter.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6 * 2.0, gainFromLinearConverter.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0 * 2.0, gainFromLinearConverter.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainFromLinearConverter.HasInc())
-        self.assertAlmostEqual(0.2 * 2.0, gainFromLinearConverter.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2 * 2.0, gainFromLinearConverter.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromAutomaticConverter = Camera.GetNode("GainFromAutomaticConverter")
         self.assertAlmostEqual(5.2 * 2.0, gainFromAutomaticConverter.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6 * 2.0, gainFromAutomaticConverter.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0 * 2.0, gainFromAutomaticConverter.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6 * 2.0, gainFromAutomaticConverter.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0 * 2.0, gainFromAutomaticConverter.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainFromAutomaticConverter.HasInc())
-        self.assertAlmostEqual(0.2 * 2.0, gainFromAutomaticConverter.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2 * 2.0, gainFromAutomaticConverter.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromDecreasingConverter = Camera.GetNode("GainFromDecreasingConverter")
         self.assertAlmostEqual(5.2 * -2.0, gainFromDecreasingConverter.GetValue(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(10.0 * -2.0, gainFromDecreasingConverter.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(1.6 * -2.0, gainFromDecreasingConverter.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(10.0 * -2.0, gainFromDecreasingConverter.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(1.6 * -2.0, gainFromDecreasingConverter.Max, delta=self.FLOAT64_EPSILON)
         self.assertEqual(True, gainFromDecreasingConverter.HasInc())
-        self.assertAlmostEqual(0.2 * 2.0, gainFromDecreasingConverter.GetInc(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(0.2 * 2.0, gainFromDecreasingConverter.Inc, delta=self.FLOAT64_EPSILON)
 
         gainFromVaryingConverter = Camera.GetNode("GainFromVaryingConverter")
         self.assertEqual(False, gainFromVaryingConverter.HasInc())
         with self.assertRaises(RuntimeException):
-            gainFromVaryingConverter.GetInc()
+            gainFromVaryingConverter.Inc
 
         gainFromNonLinearConverter = Camera.GetNode("GainFromNonLinearConverter")
         self.assertEqual(False, gainFromNonLinearConverter.HasInc())
         with self.assertRaises(RuntimeException):
-            gainFromNonLinearConverter.GetInc()
+            gainFromNonLinearConverter.Inc
 
         gainFromSwissKnife = Camera.GetNode("GainFromSwissKnife")
         self.assertEqual(False, gainFromSwissKnife.HasInc())
         with self.assertRaises(RuntimeException):
-            gainFromSwissKnife.GetInc()
+            gainFromSwissKnife.Inc
         self.assertEqual(PureNumber, gainFromSwissKnife.GetRepresentation())
 
         gainFloatReg = Camera.GetNode("GainFloatReg")
         self.assertEqual(False, gainFloatReg.HasInc())
         with self.assertRaises(RuntimeException):
-            gainFloatReg.GetInc()
+            gainFloatReg.Inc
 
     def test_FloatpLength(self):
         """[ GenApiTest@FloatTestSuite_TestFloatpLength.xml|gxml

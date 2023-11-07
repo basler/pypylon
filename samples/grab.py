@@ -31,13 +31,13 @@ try:
     print("Using device ", camera.GetDeviceInfo().GetModelName())
 
     # demonstrate some feature access
-    new_width = camera.Width.GetValue() - camera.Width.GetInc()
-    if new_width >= camera.Width.GetMin():
-        camera.Width.SetValue(new_width)
+    new_width = camera.Width.Value - camera.Width.Inc
+    if new_width >= camera.Width.Min:
+        camera.Width.Value = new_width
 
     # The parameter MaxNumBuffer can be used to control the count of buffers
     # allocated for grabbing. The default value of this parameter is 10.
-    camera.MaxNumBuffer = 5
+    camera.MaxNumBuffer.Value = 5
 
     # Start the grabbing of c_countOfImagesToGrab images.
     # The camera device is parameterized with a default configuration which

@@ -263,6 +263,10 @@ typedef unsigned long long int  uintmax_t;
 %include "GCException.i"
 #undef MODULE_NAME
 
+%pythoncode %{
+import warnings
+%}
+
 %typemap(in) (uint8_t *pBuffer, int64_t Length), (void *pBuffer, int64_t Length), (char *pBuffer, int64_t Length)
 {
     $2 = PyLong_AsLongLong($input);

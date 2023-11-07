@@ -62,17 +62,17 @@ class ErrorTestSuite(GenicamTestCase):
         self.assertTrue(bool(EnumValue))
 
         # No error
-        Value.SetValue(17)
+        Value.Value = 17
 
         # error
-        Error.SetValue("Ahrrgs")
+        Error.Value = "Ahrrgs"
         with self.assertRaises(RuntimeException):
-            Value.SetValue(17)
+            Value.Value = 17
         with self.assertRaises(RuntimeException):
             EnumValue.SetIntValue(1)
 
         # error suppressed
-        Value.SetValue(17, False)
+        Value.SetValue(17,  False)
         EnumValue.SetIntValue(1, False)
 
 

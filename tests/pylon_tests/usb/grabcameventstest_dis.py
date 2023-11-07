@@ -63,7 +63,7 @@ class GrabEventTestSuite(PylonTestCase):
         camera.RegisterImageEventHandler(SampleImageEventHandler(), pylon.RegistrationMode_Append, pylon.Cleanup_Delete)
 
         # Camera event processing must be activated first, the default is off.
-        camera.GrabCameraEvents = True
+        camera.GrabCameraEvents.Value = True
 
         # Register an event handler for the Exposure End event. For each event type, there is a "data" node
         # representing the event. The actual data that is carried by the event is held by child nodes of the
@@ -94,9 +94,9 @@ class GrabEventTestSuite(PylonTestCase):
 
         # Enable sending of Exposure End events.
         # Select the event to receive.
-        camera.EventSelector = "ExposureEnd"
+        camera.EventSelector.Value = "ExposureEnd"
         # Enable it.
-        camera.EventNotification = "On"
+        camera.EventNotification.Value = "On"
 
         # Start the grabbing of c_countOfImagesToGrab images.
         camera.StartGrabbingMax(self.countOfImagesToGrab)
@@ -113,8 +113,8 @@ class GrabEventTestSuite(PylonTestCase):
             # Nothing to do here with the grab result, the grab results are handled by the registered event handler.
 
         # Disable sending Exposure End events.
-        camera.EventSelector = "ExposureEnd"
-        camera.EventNotification = "Off"
+        camera.EventSelector.Value = "ExposureEnd"
+        camera.EventNotification.Value = "Off"
         camera.Close()
 
 

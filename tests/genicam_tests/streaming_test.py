@@ -66,8 +66,8 @@ class StreamingTestSuite(GenicamTestCase):
         SelectedB = Camera.GetNode("SelectedB")
 
         """----- check the streaming flag ---"""
-        self.assertEqual(True, Streaming.GetNode().IsStreamable())
-        self.assertEqual(False, NoStreaming.GetNode().IsStreamable())
+        self.assertEqual(True, Streaming.Node.IsStreamable())
+        self.assertEqual(False, NoStreaming.Node.IsStreamable())
 
         """----- check the Selector list---"""
         self.assertEqual(True, Selector1.Node.IsSelector())
@@ -78,14 +78,14 @@ class StreamingTestSuite(GenicamTestCase):
 
         SelectedFeatures = Selector1.Node.GetSelectedFeatures()
         self.assertEqual(3, len(SelectedFeatures))
-        self.assertEqual("SelectedAA", SelectedFeatures[2].GetNode().GetName())
-        self.assertEqual("SelectedB", SelectedFeatures[1].GetNode().GetName())
-        self.assertEqual("SelectedA", SelectedFeatures[0].GetNode().GetName())
+        self.assertEqual("SelectedAA", SelectedFeatures[2].Node.GetName())
+        self.assertEqual("SelectedB", SelectedFeatures[1].Node.GetName())
+        self.assertEqual("SelectedA", SelectedFeatures[0].Node.GetName())
 
         SelectedFeatures = Selector2.Node.GetSelectedFeatures()
         self.assertEqual(2, len(SelectedFeatures))
-        self.assertEqual("SelectedAA", SelectedFeatures[1].GetNode().GetName())
-        self.assertEqual("SelectedA", SelectedFeatures[0].GetNode().GetName())
+        self.assertEqual("SelectedAA", SelectedFeatures[1].Node.GetName())
+        self.assertEqual("SelectedA", SelectedFeatures[0].Node.GetName())
 
         SelectedFeatures = SelectedA.Node.GetSelectedFeatures()
         self.assertEqual(0, len(SelectedFeatures))
@@ -107,17 +107,17 @@ class StreamingTestSuite(GenicamTestCase):
         SelectingFeatures = SelectedA.Node.GetSelectingFeatures()
 
         self.assertEqual(2, len(SelectingFeatures))
-        self.assertEqual("Selector2", SelectingFeatures[1].GetNode().GetName())
-        self.assertEqual("Selector1", SelectingFeatures[0].GetNode().GetName())
+        self.assertEqual("Selector2", SelectingFeatures[1].Node.GetName())
+        self.assertEqual("Selector1", SelectingFeatures[0].Node.GetName())
 
         SelectingFeatures = SelectedB.Node.GetSelectingFeatures()
         self.assertEqual(1, len(SelectingFeatures))
-        self.assertEqual("Selector1", SelectingFeatures[0].GetNode().GetName())
+        self.assertEqual("Selector1", SelectingFeatures[0].Node.GetName())
 
         SelectingFeatures = SelectedAA.Node.GetSelectingFeatures()
         self.assertEqual(2, len(SelectingFeatures))
-        self.assertEqual("Selector2", SelectingFeatures[1].GetNode().GetName())
-        self.assertEqual("Selector1", SelectingFeatures[0].GetNode().GetName())
+        self.assertEqual("Selector2", SelectingFeatures[1].Node.GetName())
+        self.assertEqual("Selector1", SelectingFeatures[0].Node.GetName())
 
     def test_VeryTestSimpleStreaming(self):
         """[ GenApiTest@StreamingTestSuite_VeryTestSimpleStreaming.xml|gxml
@@ -149,7 +149,7 @@ class StreamingTestSuite(GenicamTestCase):
         SelectingFeatures = SelectedAA.Node.GetSelectingFeatures()
         i = 1
         self.assertEqual(i, len(SelectingFeatures))
-        self.assertEqual("Selector1", SelectingFeatures[i - 1].GetNode().GetName())
+        self.assertEqual("Selector1", SelectingFeatures[i - 1].Node.GetName())
 
 
 if __name__ == "__main__":

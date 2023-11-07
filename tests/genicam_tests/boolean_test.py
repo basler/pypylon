@@ -41,14 +41,14 @@ class BooleanTestSuite(GenicamTestCase):
         except LogicalErrorException:
             pass
 
-        self.assertEqual(1, value.GetValue())
-        value.SetValue(False)
-        self.assertEqual(0, value.GetValue())
+        self.assertEqual(1, value.Value)
+        value.Value = False
+        self.assertEqual(0, value.Value)
         # once again with verification
         self.assertEqual(0, value.GetValue(True))
 
-        value.SetValue(True)
-        self.assertEqual(1, value.GetValue())
+        value.Value = True
+        self.assertEqual(1, value.Value)
 
         value.FromString("0")
 
@@ -64,16 +64,16 @@ class BooleanTestSuite(GenicamTestCase):
         self.assertEqual(RW, value.GetAccessMode())
 
         # operators
-        value.SetValue(False)
+        value.Value = False
         self.assertEqual(0, value())
 
         # Check IBoolean operators
-        value.SetValue(True)
+        value.Value = True
         self.assertEqual(1, value())
 
         # access without verification
         # (currently just to reach happy path, invalid access is not possible for boolean)
-        value.SetValue(True, False)
+        value.SetValue(True,  False)
         value.FromString("0", False)
 
     def test_RegAccess(self):
@@ -110,12 +110,12 @@ class BooleanTestSuite(GenicamTestCase):
         Camera._Connect(Port, "Port")
 
         value = Camera._GetNode("Trigger")
-        self.assertEqual(0, value.GetValue())
-        value.SetValue(True)
-        self.assertEqual(1, value.GetValue())
+        self.assertEqual(0, value.Value)
+        value.Value = True
+        self.assertEqual(1, value.Value)
 
-        value.SetValue(False)
-        self.assertEqual(0, value.GetValue())
+        value.Value = False
+        self.assertEqual(0, value.Value)
 
         value.FromString("1")
         self.assertEqual("1", value.ToString())
@@ -159,7 +159,7 @@ class BooleanTestSuite(GenicamTestCase):
 
         value = Camera._GetNode("Trigger")
 
-        with self.assertRaises(LogicalErrorException):   value.GetValue()
+        with self.assertRaises(LogicalErrorException):   value.Value
 
     def test_AccessMode(self):
         """[ GenApiTest@BooleanTestSuite_TestAccessMode.xml|gxml
@@ -186,14 +186,14 @@ class BooleanTestSuite(GenicamTestCase):
         # create and initialize a test port
         value = Camera._GetNode("Trigger")
 
-        self.assertEqual(1, value.GetValue())
+        self.assertEqual(1, value.Value)
 
-        with self.assertRaises(AccessException):   value.SetValue(False)
+        with self.assertRaises(AccessException):   value.Value = False
 
         # now the WO value
         valueWO = Camera._GetNode("TriggerWO")
-        valueWO.SetValue(True)
-        with self.assertRaises(GenericException):   valueWO.GetValue()
+        valueWO.Value = True
+        with self.assertRaises(GenericException):   valueWO.Value
 
     def test_CornerCases(self):
         """[ GenApiTest@BooleanTestSuite_TestCornerCases.xml|gxml

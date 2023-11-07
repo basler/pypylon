@@ -125,123 +125,123 @@ class ConverterTestSuite(GenicamTestCase):
 
         SensorColorFilter_GB = Camera.GetNode("SensorColorFilter_GB")
 
-        ColorCode.SetValue(0)
-        self.assertEqual("Mono8", PixelFormat.GetValue())
+        ColorCode.Value = 0
+        self.assertEqual("Mono8", PixelFormat.Value)
 
-        ColorCode.SetValue(1)
-        self.assertEqual("YUV411Packed", PixelFormat.GetValue())
+        ColorCode.Value = 1
+        self.assertEqual("YUV411Packed", PixelFormat.Value)
 
-        ColorCode.SetValue(2)
-        self.assertEqual("YUV422Packed", PixelFormat.GetValue())
+        ColorCode.Value = 2
+        self.assertEqual("YUV422Packed", PixelFormat.Value)
 
-        ColorCode.SetValue(3)
-        self.assertEqual("YUV444Packed", PixelFormat.GetValue())
+        ColorCode.Value = 3
+        self.assertEqual("YUV444Packed", PixelFormat.Value)
 
-        ColorCode.SetValue(4)
-        self.assertEqual("RGB8Packed", PixelFormat.GetValue())
+        ColorCode.Value = 4
+        self.assertEqual("RGB8Packed", PixelFormat.Value)
 
-        ColorCode.SetValue(5)
-        self.assertEqual("Mono14", PixelFormat.GetValue())
+        ColorCode.Value = 5
+        self.assertEqual("Mono14", PixelFormat.Value)
 
-        ColorCode.SetValue(6)
-        self.assertEqual("RGB14Packed", PixelFormat.GetValue())
+        ColorCode.Value = 6
+        self.assertEqual("RGB14Packed", PixelFormat.Value)
 
-        ColorCode.SetValue(129)
-        self.assertEqual("Mono12Packed", PixelFormat.GetValue())
+        ColorCode.Value = 129
+        self.assertEqual("Mono12Packed", PixelFormat.Value)
 
         # Raw8
-        ColorCode.SetValue(9)
+        ColorCode.Value = 9
 
-        ColorFilterID.SetValue(0)
-        self.assertEqual("BayerRG8", PixelFormat.GetValue())
+        ColorFilterID.Value = 0
+        self.assertEqual("BayerRG8", PixelFormat.Value)
 
-        ColorFilterID.SetValue(1)
-        self.assertEqual("BayerGB8", PixelFormat.GetValue())
+        ColorFilterID.Value = 1
+        self.assertEqual("BayerGB8", PixelFormat.Value)
 
-        ColorFilterID.SetValue(2)
-        self.assertEqual("BayerGR8", PixelFormat.GetValue())
+        ColorFilterID.Value = 2
+        self.assertEqual("BayerGR8", PixelFormat.Value)
 
-        ColorFilterID.SetValue(3)
-        self.assertEqual("BayerBG8", PixelFormat.GetValue())
+        ColorFilterID.Value = 3
+        self.assertEqual("BayerBG8", PixelFormat.Value)
 
         # Raw16
-        ColorCode.SetValue(10)
+        ColorCode.Value = 10
 
-        ColorFilterID.SetValue(0)
-        self.assertEqual("BayerRG14", PixelFormat.GetValue())
+        ColorFilterID.Value = 0
+        self.assertEqual("BayerRG14", PixelFormat.Value)
 
-        ColorFilterID.SetValue(1)
-        self.assertEqual("BayerGB14", PixelFormat.GetValue())
+        ColorFilterID.Value = 1
+        self.assertEqual("BayerGB14", PixelFormat.Value)
 
-        ColorFilterID.SetValue(2)
-        self.assertEqual("BayerGR14", PixelFormat.GetValue())
+        ColorFilterID.Value = 2
+        self.assertEqual("BayerGR14", PixelFormat.Value)
 
-        ColorFilterID.SetValue(3)
-        self.assertEqual("BayerBG14", PixelFormat.GetValue())
+        ColorFilterID.Value = 3
+        self.assertEqual("BayerBG14", PixelFormat.Value)
 
         """ -------------------- """
 
-        PixelFormat.SetValue("Mono8")
-        self.assertEqual(0, ColorCode.GetValue())
+        PixelFormat.Value = "Mono8"
+        self.assertEqual(0, ColorCode.Value)
 
-        PixelFormat.SetValue("YUV411Packed")
-        self.assertEqual(1, ColorCode.GetValue())
+        PixelFormat.Value = "YUV411Packed"
+        self.assertEqual(1, ColorCode.Value)
 
-        PixelFormat.SetValue("YUV422Packed")
-        self.assertEqual(2, ColorCode.GetValue())
+        PixelFormat.Value = "YUV422Packed"
+        self.assertEqual(2, ColorCode.Value)
 
-        PixelFormat.SetValue("YUV444Packed")
-        self.assertEqual(3, ColorCode.GetValue())
+        PixelFormat.Value = "YUV444Packed"
+        self.assertEqual(3, ColorCode.Value)
 
-        PixelFormat.SetValue("RGB8Packed")
-        self.assertEqual(4, ColorCode.GetValue())
+        PixelFormat.Value = "RGB8Packed"
+        self.assertEqual(4, ColorCode.Value)
 
-        PixelFormat.SetValue("Mono14")
-        self.assertEqual(5, ColorCode.GetValue())
+        PixelFormat.Value = "Mono14"
+        self.assertEqual(5, ColorCode.Value)
 
-        PixelFormat.SetValue("RGB14Packed")
-        self.assertEqual(6, ColorCode.GetValue())
+        PixelFormat.Value = "RGB14Packed"
+        self.assertEqual(6, ColorCode.Value)
 
-        PixelFormat.SetValue("Mono12Packed")
-        self.assertEqual(129, ColorCode.GetValue())
+        PixelFormat.Value = "Mono12Packed"
+        self.assertEqual(129, ColorCode.Value)
 
         # Raw8
-        ColorFilterID.SetValue(0)  # the color filter stayes unchanged
+        ColorFilterID.Value = 0  # the color filter stayes unchanged
 
-        PixelFormat.SetValue("BayerRG8")
-        self.assertEqual(9, ColorCode.GetValue())
-        self.assertEqual(0, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerRG8"
+        self.assertEqual(9, ColorCode.Value)
+        self.assertEqual(0, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerGB8")
-        self.assertEqual(9, ColorCode.GetValue())
-        self.assertEqual(0, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerGB8"
+        self.assertEqual(9, ColorCode.Value)
+        self.assertEqual(0, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerGR8")
-        self.assertEqual(9, ColorCode.GetValue())
-        self.assertEqual(0, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerGR8"
+        self.assertEqual(9, ColorCode.Value)
+        self.assertEqual(0, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerBG8")
-        self.assertEqual(9, ColorCode.GetValue())
-        self.assertEqual(0, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerBG8"
+        self.assertEqual(9, ColorCode.Value)
+        self.assertEqual(0, ColorFilterID.Value)
 
         # Raw16
-        ColorFilterID.SetValue(1)  # the color filter stayes unchanged
+        ColorFilterID.Value = 1  # the color filter stayes unchanged
 
-        PixelFormat.SetValue("BayerRG14")
-        self.assertEqual(10, ColorCode.GetValue())
-        self.assertEqual(1, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerRG14"
+        self.assertEqual(10, ColorCode.Value)
+        self.assertEqual(1, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerGB14")
-        self.assertEqual(10, ColorCode.GetValue())
-        self.assertEqual(1, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerGB14"
+        self.assertEqual(10, ColorCode.Value)
+        self.assertEqual(1, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerGR14")
-        self.assertEqual(10, ColorCode.GetValue())
-        self.assertEqual(1, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerGR14"
+        self.assertEqual(10, ColorCode.Value)
+        self.assertEqual(1, ColorFilterID.Value)
 
-        PixelFormat.SetValue("BayerBG14")
-        self.assertEqual(10, ColorCode.GetValue())
-        self.assertEqual(1, ColorFilterID.GetValue())
+        PixelFormat.Value = "BayerBG14"
+        self.assertEqual(10, ColorCode.Value)
+        self.assertEqual(1, ColorFilterID.Value)
 
     def test_ReadModifyWrite(self):
         """[ GenApiTest@ConverterTestSuite_TestReadModifyWrite.xml|gxml
@@ -269,7 +269,7 @@ class ConverterTestSuite(GenicamTestCase):
         Camera._LoadXMLFromFile("GenApiTest", "ConverterTestSuite_TestReadModifyWrite")
 
         ShutterAbs = Camera.GetNode("ShutterAbs")
-        self.assertEqual(intfIFloat, ShutterAbs.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfIFloat, ShutterAbs.Node.GetPrincipalInterfaceType())
 
         ShutterRaw = Camera.GetNode("ShutterRaw")
 
@@ -319,7 +319,7 @@ class ConverterTestSuite(GenicamTestCase):
 
         ShutterAbs = Camera.GetNode("ShutterAbs")
 
-        self.assertEqual(intfIInteger, ShutterAbs.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfIInteger, ShutterAbs.Node.GetPrincipalInterfaceType())
 
         ShutterRaw = Camera.GetNode("ShutterRaw")
 
@@ -471,19 +471,19 @@ class ConverterTestSuite(GenicamTestCase):
         TimeBase = Camera.GetNode("TimeBase")
 
         # Test automatic slopes
-        self.assertTrue(IntInc.GetMin() == 2)
-        self.assertTrue(IntInc.GetMax() == 10)
+        self.assertTrue(IntInc.Min == 2)
+        self.assertTrue(IntInc.Max == 10)
 
-        self.assertTrue(IntDec.GetMin() == 5)
-        self.assertTrue(IntDec.GetMax() == 9)
+        self.assertTrue(IntDec.Min == 5)
+        self.assertTrue(IntDec.Max == 9)
 
-        self.assertTrue(FloatInc.GetMin() == 2)
-        self.assertTrue(FloatInc.GetMax() == 10)
+        self.assertTrue(FloatInc.Min == 2)
+        self.assertTrue(FloatInc.Max == 10)
 
-        self.assertTrue(FloatDec.GetMin() == 5)
-        self.assertTrue(FloatDec.GetMax() == 9)
+        self.assertTrue(FloatDec.Min == 5)
+        self.assertTrue(FloatDec.Max == 9)
 
-        self.assertTrue(Wobble.GetMin() < Wobble.GetMax())
+        self.assertTrue(Wobble.Min < Wobble.Max)
 
         # Do some gets and sets
         self.assertTrue(FloatInc.GetValue() == 4)
@@ -571,11 +571,11 @@ class ConverterTestSuite(GenicamTestCase):
         IntDec = Camera.GetNode("IntDec")
 
         # Test automatic slopes
-        self.assertTrue(IntInc.GetMin() == 2)
-        self.assertTrue(IntInc.GetMax() == 10)
+        self.assertTrue(IntInc.Min == 2)
+        self.assertTrue(IntInc.Max == 10)
 
-        self.assertTrue(IntDec.GetMin() == 5)
-        self.assertTrue(IntDec.GetMax() == 9)
+        self.assertTrue(IntDec.Min == 5)
+        self.assertTrue(IntDec.Max == 9)
 
         self.assertTrue(IntDec.GetRepresentation() == Linear)
         self.assertTrue(IntDec.GetRepresentation() == Linear)  # second call for happy path
@@ -822,8 +822,8 @@ class ConverterTestSuite(GenicamTestCase):
         FloatResult = Result
         Result.GetProperty("Slope", ValueStr, AttributeStr)
         # self.assertEqual(ValueStr, ESlopeClass::ToString(Varying))
-        self.assertAlmostEqual(-self.FLOAT64_LIMIT_MAX, FloatResult.GetMin(), delta=self.FLOAT64_EPSILON)
-        self.assertAlmostEqual(+self.FLOAT64_LIMIT_MAX, FloatResult.GetMax(), delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(-self.FLOAT64_LIMIT_MAX, FloatResult.Min, delta=self.FLOAT64_EPSILON)
+        self.assertAlmostEqual(+self.FLOAT64_LIMIT_MAX, FloatResult.Max, delta=self.FLOAT64_EPSILON)
         FloatResult.SetValue(-3.141)
 
     def test_ConstantAndExpression(self):
@@ -938,7 +938,7 @@ class ConverterTestSuite(GenicamTestCase):
 
         IntVal = Camera.GetNode("IntVal")
 
-        self.assertEqual(9223372036854775807, IntResult.GetMax())
+        self.assertEqual(9223372036854775807, IntResult.Max)
         IntResult.SetValue(15)
 
     def test_UpperLowerCase(self):
@@ -976,7 +976,7 @@ class ConverterTestSuite(GenicamTestCase):
 
             ShutterAbs = Camera.GetNode("ShutterAbs")
 
-            self.assertEqual(intfIFloat, ShutterAbs.GetNode().GetPrincipalInterfaceType())
+            self.assertEqual(intfIFloat, ShutterAbs.Node.GetPrincipalInterfaceType())
 
             ShutterRaw = Camera.GetNode("ShutterRaw")
 
@@ -986,17 +986,17 @@ class ConverterTestSuite(GenicamTestCase):
             self.assertEqual("s", ShutterAbs.GetUnit())
 
             # reading
-            self.assertAlmostEqual(20.0, ShutterAbs.GetValue(), delta=self.FLOAT64_EPSILON)
+            self.assertAlmostEqual(20.0, ShutterAbs.Value, delta=self.FLOAT64_EPSILON)
 
-            ShutterRaw.SetValue(3)
-            self.assertAlmostEqual(30.0, ShutterAbs.GetValue(), delta=self.FLOAT64_EPSILON)
+            ShutterRaw.Value = 3
+            self.assertAlmostEqual(30.0, ShutterAbs.Value, delta=self.FLOAT64_EPSILON)
 
-            TimeBase.SetValue(100)
-            self.assertAlmostEqual(300.0, ShutterAbs.GetValue(), delta=self.FLOAT64_EPSILON)
+            TimeBase.Value = 100
+            self.assertAlmostEqual(300.0, ShutterAbs.Value, delta=self.FLOAT64_EPSILON)
 
             # Writing
-            ShutterAbs.SetValue(400.0)
-            self.assertEqual(4, ShutterRaw.GetValue())
+            ShutterAbs.Value = 400.0
+            self.assertEqual(4, ShutterRaw.Value)
 
         else:
             # In schema version 1.1 ff the variable names can be mixed upper/lower case
@@ -1028,7 +1028,7 @@ class ConverterTestSuite(GenicamTestCase):
 
             ShutterAbs = Camera.GetNode("ShutterAbs")
 
-            self.assertEqual(intfIFloat, ShutterAbs.GetNode().GetPrincipalInterfaceType())
+            self.assertEqual(intfIFloat, ShutterAbs.Node.GetPrincipalInterfaceType())
 
             ShutterRaw = Camera.GetNode("ShutterRaw")
 

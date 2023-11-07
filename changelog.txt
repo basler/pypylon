@@ -3,6 +3,10 @@ Version X.X.X
     - Add support for pylon Data Processing and vTools
     - Linux (64bit) binaries are now manylinux_2_31 compliant and therefore
       require glibc >= 2.31
+    - Deprecate the direct feature assignment style, e.g cam.Gain = 42
+      in favor of e.g. cam.Gain.Value = 42 to allow typing support
+    - Adjust all code examples and tests to use property access for 
+      features e.g. cam.Gain.Value, cam.Gain.Min, cam.Gain.Max ...
 
 Version 2.3.0
     - Date 2023-09-01

@@ -26,9 +26,9 @@ camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
 camera.Open()
 
 # demonstrate some feature access
-new_width = camera.Width.GetValue() - camera.Width.GetInc()
-if new_width >= camera.Width.GetMin():
-    camera.Width.SetValue(new_width)
+new_width = camera.Width.Value - camera.Width.Inc
+if new_width >= camera.Width.Min:
+    camera.Width.Value = new_width
 
 numberOfImagesToGrab = 100
 camera.StartGrabbingMax(numberOfImagesToGrab)
@@ -81,6 +81,26 @@ for i in range(0, 100):
 
 recipe.Unload()
 ```
+
+# Update your code to pypylon >= 3.0.0
+
+The current pypylon implementation allows direct feature assignment:
+
+```python
+cam.Gain = 42
+```
+
+This assignment style is deprecated with pypylon 3.0.0, as it prevents full typing support for pypylon.
+
+The recommended assignment style is now:
+
+```python
+cam.Gain.Value = 42
+```
+
+To identify the locations in your code that have to be updated, run with enabled warnings:
+
+`PYTHONWARNINGS=default python script.py`
 
 # Installation
 ## Prerequisites

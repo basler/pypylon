@@ -16,20 +16,20 @@ class InstantCameraTestSuite(PylonEmuTestCase):
             priority_for_test = 15
 
         camera = pylon.InstantCamera()
-        camera.MaxNumBuffer = 20
-        camera.MaxNumQueuedBuffer = 40
-        camera.MaxNumGrabResults = 700
-        camera.ChunkNodeMapsEnable = False
-        camera.StaticChunkNodeMapPoolSize = 1
-        camera.GrabCameraEvents = True
-        camera.MonitorModeActive = True
-        camera.InternalGrabEngineThreadPriorityOverride = True
-        camera.InternalGrabEngineThreadPriority = priority_for_test
-        camera.GrabLoopThreadUseTimeout = True
-        camera.GrabLoopThreadTimeout = 10000
-        camera.GrabLoopThreadPriorityOverride = True
-        camera.GrabLoopThreadPriority = priority_for_test
-        camera.OutputQueueSize = 10
+        camera.MaxNumBuffer.Value = 20
+        camera.MaxNumQueuedBuffer.Value = 40
+        camera.MaxNumGrabResults.Value = 700
+        camera.ChunkNodeMapsEnable.Value = False
+        camera.StaticChunkNodeMapPoolSize.Value = 1
+        camera.GrabCameraEvents.Value = True
+        camera.MonitorModeActive.Value = True
+        camera.InternalGrabEngineThreadPriorityOverride.Value = True
+        camera.InternalGrabEngineThreadPriority.Value = priority_for_test
+        camera.GrabLoopThreadUseTimeout.Value = True
+        camera.GrabLoopThreadTimeout.Value = 10000
+        camera.GrabLoopThreadPriorityOverride.Value = True
+        camera.GrabLoopThreadPriority.Value = priority_for_test
+        camera.OutputQueueSize.Value = 10
 
         self.assertEqual(20, camera.MaxNumBuffer.Value)
         self.assertEqual(40, camera.MaxNumQueuedBuffer.Value)
@@ -63,7 +63,7 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         self.assertEqual(0, camera.NumEmptyBuffers.Value)
         camera.Close()
 
-        camera.MaxNumQueuedBuffer = 5
+        camera.MaxNumQueuedBuffer.Value = 5
         camera.Open()
         camera.StartGrabbing()
         self.assertEqual(5, camera.NumEmptyBuffers.Value)

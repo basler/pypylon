@@ -40,11 +40,11 @@ class StringTestSuite(GenicamTestCase):
 
         A = Camera.GetNode("A")
         # CPPUNIT_ASSERT( (bool) A )
-        self.assertEqual(intfIString, A.GetNode().GetPrincipalInterfaceType())
-        self.assertEqual("Alle meine Entchen...", A.GetValue())
+        self.assertEqual(intfIString, A.Node.GetPrincipalInterfaceType())
+        self.assertEqual("Alle meine Entchen...", A.Value)
 
-        A.SetValue("...schwimmen auf dem See!")
-        self.assertEqual("...schwimmen auf dem See!", A.GetValue())
+        A.Value = "...schwimmen auf dem See!"
+        self.assertEqual("...schwimmen auf dem See!", A.Value)
 
         A.FromString("Ehh? Don't understand Hungarian...")
         self.assertEqual("Ehh? Don't understand Hungarian...", A.ToString())
@@ -52,7 +52,7 @@ class StringTestSuite(GenicamTestCase):
         # excercise also strings with non-RW access mode
         RO = Camera.GetNode("RO")
         # CPPUNIT_ASSERT( (bool) ptrRO )
-        self.assertEqual("Alle meine Ganschen...", RO.GetValue())
+        self.assertEqual("Alle meine Ganschen...", RO.Value)
         with self.assertRaises(AccessException):
             RO.FromString("Ehh? Don't understand Hungarian...")
         self.assertEqual("Alle meine Ganschen...", RO.ToString())
@@ -108,17 +108,17 @@ class StringTestSuite(GenicamTestCase):
         Camera._LoadXMLFromFile("GenApiTest", "StringTestSuite_TestPValueAccess")
 
         A = Camera.GetNode("A")
-        self.assertEqual("Hopsa hejsa do Brandejsa...", A.GetValue())
+        self.assertEqual("Hopsa hejsa do Brandejsa...", A.Value)
 
         C = Camera.GetNode("C")
-        self.assertEqual("Hopsa hejsa do Brandejsa...", C.GetValue())
+        self.assertEqual("Hopsa hejsa do Brandejsa...", C.Value)
 
-        C.SetValue("...Brandejs nad Labem, to se nadlabem!")
+        C.Value = "...Brandejs nad Labem, to se nadlabem!"
         # <String> nodes with <pValue> entry to not have a cache. So they return the cache state of the node referred to
         self.assertEqual(True, C.IsValueCacheValid())
-        self.assertEqual("...Brandejs nad Labem, to se nadlabem!", C.GetValue())
+        self.assertEqual("...Brandejs nad Labem, to se nadlabem!", C.Value)
         self.assertEqual(True, C.IsValueCacheValid())
-        self.assertEqual("...Brandejs nad Labem, to se nadlabem!", A.GetValue())
+        self.assertEqual("...Brandejs nad Labem, to se nadlabem!", A.Value)
 
         # and test also the properties
         PropertyNames = A.Node.GetPropertyNames()

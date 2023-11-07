@@ -56,26 +56,26 @@ try:
     # The node maps are usually created dynamically when StartGrabbing() is called.
     # To avoid a delay caused by node map creation in StartGrabbing() you have the option to create
     # a static pool of node maps once before grabbing.
-    camera.StaticChunkNodeMapPoolSize = camera.MaxNumBuffer.GetValue()
+    camera.StaticChunkNodeMapPoolSize.Value = camera.MaxNumBuffer.GetValue()
 
     # Enable chunks in general.
     if genicam.IsWritable(camera.ChunkModeActive):
-        camera.ChunkModeActive = True
+        camera.ChunkModeActive.Value = True
     else:
         raise pylon.RuntimeException("The camera doesn't support chunk features")
 
     # Enable time stamp chunks.
-    camera.ChunkSelector = "Timestamp"
-    camera.ChunkEnable = True
+    camera.ChunkSelector.Value = "Timestamp"
+    camera.ChunkEnable.Value = True
 
     if not camera.IsUsb():
         # Enable frame counter chunks.
-        camera.ChunkSelector = "Framecounter"
-        camera.ChunkEnable = True
+        camera.ChunkSelector.Value = "Framecounter"
+        camera.ChunkEnable.Value = True
 
     # Enable CRC checksum chunks.
-    camera.ChunkSelector = "PayloadCRC16"
-    camera.ChunkEnable = True
+    camera.ChunkSelector.Value = "PayloadCRC16"
+    camera.ChunkEnable.Value = True
 
     # Start the grabbing of c_countOfImagesToGrab images.
     # The camera device is parameterized with a default configuration which
@@ -126,7 +126,7 @@ try:
         print()
 
     # Disable chunk mode.
-    camera.ChunkModeActive = False
+    camera.ChunkModeActive.Value = False
     camera.Close()
 
 except genicam.GenericException as e:

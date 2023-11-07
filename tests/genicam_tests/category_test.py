@@ -38,7 +38,7 @@ class CategoryTestSuite(GenicamTestCase):
         Camera._LoadXMLFromFile("GenApiTest", "CategoryTestSuite_Test1")
 
         Cat = Camera.GetNode("ScalarFeatures")
-        self.assertEqual(intfICategory, Cat.GetNode().GetPrincipalInterfaceType())
+        self.assertEqual(intfICategory, Cat.Node.GetPrincipalInterfaceType())
 
         strMainCat = "ScalarFeatures"
         self.assertEqual(strMainCat, Cat.ToString())
@@ -48,7 +48,7 @@ class CategoryTestSuite(GenicamTestCase):
         CatName = ["Shutter", "Gain"]
         i = 0
         for feature in FeatureList:
-            strName = feature.GetNode().GetName()
+            strName = feature.Node.GetName()
             self.assertEqual(CatName[i], strName)
             i += 1
 
@@ -69,7 +69,7 @@ class CategoryTestSuite(GenicamTestCase):
 
         i = 0
         for feature in FeatureList:
-            strName = feature.GetNode().GetName()
+            strName = feature.Node.GetName()
             self.assertEqual(CatName[i], strName)
             i += 1
 

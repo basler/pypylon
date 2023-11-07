@@ -17,6 +17,6 @@ def callback(node):
 
 genicam.Register(camera.GainRaw.Node, callback)
 
-camera.GainRaw = camera.GainRaw.Max
+camera.GainRaw.Value = camera.GainRaw.Max
 
 camera.Close()

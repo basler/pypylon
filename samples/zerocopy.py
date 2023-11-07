@@ -9,9 +9,9 @@ from pypylon import pylon
 
 cam = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
 cam.Open()
-print("camera model: %s" % cam.DeviceModelName.GetValue())
-print("AOI: %d x %d" % (cam.Width.GetValue(), cam.Height.GetValue()))
-print("payload size: %d\n" % cam.PayloadSize.GetValue())
+print("camera model: %s" % cam.DeviceModelName.Value)
+print("AOI: %d x %d" % (cam.Width.Value, cam.Height.Value))
+print("payload size: %d\n" % cam.PayloadSize.Value)
 
 pxl_sum = 0
 time_zc = 0

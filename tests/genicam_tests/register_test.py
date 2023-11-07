@@ -52,7 +52,7 @@ class RegisterTestSuite(GenicamTestCase):
     
         """
 
-        # LOG4CPP_NS::Category pLogger.SetValue(&CLog::GetLogger( "CppUnit.Performance" ))
+        # LOG4CPP_NS::Category pLogger.Value = &CLog::GetLogger( "CppUnit.Performance" )
 
         Camera = CNodeMapRef()
         Camera._LoadXMLFromFile("GenApiTest", "RegisterTestSuite_TestValueAccessSwiss")
@@ -76,8 +76,8 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Index.SetValue(1)
-        self.assertEqual(1, Index.GetValue())
+        Index.Value = 1
+        self.assertEqual(1, Index.Value)
         self.assertEqual(0xfff0, Register.GetAddress())
 
         # from the other one read less bytes
@@ -87,13 +87,13 @@ class RegisterTestSuite(GenicamTestCase):
         # self.assertEqual( 0xFEDC4321, Result )
 
 
-        Index.SetValue(0)
-        Index.GetNode().InvalidateNode()
+        Index.Value = 0
+        Index.Node.InvalidateNode()
         # TEST_BEGIN(1000)
         #    Register.Get((uint8_t*)&Result, 4)
         #    StopWatch.PauseBegin()
         #    Index = Index ? 0 : 1
-        #    Index.SetValue(Index)
+        #    Index.Value = Index
         #    StopWatch.PauseEnd()
         # TEST_END( Register::GetValue (with index computed via SwissKnife) )
 
@@ -123,7 +123,7 @@ class RegisterTestSuite(GenicamTestCase):
     
         """
 
-        # LOG4CPP_NS::Category pLogger.SetValue(&CLog::GetLogger( "CppUnit.Performance" ))
+        # LOG4CPP_NS::Category pLogger.Value = &CLog::GetLogger( "CppUnit.Performance" )
 
         Camera = CNodeMapRef()
         Camera._LoadXMLFromFile("GenApiTest", "RegisterTestSuite_TestValueAccessIndex")
@@ -146,8 +146,8 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Index.SetValue(1)
-        self.assertEqual(1, Index.GetValue())
+        Index.Value = 1
+        self.assertEqual(1, Index.Value)
 
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x87654321, Result)
@@ -156,13 +156,13 @@ class RegisterTestSuite(GenicamTestCase):
         # GCLOGINFO( pLogger, "Setup : Register <=> Integer (BaseAddress)" )
         # GCLOGINFO( pLogger, "                 <=> Integer (Index via Swissknife)" )
 
-        Index.SetValue(0)
-        Index.GetNode().InvalidateNode()
+        Index.Value = 0
+        Index.Node.InvalidateNode()
         # TEST_BEGIN(1000)
         #    Register.Get((uint8_t*)&Result, 4)
         #    StopWatch.PauseBegin()
         #    Index = Index ? 0 : 1
-        #    Index.SetValue(Index)
+        #    Index.Value = Index
         #    StopWatch.PauseEnd()
         # TEST_END( Register::GetValue (with index computed via Index) )
 
@@ -223,13 +223,13 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Index.SetValue(1)
-        self.assertEqual(1, Index.GetValue())
+        Index.Value = 1
+        self.assertEqual(1, Index.Value)
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Offset.SetValue(0xf0)
-        self.assertEqual(0xf0, Offset.GetValue())
+        Offset.Value = 0xf0
+        self.assertEqual(0xf0, Offset.Value)
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x87654321, Result)
 
@@ -284,8 +284,8 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Index.SetValue(1)
-        self.assertEqual(1, Index.GetValue())
+        Index.Value = 1
+        self.assertEqual(1, Index.Value)
 
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x87654321, Result)
@@ -343,7 +343,7 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Enum.SetValue("EnumValue2")
+        Enum.Value = "EnumValue2"
 
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x87654321, Result)
@@ -412,7 +412,7 @@ class RegisterTestSuite(GenicamTestCase):
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x12345678, Result)
 
-        Enum.SetValue("EnumValue2")
+        Enum.Value = "EnumValue2"
 
         Result = cast_buffer("uint32_t", LittleEndian, Register.Get(4))
         self.assertEqual(0x87654321, Result)
@@ -520,15 +520,15 @@ class RegisterTestSuite(GenicamTestCase):
         # excercise pAddress and pLength
         Byte = cast_buffer("uint8_t", LittleEndian, Register.Get(1))
         self.assertEqual(0x11, Byte)
-        Addr.SetValue(0x101)
+        Addr.Value = 0x101
         Byte = cast_buffer("uint8_t", LittleEndian, Register.Get(1))
         self.assertEqual(0x22, Byte)
-        Addr.SetValue(0x102)
-        Len.SetValue(2)
+        Addr.Value = 0x102
+        Len.Value = 2
         Word = cast_buffer("uint16_t", LittleEndian, Register.Get(2))
         self.assertEqual(0x3344, Word)
-        Addr.SetValue(0x100)
-        Len.SetValue(1)
+        Addr.Value = 0x100
+        Len.Value = 1
         # try to get/set more data than register length
         with self.assertRaises(OutOfRangeException):
             Register.Get(2)
@@ -582,12 +582,12 @@ class RegisterTestSuite(GenicamTestCase):
         RegisterC = Camera.GetNode("RegisterC")
         NoCachableIntReg = Camera.GetNode("NoCachableIntReg")
 
-        self.assertEqual(NoCache, NoCachableIntReg.GetNode().GetCachingMode())
-        self.assertEqual(Yes, NoCachableIntReg.GetNode().IsAccessModeCacheable())
+        self.assertEqual(NoCache, NoCachableIntReg.Node.GetCachingMode())
+        self.assertEqual(Yes, NoCachableIntReg.Node.IsAccessModeCacheable())
 
-        self.assertEqual(No, RegisterA.GetNode().IsAccessModeCacheable())
-        self.assertEqual(No, RegisterB.GetNode().IsAccessModeCacheable())
-        self.assertEqual(No, RegisterC.GetNode().IsAccessModeCacheable())
+        self.assertEqual(No, RegisterA.Node.IsAccessModeCacheable())
+        self.assertEqual(No, RegisterB.Node.IsAccessModeCacheable())
+        self.assertEqual(No, RegisterC.Node.IsAccessModeCacheable())
 
         self.assertEqual(RW, RegisterA.GetAccessMode())
         self.assertEqual(RW, RegisterB.GetAccessMode())

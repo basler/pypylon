@@ -21,18 +21,18 @@ else:
 # setting of 'wrong' values. This is normally not necessary.
 
 cam.Open()
-cam.ActionDeviceKey.SetValue(0)
-cam.ActionGroupKey.SetValue(0)
-cam.ActionGroupMask.SetValue(0)
-cam.TriggerSource.SetValue('Line1')
-cam.TriggerMode.SetValue('Off')
-cam.AcquisitionMode.SetValue('SingleFrame')
-print("ActionDeviceKey", hex(cam.ActionDeviceKey.GetValue()))
-print("ActionGroupKey", hex(cam.ActionGroupKey.GetValue()))
-print("ActionGroupMask", hex(cam.ActionGroupMask.GetValue()))
-print("TriggerSource", cam.TriggerSource.GetValue())
-print("TriggerMode", cam.TriggerMode.GetValue())
-print("AcquisitionMode", cam.AcquisitionMode.GetValue())
+cam.ActionDeviceKey.Value = 0
+cam.ActionGroupKey.Value = 0
+cam.ActionGroupMask.Value = 0
+cam.TriggerSource.Value = 'Line1'
+cam.TriggerMode.Value = 'Off'
+cam.AcquisitionMode.Value = 'SingleFrame'
+print("ActionDeviceKey", hex(cam.ActionDeviceKey.Value))
+print("ActionGroupKey", hex(cam.ActionGroupKey.Value))
+print("ActionGroupMask", hex(cam.ActionGroupMask.Value))
+print("TriggerSource", cam.TriggerSource.Value)
+print("TriggerMode", cam.TriggerMode.Value)
+print("AcquisitionMode", cam.AcquisitionMode.Value)
 print('\n')
 cam.Close()
 
@@ -54,12 +54,12 @@ cam.Open()
 
 # Demonstrate effect of ActionTriggerConfiguration by printing out those values
 # affected by it.
-print("ActionDeviceKey", hex(cam.ActionDeviceKey.GetValue()))
-print("ActionGroupKey", hex(cam.ActionGroupKey.GetValue()))
-print("ActionGroupMask", hex(cam.ActionGroupMask.GetValue()))
-print("TriggerSource", cam.TriggerSource.GetValue())
-print("TriggerMode", cam.TriggerMode.GetValue())
-print("AcquisitionMode", cam.AcquisitionMode.GetValue())
+print("ActionDeviceKey", hex(cam.ActionDeviceKey.Value))
+print("ActionGroupKey", hex(cam.ActionGroupKey.Value))
+print("ActionGroupMask", hex(cam.ActionGroupMask.Value))
+print("TriggerSource", cam.TriggerSource.Value)
+print("TriggerMode", cam.TriggerMode.Value)
+print("AcquisitionMode", cam.AcquisitionMode.Value)
 print('\n')
 
 # Create a suitable ActionCommand object. For that a GigETransportLayer object

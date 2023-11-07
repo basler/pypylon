@@ -91,6 +91,7 @@
             except pypylon.genicam.LogicalErrorException:
                 pass
             else:
+                warnings.warn(f"Setting a feature value by direct assignment is deprecated. Use <nodemap>.{node.Node.GetName()}.Value = {val}", DeprecationWarning, stacklevel=2)
                 node.SetValue(val)
                 return
 
