@@ -35,6 +35,7 @@ jobs:
           ${PYLON_DOWNLOAD_URL_BASE_7_4}pylon_7.4.0.14900_linux_aarch64_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_6.2.0.21487_armhf_setup.tar.gz
           ${PYLON_DOWNLOAD_URL_BASE}pylon_7_3_1_0011.dmg
+          ${PYLON_DOWNLOAD_URL_BASE}basler_pylon_7_4_0_14900.exe
           EOF
       - uses: actions/cache@v3
         id: cache
@@ -126,6 +127,54 @@ jobs:
           python3 -m twine upload --non-interactive --skip-existing dist/*
 
 
+  build-windows:
+    needs: prepare
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.6 - 3.11"
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: pylon-installer
+          path: pylon-installer
+
+      - name: Setup pylon
+        run: |
+          # install pylon
+          cd pylon-installer
+          basler_pylon_7_4_0_14900.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.13.0
+        env:
+          PYLON_DEV_DIR: "C:\Program Files\Basler\pylon 7\Development"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+
+      - name: Upload Release Asset
+        if: needs.prepare.outputs.is_release_build == 'true'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ./wheelhouse/*.whl
+
+      - name: Publish package to (Test)PyPI
+        if: needs.prepare.outputs.is_release_build == 'true'
+        run: |
+          sudo pip install twine
+          python -m twine upload --non-interactive --skip-existing wheelhouse/*
+          
+
   build-macos:
     needs: prepare
     runs-on: macos-11
@@ -181,7 +230,8 @@ jobs:
     needs: [
             prepare,
             build-linux,
-            build-macos
+            build-macos,
+            build-windows
            ]
     runs-on: ubuntu-latest
     steps:
