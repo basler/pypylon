@@ -1,3 +1,7 @@
+Version 3.0.0rc2
+    - Date 2023-11-07
+    - Fix reference version of macos intel builds
+    
 Version 3.0.0rc1
     - Date 2023-11-07
     - Updated to pylon 7.4 on linux and windows
