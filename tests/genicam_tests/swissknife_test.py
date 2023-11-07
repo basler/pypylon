@@ -1207,7 +1207,7 @@ class SwissKnifeTestSuite(GenicamTestCase):
         </SwissKnife>
     
         <SwissKnife Name="Invalid17">
-            <Formula>\* aha *\ 1</Formula>
+            <Formula>\\* aha *\\ 1</Formula>
         </SwissKnife>
     
         <SwissKnife Name="Invalid18">

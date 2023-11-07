@@ -9,7 +9,7 @@ from pypylon import genicam
 import unittest
 
 # This is just a workaround for testing puposes
-class TestWaitObject:
+class TWaitObject:
     def __init__(self):
         self._rc = pylondataprocessing.GenericOutputObserver()
         
@@ -23,7 +23,7 @@ class TestWaitObject:
         self._rc.Clear()
 
 
-class TestOuputObserver(pylondataprocessing.OutputObserver):
+class TOuputObserver(pylondataprocessing.OutputObserver):
     def __init__(self):
         pylondataprocessing.OutputObserver.__init__(self)
         self.Recipe = None
@@ -38,13 +38,13 @@ class TestOuputObserver(pylondataprocessing.OutputObserver):
         self.Update = pylondataprocessing.Update(update) #Attention: recipe can only be used in this call, create a copy to move it somewhere else
         self.UserProvidedID = userProvidedId
 
-class TestUpdateObserver(pylondataprocessing.UpdateObserver):
+class TUpdateObserver(pylondataprocessing.UpdateObserver):
     def __init__(self):
         pylondataprocessing.UpdateObserver.__init__(self)
         self.Recipe = None
         self.Update = None
         self.UserProvidedID = None
-        self.WaitObject = TestWaitObject()
+        self.WaitObject = TWaitObject()
 
     def UpdateDone(self, recipe, update, userProvidedId):
         #print("UpdateDone")
@@ -53,12 +53,12 @@ class TestUpdateObserver(pylondataprocessing.UpdateObserver):
         self.UserProvidedID = userProvidedId
         self.WaitObject.Signal()
 
-class TestEventObserver(pylondataprocessing.EventObserver):
+class TEventObserver(pylondataprocessing.EventObserver):
     def __init__(self):
         pylondataprocessing.EventObserver.__init__(self)
         self.Recipe = None
         self.Events = None
-        self.WaitObject = TestWaitObject()
+        self.WaitObject = TWaitObject()
     
     def OnEventSignaled(self, recipe, events):
         #print("OnEventSignaled")
@@ -81,7 +81,7 @@ class RecipeTestSuite(PylonDataProcessingTestCase):
         self.assertFalse(testee.HasOutput("Image"))
         #
         # unregister event observer
-        testEventObserver = TestEventObserver()
+        testEventObserver = TEventObserver()
         testee.RegisterEventObserver(testEventObserver)
         #
         # recipe context
@@ -166,8 +166,8 @@ class RecipeTestSuite(PylonDataProcessingTestCase):
         self.assertTrue(testee.UnregisterOutputObserver(resultCollector, 85))
         #
         # TriggerUpdateAsync
-        testOutputObserver = TestOuputObserver()
-        testUpdateObserver = TestUpdateObserver()
+        testOutputObserver = TOuputObserver()
+        testUpdateObserver = TUpdateObserver()
         testee.RegisterOutputObserver(["ImageConverter2"], testOutputObserver, pylon.RegistrationMode_Append, 83)
         testee.RegisterOutputObserver(["ImageConverter2"], resultCollector, pylon.RegistrationMode_Append, 83)
         update1 = testee.TriggerUpdateAsync({"Image" : result["Image"]}, testUpdateObserver, 47)
@@ -182,8 +182,8 @@ class RecipeTestSuite(PylonDataProcessingTestCase):
         self.assertTrue(testOutputObserver.Value["ImageConverter2"].ToImage().IsValid())
         #
         # TriggerUpdate
-        testOutputObserver = TestOuputObserver()
-        testUpdateObserver = TestUpdateObserver()
+        testOutputObserver = TOuputObserver()
+        testUpdateObserver = TUpdateObserver()
         testee.RegisterOutputObserver(["ImageConverter2"], testOutputObserver, pylon.RegistrationMode_Append, 83)
         update1 = testee.TriggerUpdate({"Image" : result["Image"]}, 1000, pylon.TimeoutHandling_ThrowException, testUpdateObserver, 48)
         self.assertTrue(testUpdateObserver.WaitObject.Wait(5000)) #the update may finish later, this depends on the recipe
@@ -231,7 +231,7 @@ class RecipeTestSuite(PylonDataProcessingTestCase):
         thisdir = os.path.dirname(__file__)
         recipefilename = os.path.join(thisdir, 'recipe_eventobserver_test.precipe')
         testee = pylondataprocessing.Recipe()
-        testEventObserver = TestEventObserver()
+        testEventObserver = TEventObserver()
         testee.RegisterEventObserver(testEventObserver)
         testee.Load(recipefilename)
         testee.Start()
