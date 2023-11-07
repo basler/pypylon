@@ -1,4 +1,5 @@
-Version X.X.X
+Version 3.0.0rc1
+    - Date 2023-11-07
     - Updated to pylon 7.4 on linux and windows
     - Add support for pylon Data Processing and vTools
     - Linux (64bit) binaries are now manylinux_2_31 compliant and therefore
