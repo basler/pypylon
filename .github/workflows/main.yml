@@ -147,14 +147,14 @@ jobs:
 
       - name: Setup pylon
         run: |
-          # install pylon
           cd pylon-installer
           basler_pylon_7_4_0_14900.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
+        shell: cmd
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.13.0
         env:
-          PYLON_DEV_DIR: "C:\Program Files\Basler\pylon 7\Development"
+          PYLON_DEV_DIR: "C:\\Program Files\\Basler\\pylon 7\\Development"
 
       - uses: actions/upload-artifact@v3
         with:
@@ -171,8 +171,9 @@ jobs:
       - name: Publish package to (Test)PyPI
         if: needs.prepare.outputs.is_release_build == 'true'
         run: |
-          sudo pip install twine
-          python -m twine upload --non-interactive --skip-existing wheelhouse/*
+          python -m pip install twine
+          python -m twine upload --non-interactive --skip-existing wheelhouse\\*
+        shell: cmd
           
 
   build-macos:
