@@ -9,7 +9,6 @@ This project is offered with no technical support by Basler AG.
 You are welcome to post any questions or issues on [GitHub](https://github.com/basler/pypylon) or on [ImagingHub](https://www.imaginghub.com).
 
 [![Build Status](https://github.com/basler/pypylon/workflows/build/badge.svg?branch=master)](https://github.com/basler/pypylon/actions)
-[![Build Status](https://ci.appveyor.com/api/projects/status/45j4tydwdr0fv05p/branch/master?svg=true)](https://ci.appveyor.com/project/basler-oss/pypylon/branch/master)
 
 # Getting Started
 
@@ -52,7 +51,7 @@ camera.Close()
  * pypylon additionally supports the pylon Data Processing API extension.
  * The [pylon Workbench](https://docs.baslerweb.com/overview-of-the-workbench) allows you to create image processing designs using a graphical editor.
  * Hint: The [pylondataprocessing_tests](https://github.com/basler/pypylon/blob/master/tests/pylondataprocessing_tests) can optionally be used as a source of information about the syntax of the API.
- * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/dataprocessing_barcode.py) or use the following snippet:
+ * Look at [samples/dataprocessing_barcode.py](https://github.com/basler/pypylon/blob/master/samples/dataprocessing_barcode.py) or use the following snippet:
 
 ```python
 from pypylon import pylondataprocessing
