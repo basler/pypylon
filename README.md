@@ -1,4 +1,4 @@
-![pypylon](docs/images/Pypylon_grey_RZ_400px.png "pypylon")
+![pypylon](https://raw.githubusercontent.com/basler/pypylon/9303da0cadc10e56d6f6de01b422976c9638c7c5/docs/images/Pypylon_grey_RZ_400px.png "pypylon")
 
 The official python wrapper for the Basler pylon Camera Software Suite.
 
@@ -49,7 +49,7 @@ camera.Close()
 
 ## Getting Started with pylon Data Processing
 
- * pypylon additionally supports the pylon data processing API extension.
+ * pypylon additionally supports the pylon Data Processing API extension.
  * The [pylon Workbench](https://docs.baslerweb.com/overview-of-the-workbench) allows you to create image processing designs using a graphical editor.
  * Hint: The [pylondataprocessing_tests](https://github.com/basler/pypylon/blob/master/tests/pylondataprocessing_tests) can optionally be used as a source of information about the syntax of the API.
  * Look at [samples/grab.py](https://github.com/basler/pypylon/blob/master/samples/dataprocessing_barcode.py) or use the following snippet:
@@ -107,6 +107,7 @@ To identify the locations in your code that have to be updated, run with enabled
  * Installed [pylon](https://www.baslerweb.com/pylon)
    For the binary installation this is not mandatory but strongly recommended. See [known issues](#known-issues) for further details.
  * Installed [python](https://www.python.org/) with [pip](https://pip.pypa.io/en/stable/)
+ * Installed [CodeMeter Runtime](https://www.wibu.com/support/user/user-software.html) when you want to use pylon vTools and the pylon Data Processing API extension on your platform.
 
 ## pylon OS Versions and Features
 Please note that the pylon Camera Software Suite may support different operating system versions and features than pypylon.

@@ -1,3 +1,8 @@
+Version 3.0.0rc3
+    - Date 2023-11-09
+    - Moved windows builds to GitHub actions
+    - Update README.md
+
 Version 3.0.0rc2
     - Date 2023-11-07
     - Fix reference version of macos intel builds
