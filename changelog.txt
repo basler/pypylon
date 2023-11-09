@@ -1,14 +1,5 @@
-Version 3.0.0rc3
+Version 3.0.0
     - Date 2023-11-09
-    - Moved windows builds to GitHub actions
-    - Update README.md
-
-Version 3.0.0rc2
-    - Date 2023-11-07
-    - Fix reference version of macos intel builds
-    
-Version 3.0.0rc1
-    - Date 2023-11-07
     - Updated to pylon 7.4 on linux and windows
     - Add support for pylon Data Processing and vTools
     - Linux (64bit) binaries are now manylinux_2_31 compliant and therefore
@@ -17,6 +8,9 @@ Version 3.0.0rc1
       in favor of e.g. cam.Gain.Value = 42 to allow typing support
     - Adjust all code examples and tests to use property access for 
       features e.g. cam.Gain.Value, cam.Gain.Min, cam.Gain.Max ...
+    - Update reference version of macOS intel builds
+    - Moved windows builds to GitHub actions
+    - Update README.md
 
 Version 2.3.0
     - Date 2023-09-01
