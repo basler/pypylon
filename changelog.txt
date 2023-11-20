@@ -1,4 +1,8 @@
-Version 3.0.0
+Version x.y.z
+    - Date 2023-xx-yy
+    - add issue templates and links to Basler docs and pypylon samples
+
+ Version 3.0.0
     - Date 2023-11-09
     - Updated to pylon 7.4 on linux and windows
     - Add support for pylon Data Processing and vTools
