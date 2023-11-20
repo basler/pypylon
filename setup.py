@@ -916,7 +916,8 @@ class BuildSupportMacOS(BuildSupport):
                        '-g0',
                        '-Wall',
                        '-O3',
-                       '-Wno-switch'
+                       '-Wno-switch',
+                       '-std=c++17'
                        ]
 
     ExtraLinkArgs = [
