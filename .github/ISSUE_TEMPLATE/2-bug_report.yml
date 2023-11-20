@@ -1,0 +1,95 @@
+name: Bug report
+description: Report a bug.
+title: "BUG: <Please write a comprehensive title after the 'BUG: ' prefix>"
+labels: ["Bug", "Needs Triage"]
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      Thank you for taking the time to file a bug report. Before creating a new
+      issue, please make sure to take a few minutes to check the issue tracker
+      for existing issues about the bug.
+
+- type: textarea
+  attributes:
+    label: "Describe the issue:"
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Reproduce the code example:"
+    description: >
+      A short code example that reproduces the problem/missing feature. It
+      should be self-contained, i.e., can be copy-pasted into the Python
+      interpreter or run as-is via `python sample_code.py`.
+    placeholder: |
+      import pypylon.pylon as py
+      << your code here >>
+    render: python
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Error message:"
+    description: >
+      Please include full error message, if any.
+    placeholder: |
+      << Full traceback starting from `Traceback: ...` >>
+    render: shell
+
+- type: dropdown
+  attributes:
+    label: Is your camera operational in Basler pylon viewer on your platform
+    description: To better understand if the issue is a core pylon/camera or a pypylon/camera issue please tell us if the camera works in Basler pylon viewer on your platform.
+    options:
+      - 'Yes'
+      - 'No'
+  validations:
+    required: true
+
+
+- type: textarea
+  attributes:
+    label: "Hardware setup & camera model(s) used"
+    description: >
+      List the camera model names involved in this bug report.
+      Describe your hardware setup including, e.g.:
+
+      * PC or embedded system model/type:
+        * CPU architecture X86/X86_64/ARM/ARM64
+        * Operating System
+        * RAM
+      * Interfaces used to connect the cameras
+        * Type type/model/name of interface cards
+        * Switches or hubs used
+        * cable types/lengths
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Runtime information:"
+    description: |
+      Do you have the full Basler pylon Camera Software Suite installed in addition to pypylon?
+
+      > In the pylon Viewer the keys `Shift + Ctrl + Alt + i` will capture OS / software version information, that you can paste here.
+
+      The below command will output python/pypylon and system versions. Please use the python interpreter used in your project to execute
+
+      ```python
+      import sys, pypylon.pylon, platform
+      print(f'python: {sys.version}')
+      print(f'platform: {sys.platform}/{platform.machine()}/{platform.release()}')
+      print(f'pypylon: {pypylon.pylon.__version__} / {".".join([str(i) for i in pypylon.pylon.GetPylonVersion()])}')
+      ```
+
+      And in case of containerized applications also list the operating system and platform of the base system and platform!
+    placeholder: |
+      << Runtime information >>
+    render: shell
+  validations:
+    required: true
+
