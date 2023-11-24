@@ -1,6 +1,7 @@
-Version x.y.z
-    - Date 2023-xx-yy
+Version 3.0.1rc1
+    - Date 2023-11-24
     - add issue templates and links to Basler docs and pypylon samples
+    - Fix calling of PylonTerminate at module exit
 
  Version 3.0.0
     - Date 2023-11-09

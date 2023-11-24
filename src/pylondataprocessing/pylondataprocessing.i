@@ -113,7 +113,7 @@ namespace Pylon
             intptr_t UserProvidedID = 0; //!< The user provided id belonging to the update.
             CVariantContainer Container; //!< The output data of the recipe.
         };
-    
+
         class CGenericOutputObserver : public IOutputObserver
         {
         public:
@@ -153,7 +153,7 @@ namespace Pylon
                 AutoLock scopedLock(m_memberLock);
                 return !m_queue.empty();
             }
-            
+
             void Clear()
             {
                 AutoLock scopedLock(m_memberLock);
@@ -178,7 +178,7 @@ namespace Pylon
                 }
                 return resultDataOut.Container;
             }
-            
+
             SGenericOutputObserverResult GetResult()
             {
                 AutoLock scopedLock(m_memberLock);
@@ -201,7 +201,7 @@ namespace Pylon
             WaitObjectEx m_waitObject;
             std::list<SGenericOutputObserverResult> m_queue;
         };
-        
+
         /*!
          \brief
             Lists the built-in variant container types.
@@ -211,7 +211,7 @@ namespace Pylon
             VariantContainerType_None           = 0,    //!< A basic data object without any container.
             VariantContainerType_Array          = 1,    //!< An array that may contain basic data objects.
             VariantContainerType_Unsupported    = 2     //!< A container type that is not supported natively by this SDK yet.
-        };        
+        };
     }
 }
 #ifdef _MSC_VER  // MSVC
@@ -252,15 +252,15 @@ void TranslateGenicamException(const GenericException* e)
     }
 }
 
-static void pylon_terminate(void*){ Pylon::PylonTerminate();}
-
 %}
 
 %init %{
-    // register the terminate routine
-    SWIG_module.m_free = &pylon_terminate;
 
     Pylon::PylonInitialize();
+
+    // register PylonTerminate on interpreter shutdown
+    auto pylon_terminate = [](){ Pylon::PylonTerminate(true);};
+    Py_AtExit( pylon_terminate );
 
     // Need to import TranslateGenicamException from _genicam in order to be
     // able to translate C++ Genicam exceptions to the correct Python exceptions.
@@ -523,7 +523,7 @@ Pylon::DataProcessing::CVariantContainer value
         while (PyDict_Next($input, &pos, &key, &value))
         {
             GENICAM_NAMESPACE::gcstring keyCpp;
-            
+
             if (PyBytes_Check(key)) {
                 keyCpp = GENICAM_NAMESPACE::gcstring(PyBytes_AsString(key));
             } else
@@ -541,8 +541,8 @@ Pylon::DataProcessing::CVariantContainer value
             else {
                 PyErr_SetString(PyExc_ValueError, "Expected a string as key.");
                 SWIG_fail;
-            }        
-        
+            }
+
             // python object possibly wrapping a CVariant
             // pointer to wrapped CVariant
             void *wrappedVariant = 0;
@@ -559,7 +559,7 @@ Pylon::DataProcessing::CVariantContainer value
             }
             Pylon::DataProcessing::CVariant valueCpp(*reinterpret_cast<Pylon::DataProcessing::CVariant*>(wrappedVariant));
             $1[keyCpp] = valueCpp;
-        }    
+        }
     }
     else
     {

@@ -250,7 +250,7 @@ static void FixPylonDllLoadingIfNecessary()
     catch (Pylon::GenericException&)
     {
         // Ignore failure of enumerating TLs and carry on loading this
-        // module. The user will notice later if he doesn't find any cameras.
+        // module. The user will notice later if he doesn´t find any cameras.
     }
 
     // restore p_Previous_PATH
@@ -371,8 +371,6 @@ static void ExtendGenTLPathForCXP()
 
 #endif // GENTL_CXP_PRODUCER_DIR
 
-static void pylon_terminate(void*){ Pylon::PylonTerminate();}
-
 %}
 
 %init %{
@@ -381,10 +379,11 @@ static void pylon_terminate(void*){ Pylon::PylonTerminate();}
     ExtendGenTLPathForCXP();
 #endif
 
-    // register the terminate routine
-    SWIG_module.m_free = &pylon_terminate;
-
     Pylon::PylonInitialize();
+
+    // register PylonTerminate on interpreter shutdown
+    auto pylon_terminate = [](){ Pylon::PylonTerminate(true);};
+    Py_AtExit( pylon_terminate );
 
 #if NEED_PYLON_DLL_WORKAROUND
     FixPylonDllLoadingIfNecessary();
