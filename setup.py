@@ -1207,6 +1207,7 @@ if __name__ == "__main__":
         test_suite='tests.all_emulated_tests_with_pylondataprocessing' if includePylonDataProcessing else 'tests.all_emulated_tests',
         packages=["pypylon"],
         package_data={"pypylon": package_data_files },
+        license="Other/Proprietary License",
         classifiers=[
             # Proprietary license as the resulting install contains pylon which
             # is under the pylon license
