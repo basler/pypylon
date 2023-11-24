@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: PyPylon general usage questions
+    url: https://github.com/basler/pypylon-samples
+    about: "For more documentation and specific use cases see the companion repository pypylon-samples"
+
+  - name: Basler Feature Documentation
+    url: https://docs.baslerweb.com/features
+    about: "For questions on how a camera feature works please check first in the Basler Product Documention"
