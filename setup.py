@@ -752,11 +752,11 @@ class BuildSupportLinux(BuildSupport):
             (r"libpylonutilitypcl\.so\.\d+\.\d+", ""),
             ],
         "gentl": [
-            ("libpylon_TL_gtc\.so", ""),
+            (r"libpylon_TL_gtc\.so", ""),
             ],
         "pylondataprocessing": [
             (r"libPylonDataProcessing\.so\.\d+", ""),
-            ("libPylonDataProcessing.sig", ""),
+            (r"libPylonDataProcessing.sig", ""),
             (r"libPylonDataProcessingCore\.so\.\d+", ""),
             ],
         }
@@ -1019,7 +1019,7 @@ class BuildSupportMacOS(BuildSupport):
             # cleanup double TL entries in pylon 6.2.0
             if self.get_pylon_version() == "6.2.0.18677":
                 for p in Path(f"{full_dst}").glob("**/*TL*.so"):
-                    if re.match(".*TL_[a-z]+\.so", p.name):
+                    if re.match(r".*TL_[a-z]+\.so", p.name):
                         info(f"DELETE {p}")
                         os.remove(p)
                         
