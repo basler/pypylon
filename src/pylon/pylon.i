@@ -719,6 +719,22 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 #if (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR >= 1) || PYLON_VERSION_MAJOR > 6
 %include "ImageDecompressor.i"
 #endif
+#if (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR >= 2) || PYLON_VERSION_MAJOR > 6
+%include "PylonDataComponent.i"
+%include "PylonDataContainer.i"
+ADD_PROP_GET(PylonDataContainer, DataComponentCount)
+ADD_PROP_GET(PylonDataComponent, ComponentType)
+ADD_PROP_GET(PylonDataComponent, PixelType)
+ADD_PROP_GET(PylonDataComponent, Width)
+ADD_PROP_GET(PylonDataComponent, Height)
+ADD_PROP_GET(PylonDataComponent, OffsetX)
+ADD_PROP_GET(PylonDataComponent, OffsetY)
+ADD_PROP_GET(PylonDataComponent, PaddingX)
+ADD_PROP_GET(PylonDataComponent, Data)
+ADD_PROP_GET(PylonDataComponent, DataSize)
+ADD_PROP_GET(PylonDataComponent, TimeStamp)
+ADD_PROP_GET(PylonDataComponent, Array)
+#endif
 
 ADD_PROP_GET(GrabResult, ErrorDescription)
 ADD_PROP_GET(GrabResult, ErrorCode)
