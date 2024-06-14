@@ -111,17 +111,15 @@ jobs:
           fetch-depth: 0
 
       # download the pylon sdks          
-      - name: download x86_64
+      - name: download linux artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Linux_x86_64_Pylon
+          pattern: Linux*Pylon
+          merge-multiple: true          
           path: pylon-installer
 
-      - name: download aarch64
-        uses: actions/download-artifact@v4
-        with:
-          name: Linux_aarch64_Pylon
-          path: pylon-installer          
+      - name: Display Structure of downloaded files
+        run: ls -R pylon-installer
 
       - name: Build with docker
         run: |
@@ -170,12 +168,14 @@ jobs:
           name: Windows_Pylon
           path: pylon-installer
 
+      - name: Display Structure of downloaded files
+        run: dir pylon-installer
+
       - name: Setup pylon
         run: |
           cd pylon-installer
-          # assert that we only have one installer
-          [ $(ls Basler-pylon-*.exe 2>/dev/null | wc -l) -eq 1 ] || echo "Error: Expected exactly one file, but found $(ls Basler-pylon-*.exe 2>/dev/null | wc -l)" && exit 1
-          Basler-pylon-*.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
+          move Basler-pylon-*.exe Basler-pylon.exe
+          Basler-pylon.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
         shell: cmd
 
       - name: Build wheels
@@ -225,8 +225,6 @@ jobs:
         run: |
           # install universal
           cd pylon-installer
-          # assert that we only have one installer
-          [ $(ls pylon-*.dmg 2>/dev/null | wc -l) -eq 1 ] || echo "Error: Expected exactly one file, but found $(ls pylon-*.dmg 2>/dev/null | wc -l)" && exit 1
           hdiutil attach pylon-*.dmg
           sudo installer -pkg /Volumes/pylon\ *\ Camera\ Software\ Suite/pylon-*.pkg  -target /
           hdiutil detach /Volumes/pylon\ *\ Camera\ Software\ Suite

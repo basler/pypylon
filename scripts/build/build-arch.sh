@@ -108,20 +108,8 @@ if [ -z "$PYLON_DIR" ]; then
 fi
 
 #test for pylon 6.1
-files=( $PYLON_DIR/pylon_*_${PYLON_ARCH}_setup.tar.gz )
+files=( $PYLON_DIR/pylon-*-${PYLON_ARCH}_setup.tar.gz )
 PYLON="${files[0]}"
-
-#fallback to pre 6.1 naming
-if [ ! -f "$PYLON" ]; then
-    files=( $PYLON_DIR/pylon-*-$PYLON_ARCH.tar.gz )
-    PYLON="${files[0]}"
-
-    #special case for pylon 5.x where aarch64 was named arm64
-    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64" ]; then
-        files=( $PYLON_DIR/pylon-*-arm64.tar.gz )
-        PYLON="${files[0]}"
-    fi
-fi
 
 if [ ! -f "$PYLON" ]; then
     echo "Couldn't find pylon installer in $PYLON_DIR"
