@@ -5,9 +5,6 @@
     "linux-aarch64": {
         "pylon_sdks": ["7.5.0.15658"]
     },
-    "linux-armhf": {
-        "pylon_sdks": ["6.2.0.21487"]
-    },
     "windows": {
         "pylon_sdks": ["7.5.0.15658"]
     },

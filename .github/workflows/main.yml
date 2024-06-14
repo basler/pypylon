@@ -52,8 +52,6 @@ jobs:
               jf rt dl --flat --props "pylon_architecture=x86_64;pylon_os=linux;pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./linux_x86_64_sdk/
             elif [[ $os == "linux-aarch64" ]]; then
               jf rt dl --flat --props "pylon_architecture=aarch64;pylon_os=linux;pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./linux_aarch64_sdk/
-            elif [[ $os == "linux-armhf" ]]; then
-              jf rt dl --flat --props "pylon_architecture=armhf;pylon_os=linux;pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./linux_armhf_sdk/
             fi
           done
         done
@@ -63,12 +61,6 @@ jobs:
       with:
         name: Linux_aarch64_Pylon
         path: linux_aarch64_sdk
-    
-    - name: Upload Pylon SDK for Linux armhf
-      uses: actions/upload-artifact@v4
-      with:
-        name: Linux_armhf_Pylon
-        path: linux_armhf_sdk
     
     - name: Upload Pylon SDK for Linux x86_64
       uses: actions/upload-artifact@v4
@@ -105,7 +97,7 @@ jobs:
       fail-fast: false
       matrix:
         a: [cp39, cp3_10, cp3_11]
-        p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64, manylinux_2_28_armv7l]
+        p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64]
 
     env:
       P: ${{ matrix.p }}
@@ -130,13 +122,6 @@ jobs:
         with:
           name: Linux_aarch64_Pylon
           path: pylon-installer          
-
-      - name: download armhf
-        uses: actions/download-artifact@v4
-        with:
-          name: Linux_armhf_Pylon
-          path: pylon-installer          
-  
 
       - name: Build with docker
         run: |
