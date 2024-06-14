@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        a: [cp39, cp3_10, cp3_11]
+        a: [cp39, cp3_10, cp3_11, cp3_12]
         p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64]
 
     env:
