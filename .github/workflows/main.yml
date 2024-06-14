@@ -174,8 +174,8 @@ jobs:
       - name: Setup pylon
         run: |
           cd pylon-installer
-          move Basler-pylon-*.exe Basler-pylon.exe
-          Basler-pylon.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
+          ren Basler-pylon-*.exe Basler-pylon.exe
+          .\Basler-pylon.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
         shell: cmd
 
       - name: Build wheels
