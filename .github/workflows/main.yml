@@ -161,7 +161,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.6 - 3.12"
+          python-version: "3.9 - 3.12"
 
       - uses: actions/download-artifact@v4
         with:
@@ -174,8 +174,7 @@ jobs:
       - name: Setup pylon
         run: |
           cd pylon-installer
-          ren Basler-pylon-*.exe Basler-pylon.exe
-          .\Basler-pylon.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
+          for %%i in (Basler*.exe) do "%%~i /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
         shell: cmd
 
       - name: Build wheels
@@ -214,7 +213,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.6 - 3.12"
+          python-version: "3.9 - 3.12"
 
       - uses: actions/download-artifact@v4
         with:
