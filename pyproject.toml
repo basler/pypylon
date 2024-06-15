@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "swig>=4.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-skip  = "pp*"
+skip = "pp* cp36-* cp37-* cp38-*"
 build-verbosity = "0"
 test-requires = "pytest numpy"
 
