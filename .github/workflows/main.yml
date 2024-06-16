@@ -174,8 +174,8 @@ jobs:
       - name: Setup pylon
         run: |
           cd pylon-installer
-          Basler-pylon-7.4.0.14900.exe /quiet /install="GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK"
-        shell: cmd
+          ren Basler-pylon-*.exe Basler-pylon.exe
+          Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK'
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.13.0
