@@ -178,7 +178,7 @@ jobs:
           Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK'
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.13.0
+        uses: pypa/cibuildwheel@v2.19
         env:
           PYLON_DEV_DIR: "C:\\Program Files\\Basler\\pylon 7\\Development"
 
@@ -229,7 +229,7 @@ jobs:
           hdiutil detach /Volumes/pylon\ *\ Camera\ Software\ Suite
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.13.0
+        uses: pypa/cibuildwheel@v2.19
         env:
           PYLON_FRAMEWORK_ARM64: /Library/Frameworks
           PYLON_FRAMEWORK_X86_64: /Library/Frameworks
