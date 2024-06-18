@@ -53,7 +53,7 @@ try:
             print("Component Count: ", pylonDataContainer.DataComponentCount);
             # Access data components if the component type indicates image data
             for componentIndex in range(pylonDataContainer.DataComponentCount):
-                pylonDataComponent = grabResult.GetDataComponent(componentIndex);
+                pylonDataComponent = pylonDataContainer.GetDataComponent(componentIndex);
                 if pylonDataComponent.ComponentType == pylon.ComponentType_Intensity:
                     # Access the component data.
                     print("PixelType: ", pylonDataComponent.PixelType)
@@ -64,7 +64,7 @@ try:
                     print("PaddingX: ", pylonDataComponent.PaddingX)
                     print("DataSize: ", pylonDataComponent.DataSize)
                     print("TimeStamp: ", pylonDataComponent.TimeStamp)
-                    img = grabResult.Array
+                    img = pylonDataComponent.Array
                     print("Gray value of first pixel: ", img[0, 0])
                 pylonDataComponent.Release()
             pylonDataContainer.Release()

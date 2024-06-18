@@ -13,7 +13,7 @@
             pt = self.GetPixelType()
         if IsPacked(pt):
             raise ValueError("Packed Formats are not supported with numpy interface")
-        if pt in ( PixelType_Mono8, PixelType_BayerGR8, PixelType_BayerRG8, PixelType_BayerGB8, PixelType_BayerBG8, PixelType_Confidence8 ):
+        if pt in ( PixelType_Mono8, PixelType_BayerGR8, PixelType_BayerRG8, PixelType_BayerGB8, PixelType_BayerBG8, PixelType_Confidence8, PixelType_Coord3D_C8 ):
             shape = (self.GetHeight(), self.GetWidth())
             format = "B"
             dtype = _pylon_numpy.uint8
@@ -25,7 +25,7 @@
             shape = (self.GetHeight(), self.GetWidth())
             format = "H"
             dtype = _pylon_numpy.uint16
-        elif pt in ( PixelType_Mono16, PixelType_BayerGR16, PixelType_BayerRG16, PixelType_BayerGB16, PixelType_BayerBG16, PixelType_Confidence16 ):
+        elif pt in ( PixelType_Mono16, PixelType_BayerGR16, PixelType_BayerRG16, PixelType_BayerGB16, PixelType_BayerBG16, PixelType_Confidence16, PixelType_Coord3D_C16 ):
             shape = (self.GetHeight(), self.GetWidth())
             format = "H"
             dtype = _pylon_numpy.uint16
@@ -37,6 +37,10 @@
             shape = (self.GetHeight(), self.GetWidth(), 2)
             dtype = _pylon_numpy.uint8
             format = "B"
+        elif pt in ( PixelType_Coord3D_ABC32f, ):
+            shape = (self.GetHeight(), self.GetWidth(), 3)
+            dtype = _pylon_numpy.float32
+            format = "f"
         else:
             raise ValueError("Pixel format currently not supported")
 
@@ -57,7 +61,7 @@
             shape, dtype, format = self.GetImageFormat(new_pt)
         else:
             shape, dtype, format = self.GetImageFormat(pt)
-            buf = self.GetImageBuffer()
+            buf = self.GetData()
 
         # Now we will copy the data into an array:
         return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
