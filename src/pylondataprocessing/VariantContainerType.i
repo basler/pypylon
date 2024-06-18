@@ -1,5 +1,8 @@
 %rename(VariantContainerType) Pylon::DataProcessing::EVariantContainerType;
 
+#if PYLON_DATAPROCESSING_VERSION_MAJOR >= 2
+%include <pylondataprocessing/VariantContainerType.h>;
+#else
 /*!
  * \namespace Pylon
  * \brief The Pylon namespace
@@ -24,3 +27,4 @@ namespace Pylon
         };
     }
 }
+#endif

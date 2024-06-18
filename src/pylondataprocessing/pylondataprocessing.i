@@ -101,7 +101,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <GenApi/EventAdapterGEV.h>
 #include "genicam/PyPortImpl.h"
 
-#include <pylondataprocessing/PylonDataProcessingIncludes.h>
+#include <pylondataprocessing/BuildersRecipe.h>
+#include <pylondataprocessing/IOutputObserver.h>
+#include <pylondataprocessing/IParameterCollection.h>
+#include <pylondataprocessing/IUpdateObserver.h>
+#include <pylondataprocessing/ParameterNames.h>
+#include <pylondataprocessing/PylonDataProcessing.h>
+#include <pylondataprocessing/PylonDataProcessingVersion.h>
+#include <pylondataprocessing/Recipe.h>
+#include <pylondataprocessing/Update.h>
+#include <pylondataprocessing/Variant.h>
+#include <pylondataprocessing/VariantContainer.h>
+#include <pylondataprocessing/VariantDataType.h>
+#if PYLON_DATAPROCESSING_VERSION_MAJOR >= 2
+#include <pylondataprocessing/AcquisitionMode.h>
+#include <pylondataprocessing/VariantContainerType.h>
+#endif
 
 namespace Pylon
 {
@@ -201,7 +216,7 @@ namespace Pylon
             WaitObjectEx m_waitObject;
             std::list<SGenericOutputObserverResult> m_queue;
         };
-
+#if PYLON_DATAPROCESSING_VERSION_MAJOR < 2
         /*!
          \brief
             Lists the built-in variant container types.
@@ -212,6 +227,12 @@ namespace Pylon
             VariantContainerType_Array          = 1,    //!< An array that may contain basic data objects.
             VariantContainerType_Unsupported    = 2     //!< A container type that is not supported natively by this SDK yet.
         };
+#endif
+
+        Pylon::VersionInfo GetVersion()
+        {
+            return Pylon::VersionInfo(PYLON_DATAPROCESSING_VERSION_MAJOR, PYLON_DATAPROCESSING_VERSION_MINOR, PYLON_DATAPROCESSING_VERSION_SUBMINOR);
+        }
     }
 }
 #ifdef _MSC_VER  // MSVC
@@ -694,7 +715,20 @@ Pylon::DataProcessing::CVariantContainer value
 #define GenApi GENAPI_NAMESPACE
 
 #define PYLONDATAPROCESSING_API
-
+%include <pylondataprocessing/PylonDataProcessingVersion.h>
+namespace Pylon
+{
+    namespace DataProcessing
+    {
+        Pylon::VersionInfo GetVersion()
+        {
+            return Pylon::VersionInfo(PYLON_DATAPROCESSING_VERSION_MAJOR, PYLON_DATAPROCESSING_VERSION_MINOR, PYLON_DATAPROCESSING_VERSION_SUBMINOR);
+        }
+    }
+}
+#if PYLON_DATAPROCESSING_VERSION_MAJOR >= 2
+%include "AcquisitionMode.i"
+#endif
 %include "PointF2D.i"
 %include "LineF2D.i"
 %include "EllipseF.i"
