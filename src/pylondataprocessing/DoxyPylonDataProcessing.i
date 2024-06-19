@@ -298,44 +298,28 @@ Parameters
 ----------
 * `inputFullName` :  
     The identifier of the new input.  
-* `inputTypeID` :  
-    Type ID of the new input.  
-
-Valid type IDs are:  
-
-*   \"Pylon::DataProcessing::Core::IInteger\"  
-*   \"Pylon::DataProcessing::Core::IBoolean\"  
-*   \"Pylon::DataProcessing::Core::IString\"  
-*   \"Pylon::DataProcessing::Core::IFloat\"  
-*   \"Pylon::DataProcessing::Core::IImage\"  
-*   \"Pylon::DataProcessing::Core::IPointF\"  
-*   \"Pylon::DataProcessing::Core::IRectangleF\"  
-*   \"Pylon::DataProcessing::Core::IEllipseF\"  
-*   \"Pylon::DataProcessing::Core::ICircleF\"  
-*   \"Pylon::DataProcessing::Core::ILineF\"  
-*   \"Pylon::DataProcessing::Core::IIntegerArray\"  
-*   \"Pylon::DataProcessing::Core::IBooleanArray\"  
-*   \"Pylon::DataProcessing::Core::IStringArray\"  
-*   \"Pylon::DataProcessing::Core::IFloatArray\"  
-*   \"Pylon::DataProcessing::Core::IImageArray\"  
-*   \"Pylon::DataProcessing::Core::IPointFArray\"  
-*   \"Pylon::DataProcessing::Core::IRectangleFArray\"  
-*   \"Pylon::DataProcessing::Core::IEllipseFArray\"  
-*   \"Pylon::DataProcessing::Core::ICircleFArray\"  
-*   \"Pylon::DataProcessing::Core::ILineFArray\"  
+* `inputDataType` :  
+    Data type of the new input.  
+* `inputContainerType` :  
+    Container type of the new input.  
 
 pre:  
 
     *   `inputFullName` is a valid C++ identifier and must not start with an
         underscore.  
     *   The recipe doesn't contain an input with the identifier `inputFullName`.  
-    *   `inputTypeID` refers to an existing type.  
+    *   `inputDataType` refers to an actual data type and is not equal to
+        `VariantDataType_Composite`, `VariantDataType_None`, or
+        `VariantDataType_Unsupported`.  
+    *   `inputContainerType` refers to an actual container type and is not equal
+        to `VariantContainerType_Unsupported`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
 post:  
 
-    *   An input with the type identified by `inputTypeID` has been added to the
-        recipe with the identifier `inputFullName`.  
+    *   An input with the type identified by `inputDataType` and
+        `inputContainerType` has been added to the recipe with the identifier
+        `inputFullName`.  
 
 \\error Throws an exception if the preconditions aren't met.  
 
@@ -349,21 +333,24 @@ identifier.
 
 Parameters
 ----------
-* `inputTypeID` :  
-    Type ID of the new input.  
-
-See AddInput(const Pylon::String_t&, const Pylon::String_t&) for a list of valid
-type IDs.  
+* `inputDataType` :  
+    Data type of the new input.  
+* `inputContainerType` :  
+    Container type of the new input.  
 
 pre:  
 
-    *   `inputTypeID` refers to an existing type.  
+    *   `inputDataType` refers to an actual data type and is not equal to
+        `VariantDataType_Composite`, `VariantDataType_None`, or
+        `VariantDataType_Unsupported`.  
+    *   `inputContainerType` refers to an actual container type and is not equal
+        to `VariantContainerType_Unsupported`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
 post:  
 
-    *   An input with the type identified by `inputTypeID` has been added to the
-        recipe.  
+    *   An input with the type identified by `inputDataType` and
+        `inputContainerType` has been added to the recipe.  
 
 \\error Throws an exception if the preconditions aren't met.  
 
@@ -463,11 +450,10 @@ Parameters
 ----------
 * `outputFullName` :  
     The identifier of the new output.  
-* `outputTypeID` :  
-    Type ID of the new output.  
-
-See AddInput(const Pylon::String_t&, const Pylon::String_t&) for a list of valid
-type IDs.  
+* `outputDataType` :  
+    Data type of the new output.  
+* `outputContainerType` :  
+    Container type of the new output.  
 
 pre:  
 
@@ -475,13 +461,18 @@ pre:
         underscore.  
     *   The recipe doesn't contain an output with the identifier
         `outputFullName`.  
-    *   `outputTypeID` refers to an existing type.  
+    *   `outputDataType` refers to an actual data type and is not equal to
+        `VariantDataType_Composite`, `VariantDataType_None`, or
+        `VariantDataType_Unsupported`.  
+    *   `outputContainerType` refers to an actual container type and is not
+        equal to `VariantContainerType_Unsupported`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
 post:  
 
-    *   An output with the type identified by `outputTypeID` has been added to
-        the recipe with the identifier `outputFullName`.  
+    *   An output with the type identified by `outputDataType` and
+        `outputContainerType` has been added to the recipe with the identifier
+        `outputFullName`.  
 
 \\error Throws an exception if the preconditions aren't met.  
 
@@ -495,21 +486,24 @@ identifier.
 
 Parameters
 ----------
-* `outputTypeID` :  
-    Type ID of the new output.  
-
-See AddInput(const Pylon::String_t&, const Pylon::String_t&) for a list of valid
-type IDs.  
+* `outputDataType` :  
+    Data type of the new output.  
+* `outputContainerType` :  
+    Container type of the new output.  
 
 pre:  
 
-    *   `outputTypeID` refers to an existing type.  
+    *   `outputDataType` refers to an actual data type and is not equal to
+        `VariantDataType_Composite`, `VariantDataType_None`, or
+        `VariantDataType_Unsupported`.  
+    *   `outputContainerType` refers to an actual container type and is not
+        equal to `VariantContainerType_Unsupported`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
 post:  
 
-    *   An output with the type identified by `outputTypeID` has been added to
-        the recipe.  
+    *   An output with the type identified by `outputDataType` and
+        `outputContainerType` has been added to the recipe.  
 
 \\error Throws an exception if the preconditions aren't met.  
 
@@ -994,6 +988,215 @@ post:
 \\error Throws an exception if the preconditions aren't met.  
 ";
 
+// File: class_pylon_1_1_data_processing_1_1_c_callable_event_observer.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CCallableEventObserver "
+
+A class that wraps a callable (function pointer or functor) to be used as an
+event observer of a `CRecipe`.  
+
+\\threading The observer, and therefore the callable, is called from multiple
+internal threads of the `CRecipe`.  
+
+C++ includes: CallableEventObserver.h
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableEventObserver::CCallableEventObserver "
+Pylon::DataProcessing::CCallableEventObserver::CCallableEventObserver
+Constructs an event observer with a given callable.  
+
+The callable must be invocable with the following signature: void (CRecipe&
+recipe, const CEventData* pEvents, size_t numEvents)  
+
+Example:  
+
+Parameters
+----------
+* `callable` :  
+    The callable to invoke.  
+* `autoDelete` :  
+    If true, the object will be deleted automatically when it is unregistered
+    from the recipe.  
+
+pre:  
+
+    *   The callable must be valid (e.g., not a nullptr)  
+
+\\error Throws an exception if the preconditions aren't met.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableEventObserver::~CCallableEventObserver "
+Pylon::DataProcessing::CCallableEventObserver::~CCallableEventObserver";
+
+%feature("docstring") Pylon::DataProcessing::CCallableEventObserver::OnEventSignaled "
+Pylon::DataProcessing::CCallableEventObserver::OnEventSignaled
+This method is called when the graph of the `CRecipe` detects an event, e.g., an
+error change of a vtool.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that produced the output.  
+* `pEvents` :  
+    List of event infos as plain C array.  
+* `numEvents` :  
+    Number of entries in that list.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableEventObserver::OnDeregistered "
+Pylon::DataProcessing::CCallableEventObserver::OnDeregistered
+This method is called when the event observer is deregistered from the recipe.
+It can be used to delete the event observer by overloading the method. The
+default implementation of this method does nothing.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that the observer is deregistered from.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_callable_output_observer.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CCallableOutputObserver "
+
+A class that wraps a callable (function pointer or functor) to be used as an
+output observer of a `CRecipe`.  
+
+\\threading The observer, and therefore the callable, is called from multiple
+internal threads of the `CRecipe`.  
+
+C++ includes: CallableOutputObserver.h
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableOutputObserver::CCallableOutputObserver "
+Pylon::DataProcessing::CCallableOutputObserver::CCallableOutputObserver
+Constructs an output observer with a given callable.  
+
+The callable must be invocable with the following signature: void (CRecipe&
+recipe, CVariantContainer value, const CUpdate& update, intptr_t userProvidedId)  
+
+Example:  
+
+Parameters
+----------
+* `callable` :  
+    The callable to invoke.  
+* `autoDelete` :  
+    If true, the object will be deleted automatically when it is unregistered
+    from the recipe.  
+
+pre:  
+
+    *   The callable must be valid (e.g., not a nullptr)  
+
+\\error Throws an exception if the preconditions aren't met.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableOutputObserver::~CCallableOutputObserver "
+Pylon::DataProcessing::CCallableOutputObserver::~CCallableOutputObserver";
+
+%feature("docstring") Pylon::DataProcessing::CCallableOutputObserver::OutputDataPush "
+Pylon::DataProcessing::CCallableOutputObserver::OutputDataPush
+This method is called when an output of the `CRecipe` pushes data out.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that produced the output.  
+* `value` :  
+    A variant container containing the output data.  
+* `update` :  
+    The corresponding update.  
+* `userProvidedId` :  
+    This ID is passed to distinguish between different events. This ID has been
+    passed when calling `CRecipe::RegisterOutputObserver()`.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableOutputObserver::OnDeregistered "
+Pylon::DataProcessing::CCallableOutputObserver::OnDeregistered
+This method is called when the output observer is deregistered from the recipe.
+It can be used to delete the output observer by overloading the method. The
+default implementation of this method does nothing.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that the observer is deregistered from.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_callable_update_observer.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CCallableUpdateObserver "
+
+A class that wraps a callable (function pointer or functor) to be used as an
+update observer in a `CRecipe`.  
+
+\\threading The observer, and therefore the callable, is called from multiple
+internal threads of the `CRecipe`.  
+
+C++ includes: CallableUpdateObserver.h
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableUpdateObserver::CCallableUpdateObserver "
+Pylon::DataProcessing::CCallableUpdateObserver::CCallableUpdateObserver
+Constructs an update observer with a given callable.  
+
+The callable must be invocable with the following signature: void (CRecipe&
+recipe, const CUpdate& update, intptr_t userProvidedId)  
+
+Example:  
+
+Parameters
+----------
+* `callable` :  
+    The callable to invoke.  
+* `autoDelete` :  
+    If true, the object will be deleted automatically after the callable has
+    been invoked.  
+
+pre:  
+
+    *   The callable must be valid (e.g., not a nullptr)  
+
+\\error Throws an exception if the preconditions aren't met.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CCallableUpdateObserver::~CCallableUpdateObserver "
+Pylon::DataProcessing::CCallableUpdateObserver::~CCallableUpdateObserver";
+
+%feature("docstring") Pylon::DataProcessing::CCallableUpdateObserver::UpdateDone "
+Pylon::DataProcessing::CCallableUpdateObserver::UpdateDone
+This method is called when an update of a `Pylon::DataProcessing::CRecipe` has
+been processed completely.  
+
+note: If this update has triggered further updates, depending on the vTools used
+    in a recipe, the output data may not be available yet.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that processed the update.  
+* `update` :  
+    The update that was processed completely.  
+* `userProvidedId` :  
+    This ID is passed to distinguish between different events. This ID has been
+    passed when calling `CRecipe::TriggerUpdateAsync()` or
+    `CRecipe:TriggerUpdate()`.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
 // File: struct_pylon_1_1_data_processing_1_1_c_event_data.xml
 
 
@@ -1003,6 +1206,99 @@ Data associated with an event inside the recipe. Currently, only errors are
 supported.  
 
 C++ includes: IEventObserver.h
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_generic_output_observer.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver "
+
+A simple Recipe Output Observer that collects recipe outputs in a queue.  
+
+C++ includes: GenericOutputObserver.h
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::CGenericOutputObserver "
+Pylon::DataProcessing::CGenericOutputObserver::CGenericOutputObserver
+Creates a `CGenericOutputObserver` object.  
+
+\\error Doesn't throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::~CGenericOutputObserver "
+Pylon::DataProcessing::CGenericOutputObserver::~CGenericOutputObserver
+Destroys a `CGenericOutputObserver` object and resets the wait object provided
+by GetWaitObject().  
+
+\\error Doesn't throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::GetWaitObject "
+Pylon::DataProcessing::CGenericOutputObserver::GetWaitObject
+Returns a WaitObject that is in Signaled state if the queue is not empty and in
+Reset state if it is empty.  
+
+Returns
+-------
+`WaitObject` of the GenericOutputObserver.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is thread safe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::RetrieveResult "
+Pylon::DataProcessing::CGenericOutputObserver::RetrieveResult
+Retrieves the oldest CVariantContainer from the recipe output in the queue. The
+SGenericOutputObserverResult containing the CVariantContainer will be removed
+from the queue.  
+
+Returns
+-------
+`The` oldest CVariantContainer in the queue or an empty variant container if the
+queue is empty.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is thread safe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::RetrieveFullResult "
+Pylon::DataProcessing::CGenericOutputObserver::RetrieveFullResult
+Retrieves the oldest SGenericOutputObserverResult from the recipe output in the
+queue. The SGenericOutputObserverResult will be removed from the queue.  
+
+Returns
+-------
+`The` oldest SGenericOutputObserverResult in the queue or an
+SGenericOutputObserverResult with an invalid update and empty CVariantContainer
+if the queue is empty.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is thread safe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::GetNumResults "
+Pylon::DataProcessing::CGenericOutputObserver::GetNumResults
+Gets the number of SGenericOutputObserverResults in the queue.  
+
+Returns
+-------
+`The` number of elements in the queue.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is thread safe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CGenericOutputObserver::Clear "
+Pylon::DataProcessing::CGenericOutputObserver::Clear
+Removes all CVariantContainers from the queue.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is thread safe.  
 ";
 
 // File: struct_pylon_1_1_data_processing_1_1_command_parameter_name.xml
@@ -1175,11 +1471,36 @@ post:
 
 %feature("docstring") Pylon::DataProcessing::CRecipe::Start "
 Pylon::DataProcessing::CRecipe::Start
-Prepares the data processing and allocates resources required by the design.  
+Prepares the data processing and allocates resources required by the design. All
+Camera and Image Loading vTools keep their individual acquisition modes and the
+recipe is started like that (this corresponds to
+`Start(AcquisitionMode_Unchanged)`).  
 
 pre:  
 
     *   A recipe is loaded.  
+
+\\error The recipe is not started if an error occurred. Throws an exception if
+the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRecipe::Start "
+Pylon::DataProcessing::CRecipe::Start
+Prepares the data processing and allocates resources required by the design. In
+addition, the acquisition mode for all Camera and Image Loading vTools can be
+specified (see `EAcquisitionMode` for more details).  
+
+Parameters
+----------
+* `acquisitionMode` :  
+    The acquisition mode used to start the recipe (see `EAcquisitionMode` for
+    more details).  
+
+pre:  
+
+    *   A recipe has been loaded.  
 
 \\error The recipe is not started if an error occurred. Throws an exception if
 the preconditions aren't met.  
@@ -1294,9 +1615,15 @@ This is useful when handling multiple recipes.
 You can access the context using `GetRecipeContext()`, e.g., in
 `IOutputObserver::OutputDataPush()`, when receiving data from multiple recipes.  
 
+Parameters
+----------
+* `context` :  
+    The user-defined context.  
+
 \\error Doesn't throw C++ exceptions.  
 
-\\threading This method is synchronized using the lock provided by `GetLock()`.  
+\\threading This method is synchronized using an internal lock for the recipe
+context.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::CRecipe::GetRecipeContext "
@@ -1314,7 +1641,8 @@ The context.
 
 \\error Doesn't throw C++ exceptions.  
 
-\\threading This method is synchronized using the lock provided by `GetLock()`.  
+\\threading This method is synchronized using an internal lock for the recipe
+context.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::CRecipe::HasInput "
@@ -1353,50 +1681,6 @@ Returns
 \\threading This method is synchronized using the lock provided by `GetLock()`.  
 ";
 
-%feature("docstring") Pylon::DataProcessing::CRecipe::GetInputTypeName "
-Pylon::DataProcessing::CRecipe::GetInputTypeName
-Returns the type name of the input pin.  
-
-Parameters
-----------
-* `inputFullName` :  
-    The identifier of the input pin.  
-
-Returns
--------
-The type name of the input pin.  
-
-pre:  
-
-    *   An input pin with the name `inputFullName` must exist.  
-
-\\error Throws an exception if the preconditions aren't met.  
-
-\\threading This method is synchronized using the lock provided by `GetLock()`.  
-";
-
-%feature("docstring") Pylon::DataProcessing::CRecipe::GetOutputTypeName "
-Pylon::DataProcessing::CRecipe::GetOutputTypeName
-Returns the type name of the output pin.  
-
-Parameters
-----------
-* `outputFullName` :  
-    The name of the output pin.  
-
-Returns
--------
-The type name of the output pin.  
-
-pre:  
-
-    *   An output pin with the name `outputFullName` must exist.  
-
-\\error Throws an exception if the preconditions aren't met.  
-
-\\threading This method is synchronized using the lock provided by `GetLock()`.  
-";
-
 %feature("docstring") Pylon::DataProcessing::CRecipe::GetInputType "
 Pylon::DataProcessing::CRecipe::GetInputType
 Returns the variant data type of the input pin.  
@@ -1419,6 +1703,28 @@ pre:
 \\threading This method is synchronized using the lock provided by `GetLock()`.  
 ";
 
+%feature("docstring") Pylon::DataProcessing::CRecipe::GetInputContainerType "
+Pylon::DataProcessing::CRecipe::GetInputContainerType
+Returns the variant container type of the input pin.  
+
+Parameters
+----------
+* `inputFullName` :  
+    The identifier of the input pin.  
+
+Returns
+-------
+The variant container type of the input pin.  
+
+pre:  
+
+    *   An input pin with the name `inputFullName` must exist.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
 %feature("docstring") Pylon::DataProcessing::CRecipe::GetOutputType "
 Pylon::DataProcessing::CRecipe::GetOutputType
 Returns the variant data type of the output pin.  
@@ -1431,6 +1737,28 @@ Parameters
 Returns
 -------
 The variant data type of the output pin.  
+
+pre:  
+
+    *   An output pin with the name `outputFullName` must exist.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRecipe::GetOutputContainerType "
+Pylon::DataProcessing::CRecipe::GetOutputContainerType
+Returns the variant container type of the output pin.  
+
+Parameters
+----------
+* `outputFullName` :  
+    The identifier of the output pin.  
+
+Returns
+-------
+The variant container type of the output pin.  
 
 pre:  
 
@@ -1515,7 +1843,7 @@ The update object that has been produced by this call.
 pre:  
 
     *   The recipe is started.  
-    *   The argument `inputCollection` must not be empty.  
+    *   The `inputCollection` argument is not empty.  
     *   The input pins exist.  
     *   The types of the values in `inputCollection` are compatible with the
         input data types.  
@@ -1561,7 +1889,7 @@ pre:
     *   `CanTriggerUpdate()` must return `true`.  
 
 \\error Throws an exception if the preconditions aren't met. Throws an exception
-if the update could not be processed in the time specified by `timeoutMs` and
+if the update couldn't be processed in the time specified by `timeoutMs` and
 `timeoutHandling` == TimeoutHandling_ThrowException.  
 
 \\threading This method is synchronized using the lock provided by `GetLock()`
@@ -1596,14 +1924,52 @@ The update object that has been produced by this call.
 pre:  
 
     *   The recipe is started.  
-    *   The argument `inputCollection` must not be empty.  
+    *   The `inputCollection` argument is not empty.  
     *   The input pins exist.  
     *   The types of the values in `inputCollection` are compatible with the
         input data types.  
     *   `CanTriggerUpdate()` must return `true`.  
 
 \\error Throws an exception if the preconditions aren't met. Throws an exception
-if the update could not be processed in the time specified by `timeoutMs` and
+if the update couldn't be processed in the time specified by `timeoutMs` and
+`timeoutHandling` == TimeoutHandling_ThrowException.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`
+while not waiting for the update to finish completely.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRecipe::TriggerUpdateWithReturn "
+Pylon::DataProcessing::CRecipe::TriggerUpdateWithReturn
+Starts an update in a blocking call for a number of input pins. After the update
+has been processed, a variant container containing the recipe output is
+returned. This method is only intended for cases where the input triggers
+exactly one result.  
+
+Parameters
+----------
+* `inputCollection` :  
+    Provides the input names and the values.  
+* `timeoutMs` :  
+    The timeout for the update to finish completely.  
+* `timeoutHandling` :  
+    If timeoutHandling equals TimeoutHandling_ThrowException, a timeout
+    exception is thrown on timeout.  
+
+Returns
+-------
+The variant container that has been output by the recipe.  
+
+pre:  
+
+    *   The recipe is started.  
+    *   The `inputCollection` argument is not empty.  
+    *   The input pins exist.  
+    *   The types of the values in `inputCollection` are compatible with the
+        input data types.  
+    *   `CanTriggerUpdate()` must return `true`.  
+
+\\error Throws an exception if the preconditions aren't met. Throws an exception
+if the update couldn't be processed in the time specified by `timeoutMs` and
 `timeoutHandling` == TimeoutHandling_ThrowException.  
 
 \\threading This method is synchronized using the lock provided by `GetLock()`
@@ -1652,7 +2018,7 @@ Parameters
 * `mode` :  
     Indicates how to register the new observer.  
 * `userProvidedId` :  
-    This optional ID is passed to distinguish between different events.. This ID
+    This optional ID is passed to distinguish between different events. This ID
     is provided to `IUpdateObserver::UpdateDone`.  
 
 pre:  
@@ -1665,7 +2031,9 @@ post:
 
     *   The observer is registered and called when output data is available.  
 
-\\error Throws an exception if the preconditions aren't met.  
+\\error Throws an exception if the preconditions aren't met. If an exception is
+thrown, the observer is not registered and its `OnDeregistered` method will not
+be called.  
 
 \\threading This method is synchronized using the lock provided by `GetLock()`.  
 ";
@@ -1707,7 +2075,9 @@ post:
 
     *   The observer is registered and called when output data is available.  
 
-\\error Throws an exception if the preconditions aren't met.  
+\\error Throws an exception if the preconditions aren't met. If an exception is
+thrown, the observer is not registered and its `OnDeregistered` method will not
+be called.  
 
 \\threading This method is synchronized using the lock provided by `GetLock()`.  
 ";
@@ -1746,14 +2116,17 @@ post:
 
     *   The observer is registered and called when any output data is available.  
 
-\\error Throws an exception if the preconditions aren't met.  
+\\error Throws an exception if the preconditions aren't met. If an exception is
+thrown, the observer is not registered and its `OnDeregistered` method will not
+be called.  
 
 \\threading This method is synchronized using the lock provided by `GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::CRecipe::UnregisterOutputObserver "
 Pylon::DataProcessing::CRecipe::UnregisterOutputObserver
-Removes an output observer from the list of registered output observers.  
+Removes an output observer from the list of registered output observers and
+calls the observer's `OnDeregistered` method.  
 
 If the output pin or the observer with `userProvidedId` is not found, nothing is
 done.  
@@ -1793,7 +2166,7 @@ post:
 %feature("docstring") Pylon::DataProcessing::CRecipe::UnregisterOutputObserver "
 Pylon::DataProcessing::CRecipe::UnregisterOutputObserver
 Removes an output observer from the list of registered output observers for all
-output pins.  
+output pins and calls the observer's `OnDeregistered` method.  
 
 If the observer with `userProvidedId` is not found, nothing is done.  
 
@@ -1847,7 +2220,9 @@ post:
     *   The observer is registered and called when events occur, e.g., an error
         is detected by a vTool.  
 
-\\error Throws an exception if the preconditions aren't met.  
+\\error Throws an exception if the preconditions aren't met. If an exception is
+thrown, the observer is not registered and its `OnDeregistered` method will not
+be called.  
 
 \\threading This method is synchronized using an internal lock for event
 observer handling.  
@@ -1855,7 +2230,8 @@ observer handling.
 
 %feature("docstring") Pylon::DataProcessing::CRecipe::UnregisterEventObserver "
 Pylon::DataProcessing::CRecipe::UnregisterEventObserver
-Removes any registered event observer from the recipe.  
+Removes any registered event observer from the recipe and calls the observer's
+`OnDeregistered` method.  
 
 If an observer is not found, nothing is done.  
 
@@ -3263,6 +3639,17 @@ The data type of the data held.
 \\error Doesn't throw C++ exceptions.  
 ";
 
+%feature("docstring") Pylon::DataProcessing::CVariant::GetContainerType "
+Pylon::DataProcessing::CVariant::GetContainerType
+Returns the container type of the variant.  
+
+Returns
+-------
+The container type of the data held.  
+
+\\error Doesn't throw C++ exceptions.  
+";
+
 %feature("docstring") Pylon::DataProcessing::CVariant::GetNumSubValues "
 Pylon::DataProcessing::CVariant::GetNumSubValues
 Returns the number of subvalues.  
@@ -3364,21 +3751,6 @@ pre:
 post:  
 
     *   The subvalue has been changed to the new value.  
-
-\\error Throws an exception if the preconditions aren't met.  
-";
-
-%feature("docstring") Pylon::DataProcessing::CVariant::GetTypeName "
-Pylon::DataProcessing::CVariant::GetTypeName
-Returns the name of the type that can be used with `CreateFromTypeName()`.  
-
-pre:  
-
-    *   The data type of the variant must not be VariantDataType_None.  
-
-Returns
--------
-The name of the type, that can be used with `CreateFromTypeName()`.  
 
 \\error Throws an exception if the preconditions aren't met.  
 ";
@@ -4286,55 +4658,6 @@ post:
 \\error Throws an exception if the preconditions aren't met.  
 ";
 
-%feature("docstring") Pylon::DataProcessing::CVariant::CreateFromTypeName "
-Pylon::DataProcessing::CVariant::CreateFromTypeName
-Creates a variant using a known type name.  
-
-This factory method is mainly used to create composite data types
-(`VariantDataType_Composite`) used as input data for a recipe.  
-
-See the documentation of the vTools connected to input pins of the recipe for
-more information about composite data types and the correct type name in case
-composite data types are used.  
-
-Parameters
-----------
-* `typeName` :  
-    The name of the data type to create.  
-
-Returns
--------
-A newly created variant of the type passed with `typeName`.  
-
-pre:  
-
-    *   `CanCreateFromTypeName()` returns `true` for `typeName`.  
-
-post:  
-
-    *   The data type is created.  
-    *   The default value is assigned.  
-
-\\error Throws an exception if the preconditions aren't met.  
-";
-
-%feature("docstring") Pylon::DataProcessing::CVariant::CanCreateFromTypeName "
-Pylon::DataProcessing::CVariant::CanCreateFromTypeName
-Returns `true` if a variant with the type name passed can be created.  
-
-Parameters
-----------
-* `typeName` :  
-    The name of the data type to check.  
-
-Returns
--------
-`true` if a variant with the type name passed can be created using
-`CreateFromTypeName()`.  
-
-\\error Doesn't throw C++ exceptions.  
-";
-
 // File: class_pylon_1_1_data_processing_1_1_c_variant_container.xml
 
 
@@ -4556,10 +4879,24 @@ Parameters
 ----------
 * `recipe` :  
     The recipe that produced the output.  
-* `events` :  
+* `pEvents` :  
     List of event infos as plain C array.  
 * `numEvents` :  
     Number of entries in that list.  
+
+\\error C++ Exceptions thrown by this method are caught and ignored.  
+";
+
+%feature("docstring") Pylon::DataProcessing::IEventObserver::OnDeregistered "
+Pylon::DataProcessing::IEventObserver::OnDeregistered
+This method is called when the event observer is deregistered from the recipe.
+It can be used to delete the event observer by overloading the method. The
+default implementation of this method does nothing.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that the observer is deregistered from.  
 
 \\error C++ Exceptions thrown by this method are caught and ignored.  
 ";
@@ -4609,6 +4946,19 @@ Parameters
 * `userProvidedId` :  
     This ID is passed to distinguish between different events. This ID has been
     passed when calling `CRecipe::RegisterOutputObserver()`.  
+
+\\error C++ exceptions thrown by this method are caught and ignored.  
+";
+
+%feature("docstring") Pylon::DataProcessing::IOutputObserver::OnDeregistered "
+Pylon::DataProcessing::IOutputObserver::OnDeregistered
+This method is called when the output observer is deregistered from the recipe.
+It can be used to delete the output observer by overloading the method.  
+
+Parameters
+----------
+* `recipe` :  
+    The recipe that the observer is deregistered from.  
 
 \\error C++ Exceptions thrown by this method are caught and ignored.  
 ";
@@ -4787,8 +5137,7 @@ Parameters
     The radius of the ellipse that is parallel to the y axis when the ellipse is
     in its original state, i.e., it hasn't been rotated.  
 * `rotation` :  
-    The rotation of the ellipse. The rotation is defined relative to the x axis
-    and rotates counterclockwise in radiant.  
+    The rotation of the ellipse in radiant.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::SEllipseF::SEllipseF "
@@ -4806,8 +5155,17 @@ Parameters
     The radius of the ellipse that is parallel to the y axis when the ellipse is
     in its original state, i.e., it hasn't been rotated.  
 * `rotation` :  
-    The rotation of the ellipse. The rotation is defined relative to the x axis
-    and rotates counterclockwise in radiant.  
+    The rotation of the ellipse in radiant.  
+";
+
+// File: struct_pylon_1_1_data_processing_1_1_s_generic_output_observer_result.xml
+
+
+%feature("docstring") Pylon::DataProcessing::SGenericOutputObserverResult "
+
+A container for recipe output data.  
+
+C++ includes: GenericOutputObserver.h
 ";
 
 // File: struct_pylon_1_1_data_processing_1_1_s_line_f2_d.xml
@@ -4906,8 +5264,7 @@ Parameters
 * `height` :  
     The height of the rectangle.  
 * `rotation` :  
-    The rotation of the rectangle. The rotation is defined relative to the x
-    axis and rotates counterclockwise in radiant.  
+    The rotation of the rectangle in radiant.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::SRectangleF::SRectangleF "
@@ -4923,8 +5280,7 @@ Parameters
 * `height` :  
     The height of the rectangle.  
 * `rotation` :  
-    The rotation of the rectangle. The rotation is defined relative to the x
-    axis and rotates counterclockwise in radiant.  
+    The rotation of the rectangle in radiant.  
 ";
 
 // File: struct_pylon_1_1_data_processing_1_1_s_region_entry_r_l_e32.xml
@@ -5363,11 +5719,21 @@ of region elements.
 \\error Throws an exception if the preconditions aren't met.  
 ";
 
+// File: _acquisition_mode_8h.xml
+
 // File: _builders_recipe_8h.xml
+
+// File: _callable_event_observer_8h.xml
+
+// File: _callable_output_observer_8h.xml
+
+// File: _callable_update_observer_8h.xml
 
 // File: _circle_f_8h.xml
 
 // File: _ellipse_f_8h.xml
+
+// File: _generic_output_observer_8h.xml
 
 // File: _i_event_observer_8h.xml
 
@@ -5410,6 +5776,8 @@ of region elements.
 // File: _variant_8h.xml
 
 // File: _variant_container_8h.xml
+
+// File: _variant_container_type_8h.xml
 
 // File: _variant_data_type_8h.xml
 
