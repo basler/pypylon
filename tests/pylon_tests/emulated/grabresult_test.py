@@ -18,6 +18,9 @@ class GrabResultTestSuite(PylonEmuTestCase):
         camera = self.create_first()
 
         camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
         grabResult = camera.GrabOne(1000)
         camera.Close()
 
@@ -30,6 +33,19 @@ class GrabResultTestSuite(PylonEmuTestCase):
         actual = list(grabResult.Array[0:20, 0])
         expected = [actual[0] + i for i in range(20)]
         self.assertEqual(actual, expected)
+
+        self.assertEqual(grabResult.GetDataComponentCount(), 1)
+        self.assertEqual(grabResult.DataComponentCount, 1)
+        container = grabResult.DataContainer;
+        self.assertEqual(container.DataComponentCount, 1)
+        container.Release()
+        container = grabResult.GetDataContainer();
+        self.assertEqual(container.DataComponentCount, 1)
+        container.Release()
+        component = grabResult.GetDataComponent(0)
+        self.assertEqual(component.Width, 1024)
+        component.Release()
+
         grabResult.Release()
         self.assertFalse(grabResult.IsValid())
         self.assertFalse(grabResult.IsUnique())
@@ -41,6 +57,9 @@ class GrabResultTestSuite(PylonEmuTestCase):
         camera = self.create_first()
 
         camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
         cameraGrab = camera.GrabOne(1000)
         camera.Close()
 

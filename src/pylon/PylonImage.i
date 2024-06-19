@@ -29,6 +29,19 @@
 %#endif
     }    
 
+    int GetNumBufferExports(PyObject * omv)
+    {
+// need at least Python 3.3 for memory view
+%#if PY_VERSION_HEX >= 0x03030000
+        PyMemoryViewObject * mv = (PyMemoryViewObject *) omv;
+        int ret = (int) mv->mbuf->exports;
+        Py_DECREF(omv);
+        return ret;
+%#else
+        return 0;
+%#endif
+    }
+
 %pythoncode %{
     @needs_numpy
     def GetImageFormat(self, pt = None):
@@ -68,6 +81,12 @@
             raise ValueError("Pixel format currently not supported")
 
         return (shape, dtype, format)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.Release()
 
     @needs_numpy
     def GetArray(self, raw = False):

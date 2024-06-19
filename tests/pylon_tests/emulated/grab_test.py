@@ -6,9 +6,11 @@ import unittest
 
 class GrabTestSuite(PylonEmuTestCase):
     def test_grabone(self):
-
         camera = self.create_first()
         camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
         camera.ExposureTimeAbs.Value = 10000.0
         self.assertEqual(10000, camera.ExposureTimeAbs.Value)
         result = camera.GrabOne(1000)
@@ -22,6 +24,9 @@ class GrabTestSuite(PylonEmuTestCase):
         imageCounter = 0
         camera = self.create_first()
         camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
         camera.ExposureTimeAbs.Value = 10000.0
         self.assertEqual(10000, camera.ExposureTimeAbs.Value)
         camera.StartGrabbingMax(countOfImagesToGrab)
@@ -59,6 +64,12 @@ class GrabTestSuite(PylonEmuTestCase):
         for i, cam in enumerate(cameras):
             self.assertEqual(devices[i].GetDeviceClass(), self.device_class)
             cam.Attach(tlFactory.CreateDevice(devices[i]))
+        cameras.Open()
+        for i, cam in enumerate(cameras):
+            cam.Width.Value = 1024
+            cam.Height.Value = 1040
+            cam.PixelFormat.Value = "Mono8"
+            cam.ExposureTimeAbs.Value = 10000.0
         # Starts grabbing for all cameras
         cameras.StartGrabbing()
         # Grab c_countOfImagesToGrab from the cameras.
@@ -73,10 +84,10 @@ class GrabTestSuite(PylonEmuTestCase):
             self.assertEqual(True, grabResult.GrabSucceeded())
             img = grabResult.GetArray()
             first_line = img[0]
-            prev = first_line[0]
+            prev = int(first_line[0])
             for pxl in first_line[1:]:
-                self.assertEqual(pxl, (prev + 1) % 256)
-                prev = pxl
+                self.assertEqual(int(pxl), (prev + 1) % 256)
+                prev = int(pxl)
         self.assertTrue(twoCamsUsed)  # Are 2 Cameras actually used
 
 

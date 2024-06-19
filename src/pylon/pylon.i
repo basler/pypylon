@@ -734,6 +734,7 @@ ADD_PROP_GET(PylonDataComponent, Data)
 ADD_PROP_GET(PylonDataComponent, DataSize)
 ADD_PROP_GET(PylonDataComponent, TimeStamp)
 ADD_PROP_GET(PylonDataComponent, Array)
+ADD_PROP_GET(PylonDataComponent, ImageFormat)
 #endif
 
 ADD_PROP_GET(GrabResult, ErrorDescription)
@@ -756,6 +757,8 @@ ADD_PROP_GET(GrabResult, ID)
 ADD_PROP_GET(GrabResult, ImageNumber)
 ADD_PROP_GET(GrabResult, NumberOfSkippedImages)
 ADD_PROP_GET(GrabResult, ChunkDataNodeMap)
+ADD_PROP_GET(GrabResult, DataComponentCount)
+ADD_PROP_GET(GrabResult, DataContainer)
 
 ADD_PROP_GET(PylonImage, AllocatedBufferSize)
 ADD_PROP_GET(PylonImage, Aoi)
