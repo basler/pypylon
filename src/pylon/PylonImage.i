@@ -7,6 +7,7 @@
     // when calling them (%nothread).
     %nothread GetBuffer;
     %nothread GetMemoryView;
+    %nothread GetArrayZeroCopy;
 
     // Create an overload for 'GetBuffer' for easier type mapping.
     void GetBuffer(void **buf_mem, size_t *length) {
