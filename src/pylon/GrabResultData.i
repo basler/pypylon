@@ -63,19 +63,6 @@
 %#endif
     }
 
-    int GetNumBufferExports(PyObject * omv)
-    {
-// need at least Python 3.3 for memory view
-%#if PY_VERSION_HEX >= 0x03030000
-        PyMemoryViewObject * mv = (PyMemoryViewObject *) omv;
-        int ret = (int) mv->mbuf->exports;
-        Py_DECREF(omv);
-        return ret;
-%#else
-        return 0;
-%#endif
-    }
-
     PyObject * _Unpack10or12BitPacked()
     {
         // Current pixel type of our data
