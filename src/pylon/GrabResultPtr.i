@@ -151,7 +151,7 @@
         # yield the array to the context code
         yield ar
 
-        # detect if more refs thatn the one from the yield are hold
+        # detect if more refs than the one from the yield are held
         if sys.getrefcount(ar) > initial_refcount + 1:
             raise RuntimeError("Please remove any references to the array before leaving context manager scope!!!")
 

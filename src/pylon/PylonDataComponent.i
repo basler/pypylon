@@ -4,6 +4,11 @@
 %ignore operator IImage&;
 %ignore GetData() const;
 
+%pythoncode %{
+    from contextlib import contextmanager
+    import sys
+%} 
+
 %include <pylon/PylonDataComponent.h>;
 %extend Pylon::CPylonDataComponent {
 %pythoncode %{
@@ -72,52 +77,39 @@
     def __exit__(self, type, value, traceback):
         self.Release()
 
-    from sys import version_info as _gazc_python_version_info
-    # need at least Python 3.3 for memory view
-    if _gazc_python_version_info >= (3, 3, 0):
-        from contextlib import contextmanager
-        @contextmanager
-        @needs_numpy
-        def GetArrayZeroCopy(self, raw = False):
-            '''
-            Get a numpy array for the image buffer as zero copy reference to the underlying buffer.
-            Note: The context manager variable MUST be released before leaving the scope.
-            '''
+    @contextmanager
+    @needs_numpy
+    def GetArrayZeroCopy(self, raw = False):
+        '''
+        Get a numpy array for the image buffer as zero copy reference to the underlying buffer.
+        Note: The context manager variable MUST be released before leaving the scope.
+        '''
 
-            # For packed formats, we cannot zero-copy, so use GetArray
-            pt = self.GetPixelType()
-            if IsPacked(pt):
-                yield self.GetArray()
-                return
+        # For packed formats, we cannot zero-copy, so use GetArray
+        pt = self.GetPixelType()
+        if IsPacked(pt):
+            yield self.GetArray()
+            return
 
-            # Here is the procedure:
-            #  1. prepare and get image format info
-            #  2. get a memory view for our image buffer and
-            #     cast it to the right shape and data format
-            #  3. build an array upon the view (zero copy!)
-            #  4. as context manager, we yield this array
-            #  5. delete the array and release our memory
-            #  6. check the number of exports of the encapsuled buffer
-            #     => if this is > 0 => somebody else still has a reference!
+        mv = self.GetMemoryView()
+        if not raw:
+            shape, dtype, format = self.GetImageFormat()
+            mv = mv.cast(format, shape)
 
-            mv = self.GetMemoryView()
-            if not raw:
-                shape, dtype, format = self.GetImageFormat()
-                mv = mv.cast(format, shape)
+        ar = _pylon_numpy.asarray(mv)
 
-            ar = _pylon_numpy.asarray(mv)
+        # trace external references to array
+        initial_refcount = sys.getrefcount(ar)
 
-            yield ar
+        # yield the array to the context code
+        yield ar
 
-            del ar
-            mv.release() # Only release() so we can check the references
+        # detect if more refs than the one from the yield are held
+        if sys.getrefcount(ar) > initial_refcount + 1:
+            raise RuntimeError("Please remove any references to the array before leaving context manager scope!!!")
 
-            # There will be one outstanding reference for the 'with target'.
-            # That is OK since that will be released right after this function
-            # returns.
-            if self.GetNumBufferExports(mv) > 1:
-                raise RuntimeError("Please remove any references to the array before leaving context manager scope!!!")
-    del _gazc_python_version_info
+        # release the memory view
+        mv.release()
 %}
 
     // To allow the instant camera to reuse the CGrabResultData
@@ -155,19 +147,6 @@
 %#else
         PyErr_SetString(PyExc_RuntimeError, "memory view not available");
         return NULL;
-%#endif
-    }
-
-    int GetNumBufferExports(PyObject * omv)
-    {
-// need at least Python 3.3 for memory view
-%#if PY_VERSION_HEX >= 0x03030000
-        PyMemoryViewObject * mv = (PyMemoryViewObject *) omv;
-        int ret = (int) mv->mbuf->exports;
-        Py_DECREF(omv);
-        return ret;
-%#else
-        return 0;
 %#endif
     }
 
