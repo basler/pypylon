@@ -94,6 +94,38 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertRaises(genicam.RuntimeException, grabResult.GetImageFormat)
         self.assertRaises(genicam.RuntimeException, grabResult.GetArray)
 
+    def test_zerocopy_access(self):
+        camera = self.create_first()
+
+        camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
+        cameraGrab = camera.GrabOne(1000)
+        camera.Close()
+
+        self.assertTrue(cameraGrab.IsValid())
+        with cameraGrab.GetArrayZeroCopy() as zc:
+            self.assertTrue(zc.shape[0] == 1040)
+            self.assertTrue(zc.shape[1] == 1024)
+
+    def test_zerocopy_access_exception(self):
+        camera = self.create_first()
+
+        camera.Open()
+        camera.Width.Value = 1024
+        camera.Height.Value = 1040
+        camera.PixelFormat.Value = "Mono8"
+        cameraGrab = camera.GrabOne(1000)
+        camera.Close()
+
+        self.assertTrue(cameraGrab.IsValid())
+        with self.assertRaises(RuntimeError) as context:
+            with cameraGrab.GetArrayZeroCopy() as zc:
+                self.assertTrue(zc.shape[0] == 1040)
+                self.assertTrue(zc.shape[1] == 1024)
+                external_ref = zc
+        self.assertEqual(str(context.exception), "Please remove any references to the array before leaving context manager scope!!!")
 
 if __name__ == "__main__":
     unittest.main()
