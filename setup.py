@@ -102,7 +102,6 @@ class BuildSupport(object):
         "gentl",
         "extra",
         "pylondataprocessing",
-        "cxp",
         }
 
     # Global switch to toggle pylon data processing support on or off
@@ -457,18 +456,11 @@ class BuildSupportWindows(BuildSupport):
         "gentl": [
             ("PylonGtc_*.dll", ""),
             ],
-
-        "cxp": [
-            ],
         }
 
-    GENTL_CXP_PRODUCER_DIR = "pylonCXP"
     PYLON_DATA_PROCESSING_VTOOLS_DIR = "pylonDataProcessingPlugins"
 
     RuntimeFolders = {
-        "cxp": [
-            (GENTL_CXP_PRODUCER_DIR, GENTL_CXP_PRODUCER_DIR, ()),
-            ],
         "pylondataprocessing": [
             (PYLON_DATA_PROCESSING_VTOOLS_DIR, PYLON_DATA_PROCESSING_VTOOLS_DIR, ("*Editor*.dll",)),
             ],
@@ -485,7 +477,6 @@ class BuildSupportWindows(BuildSupport):
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
-        ("GENTL_CXP_PRODUCER_DIR", gentl_dir_fmt % GENTL_CXP_PRODUCER_DIR),
 
         # let swig share its type information between the 'genicam' and the
         # 'pylon' module by using the same name for the type table.
@@ -701,8 +692,6 @@ class BuildSupportLinux(BuildSupport):
             ],
         "usb": [
             (r"pylon-libusb-.*\.so", ""),
-            ],
-        "cxp": [
             ],
         }
 
