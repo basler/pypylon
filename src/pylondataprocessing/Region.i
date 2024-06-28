@@ -16,6 +16,7 @@
     // when calling them (%nothread).
 
     %nothread GetBuffer;
+    %nothread GetBuffer2;
     %nothread GetMemoryView;
     %nothread ToArray;
 

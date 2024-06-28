@@ -1,5 +1,6 @@
 from pylondataprocessingtestcase import PylonDataProcessingTestCase
 from pypylon import pylondataprocessing
+from pypylon import pylon
 import unittest
 import os
 
@@ -28,14 +29,24 @@ class BuildersRecipeTestSuite(PylonDataProcessingTestCase):
         self.assertTrue(testee.HasVTool(vToolIdentifier + "NewName"));
         testee.RemoveVTool(vToolIdentifier + "NewName")
         self.assertFalse(testee.HasVTool(vToolIdentifier + "NewName"));
-        testee.AddOutput("OriginalImage", "Pylon::DataProcessing::Core::IImage")
-        testee.AddOutput("ConvertedImage", "Pylon::DataProcessing::Core::IImage")
-        testee.AddOutput("ConvertedImage2", "Pylon::DataProcessing::Core::IImage")
+        if pylondataprocessing.GetVersion() >= pylon.VersionInfo(2,0,0):
+            # This is the latest version
+            testee.AddOutput("OriginalImage", pylondataprocessing.VariantDataType_PylonImage)
+            testee.AddOutput("ConvertedImage", pylondataprocessing.VariantDataType_PylonImage)
+            testee.AddOutput("ConvertedImage2", pylondataprocessing.VariantDataType_PylonImage)
+        else:
+            testee.AddOutput("OriginalImage", "Pylon::DataProcessing::Core::IImage")
+            testee.AddOutput("ConvertedImage", "Pylon::DataProcessing::Core::IImage")
+            testee.AddOutput("ConvertedImage2", "Pylon::DataProcessing::Core::IImage")
         testee.RenameOutput("ConvertedImage2", "ConvertedImage3")
         self.assertTrue("ConvertedImage3" in testee.GetOutputNames())
         testee.RemoveOutput("ConvertedImage3")
         self.assertFalse("ConvertedImage3" in testee.GetOutputNames())
-        outputName = testee.AddOutput("Pylon::DataProcessing::Core::IImage")
+        if pylondataprocessing.GetVersion() >= pylon.VersionInfo(2,0,0):
+            # This is the latest version
+            outputName = testee.AddOutput(pylondataprocessing.VariantDataType_PylonImage)
+        else:
+            outputName = testee.AddOutput("Pylon::DataProcessing::Core::IImage")
         self.assertTrue(outputName in testee.GetOutputNames())
         testee.RemoveOutput(outputName)
         vToolIdentifiers = testee.GetVToolIdentifiers()
@@ -70,13 +81,22 @@ class BuildersRecipeTestSuite(PylonDataProcessingTestCase):
         testee.SetConnectionSettings(connectionName, pylondataprocessing.QueueMode_Unlimited, 3)
         self.assertEqual(testee.GetConnectionQueueMode(connectionName), pylondataprocessing.QueueMode_Unlimited)
         self.assertEqual(testee.GetConnectionMaxQueueSize(connectionName), 3)
-        testee.AddInput("A", "Pylon::DataProcessing::Core::IImage")
+        if pylondataprocessing.GetVersion() >= pylon.VersionInfo(2,0,0):
+            # This is the latest version
+            testee.AddInput("A", pylondataprocessing.VariantDataType_PylonImage)
+        else:
+            testee.AddInput("A", "Pylon::DataProcessing::Core::IImage")
         self.assertTrue("A" in testee.GetInputNames())
         testee.RenameInput("A", "B")
         self.assertTrue("B" in testee.GetInputNames())
         testee.RemoveInput("B")
         self.assertFalse("B" in testee.GetInputNames())
-        inputName = testee.AddInput("Pylon::DataProcessing::Core::IImage")
+        inputName = None
+        if pylondataprocessing.GetVersion() >= pylon.VersionInfo(2,0,0):
+            # This is the latest version
+            inputName = testee.AddInput(pylondataprocessing.VariantDataType_PylonImage)
+        else:
+            inputName = testee.AddInput("Pylon::DataProcessing::Core::IImage")
         self.assertTrue(inputName in testee.GetInputNames())
         testee.RemoveInput(inputName)
         self.assertFalse(inputName in testee.GetInputNames())

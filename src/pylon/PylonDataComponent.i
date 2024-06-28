@@ -1,35 +1,137 @@
-%rename(GrabResultData) Pylon::CGrabResultData;
+%rename(PylonDataComponent) Pylon::CPylonDataComponent;
 
-%ignore CGrabResultDataImpl;
-%ignore CGrabResultDataFactory;
-%ignore GetFrameNumber;
-%ignore GetBuffer() const;
+%ignore CPylonDataComponentImpl;
+%ignore operator IImage&;
+%ignore GetData() const;
 
-%include <pylon/GrabResultData.h>;
-%extend Pylon::CGrabResultData {
+%pythoncode %{
+    from contextlib import contextmanager
+    import sys
+%} 
 
-    // Since 'GetBuffer', 'GetImageBuffer', 'GetMemoryView', 'GetImageMemoryView'
+%include <pylon/PylonDataComponent.h>;
+%extend Pylon::CPylonDataComponent {
+%pythoncode %{
+    @needs_numpy
+    def GetImageFormat(self, pt = None):
+        if pt is None:
+            pt = self.GetPixelType()
+        if IsPacked(pt):
+            raise ValueError("Packed Formats are not supported with numpy interface")
+        if pt in ( PixelType_Mono8, PixelType_BayerGR8, PixelType_BayerRG8, PixelType_BayerGB8, PixelType_BayerBG8, PixelType_Confidence8, PixelType_Coord3D_C8 ):
+            shape = (self.GetHeight(), self.GetWidth())
+            format = "B"
+            dtype = _pylon_numpy.uint8
+        elif pt in ( PixelType_Mono10, PixelType_BayerGR10, PixelType_BayerRG10, PixelType_BayerGB10, PixelType_BayerBG10 ):
+            shape = (self.GetHeight(), self.GetWidth())
+            format = "H"
+            dtype = _pylon_numpy.uint16
+        elif pt in ( PixelType_Mono12, PixelType_BayerGR12, PixelType_BayerRG12, PixelType_BayerGB12, PixelType_BayerBG12 ):
+            shape = (self.GetHeight(), self.GetWidth())
+            format = "H"
+            dtype = _pylon_numpy.uint16
+        elif pt in ( PixelType_Mono16, PixelType_BayerGR16, PixelType_BayerRG16, PixelType_BayerGB16, PixelType_BayerBG16, PixelType_Confidence16, PixelType_Coord3D_C16 ):
+            shape = (self.GetHeight(), self.GetWidth())
+            format = "H"
+            dtype = _pylon_numpy.uint16
+        elif pt in ( PixelType_RGB8packed, PixelType_BGR8packed ):
+            shape = (self.GetHeight(), self.GetWidth(), 3)
+            dtype = _pylon_numpy.uint8
+            format = "B"
+        elif pt in ( PixelType_YUV422_YUYV_Packed, PixelType_YUV422packed ):
+            shape = (self.GetHeight(), self.GetWidth(), 2)
+            dtype = _pylon_numpy.uint8
+            format = "B"
+        elif pt in ( PixelType_Coord3D_ABC32f, ):
+            shape = (self.GetHeight(), self.GetWidth(), 3)
+            dtype = _pylon_numpy.float32
+            format = "f"
+        else:
+            raise ValueError("Pixel format currently not supported")
+
+        return (shape, dtype, format)
+
+    @needs_numpy
+    def GetArray(self, raw = False):
+
+        # Raw case => Simple byte wrapping of buffer
+        if raw:
+            shape, dtype, format = ( self.GetDataSize() ), _pylon_numpy.uint8, "B"
+            buf = self.GetData()
+            return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
+
+        pt = self.GetPixelType()
+        if IsPacked(pt):
+            buf, new_pt = self._Unpack10or12BitPacked()
+            shape, dtype, format = self.GetImageFormat(new_pt)
+        else:
+            shape, dtype, format = self.GetImageFormat(pt)
+            buf = self.GetData()
+
+        # Now we will copy the data into an array:
+        return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.Release()
+
+    @contextmanager
+    @needs_numpy
+    def GetArrayZeroCopy(self, raw = False):
+        '''
+        Get a numpy array for the image buffer as zero copy reference to the underlying buffer.
+        Note: The context manager variable MUST be released before leaving the scope.
+        '''
+
+        # For packed formats, we cannot zero-copy, so use GetArray
+        pt = self.GetPixelType()
+        if IsPacked(pt):
+            yield self.GetArray()
+            return
+
+        mv = self.GetMemoryView()
+        if not raw:
+            shape, dtype, format = self.GetImageFormat()
+            mv = mv.cast(format, shape)
+
+        ar = _pylon_numpy.asarray(mv)
+
+        # trace external references to array
+        initial_refcount = sys.getrefcount(ar)
+
+        # yield the array to the context code
+        yield ar
+
+        # detect if more refs than the one from the yield are held
+        if sys.getrefcount(ar) > initial_refcount + 1:
+            raise RuntimeError("Please remove any references to the array before leaving context manager scope!!!")
+
+        # release the memory view
+        mv.release()
+%}
+
+    // To allow the instant camera to reuse the CGrabResultData
+    // and prevent buffer underruns, you must release the PylonDataContainer and all its PylonDataComponent objects.
+    void Release()
+    {
+        *($self) = Pylon::CPylonDataComponent();
+    }
+    
+    // Since 'GetData', 'GetImageBuffer', 'GetMemoryView', 'GetImageMemoryView'
     // and '_Unpack10or12BitPacked' allocate memory, they must not be called without
     // the GIL being held. Therefore we have to tell SWIG not to release the GIL
     // when calling them (%nothread).
 
-    %nothread GetBuffer;
-    %nothread GetImageBuffer;
+    %nothread GetData;
     %nothread GetMemoryView;
-    %nothread GetImageMemoryView;
     %nothread _Unpack10or12BitPacked;
 
-    PyObject * GetBuffer()
+    PyObject * GetData()
     {
-        void * buf = $self->GetBuffer();
-        size_t length = $self->GetPayloadSize();
-        return (buf) ? PyByteArray_FromStringAndSize((const char *) buf, length) : Py_None;
-    }
-
-    PyObject * GetImageBuffer()
-    {
-        void * buf = $self->GetBuffer();
-        size_t length = $self->GetImageSize();
+        void * buf = const_cast<void*>($self->GetData());
+        size_t length = $self->GetDataSize();
         return (buf) ? PyByteArray_FromStringAndSize((const char *) buf, length) : Py_None;
     }
 
@@ -38,23 +140,8 @@
 // need at least Python 3.3 for memory view
 %#if PY_VERSION_HEX >= 0x03030000
         return PyMemoryView_FromMemory(
-            (char*)$self->GetBuffer(),
-            $self->GetPayloadSize(),
-            PyBUF_WRITE
-            );
-%#else
-        PyErr_SetString(PyExc_RuntimeError, "memory view not available");
-        return NULL;
-%#endif
-    }
-
-    PyObject * GetImageMemoryView()
-    {
-// need at least Python 3.3 for memory view
-%#if PY_VERSION_HEX >= 0x03030000
-        return PyMemoryView_FromMemory(
-            (char*)$self->GetBuffer(),
-            $self->GetImageSize(),
+            (char*)$self->GetData(),
+            $self->GetDataSize(),
             PyBUF_WRITE
             );
 %#else
@@ -184,8 +271,8 @@
         }
 
         // Now get some info for the current image data
-        const void * const buf = $self->GetBuffer();
-        const size_t sz = $self->GetImageSize();
+        const void * const buf = $self->GetData();
+        const size_t sz = $self->GetDataSize();
         const uint32_t width = $self->GetWidth();
         const uint32_t height = $self->GetHeight();
         const size_t padding_x = $self->GetPaddingX();

@@ -66,7 +66,7 @@ class TEventObserver(pylondataprocessing.EventObserver):
         self.Events = events #Value is converted to a list and can be used anywhere
         #print(events[0])
         self.WaitObject.Signal()
-        return True; #superfluous in C++ API
+        return True; #superfluous in C++ API, has been removed in data processing version 2.0/pylon 7.5
 
 class RecipeTestSuite(PylonDataProcessingTestCase):
     def test_flow(self):
