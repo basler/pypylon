@@ -113,7 +113,7 @@ Please note that the pylon Camera Software Suite may support different operating
 For latest information on pylon refer to: https://www.baslerweb.com/en/software/pylon/
 In addition, check the release notes of your pylon installation. 
 For instance: 
-* pylon 7.4.0 supports Windows 10/11 64 bit, Linux x86_64 and Linux aarch64 with glibc version >= 2.31 or newer.
+* pylon 7.5.0 supports Windows 10/11 64 bit, Linux x86_64 and Linux aarch64 with glibc version >= 2.31 or newer.
 * pylon vTools are supported on pylon 7.0.0 and newer.
 * pylon vTools are supported on pypylon 3.0 and newer only on Windows 10/11 64 bit, Linux x86_64 and Linux aarch64. 
 * For pylon vTools that require a license refer to: https://www.baslerweb.com/en/software/pylon-vtools/
@@ -127,21 +127,17 @@ To install pypylon open your favourite terminal and run:
 
 The following versions are available on pypi:
 
- |                  | 3.6 | 3.7 | 3.8 | 3.9 | 3.10 | 3.11 |
- |------------------|-----|-----|-----|-----|------|------|
- | Windows 64bit    | x   | x   | x   | x   |  x   |  x   |
- | Linux x86_64***  | x   | x   | x   | x   |  x   |  x   |
- | Linux armv7l*    | x   | x   | x   | x   |  x   |  x   |
- | Linux aarch64*** | x   | x   | x   | x   |  x   |  x   |
- | macOS x86_64**   | x   | x   | x   | x   |  x   |  x   |
- | macOS arm64**    |     |     | x   | x   |  x   |  x   |
+ |                | 3.9 | 3.10 | 3.11 | 3.12 |
+ |----------------|-----|------|------|------|
+ | Windows 64bit  | x   | x    |  x   |  x   |
+ | Linux x86_64*  | x   | x    |  x   |  x   |
+ | Linux aarch64* | x   | x    |  x   |  x   |
+ | macOS x86_64** | x   | x    |  x   |  x   |
+ | macOS arm64**  | x   | x    |  x   |  x   |
 
 
 > Additional Notes on binary packages:
-> * (*) The linux 32bit binaries are manylinux_2_28 conformant.
-    This is roughly equivalent to a minimum glibc version >= 2.28.
-    :warning: You need at least pip 20.3 to install them.
-> * (***) The linux 64bit binaries are manylinux_2_31 conformant.
+> * (*) The linux 64bit binaries are manylinux_2_31 conformant.
     This is roughly equivalent to a minimum glibc version >= 2.31. 
     :warning: You need at least pip 20.3 to install them.
 > * (**) macOS binaries are built for macOS >= 11.0 (Big-Sur)
