@@ -1,9 +1,25 @@
 Version x.y.z
     - Date 2024-xx-yy
-    - Updated to pylon 7.5 on linux and windows
+    - Updated to pylon 7.5 on linux and windows.
+    - pylon 6.2 is the lowest supported version.
     - Dropped support for python 3.6, 3.7 and 3.8
     - Added CI builds for python 3.12
-    - Dropped linux armv7l (32bit) support as it is no longer supported by pylon
+    - Dropped linux armv7l (32bit) support as it is no longer supported by pylon.
+    - Added PylonDataContainer and PylonDataComponent support for
+      3D cameras. You can use Basler 3D cameras with pypylon now.
+    - Extended PylonImage support for GetArray and GetMemoryWindow.
+    - Added pylondataprocessing.GetVersion().
+      It reports the version of the pylon Data Processing C++ SDK.
+    - The Builders recipe AddInput and AddOutput methods have changed.
+      see buildersrecipe_test.py on how to handle that.
+    - Updated data processing module documentation.
+    - Fixed an issue when using all GetMemoryWindow() methods when
+      running under python 3.12
+    - Fixed an issue when using GetArrayZeroCopy().
+    - Fixed an issue when running the unit tests with python 3.12.
+    - Fixed an issue with strings constaining regular expressions in setup.py
+    - Fixed an issue when running with numpy 2.0 in the unit tests.
+    - Extended the unit tests.
 
 Version 3.0.1
     - Date 2023-12-15
