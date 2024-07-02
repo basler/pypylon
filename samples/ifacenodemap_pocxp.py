@@ -2,7 +2,13 @@
 # Here we are going to use the interface node map of a Basler CXP interface
 # card to toggle 'Power Over CoaXPress' (PoCXP) between 'Auto' and 'Off'.
 
+from os import environ
 from pypylon import pylon
+
+# First check if GENICAM_GENTL64_PATH environment variable is set.
+# This is set automatically by the Basler setup when installing pylon CXP
+if environ.get('GENICAM_GENTL64_PATH') is None:
+    raise RuntimeError("GENICAM_GENTL64_PATH not set! Please install the CXP GenTL producer and drivers using the pylon Camera Software Suite setup.")
 
 # We need access to the interface node map. This can only be obtained from
 # a transport layer. Therefore we have to create the TL first.

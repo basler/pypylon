@@ -117,6 +117,8 @@ For instance:
 * pylon vTools are supported on pylon 7.0.0 and newer.
 * pylon vTools are supported on pypylon 3.0 and newer only on Windows 10/11 64 bit, Linux x86_64 and Linux aarch64. 
 * For pylon vTools that require a license refer to: https://www.baslerweb.com/en/software/pylon-vtools/
+* CXP-12: To use CXP with pypylon >= 4.0.0 you need to install the CXP GenTL producer and drivers using the pylon Camera Software Suite setup.
+
 
 ## Binary Installation
 The easiest way to get pypylon is to install a prebuild wheel.
