@@ -1,7 +1,7 @@
 Version x.y.z
     - Date 2024-xx-yy
     - Updated to pylon 7.5 on linux and windows.
-    - pylon 6.2 is the lowest supported version.
+    - pylon 6.2 is the lowest supported version when building pypylon.
     - Dropped support for python 3.6, 3.7 and 3.8
     - Added CI builds for python 3.12
     - Dropped linux armv7l (32bit) support as it is no longer supported by pylon.
