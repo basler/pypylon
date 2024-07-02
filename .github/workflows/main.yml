@@ -175,12 +175,11 @@ jobs:
         run: |
           cd pylon-installer
           ren Basler-pylon-*.exe Basler-pylon.exe
-          Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Support;USB_Support;Camera_Link_Support;CoaXPress_Support;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK'
+          $process = Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Runtime;USB_Runtime;Camera_Link_Runtime;CoaXPress_Runtime;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK' -PassThru
+          Write-Host "Process finished with return code:" $process.ExitCode
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19
-        env:
-          PYLON_DEV_DIR: "C:\\Program Files\\Basler\\pylon 7\\Development"
 
       - uses: actions/upload-artifact@v3
         with:
@@ -204,7 +203,7 @@ jobs:
 
   build-macos:
     needs: setup
-    runs-on: macos-11
+    runs-on: macos-latest
     strategy:
       fail-fast: false
     steps:
