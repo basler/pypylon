@@ -519,7 +519,25 @@ class BuildSupportWindows(BuildSupport):
 
         self.PylonDevDir = os.environ.get("PYLON_DEV_DIR")
         if not self.PylonDevDir:
-            raise EnvironmentError("PYLON_DEV_DIR is not set")
+            # Fallback, try to locate pylon installation via registry key
+            import winreg
+            try:
+                # Read install location from registry entry
+                basler_pylon_registry_key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Basler\pylon')
+                basler_pylon_install_folder = winreg.QueryValueEx(basler_pylon_registry_key, "InstallationFolder")[0]
+
+                # Check if install folder contain "Development" folder.
+                basler_pylon_install_dev_dir = os.path.join(basler_pylon_install_folder, "Development")
+                if os.path.exists(basler_pylon_install_dev_dir):
+                    self.PylonDevDir = basler_pylon_install_dev_dir
+
+            except OSError as error:
+                print("Fallback, locate of pylon installation via registry failed:", error)
+
+            # Throw exception if registry fallback failed.
+            if not self.PylonDevDir:
+                raise EnvironmentError("PYLON_DEV_DIR is not set")
+
         self.LibraryDirs = [
             os.path.join(
                 self.PylonDevDir,

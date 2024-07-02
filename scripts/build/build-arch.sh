@@ -62,8 +62,9 @@ if [ $BUILD_DISTRO = "debian" ]; then
         cp39)   BASE_IMAGE32="python:3.9.16-buster";   BASE_IMAGE64="python:3.9.16-bullseye" ;;
         cp3_10) BASE_IMAGE32="python:3.10.11-buster";  BASE_IMAGE64="python:3.10.11-bullseye" ;;
         cp3_11) BASE_IMAGE32="python:3.11.3-buster";   BASE_IMAGE64="python:3.11.3-bullseye" ;;
+        cp3_12) BASE_IMAGE64="python:3.12.4-bullseye" ;;
         *)
-        echo "Unsupported abi '$ABI_TAG'. Supported tags: cp36m, cp37m, cp38, cp39, cp3_10, cp3_11"
+        echo "Unsupported abi '$ABI_TAG'. Supported tags: cp36m, cp37m, cp38, cp39, cp3_10, cp3_11, cp3_12"
         exit 1
     esac
 else
@@ -85,17 +86,17 @@ fi
 CMD_WRAPPER=linux64
 
 case $PLATFORM_TAG in
-    linux_x86_64)           QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE64";                  PYLON_ARCH=x86_64 ;;
-    linux_i686)             QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE32";                   PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
-    linux_armv7l)           QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE32";                PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
-    linux_aarch64)          QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE64";                PYLON_ARCH=aarch64 ;;
-    manylinux_2_31_x86_64)  QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE64";                  PYLON_ARCH=x86_64 ;;
-    manylinux_2_28_i686)    QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE32";                   PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
-    manylinux_2_28_armv7l)  QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE32";                PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
-    manylinux_2_31_aarch64) QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE64";                PYLON_ARCH=aarch64 ;;
-    manylinux2014_x86_64)   QEMU_ARCH="x86_64";   BASE_IMAGE="quay.io/pypa/manylinux2014_x86_64";    PYLON_ARCH=x86_64 ;;
-    manylinux2014_i686)     QEMU_ARCH="i386";     BASE_IMAGE="quay.io/pypa/manylinux2014_i686";      PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
-    manylinux2014_aarch64)  QEMU_ARCH="aarch64";  BASE_IMAGE="quay.io/pypa/manylinux2014_aarch64";   PYLON_ARCH=aarch64 ;;
+    linux_x86_64)           QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE64";                 DOCKER_PLATFORM="linux/amd64";   PYLON_ARCH=x86_64 ;;
+    linux_i686)             QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE32";                  DOCKER_PLATFORM="linux/i386";    PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
+    linux_armv7l)           QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE32";               DOCKER_PLATFORM="linux/arm/v7";  PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
+    linux_aarch64)          QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE64";               DOCKER_PLATFORM="linux/arm64";   PYLON_ARCH=aarch64 ;;
+    manylinux_2_31_x86_64)  QEMU_ARCH="x86_64";   BASE_IMAGE="amd64/$BASE_IMAGE64";                 DOCKER_PLATFORM="linux/amd64";   PYLON_ARCH=x86_64 ;;
+    manylinux_2_28_i686)    QEMU_ARCH="i386";     BASE_IMAGE="i386/$BASE_IMAGE32";                  DOCKER_PLATFORM="linux/i386";    PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
+    manylinux_2_28_armv7l)  QEMU_ARCH="arm";      BASE_IMAGE="arm32v7/$BASE_IMAGE32";               DOCKER_PLATFORM="linux/arm/v7";  PYLON_ARCH=armhf        CMD_WRAPPER=linux32 ;;
+    manylinux_2_31_aarch64) QEMU_ARCH="aarch64";  BASE_IMAGE="arm64v8/$BASE_IMAGE64";               DOCKER_PLATFORM="linux/arm64";   PYLON_ARCH=aarch64 ;;
+    manylinux2014_x86_64)   QEMU_ARCH="x86_64";   BASE_IMAGE="quay.io/pypa/manylinux2014_x86_64";   DOCKER_PLATFORM="linux/amd64";   PYLON_ARCH=x86_64 ;;
+    manylinux2014_i686)     QEMU_ARCH="i386";     BASE_IMAGE="quay.io/pypa/manylinux2014_i686";     DOCKER_PLATFORM="linux/i386";    PYLON_ARCH=x86 ;        CMD_WRAPPER=linux32 ;;
+    manylinux2014_aarch64)  QEMU_ARCH="aarch64";  BASE_IMAGE="quay.io/pypa/manylinux2014_aarch64";  DOCKER_PLATFORM="linux/arm64";   PYLON_ARCH=aarch64 ;;
     *)
     echo "Unsupported platform tag '$PLATFORM_TAG'. Supported platforms: linux_x86_64, linux_i686, linux_armv7l, linux_aarch64, manylinux2014_x86_64, manylinux2014_i686, manylinux2014_aarch64, manylinux_2_28_<arch>, manylinux_2_31_<arch>"
     exit 1
@@ -108,20 +109,8 @@ if [ -z "$PYLON_DIR" ]; then
 fi
 
 #test for pylon 6.1
-files=( $PYLON_DIR/pylon_*_${PYLON_ARCH}_setup.tar.gz )
+files=( $PYLON_DIR/pylon-*-${PYLON_ARCH}_setup.tar.gz )
 PYLON="${files[0]}"
-
-#fallback to pre 6.1 naming
-if [ ! -f "$PYLON" ]; then
-    files=( $PYLON_DIR/pylon-*-$PYLON_ARCH.tar.gz )
-    PYLON="${files[0]}"
-
-    #special case for pylon 5.x where aarch64 was named arm64
-    if [ ! -f "$PYLON" -a $PYLON_ARCH == "aarch64" ]; then
-        files=( $PYLON_DIR/pylon-*-arm64.tar.gz )
-        PYLON="${files[0]}"
-    fi
-fi
 
 if [ ! -f "$PYLON" ]; then
     echo "Couldn't find pylon installer in $PYLON_DIR"
@@ -130,10 +119,11 @@ fi
 
 DOCKER_TAG="pypylon-$PLATFORM_TAG-$(date +%s)"
 docker build --network host \
-                --build-arg "QEMU_TARGET_ARCH=$QEMU_ARCH" \
-                --build-arg "DOCKER_BASE_IMAGE=$BASE_IMAGE" \
-                --build-arg "CMD_WRAPPER=$CMD_WRAPPER" \
-                --tag "$DOCKER_TAG" - < $THISDIR/Dockerfile.$BUILD_DISTRO
+  --platform "$DOCKER_PLATFORM" \
+  --build-arg "QEMU_TARGET_ARCH=$QEMU_ARCH" \
+  --build-arg "DOCKER_BASE_IMAGE=$BASE_IMAGE" \
+  --build-arg "CMD_WRAPPER=$CMD_WRAPPER" \
+  --tag "$DOCKER_TAG" - < $THISDIR/Dockerfile.$BUILD_DISTRO
 
 
 #make path absolute
