@@ -1,5 +1,5 @@
-Version x.y.z
-    - Date 2024-xx-yy
+Version 4.0.0rc1
+    - Date 2024-07-02
     - Updated to pylon 7.5 on linux and windows.
     - pylon 6.2 is the lowest supported version when building pypylon.
     - Dropped support for python 3.6, 3.7 and 3.8
