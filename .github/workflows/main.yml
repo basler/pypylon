@@ -24,6 +24,8 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      is_release_build: ${{ env.RELEASE_BUILD == '1' }}
     steps:
     - uses: jfrog/setup-jfrog-cli@v4
       env:
@@ -81,14 +83,10 @@ jobs:
         path: macos_sdk
 
     - name: Check for release build
-      id: check_release_build
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         echo "Build release for $GITHUB_REF"
-        echo "release_build=1" >> $GITHUB_OUTPUT
-
-    outputs:
-      is_release_build: ${{ steps.check_release_build.outputs.env.release_build == '1' }}
+        echo "RELEASE_BUILD=1" >> $GITHUB_ENV
 
   build-linux:
     needs: setup
@@ -129,8 +127,7 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static:register --reset
           ./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon-installer $ARGS
 
-      # TODO: can we use v4 here?
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build-results-${{ matrix.p }}-${{ matrix.a }}
           path: dist/*
@@ -159,7 +156,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9 - 3.12"
 
@@ -181,8 +178,9 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: build-results-windows
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
@@ -210,7 +208,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9 - 3.12"
 
@@ -233,8 +231,9 @@ jobs:
           PYLON_FRAMEWORK_ARM64: /Library/Frameworks
           PYLON_FRAMEWORK_X86_64: /Library/Frameworks
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: build-results-macos
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset

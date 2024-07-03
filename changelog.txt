@@ -1,3 +1,8 @@
+Version 4.0.0rc2
+    - Date 2024-07-03
+    - Fixed issue with upload of release artifacts.
+    - Fixed reference version for linux and windows builds
+    
 Version 4.0.0rc1
     - Date 2024-07-02
     - Updated to pylon 7.5 on linux and windows.
