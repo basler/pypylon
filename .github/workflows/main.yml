@@ -180,6 +180,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: build-results-windows
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
@@ -232,6 +233,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: build-results-macos
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
