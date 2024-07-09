@@ -1,9 +1,13 @@
 Version 4.0.0
     - Date 2024-07-08
     - Updated to pylon Camera Software Suite 7.5 on linux and windows.
+      This contains pylon SDK 8.0.0 and pylon Data Processing SDK 2.0.0.
+    - Removed pylon CXP GenTL Producer files from windows wheel packages.
+      The CXP-12 support is automatically available when the
+      pylon Camera Software Suite 7.5 with CXP is installed.
     - pylon 6.2 is the lowest supported version when building pypylon.
-    - Dropped support for python 3.6, 3.7 and 3.8
     - Dropped linux armv7l (32bit) support as it is no longer supported by pylon.
+    - Dropped support for python 3.6, 3.7 and 3.8
     - Added PylonDataContainer and PylonDataComponent support for
       3D cameras. You can use Basler 3D cameras with pypylon now.
     - Extended PylonImage support for GetArray and GetMemoryWindow.
