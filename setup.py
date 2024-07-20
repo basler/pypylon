@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-from setuptools import setup, Extension, __version__ as setuptools_version
+from setuptools import setup, Extension
 from setuptools.command.build_ext import new_compiler
-from pkg_resources import parse_version
-from logging import info, warning, error
 
 import argparse
 import ctypes
@@ -16,6 +14,7 @@ import subprocess
 import sys
 import platform
 from pathlib import Path
+from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
     "Windows": "9.0.0",
@@ -391,14 +390,14 @@ class BuildSupport(object):
         # take the leading numerals.
         parts[3] = re.search(r'\d+', parts[3]).group()
         return tuple(map(int, parts))
-        
-        
+
+
     def include_pylon_data_processing(self):
         # pylon Versions since 7.0 support data processing but the pypylon mapping has been introduced with 7.4.
         # previous pylon versions are missing required header files used by pypylon
         result = self.IncludePylonDataProcessing and self.get_pylon_version_tuple() >= (7, 4, 0, 0)
         return result
-        
+
     def get_deploy_list(self):
         if self.include_pylon_data_processing():
             return self.RuntimeDefaultDeploy
@@ -466,17 +465,10 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
-    # Old versions of distutils use a layman's qouting of commandline
-    # parameters, that has to be amended with a 'hack'. Newer and fixed
-    # distutils are used if either (py >= 3.9.0) or (setuptools >= 60.0.0)
-    correct_qouting = (
-        sys.version_info >= (3, 9, 0) or
-        parse_version(setuptools_version) >= parse_version("60.0.0")
-        )
-    gentl_dir_fmt = r'L"%s\\bin"' if correct_qouting else r'L\"%s\\bin\"'
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
+        ("_CRT_SECURE_NO_WARNINGS", None),
 
         # let swig share its type information between the 'genicam' and the
         # 'pylon' module by using the same name for the type table.
@@ -1068,7 +1060,7 @@ class BuildSupportMacOS(BuildSupport):
                     if re.match(r".*TL_[a-z]+\.so", p.name):
                         info(f"DELETE {p}")
                         os.remove(p)
-                        
+
     def include_pylon_data_processing(self):
         return False
 
