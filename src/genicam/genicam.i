@@ -300,16 +300,17 @@ import warnings
 %typemap(in, noblock=1) (TYPEMAP, SIZE)
 {
 %#if PY_VERSION_HEX >= 0x03000000
-    Py_buffer buffer_view;
     int get_buf_res;
-    get_buf_res = PyObject_GetBuffer($input, &buffer_view, PyBUF_SIMPLE);
+    Py_ssize_t len;
+    char *buf;
+    get_buf_res = PyBytes_AsStringAndSize($input, &buf, &len);
     if (get_buf_res < 0)
     {
         PyErr_Clear();
         %argument_fail(get_buf_res, "(TYPEMAP, SIZE)", $symname, $argnum);
     }
-    $1 = ($1_ltype) buffer_view.buf;
-    $2 = ($2_ltype) buffer_view.len;
+    $1 = ($1_ltype) buf;
+    $2 = ($2_ltype) len;
 %#else
     Py_ssize_t size;
     const void *buf;
@@ -328,9 +329,6 @@ import warnings
 }
 %typemap(freearg, noblock=1) (TYPEMAP, SIZE)
 {
-%#if PY_VERSION_HEX >= 0x03000000
-    PyBuffer_Release(&buffer_view);
-%#endif
 }
 %enddef
 
