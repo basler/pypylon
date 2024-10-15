@@ -894,7 +894,13 @@ class BuildSupportLinux(BuildSupport):
         return res.strip()
 
     def get_pylon_version(self):
-        return self.call_pylon_config("--version")
+        pylon_version = self.call_pylon_config("--version")
+
+        # workaround for pylon 8.0.0 on linux
+        if pylon_version == "9...":
+            pylon_version = "9.0.3.215"
+
+        return pylon_version
 
 ################################################################################
 
