@@ -22,6 +22,8 @@ RUN pip install wheel 'auditwheel<=5.1.2'
 
 # install swig from pypi
 RUN pip install swig>=4.2
+# install setuptools
+RUN pip install setuptools --upgrade
 
 # numpy is required for the pypylon unittests
 # currently disabled because the numpy install exceeds the current travis max duration

@@ -11,6 +11,9 @@ COPY --from=qemu /usr/bin/* /usr/bin/
 # install pip from pypi
 RUN pip install swig>=4.2
 
+# install setuptools
+RUN pip install setuptools --upgrade
+
 # one genicam unittest requires a french locale
 RUN yum -y reinstall glibc-common
 
