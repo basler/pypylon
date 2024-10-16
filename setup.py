@@ -18,10 +18,10 @@ import platform
 from pathlib import Path
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "8.0.0",
+    "Windows": "9.0.0",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "8.0.0",
+    "Linux": "9.0.0",
     "Linux_armv7l": "6.2.0",
     "Darwin": "7.3.1",
     "Darwin_arm64": "7.3.1"
