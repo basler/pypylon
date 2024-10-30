@@ -1,4 +1,5 @@
 %rename(PylonImage) Pylon::CPylonImage;
+%feature("shadow", "0") Pylon::CPylonImage::AttachMemoryView;
 
 %pythoncode %{
     from contextlib import contextmanager
@@ -33,9 +34,28 @@
         PyErr_SetString(PyExc_RuntimeError, "memory view not available");
         return NULL;
 %#endif
-    }    
+    }
+
+    void AttachMemoryView(PyObject* memoryView, Pylon::EPixelType pixelType, unsigned int width, unsigned int height, size_t paddingX) {
+        Py_buffer buffer;
+        if (PyObject_GetBuffer(memoryView, &buffer, PyBUF_SIMPLE) == -1) {
+            PyErr_SetString(PyExc_RuntimeError, "Expected a buffer-compatible object");
+            return;
+        }
+
+        // Call the existing C++ AttachUserBuffer method
+        $self->AttachUserBuffer(buffer.buf, buffer.len, pixelType, width, height, paddingX);
+
+        // Release the buffer info
+        PyBuffer_Release(&buffer);
+    }
 
 %pythoncode %{
+
+    def AttachMemoryView(self, memoryView, pixelType, width, height, paddingX):
+        _pylon.PylonImage_AttachMemoryView(self, memoryView, pixelType, width, height, paddingX)
+        self._memory_view = memoryView  # Hold the reference to prevent garbage collection
+
     @needs_numpy
     def GetImageFormat(self, pt = None):
         if pt is None:
@@ -80,6 +100,13 @@
 
     def __exit__(self, type, value, traceback):
         self.Release()
+
+    @needs_numpy
+    def AttachArray(self, array, pixeltype):
+        width = array.shape[1]
+        height = array.shape[0]
+        paddingX = 0 # numpy has no concept of padding bytes
+        self.AttachMemoryView(array.data, pixeltype, width, height, paddingX)
 
     @needs_numpy
     def GetArray(self, raw = False):
@@ -141,5 +168,7 @@
 
 // Ignore original 'GetBuffer' overloads.
 %ignore GetBuffer;
+// Ignore original 'AttachUserBuffer' overloads.
+%ignore AttachUserBuffer;
 
 %include <pylon/PylonImage.h>;
