@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "swig>=4.2", "wheel"]
+requires = ["setuptools>=42,<72", "swig>=4.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]

@@ -1,7 +1,12 @@
+Version 4.1.0
+    - Date 2024-10-22
+    - Updated to pylon Camera Software Suite 8.0.0 on linux and windows.
+      This contains pylon C++ SDK 9.0.0 and pylon Data Processing C++ SDK 3.0.1.
+
 Version 4.0.0
     - Date 2024-07-08
     - Updated to pylon Camera Software Suite 7.5 on linux and windows.
-      This contains pylon SDK 8.0.0 and pylon Data Processing SDK 2.0.0.
+      This contains pylon C++ SDK 8.0.0 and pylon Data Processing C++ SDK 2.0.0.
     - Removed pylon CXP GenTL Producer files from windows wheel packages.
       The CXP-12 support is automatically available when the
       pylon Camera Software Suite 7.5 with CXP is installed.

@@ -18,10 +18,10 @@ import platform
 from pathlib import Path
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "8.0.0",
+    "Windows": "9.0.0",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "8.0.0",
+    "Linux": "9.0.0",
     "Linux_armv7l": "6.2.0",
     "Darwin": "7.3.1",
     "Darwin_arm64": "7.3.1"
@@ -78,7 +78,7 @@ class BuildSupport(object):
         } [ (get_platform(), get_machinewidth()) ]
 
     # Compatible swig versions
-    SwigVersions = ["4.0.0"]
+    SwigVersions = ["4.2.0", "4.2.1"]
     SwigOptions = [
         "-c++",
         "-Wextra",
@@ -768,6 +768,36 @@ class BuildSupportLinux(BuildSupport):
             ],
         }
    
+    # match those shared objects without symlinks directly and where there are
+    # symlinks, match the first one (*.so.<major>)
+    RuntimeFiles_starting_9_0_3_215 = {
+        "base": [
+            (r"libpylonbase\.so\.\d+", ""),
+            ],
+        "gige": [
+            (r"libpylon_TL_gige\.so", ""),
+            (r"libgxapi\.so\.\d+", "")
+            ],
+        "usb": [
+            (r"libpylon_TL_usb\.so", ""),
+            (r"libuxapi\.so\.\d+", ""),
+            ],
+        "camemu": [
+            (r"libpylon_TL_camemu\.so", "")
+            ],
+        "extra": [
+            (r"libpylonutility\.so\.\d+", ""),
+            (r"libpylonutilitypcl\.so\.\d+", ""),
+            ],
+        "gentl": [
+            (r"libpylon_TL_gtc\.so", ""),
+            ],
+        "pylondataprocessing": [
+            (r"libPylonDataProcessing\.so\.\d+", ""),
+            (r"libPylonDataProcessing.sig", ""),
+            (r"libPylonDataProcessingCore\.so\.\d+", ""),
+            ],
+        }
     PYLON_DATA_PROCESSING_VTOOLS_DIR = "pylondataprocessingplugins"
 
     RuntimeFolders = {
@@ -807,11 +837,14 @@ class BuildSupportLinux(BuildSupport):
         print("LibraryDirs:", self.LibraryDirs)
 
         # adjust runtime files according to pylon version
-        olden_days = self.get_pylon_version_tuple() <= (6, 3, 0, 18933)
-        add_runtime = (
-            self.RuntimeFiles_up_to_6_3_0_18933 if olden_days
-            else self.RuntimeFiles_after_6_3_0_18933
-            )
+        version = self.get_pylon_version_tuple()
+
+        if version <= (6, 3, 0, 18933):
+            add_runtime = self.RuntimeFiles_up_to_6_3_0_18933
+        elif (6, 3, 0, 18933) < version < (9, 0, 3, 215):
+            add_runtime = self.RuntimeFiles_after_6_3_0_18933
+        else:
+            add_runtime = self.RuntimeFiles_starting_9_0_3_215
         for package in add_runtime:
             if package in self.RuntimeFiles:
                 self.RuntimeFiles[package].extend(add_runtime[package])
@@ -894,7 +927,13 @@ class BuildSupportLinux(BuildSupport):
         return res.strip()
 
     def get_pylon_version(self):
-        return self.call_pylon_config("--version")
+        pylon_version = self.call_pylon_config("--version")
+
+        # workaround for pylon 8.0.0 on linux
+        if pylon_version == "9...":
+            pylon_version = "9.0.3.215"
+
+        return pylon_version
 
 ################################################################################
 

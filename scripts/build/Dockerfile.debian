@@ -20,13 +20,10 @@ RUN if cat /etc/debian_version | grep -q "8\." ; then \
 # auditwheel is limited to 5.1.2 because since 5.2.1 it requires patchelf >= 0.14 which is not available on our debian base images
 RUN pip install wheel 'auditwheel<=5.1.2'
 
-# build a new swig
-RUN mkdir /build && \
-    cd /build && \
-    wget http://prdownloads.sourceforge.net/swig/swig-4.0.1.tar.gz && \
-    tar -xzf swig-4.0.1.tar.gz && cd swig-4.0.1 && \
-    ./configure --with-python3 && make -j2 && make install && \
-    rm -rf /build
+# install swig from pypi
+RUN pip install swig>=4.2
+# install setuptools
+RUN pip install "setuptools<72" --upgrade
 
 # numpy is required for the pypylon unittests
 # currently disabled because the numpy install exceeds the current travis max duration
