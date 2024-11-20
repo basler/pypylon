@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-from setuptools import setup, Extension, __version__ as setuptools_version
+from setuptools import setup, Extension
 from setuptools.command.build_ext import new_compiler
-from pkg_resources import parse_version
-from logging import info, warning, error
 
 import argparse
 import ctypes
@@ -16,6 +14,7 @@ import subprocess
 import sys
 import platform
 from pathlib import Path
+from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
     "Windows": "9.0.0",
@@ -27,6 +26,19 @@ ReferencePylonVersion = {
     "Darwin_arm64": "7.3.1"
 }
 
+################################################################################
+
+def prepare_for_limited_api(min_ver_str):
+    min_maj, min_min = map(int, min_ver_str.split("."))
+    py_ver_too_low = sys.version_info[:2] < (min_maj, min_min)
+    # Currently there is no support for non windows OS. Most likely the only
+    # thing needed is a more recent version of SWIG (>= 4.2.0).
+    if sys.platform != 'win32' or py_ver_too_low:
+        return None, None
+    return f"0x{min_maj:02x}{min_min:02x}0000", f"cp{min_maj}{min_min}"
+
+MIN_PY_VER_FOR_LIMITED_API = "3.6" # some low value to prove that it works
+LIMIT_DEF, LIMIT_TAG = prepare_for_limited_api(MIN_PY_VER_FOR_LIMITED_API)
 
 ################################################################################
 
@@ -171,10 +183,10 @@ class BuildSupport(object):
         if res is None:
             return False
 
-        if tuple(map(int, res.group(1).split('.'))) < (4, 0, 0):
+        if tuple(map(int, res.group(1).split('.'))) < (4, 2, 0):
             msg = (
                 "The version of swig is %s which is too old. " +
-                "Minimum required version is 4.0.0"
+                "Minimum required version is 4.2.0"
                 )
             warning(msg, res.group(1))
             return False
@@ -391,14 +403,14 @@ class BuildSupport(object):
         # take the leading numerals.
         parts[3] = re.search(r'\d+', parts[3]).group()
         return tuple(map(int, parts))
-        
-        
+
+
     def include_pylon_data_processing(self):
         # pylon Versions since 7.0 support data processing but the pypylon mapping has been introduced with 7.4.
         # previous pylon versions are missing required header files used by pypylon
         result = self.IncludePylonDataProcessing and self.get_pylon_version_tuple() >= (7, 4, 0, 0)
         return result
-        
+
     def get_deploy_list(self):
         if self.include_pylon_data_processing():
             return self.RuntimeDefaultDeploy
@@ -466,17 +478,10 @@ class BuildSupportWindows(BuildSupport):
             ],
         }
 
-    # Old versions of distutils use a layman's qouting of commandline
-    # parameters, that has to be amended with a 'hack'. Newer and fixed
-    # distutils are used if either (py >= 3.9.0) or (setuptools >= 60.0.0)
-    correct_qouting = (
-        sys.version_info >= (3, 9, 0) or
-        parse_version(setuptools_version) >= parse_version("60.0.0")
-        )
-    gentl_dir_fmt = r'L"%s\\bin"' if correct_qouting else r'L\"%s\\bin\"'
     DefineMacros = [
         ("UNICODE", None),
         ("_UNICODE", None),
+        ("_CRT_SECURE_NO_WARNINGS", None),
 
         # let swig share its type information between the 'genicam' and the
         # 'pylon' module by using the same name for the type table.
@@ -767,7 +772,7 @@ class BuildSupportLinux(BuildSupport):
             (r"libPylonDataProcessingCore\.so\.\d+", ""),
             ],
         }
-   
+
     # match those shared objects without symlinks directly and where there are
     # symlinks, match the first one (*.so.<major>)
     RuntimeFiles_starting_9_0_3_215 = {
@@ -1068,7 +1073,7 @@ class BuildSupportMacOS(BuildSupport):
                     if re.match(r".*TL_[a-z]+\.so", p.name):
                         info(f"DELETE {p}")
                         os.remove(p)
-                        
+
     def include_pylon_data_processing(self):
         return False
 
@@ -1157,6 +1162,9 @@ if __name__ == "__main__":
         # start with fresh 'pypylon' and 'generated' dirs if not skipping swig
         bs.clean("skip" if args.skip_swig else "keep")
 
+        if LIMIT_DEF:
+            bs.DefineMacros.append(("Py_LIMITED_API", LIMIT_DEF))
+
         genicam_wrapper_src = bs.call_swig(
             "src/genicam",
             "genicam.i",
@@ -1205,6 +1213,7 @@ if __name__ == "__main__":
         define_macros=bs.DefineMacros,
         extra_compile_args=bs.ExtraCompileArgs,
         extra_link_args=bs.ExtraLinkArgs,
+        py_limited_api=bool(LIMIT_DEF),
         )
     print('\n')
     pylon_ext = Extension(
@@ -1217,6 +1226,7 @@ if __name__ == "__main__":
         define_macros=bs.DefineMacros,
         extra_compile_args=bs.ExtraCompileArgs,
         extra_link_args=bs.ExtraLinkArgs,
+        py_limited_api=bool(LIMIT_DEF),
         )
     print('\n')
     if includePylonDataProcessing:
@@ -1230,6 +1240,7 @@ if __name__ == "__main__":
             define_macros=bs.DefineMacros,
             extra_compile_args=bs.ExtraCompileArgs,
             extra_link_args=bs.ExtraLinkArgs,
+            py_limited_api=bool(LIMIT_DEF),
             )
         print('\n')
 
@@ -1267,7 +1278,8 @@ if __name__ == "__main__":
             "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
             "Topic :: Multimedia :: Video :: Capture",
             "Topic :: Scientific/Engineering",
-        ]
+        ],
+        options={"bdist_wheel": {"py_limited_api": LIMIT_TAG or False}},
     )
 
     if args.generate_python_doc:
