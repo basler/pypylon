@@ -2,6 +2,9 @@ Version 4.1.0
     - Date 2024-10-22
     - Updated to pylon Camera Software Suite 8.0.0 on linux and windows.
       This contains pylon C++ SDK 9.0.0 and pylon Data Processing C++ SDK 3.0.1.
+    - Removed PylonImage.AttachUserBuffer
+    - Added PylonImage.AttachMemoryView
+    - Added PylonImage.AttachArray
 
 Version 4.0.0
     - Date 2024-07-08

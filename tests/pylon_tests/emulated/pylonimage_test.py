@@ -70,6 +70,27 @@ class PylonImageTestSuite(PylonEmuTestCase):
             self.assertEqual(zc[0,0], 143)
         testee.Release()
 
+    def test_attacharray(self):
+        import numpy as np
+        import sys
+
+        img = pylon.PylonImage()
+        arr = np.random.randint(0, 256, (480, 640), dtype=np.uint8)
+
+        arr_refcount_0 = sys.getrefcount(arr)
+        img.AttachArray(arr, pylon.PixelType_Mono8)
+        # check proper refcounting attach
+        self.assertEqual( sys.getrefcount(arr) , arr_refcount_0 + 1)
+
+        # check that img and array have same content
+        self.assertEqual(np.all(arr == img.Array), True)
+
+        del img
+        # check proper refcounting free
+        self.assertEqual( sys.getrefcount(arr), arr_refcount_0)
+
+
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
