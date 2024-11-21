@@ -33,11 +33,11 @@ def prepare_for_limited_api(min_ver_str):
     py_ver_too_low = sys.version_info[:2] < (min_maj, min_min)
     # Currently there is no support for non windows OS. Most likely the only
     # thing needed is a more recent version of SWIG (>= 4.2.0).
-    if sys.platform != 'win32' or py_ver_too_low:
+    if py_ver_too_low:
         return None, None
     return f"0x{min_maj:02x}{min_min:02x}0000", f"cp{min_maj}{min_min}"
 
-MIN_PY_VER_FOR_LIMITED_API = "3.6" # some low value to prove that it works
+MIN_PY_VER_FOR_LIMITED_API = "3.9" # some low value to prove that it works
 LIMIT_DEF, LIMIT_TAG = prepare_for_limited_api(MIN_PY_VER_FOR_LIMITED_API)
 
 ################################################################################
