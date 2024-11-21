@@ -17,10 +17,10 @@ from pathlib import Path
 from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "9.0.0",
+    "Windows": "9.0.3",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "9.0.0",
+    "Linux": "9.0.3",
     "Linux_armv7l": "6.2.0",
     "Darwin": "7.3.1",
     "Darwin_arm64": "7.3.1"
@@ -31,8 +31,7 @@ ReferencePylonVersion = {
 def prepare_for_limited_api(min_ver_str):
     min_maj, min_min = map(int, min_ver_str.split("."))
     py_ver_too_low = sys.version_info[:2] < (min_maj, min_min)
-    # Currently there is no support for non windows OS. Most likely the only
-    # thing needed is a more recent version of SWIG (>= 4.2.0).
+    # Disable limited api when python version is to low
     if py_ver_too_low:
         return None, None
     return f"0x{min_maj:02x}{min_min:02x}0000", f"cp{min_maj}{min_min}"
@@ -314,14 +313,11 @@ class BuildSupport(object):
             warning("git not found or invalid tag found.")
             warning("-> Building version from date!")
             now = datetime.datetime.now()
-            midnight = datetime.datetime(now.year, now.month, now.day)
-            todays_seconds = (now - midnight).seconds
-            return "%d.%d.%d.dev%d" % (
+            return "%d.%d.%d.dev0" % (
                 now.year,
                 now.month,
-                now.day,
-                todays_seconds
-                )
+                now.day
+            )
 
     def get_version(self):
         git_version = self.get_git_version()
@@ -1037,7 +1033,13 @@ class BuildSupportMacOS(BuildSupport):
         return res.strip()
 
     def get_pylon_version(self):
-        return self.call_pylon_config("--version")
+        pylon_version = self.call_pylon_config("--version")
+
+        # workaround for pylon 8.0.0 on macOS
+        if pylon_version == "9...":
+            pylon_version = "9.0.3.215"
+
+        return pylon_version
 
     def get_swig_includes(self):
         # add compiler include paths to list
@@ -1279,7 +1281,7 @@ if __name__ == "__main__":
             "Topic :: Multimedia :: Video :: Capture",
             "Topic :: Scientific/Engineering",
         ],
-        options={"bdist_wheel": {"py_limited_api": LIMIT_TAG or False}},
+        options={"bdist_wheel": {"py_limited_api": LIMIT_TAG or False}}
     )
 
     if args.generate_python_doc:
