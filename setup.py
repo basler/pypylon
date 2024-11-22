@@ -467,10 +467,12 @@ class BuildSupportWindows(BuildSupport):
         }
 
     PYLON_DATA_PROCESSING_VTOOLS_DIR = "pylonDataProcessingPlugins"
+    PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR = "DataProcessingPluginsB"
 
     RuntimeFolders = {
         "pylondataprocessing": [
             (PYLON_DATA_PROCESSING_VTOOLS_DIR, PYLON_DATA_PROCESSING_VTOOLS_DIR, ("*Editor*.dll",)),
+            (PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR, PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR, ()),
             ],
         }
 
@@ -800,10 +802,12 @@ class BuildSupportLinux(BuildSupport):
             ],
         }
     PYLON_DATA_PROCESSING_VTOOLS_DIR = "pylondataprocessingplugins"
+    PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR = "dataprocessingpluginsb"
 
     RuntimeFolders = {
         "pylondataprocessing": [
             (PYLON_DATA_PROCESSING_VTOOLS_DIR, PYLON_DATA_PROCESSING_VTOOLS_DIR, ("*Editor*.so",)),
+            (PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR, PYLON_DATA_PROCESSING_VTOOLS_CREATOR_DIR, ()),
             ],
         }
 

@@ -9,7 +9,7 @@ test-requires = "pytest numpy"
 
 [tool.cibuildwheel.windows]
 archs = "AMD64"
-build = "*-win_*"
+build = "cp39-win_*"
 before-all = 'echo "Building: %CIBW_BUILD%"'
 test-command = [
              '''
@@ -19,7 +19,7 @@ test-command = [
 
 [tool.cibuildwheel.macos]
 archs = "x86_64 arm64"
-build = "*-macosx_*"
+build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
 test-command = [

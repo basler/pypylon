@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        a: [cp39, cp3_10, cp3_11, cp3_12, cp3_13]
+        a: [cp39]
         p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64]
 
     env:
@@ -158,7 +158,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9 - 3.13"
+          python-version: "3.9"
 
       - uses: actions/download-artifact@v4
         with:
@@ -172,7 +172,7 @@ jobs:
         run: |
           cd pylon-installer
           ren Basler-pylon-*.exe Basler-pylon.exe
-          $process = Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Runtime;USB_Runtime;Camera_Link_Runtime;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK;DataProcessing_vTools' -PassThru
+          $process = Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Runtime;USB_Runtime;Camera_Link_Runtime;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK;DataProcessing_vTools;DataProcessing_AI;DataProcessing_CREATOR' -PassThru
           Write-Host "Process finished with return code:" $process.ExitCode
 
       - name: Build wheels
@@ -210,7 +210,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9 - 3.13"
+          python-version: "3.9"
 
       - uses: actions/download-artifact@v4
         with:

@@ -1,5 +1,5 @@
-Version 4.1.0rc1
-    - Date 2024-11-20
+Version 4.x.x
+    - Date xxxx-xx-xx
     - Updated to pylon Camera Software Suite 8.0.1 on linux and windows.
       This contains pylon C++ SDK 9.0.3 and pylon Data Processing C++ SDK 3.0.1.
     - We now use python 3.9 limited api to get able to provide multi abi version wheels of pypylon.
