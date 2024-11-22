@@ -1,4 +1,3 @@
-ARG QEMU_TARGET_ARCH
 ARG DOCKER_BASE_IMAGE
 
 #the following lines are used to get a qemu binary only with docker tools
@@ -6,6 +5,7 @@ FROM multiarch/qemu-user-static:4.2.0-6 as qemu
 
 FROM $DOCKER_BASE_IMAGE
 ARG CMD_WRAPPER
+ARG QEMU_TARGET_ARCH
 COPY --from=qemu /usr/bin/* /usr/bin/
 
 # Quick fix for the now archived debian jessie. Security updates are also no longer provided for arm64. 
@@ -20,13 +20,10 @@ RUN if cat /etc/debian_version | grep -q "8\." ; then \
 # auditwheel is limited to 5.1.2 because since 5.2.1 it requires patchelf >= 0.14 which is not available on our debian base images
 RUN pip install wheel 'auditwheel<=5.1.2'
 
-# build a new swig
-RUN mkdir /build && \
-    cd /build && \
-    wget http://prdownloads.sourceforge.net/swig/swig-4.0.1.tar.gz && \
-    tar -xzf swig-4.0.1.tar.gz && cd swig-4.0.1 && \
-    ./configure --with-python3 && make -j2 && make install && \
-    rm -rf /build
+# install swig from pypi
+RUN pip install swig>=4.2
+# install setuptools
+RUN pip install "setuptools<72" --upgrade
 
 # numpy is required for the pypylon unittests
 # currently disabled because the numpy install exceeds the current travis max duration
@@ -34,7 +31,9 @@ RUN mkdir /build && \
 
 # one genicam unittest requires a french locale
 # patchelf, unzip are needed for auditwheel
-RUN apt-get update && apt-get install -y locales patchelf unzip\
+# symlink for libicuuc.so.66 needed for pylon
+RUN apt-get update && apt-get install -y locales patchelf unzip libicu67\
+ && ln -s /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.67 /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.66\
  && rm -rf /var/lib/apt/lists/* \
  && sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen

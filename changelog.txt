@@ -1,7 +1,16 @@
+Version 4.x.x
+    - Date xxxx-xx-xx
+    - Updated to pylon Camera Software Suite 8.0.1 on linux and windows.
+      This contains pylon C++ SDK 9.0.3 and pylon Data Processing C++ SDK 3.0.1.
+    - We now use python 3.9 limited api to provide multi abi version wheels of pypylon.
+    - Removed PylonImage.AttachUserBuffer
+    - Added PylonImage.AttachMemoryView
+    - Added PylonImage.AttachArray
+
 Version 4.0.0
     - Date 2024-07-08
     - Updated to pylon Camera Software Suite 7.5 on linux and windows.
-      This contains pylon SDK 8.0.0 and pylon Data Processing SDK 2.0.0.
+      This contains pylon C++ SDK 8.0.0 and pylon Data Processing C++ SDK 2.0.0.
     - Removed pylon CXP GenTL Producer files from windows wheel packages.
       The CXP-12 support is automatically available when the
       pylon Camera Software Suite 7.5 with CXP is installed.

@@ -28,6 +28,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %module(directors="1", package="pypylon", docstring=PYLONDP_DOCSTRING) pylondataprocessing
 %include "DoxyPylonDataProcessing.i";
 %begin %{
+
+#ifdef Py_LIMITED_API
+#include <stdlib.h> // malloc / free
+// Although PyMemoryView_FromMemory has been part of limited API since
+// version 3.3, the flags PyBUF_READ and PyBUF_WRITE, which are needed to use
+// this function, are not defined in newer Python headers unless Py_LIMITED_API
+// is set to >= 3.11. Since this is obviously a bug, we need the following
+// workarond:
+#ifndef PyBUF_READ
+#define PyBUF_READ  0x100
+#endif
+#ifndef PyBUF_WRITE
+#define PyBUF_WRITE 0x200
+#endif
+#endif
+
 // allow debug builds of genicam wrapper against release build of python
 # ifdef _DEBUG
 #	ifdef _MSC_VER
