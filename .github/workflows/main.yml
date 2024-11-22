@@ -31,6 +31,9 @@ jobs:
       env:
        JF_URL: ${{ secrets.SDK_URL }}
        JF_ACCESS_TOKEN: ${{ secrets.SDK_TOKEN }}
+      with:
+        disable-auto-build-publish: true
+        disable-job-summary: true
  
     - name: Checkout repository
       uses: actions/checkout@v4

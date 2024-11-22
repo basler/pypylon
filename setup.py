@@ -22,8 +22,8 @@ ReferencePylonVersion = {
     # which is not equal to the version on the outer tar.gz
     "Linux": "9.0.3",
     "Linux_armv7l": "6.2.0",
-    "Darwin": "7.3.1",
-    "Darwin_arm64": "7.3.1"
+    "Darwin": "7.3.2",
+    "Darwin_arm64": "7.3.2"
 }
 
 ################################################################################
