@@ -38,9 +38,8 @@ body:
 
 - type: textarea
   attributes:
-    label: "Hardware setup & camera model(s) used"
+    label: "Hardware setup used"
     description: >
-      List the camera model names involved in this support request.
       Describe your hardware setup including, e.g.,:
 
       * PC or embedded system model/type:
@@ -54,6 +53,29 @@ body:
   validations:
     required: true
 
+- type: textarea
+  attributes:
+    label: "Camera(s) used"
+    description: >
+      List your Camera(s), especially the DeviceFirmwareVersion.
+      The below command will output all the required information.
+      ```python
+      import pypylon.pylon as py
+
+      tl_factory = py.TlFactory.GetInstance()
+      for dev in tl_factory.EnumerateDevices():
+          dev: py.DeviceInfo
+          print(dev.GetFriendlyName())
+          try:
+              camera = py.InstantCamera(tl_factory.CreateDevice(dev))
+              camera.Open()
+              print(camera.DeviceFirmwareVersion.Value)
+              camera.Close()
+          except (py.LogicalErrorException, py.RuntimeException) as error:
+              print(f"Error reading camera info: {error}")
+
+  validations:
+    required: true
 
 - type: textarea
   attributes:
