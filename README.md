@@ -130,13 +130,13 @@ To install pypylon open your favourite terminal and run:
 
 The following versions are available on pypi:
 
- |                | 3.9 | 3.10 | 3.11 | 3.12 |
- |----------------|-----|------|------|------|
- | Windows 64bit  | x   | x    |  x   |  x   |
- | Linux x86_64*  | x   | x    |  x   |  x   |
- | Linux aarch64* | x   | x    |  x   |  x   |
- | macOS x86_64** | x   | x    |  x   |  x   |
- | macOS arm64**  | x   | x    |  x   |  x   |
+ |                | 3.9 | 3.10 | 3.11 | 3.12 | 3.13 |
+ |----------------|-----|------|------|------|------|
+ | Windows 64bit  | x   | x    |  x   |  x   |  x   |
+ | Linux x86_64*  | x   | x    |  x   |  x   |  x   |
+ | Linux aarch64* | x   | x    |  x   |  x   |  x   |
+ | macOS x86_64** | x   | x    |  x   |  x   |  x   |
+ | macOS arm64**  | x   | x    |  x   |  x   |  x   |
 
 
 > Additional Notes on binary packages:
@@ -152,8 +152,8 @@ You need a few more things to compile pypylon:
  * An installation of pylon SDK for your platform
  * A compiler for your system (Visual Studio on Windows, gcc on linux, xCode commandline tools on macOS)
  * Python development files (e.g. `sudo apt install python-dev` on linux)
- * [swig](http://www.swig.org) >= 4.2
-   * For all 64bit platforms you can install the tool via `pip install swig`
+ * [swig](http://www.swig.org) >= 4.2 and < 4.3
+   * For all 64bit platforms you can install the tool via `pip install "swig>=4.2,<4.3"`
 
 To build pypylon from source:
 ```console
