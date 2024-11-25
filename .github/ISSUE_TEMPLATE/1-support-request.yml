@@ -50,6 +50,8 @@ body:
         * Type in type/model/name of interface cards
         * Switches or hubs used
         * Cable types/lengths
+    placeholder: |
+      << Hardware setup used >>
   validations:
     required: true
 
@@ -59,6 +61,7 @@ body:
     description: >
       List your Camera(s), especially the DeviceFirmwareVersion.
       The below command will output all the required information.
+      
       ```python
       import pypylon.pylon as py
 
@@ -73,7 +76,9 @@ body:
               camera.Close()
           except (py.LogicalErrorException, py.RuntimeException) as error:
               print(f"Error reading camera info: {error}")
-
+      ```
+    placeholder: |
+      << Camera(s) used >>
   validations:
     required: true
 
