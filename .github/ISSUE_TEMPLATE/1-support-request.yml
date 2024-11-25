@@ -59,8 +59,8 @@ body:
   attributes:
     label: "Camera(s) used"
     description: >
-      List your Camera(s), especially the DeviceFirmwareVersion.
-      The below command will output all the required information.
+      List your camera(s), especially the value of DeviceFirmwareVersion.
+      The command below will output all the required information.
       
       ```python
       import pypylon.pylon as py
