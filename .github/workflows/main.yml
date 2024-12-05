@@ -272,4 +272,107 @@ jobs:
           Windows_Pylon
           macOS_Pylon
 
+  unit-tests:
+    if: success()
+    needs: [
+      setup,
+      build-linux,
+      build-macos,
+      build-windows
+    ]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, macos-13, windows-latest ]
+        python-version: [ '3.10', '3.11', '3.12', '3.13' ]
+        architecture: [ x64, arm64 ]
+        exclude:
+          # Exclude ARM64 architecture for Windows
+          - os: windows-latest
+            architecture: arm64
+          # Exclude ARM64 architecture macos-13
+          - os: macos-13
+            architecture: arm64
+          # Exclude x86_64 architecture macos-latest
+          - os: macos-latest
+            architecture: x64
 
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        if: matrix.architecture == 'arm64' && runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - uses: dkershner6/switch-case-action@v1
+        id: pypylon-wheel-source
+        with:
+          default: "build-results-unknown"
+          conditionals-with-values: |
+            ${{ runner.os == 'Linux' && matrix.architecture == 'arm64' }} => build-results-manylinux_2_31_aarch64-cp39
+            ${{ runner.os == 'Linux' && matrix.architecture == 'x64' }} => build-results-manylinux_2_31_x86_64-cp39
+            ${{ runner.os == 'Windows' }} => build-results-windows
+            ${{ runner.os == 'macOS' }} => build-results-macos
+
+      - name: Download pypylon wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.pypylon-wheel-source.outputs.value }}
+          path: pypylon-wheels
+
+      - name: Set up Python ${{ matrix.python-version }} on Linux
+        if: runner.os == 'Linux' && matrix.architecture != 'arm64'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+
+      - name: Set up Python ${{ matrix.python-version }} on Windows & macOS
+        if: runner.os != 'Linux'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+
+      - name: Set up needed linux requirements
+        if: runner.os == 'Linux' && matrix.architecture != 'arm64'
+        run: |
+          sudo apt-get update && sudo apt-get install -y locales
+          sudo sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen
+          sudo locale-gen
+
+      - name: Run pypylon unit tests for Python ${{ matrix.python-version }}
+        if: matrix.architecture != 'arm64' && runner.os != 'macOS'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest numpy
+          pip install --no-index --find-links pypylon-wheels pypylon
+          pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests
+
+      - name: Run pypylon unit tests for Python ${{ matrix.python-version }} using QEMU
+        if: matrix.architecture == 'arm64' && runner.os == 'Linux'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: arm64v8/python:${{ matrix.python-version }}-slim
+          options: --platform linux/arm64 -v ${{ github.workspace }}:/build -w /build
+          run: |
+            apt-get update && apt-get install -y locales
+            sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen
+            locale-gen
+            # Install python requirements and run unit tests
+            python -m pip install --upgrade pip
+            pip install pytest numpy
+            pip install --no-index --find-links pypylon-wheels pypylon
+            pytest tests/genicam_tests tests/pylon_tests/emulated
+
+      - name: Run pypylon unit tests for Python ${{ matrix.python-version }} without pylon Data Processing
+        if: runner.os == 'macOS'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest numpy
+          pip install --no-index --find-links pypylon-wheels pypylon
+          pytest tests/genicam_tests tests/pylon_tests/emulated
