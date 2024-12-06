@@ -274,12 +274,7 @@ jobs:
 
   unit-tests:
     if: success()
-    needs: [
-      setup,
-      build-linux,
-      build-macos,
-      build-windows
-    ]
+    needs: cleanup
     strategy:
       fail-fast: false
       matrix:
