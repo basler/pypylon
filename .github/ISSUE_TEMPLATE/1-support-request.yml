@@ -9,7 +9,7 @@ body:
     value: >
       For a support request on how to operate your cameras with Basler pypylon, please use the fields below to describe your environment.
 
-      To help Basler find the right support channel for you, please indicate where your company is located, e.g., in Germany, China, Canada, etc. 
+      To help Basler find the right support channel for you, please indicate where your company is located, e.g., in Germany, China, Canada, etc.
 
       If you feel confident, you may also indicate your company's name.
 
@@ -45,7 +45,7 @@ body:
       * PC or embedded system model/type:
         * CPU architecture X86/X86_64/ARM/ARM64
         * Operating System
-        * RAM 
+        * RAM
       * Interfaces used to connect the cameras:
         * Type in type/model/name of interface cards
         * Switches or hubs used
@@ -58,16 +58,16 @@ body:
 - type: textarea
   attributes:
     label: "Camera(s) used"
-    description: >
+    description: |
       List your camera(s), especially the value of DeviceFirmwareVersion.
       The command below will output all the required information.
-      
+
       ```python
       import pypylon.pylon as py
 
       tl_factory = py.TlFactory.GetInstance()
+
       for dev in tl_factory.EnumerateDevices():
-          dev: py.DeviceInfo
           print(dev.GetFriendlyName())
           try:
               camera = py.InstantCamera(tl_factory.CreateDevice(dev))
@@ -87,7 +87,7 @@ body:
     label: "Runtime information:"
     description: |
       Do you have the full Basler pylon Camera Software Suite installed in addition to pypylon?
-      
+
       > In the pylon Viewer, the keys `Shift + Ctrl + Alt + i` will capture OS / software version information, that you can paste here.
 
       The below command will output python/pypylon and system versions. Please use the python interpreter used in your project to execute
