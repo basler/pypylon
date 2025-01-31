@@ -7,7 +7,7 @@
   $1 = new DeviceInfoList_t();
 }
 
-%typemap(argout,fragment="t_output_helper") Pylon::DeviceInfoList_t & {
+%typemap(argout) Pylon::DeviceInfoList_t & {
   Py_DECREF($result);
   PyObject *tpl = PyTuple_New($1->size());
   for (unsigned int i = 0; i < $1->size(); i++) {

@@ -300,11 +300,13 @@
         PyObject * result = 0;
 
         PyObject * data = (dst) ? PyByteArray_FromStringAndSize((const char *) dst, new_size) : Py_None;
-        result = SWIG_Python_AppendOutput(result, data);
+        // workaround for using AppendOutput outside of template for swig >= 4.3
+        const int IS_VOID = 1;
+        result = SWIG_Python_AppendOutput(result, data, IS_VOID);
         delete [] dst;
 
         PyObject * tp = PyInt_FromLong((long) ret_pt);
-        result = SWIG_Python_AppendOutput(result, tp);
+        result = SWIG_Python_AppendOutput(result, tp, IS_VOID);
 
         return result;
     }
