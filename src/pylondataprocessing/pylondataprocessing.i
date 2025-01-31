@@ -615,7 +615,7 @@ Pylon::DataProcessing::CVariantContainer value
     Py_XDECREF(stringObject);
     Py_XDECREF(variantObject);
   }
-  $result = SWIG_Python_AppendOutput($result, obj);
+  $result = SWIG_Python_AppendOutput($result, obj,$isvoid);
 %}
 
 ////////////////////////////////////////////////////////////////////////////////
