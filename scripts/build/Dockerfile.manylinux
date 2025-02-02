@@ -9,7 +9,7 @@ COPY --from=qemu /usr/bin/* /usr/bin/
 
 
 # install pip from pypi
-RUN pip install "swig>=4.2,<4.3"
+RUN pip install "swig==4.3"
 
 # install setuptools
 RUN pip install "setuptools<72" --upgrade
