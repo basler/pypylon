@@ -93,6 +93,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // python defines own version of COMPILER macro which collides with genicam logic
 #define _PYTHON_COMPILER COMPILER
 #undef COMPILER
+
+// Turn off GenICam compiler warning about untested compiler.
+#if !defined(GENICAM_USER_ACCEPTS_ANY_COMPILER)
+#   define GENICAM_USER_ACCEPTS_ANY_COMPILER
+#endif
+
 #include <GenICam.h>
 
 #include <GenApi/EnumClasses.h>
