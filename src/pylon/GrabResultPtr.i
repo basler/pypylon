@@ -44,6 +44,10 @@
             shape = (self.GetHeight(), self.GetWidth(), 3)
             dtype = _pylon_numpy.float32
             format = "f"
+        elif pt in ( PixelType_Data32f, ):
+            shape = (self.GetHeight(), self.GetWidth(), 1)
+            dtype = _pylon_numpy.float32
+            format = "f"
         else:
             raise ValueError("Pixel format currently not supported")
 
