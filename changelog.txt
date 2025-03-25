@@ -29,7 +29,7 @@ Version 4.0.0
     - The Builders recipe AddInput and AddOutput methods have changed.
       see buildersrecipe_test.py on how to handle that.
     - Updated data processing module documentation.
-    - Fixed an issue when using GetArrayZeroCopy().
+    - Fixed an issue when using GetArrayZeroCopy() (fixes #762).
     - Fixed an issue with strings constaining regular expressions in setup.py
     - Fixed an issue when running with numpy 2.0 in the unit tests.
     - Extended the unit tests.
