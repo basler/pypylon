@@ -38,6 +38,10 @@
             shape = (self.GetHeight(), self.GetWidth(), 3)
             dtype = _pylon_numpy.uint8
             format = "B"
+        elif pt in ( PixelType_RGB12packed, PixelType_BGR12packed, PixelType_RGB10packed, PixelType_BGR10packed ):
+            shape = (self.GetHeight(), self.GetWidth(), 3)
+            format = "H"
+            dtype = _pylon_numpy.uint16            
         elif pt in ( PixelType_YUV422_YUYV_Packed, PixelType_YUV422packed ):
             shape = (self.GetHeight(), self.GetWidth(), 2)
             dtype = _pylon_numpy.uint8
@@ -50,6 +54,14 @@
             shape = (self.GetHeight(), self.GetWidth(), 1)
             dtype = _pylon_numpy.float32
             format = "f"
+        elif pt in ( PixelType_BiColorRGBG8, PixelType_BiColorBGRG8 ):
+            shape = (self.GetHeight(), self.GetWidth() * 2)
+            format = "B"
+            dtype = _pylon_numpy.uint8
+        elif pt in ( PixelType_BiColorRGBG10, PixelType_BiColorBGRG10, PixelType_BiColorRGBG12, PixelType_BiColorBGRG12 ):
+            shape = (self.GetHeight(), self.GetWidth() * 2)
+            format = "H"
+            dtype = _pylon_numpy.uint16
         else:
             raise ValueError("Pixel format currently not supported")
 
