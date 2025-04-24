@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42,<72", "swig>=4.2,<4.3", "wheel", "lief; sys_platform == 'darwin'"]
+requires = ["setuptools>=42,<72", "swig==4.3", "wheel", "lief; sys_platform == 'darwin'"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
@@ -7,26 +7,26 @@ skip = "pp* cp36-* cp37-* cp38-*"
 build-verbosity = "0"
 test-requires = "pytest numpy"
 
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/genicam_tests",
+    "tests/pylon_tests/emulated",
+    "tests/pylondataprocessing_tests",
+]
+
 [tool.cibuildwheel.windows]
 archs = "AMD64"
 build = "cp39-win_*"
 before-all = 'echo "Building: %CIBW_BUILD%"'
-test-command = [
-             '''
-             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated {project}/tests/pylondataprocessing_tests
-             '''
-             ]
 
 [tool.cibuildwheel.macos]
 archs = "x86_64 arm64"
 build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
-test-command = [
-             '''
-             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated
-             '''
-             ]
+test-skip = [
+    "tests/pylondataprocessing_tests"
+]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"

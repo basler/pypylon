@@ -55,7 +55,7 @@
     $2 = false;
 }
 
-%typemap(argout,fragment="t_output_helper") Pylon::InterfaceInfoList_t &
+%typemap(argout) Pylon::InterfaceInfoList_t &
 {
     Py_DECREF($result);
     PyObject *tpl = PyTuple_New($1->size());

@@ -21,7 +21,7 @@ RUN if cat /etc/debian_version | grep -q "8\." ; then \
 RUN pip install wheel 'auditwheel<=5.1.2'
 
 # install swig from pypi
-RUN pip install "swig>=4.2,<4.3"
+RUN pip install "swig==4.3"
 # install setuptools
 RUN pip install "setuptools<72" --upgrade
 

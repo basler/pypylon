@@ -301,7 +301,7 @@ import warnings
 
 
 
-%typemap(argout,fragment="t_output_helper") (uint8_t *pBuffer, int64_t Length), (void *pBuffer, int64_t Length), (char *pBuffer, int64_t Length)
+%typemap(argout) (uint8_t *pBuffer, int64_t Length), (void *pBuffer, int64_t Length), (char *pBuffer, int64_t Length)
 {
     PyObject *o;
     if ( ($2 < 0) || ($2 > INT_MAX) ) {
@@ -309,10 +309,10 @@ import warnings
         SWIG_fail;
     }
     o = PyBytes_FromStringAndSize((const char*)$1,(int)$2);
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
 }
 
-%typemap(freearg,fragment="t_output_helper") (uint8_t *pBuffer, int64_t Length), (void *pBuffer, int64_t Length), (char *pBuffer, int64_t Length)
+%typemap(freearg) (uint8_t *pBuffer, int64_t Length), (void *pBuffer, int64_t Length), (char *pBuffer, int64_t Length)
 {
     delete [] (char*)$1;
 }
@@ -443,9 +443,9 @@ namespace GENICAM_NAMESPACE {
 %typemap(argout) const GENICAM_NAMESPACE::gcstring & {}
 %typemap(argout) GENICAM_NAMESPACE::gcstring & {
 %#if PY_VERSION_HEX >= 0x03000000
-    $result = t_output_helper($result,PyUnicode_FromStringAndSize($1->c_str(),$1->length()));
+    $result = SWIG_AppendOutput($result,PyUnicode_FromStringAndSize($1->c_str(),$1->length()));
 %#else
-    $result = t_output_helper($result,PyString_FromStringAndSize($1->c_str(),$1->length()));
+    $result = SWIG_AppendOutput($result,PyString_FromStringAndSize($1->c_str(),$1->length()));
 %#endif
 }
 
@@ -497,7 +497,7 @@ namespace GENICAM_NAMESPACE {
     $1 = new NodeList_t();
 }
 
-%typemap(argout,fragment="t_output_helper") GENAPI_NAMESPACE::NodeList_t & {
+%typemap(argout) GENAPI_NAMESPACE::NodeList_t & {
     PyObject *o = PyTuple_New($1->size());
     for( unsigned int i = 0; i < $1->size(); i++){
         PyObject *o_item;
@@ -557,7 +557,7 @@ namespace GENICAM_NAMESPACE {
         o_item = SWIG_NewPointerObj(outptr, outtype, 0);
         PyTuple_SetItem(o,i,o_item);
     }
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
     delete $1;
 }
 
@@ -568,7 +568,7 @@ namespace GENICAM_NAMESPACE {
         o_item = PyLong_FromLongLong($1[i]);
         PyTuple_SetItem(o,i,o_item);
     }
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
 }
 
 %typemap(out) double_autovector_t {
@@ -578,7 +578,7 @@ namespace GENICAM_NAMESPACE {
         o_item = PyFloat_FromDouble($1[i]);
         PyTuple_SetItem(o,i,o_item);
     }
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
 }
 
 
@@ -586,7 +586,7 @@ namespace GENICAM_NAMESPACE {
     $1 = new FeatureList_t();
 }
 
-%typemap(argout,fragment="t_output_helper") GENAPI_NAMESPACE::FeatureList_t & {
+%typemap(argout) GENAPI_NAMESPACE::FeatureList_t & {
     PyObject *o = PyTuple_New($1->size());
     for( unsigned int i = 0; i < $1->size(); i++){
         PyObject *o_item;
@@ -646,7 +646,7 @@ namespace GENICAM_NAMESPACE {
         o_item = SWIG_NewPointerObj(outptr, outtype, 0);
         PyTuple_SetItem(o,i,o_item);
     }
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
     delete $1;
 }
 
@@ -654,7 +654,7 @@ namespace GENICAM_NAMESPACE {
     $1 = new GENICAM_NAMESPACE::gcstring_vector();
 }
 
-%typemap(argout,fragment="t_output_helper") GENICAM_NAMESPACE::gcstring_vector & {
+%typemap(argout) GENICAM_NAMESPACE::gcstring_vector & {
     PyObject *o = PyTuple_New($1->size());
     for( unsigned int i = 0; i < $1->size(); i++){
       PyObject *o_item;
@@ -665,12 +665,12 @@ namespace GENICAM_NAMESPACE {
 %#endif
       PyTuple_SetItem(o,i,o_item);
     }
-    $result = t_output_helper($result,o);
+    $result = SWIG_AppendOutput($result,o);
     delete $1;
 }
 
 // Make sure the above typemap is no applied on const references
-%typemap(argout,fragment="t_output_helper") const GENICAM_NAMESPACE::gcstring_vector & {}
+%typemap(argout) const GENICAM_NAMESPACE::gcstring_vector & {}
 
 
 // typemaps for chunk handling
