@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42,<72", "swig>=4.2,<4.3", "wheel"]
+requires = ["setuptools>=42,<72", "swig>=4.2,<4.3", "wheel", "lief; sys_platform == 'darwin'"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
@@ -39,7 +39,7 @@ before-build = [
              fi
              '''
             ]
-environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_ARM64}",MACOSX_DEPLOYMENT_TARGET="13.0" }
+environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_ARM64}",MACOSX_DEPLOYMENT_TARGET="14.0" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_x86_64"
@@ -52,4 +52,4 @@ before-build = [
              fi
              '''
             ]
-environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="13.0" }
+environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="14.0" }
