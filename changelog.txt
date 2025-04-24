@@ -1,6 +1,9 @@
-Version 4.2
+Version 4.2.0rc1
+    - Date 2025-04-24
     - Updated to pylon Software Suite 8.1.0 on all platforms.
     - Added support for pylon data processing method BuildersRecipe.SaveAs
+    - Update reference version for all platforms.
+    - Update README.md
 
 Version 4.1.0
     - Date 2024-11-25
