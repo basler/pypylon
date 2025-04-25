@@ -300,10 +300,10 @@ jobs:
             architecture: x64
             # Exclude python 3.9 - 3.10 on macOS x86_64 due too issues with the runner image
             # See also GitHub issue: https://github.com/actions/setup-python/issues/825
-          - os: macos-latest
+          - os: macos-14
             architecture: x64
             python-version: 3.9
-          - os: macos-latest
+          - os: macos-14
             architecture: x64
             python-version: 3.10
 
