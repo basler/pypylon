@@ -107,7 +107,18 @@ class BuildersRecipeTestSuite(PylonDataProcessingTestCase):
         testee2.Load(recipefilename)
         testee2.Unload()
         os.remove(recipefilename)
+        if pylondataprocessing.GetVersion() >= pylon.VersionInfo(3,1,0):
+            testee.SaveAs(pylondataprocessing.RecipeFileFormat_JsonDefault, recipefilename)
+            testee2 = pylondataprocessing.Recipe()
+            testee2.Load(recipefilename)
+            testee2.Unload()
+            os.remove(recipefilename)
+            testee.SaveAs(pylondataprocessing.RecipeFileFormat_JsonCompressedBinaryData, recipefilename)
+            testee2 = pylondataprocessing.Recipe()
+            testee2.Load(recipefilename)
+            testee2.Unload()
+            os.remove(recipefilename)
         testee.ResetToEmpty()
-        
+ 
 if __name__ == "__main__":
     unittest.main()

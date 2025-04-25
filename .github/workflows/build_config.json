@@ -1,14 +1,14 @@
 {
     "linux-x86_64": {
-        "pylon_sdks": ["8.0.1.16188"]
+        "pylon_sdks": ["8.1.0"]
     },
     "linux-aarch64": {
-        "pylon_sdks": ["8.0.1.16188"]
+        "pylon_sdks": ["8.1.0"]
     },
     "windows": {
-        "pylon_sdks": ["8.0.1.16188"]
+        "pylon_sdks": ["8.1.0"]
     },
     "macos": {
-        "pylon_sdks": ["7.3.2.0001"]
+        "pylon_sdks": ["8.1.0"]
     }
 }

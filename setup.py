@@ -17,13 +17,12 @@ from pathlib import Path
 from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "9.0.3",
+    "Windows": "10.2.1",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "9.0.3",
+    "Linux": "10.0.2",
     "Linux_armv7l": "6.2.0",
-    "Darwin": "7.3.2",
-    "Darwin_arm64": "7.3.2"
+    "Darwin": "10.0.2"
 }
 
 ################################################################################
@@ -1079,6 +1078,25 @@ class BuildSupportMacOS(BuildSupport):
                     if re.match(r".*TL_[a-z]+\.so", p.name):
                         info(f"DELETE {p}")
                         os.remove(p)
+            # Patch minimum required OS version for pylon 10.0.2 for external provided libusb
+            if self.get_pylon_version() == "10.0.2.471":
+                import lief
+                import tempfile
+                # Create a temp directory
+                temp_dir = tempfile.mkdtemp()
+                # Patch and write per-arch files
+                for p in Path(f"{full_dst}").glob("**/pylon-libusb-1.0.27.dylib"):
+                    fat_binary = lief.MachO.parse(str(p))
+                    for binary in fat_binary:
+                        info(f"Patching architecture: {binary.header.cpu_type} - {binary.header.cpu_subtype}")
+                        for command in binary.commands:
+                            if isinstance(command, lief.MachO.BuildVersion):
+                                command.minos = (14, 0, 0)  # Set macOS 14.0 as minimum version
+                                command.sdk = (14, 0, 0)  # Set macOS SDK 14.0 as minimum version
+                        output_path = os.path.join(temp_dir, f"pylon-libusb-1.0.27-{binary.header.cpu_type.name}.dylib")
+                        binary.write(output_path)
+                    # Recombine into a universal binary
+                    fat_binary.write(str(p))
 
     def include_pylon_data_processing(self):
         return False

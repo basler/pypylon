@@ -38,6 +38,10 @@
             shape = (self.GetHeight(), self.GetWidth(), 3)
             dtype = _pylon_numpy.uint8
             format = "B"
+        elif pt in ( PixelType_RGB12packed, PixelType_BGR12packed, PixelType_RGB10packed, PixelType_BGR10packed ):
+            shape = (self.GetHeight(), self.GetWidth(), 3)
+            format = "H"
+            dtype = _pylon_numpy.uint16            
         elif pt in ( PixelType_YUV422_YUYV_Packed, PixelType_YUV422packed ):
             shape = (self.GetHeight(), self.GetWidth(), 2)
             dtype = _pylon_numpy.uint8
@@ -46,6 +50,18 @@
             shape = (self.GetHeight(), self.GetWidth(), 3)
             dtype = _pylon_numpy.float32
             format = "f"
+        elif pt in ( PixelType_Data32f, ):
+            shape = (self.GetHeight(), self.GetWidth(), 1)
+            dtype = _pylon_numpy.float32
+            format = "f"
+        elif pt in ( PixelType_BiColorRGBG8, PixelType_BiColorBGRG8 ):
+            shape = (self.GetHeight(), self.GetWidth() * 2)
+            format = "B"
+            dtype = _pylon_numpy.uint8
+        elif pt in ( PixelType_BiColorRGBG10, PixelType_BiColorBGRG10, PixelType_BiColorRGBG12, PixelType_BiColorBGRG12 ):
+            shape = (self.GetHeight(), self.GetWidth() * 2)
+            format = "H"
+            dtype = _pylon_numpy.uint16
         else:
             raise ValueError("Pixel format currently not supported")
 
@@ -300,11 +316,13 @@
         PyObject * result = 0;
 
         PyObject * data = (dst) ? PyByteArray_FromStringAndSize((const char *) dst, new_size) : Py_None;
-        result = SWIG_Python_AppendOutput(result, data);
+        // workaround for using AppendOutput outside of template for swig >= 4.3
+        const int IS_VOID = 1;
+        result = SWIG_Python_AppendOutput(result, data, IS_VOID);
         delete [] dst;
 
         PyObject * tp = PyInt_FromLong((long) ret_pt);
-        result = SWIG_Python_AppendOutput(result, tp);
+        result = SWIG_Python_AppendOutput(result, tp, IS_VOID);
 
         return result;
     }

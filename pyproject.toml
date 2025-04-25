@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42,<72", "swig>=4.2,<4.3", "wheel"]
+requires = ["setuptools>=42,<72", "swig==4.3", "wheel", "lief; sys_platform == 'darwin'"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
@@ -7,26 +7,26 @@ skip = "pp* cp36-* cp37-* cp38-*"
 build-verbosity = "0"
 test-requires = "pytest numpy"
 
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/genicam_tests",
+    "tests/pylon_tests/emulated",
+    "tests/pylondataprocessing_tests",
+]
+
 [tool.cibuildwheel.windows]
 archs = "AMD64"
 build = "cp39-win_*"
 before-all = 'echo "Building: %CIBW_BUILD%"'
-test-command = [
-             '''
-             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated {project}/tests/pylondataprocessing_tests
-             '''
-             ]
 
 [tool.cibuildwheel.macos]
 archs = "x86_64 arm64"
 build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
-test-command = [
-             '''
-             pytest {project}/tests/genicam_tests {project}/tests/pylon_tests/emulated
-             '''
-             ]
+test-skip = [
+    "tests/pylondataprocessing_tests"
+]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
@@ -35,11 +35,11 @@ before-build = [
              echo "arm framework"
              if [ -z "${PYLON_FRAMEWORK_ARM64}" ]; then
                  echo "Set PYLON_FRAMEWORK_ARM64 to the directory where pylon.framework for arm64 is installed"
-                 exit -1
+                 echo "default of /Library/Frameworks will be used"
              fi
              '''
             ]
-environment = { PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_ARM64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
+environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_ARM64}",MACOSX_DEPLOYMENT_TARGET="14.0" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_x86_64"
@@ -52,4 +52,4 @@ before-build = [
              fi
              '''
             ]
-environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="11.0" }
+environment = { SYSTEM_VERSION_COMPAT="0",PYLON_FRAMEWORK_LOCATION="${PYLON_FRAMEWORK_X86_64}",MACOSX_DEPLOYMENT_TARGET="14.0" }

@@ -204,7 +204,7 @@
 }
 
 
-%typemap(argout, fragment="t_output_helper")
+%typemap(argout)
 (uint32_t *pNumResults, Pylon::GigEActionCommandResult *results)
 {
     uint32_t cnt = *$1;

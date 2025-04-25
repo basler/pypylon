@@ -615,7 +615,7 @@ Pylon::DataProcessing::CVariantContainer value
     Py_XDECREF(stringObject);
     Py_XDECREF(variantObject);
   }
-  $result = SWIG_Python_AppendOutput($result, obj);
+  $result = SWIG_Python_AppendOutput($result, obj,$isvoid);
 %}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -765,6 +765,9 @@ namespace Pylon
 %include "UpdateObserver.i"
 %include "EventObserver.i"
 %include "Recipe.i"
+#if ((PYLON_DATAPROCESSING_VERSION_MAJOR > 3) || (PYLON_DATAPROCESSING_VERSION_MAJOR >= 3 && PYLON_DATAPROCESSING_VERSION_MINOR >= 1))
+%include "RecipeFileFormat.i"
+#endif
 %include "BuildersRecipe.i"
 
 ADD_PROP_GET(TransformationData, ColumnCount)

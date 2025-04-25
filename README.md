@@ -118,7 +118,7 @@ For instance:
 * pylon vTools are supported on pypylon 3.0 and newer only on Windows 10/11 64 bit, Linux x86_64 and Linux aarch64. 
 * For pylon vTools that require a license refer to: https://www.baslerweb.com/en/software/pylon-vtools/
 * CXP-12: To use CXP with pypylon >= 4.0.0 you need to install the CXP GenTL producer and drivers using the pylon Camera Software Suite setup.
-* For accessing Basler 3D cameras, e.g. Basler blaze, installation of pylon Camera Software Suite 8.0.1 
+* For accessing Basler 3D cameras, e.g. Basler blaze, installation of pylon Camera Software Suite 8.1.0 
   and the latest pylon Supplementary Package for blaze is required.
 
 ## Binary Installation
@@ -143,7 +143,7 @@ The following versions are available on pypi:
 > * (*) The linux 64bit binaries are manylinux_2_31 conformant.
     This is roughly equivalent to a minimum glibc version >= 2.31. 
     :warning: You need at least pip 20.3 to install them.
-> * (**) macOS binaries are built for macOS >= 11.0 (Big-Sur)
+> * (**) macOS binaries are built for macOS >= 14.0 (Sonoma)
 
 ## Installation from Source
 Building the pypylon bindings is supported and tested on Windows, Linux and macOS
@@ -152,8 +152,8 @@ You need a few more things to compile pypylon:
  * An installation of pylon SDK for your platform
  * A compiler for your system (Visual Studio on Windows, gcc on linux, xCode commandline tools on macOS)
  * Python development files (e.g. `sudo apt install python-dev` on linux)
- * [swig](http://www.swig.org) >= 4.2 and < 4.3
-   * For all 64bit platforms you can install the tool via `pip install "swig>=4.2,<4.3"`
+ * [swig](http://www.swig.org) 4.3
+   * For all 64bit platforms you can install the tool via `pip install "swig==4.3"`
 
 To build pypylon from source:
 ```console
