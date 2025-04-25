@@ -285,8 +285,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-latest, windows-latest ]
-        python-version: [ '3.10', '3.11', '3.12', '3.13' ]
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-14, windows-latest ]
+        python-version: [ '3.9', '3.10', '3.11', '3.12', '3.13' ]
         architecture: [ x64, arm64 ]
         exclude:
           # Exclude ARM64 architecture for windows-latest
@@ -298,6 +298,14 @@ jobs:
           # Exclude X64 architecture for ubuntu-24.04-arm
           - os: ubuntu-24.04-arm
             architecture: x64
+            # Exclude python 3.9 - 3.10 on macOS x86_64 due too issues with the runner image
+            # See also GitHub issue: https://github.com/actions/setup-python/issues/825
+          - os: macos-14
+            architecture: x64
+            python-version: 3.9
+          - os: macos-14
+            architecture: x64
+            python-version: 3.10
 
     runs-on: ${{ matrix.os }}
     steps:
