@@ -152,7 +152,7 @@ jobs:
       - name: Publish package to (Test)PyPI
         if: needs.setup.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
         run: |
-          sudo pip3 install twine
+          sudo pip3 install "twine==6.0.1"
           python3 -m twine upload --non-interactive --skip-existing dist/*
 
 
