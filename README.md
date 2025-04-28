@@ -113,7 +113,8 @@ Please note that the pylon Camera Software Suite may support different operating
 For latest information on pylon refer to: https://www.baslerweb.com/en/software/pylon/
 In addition, check the release notes of your pylon installation. 
 For instance: 
-* pylon Camera Software Suite 8.0.1 supports Windows 10/11 64 bit, Linux x86_64 and Linux aarch64 with glibc version >= 2.31 or newer.
+* pylon Camera Software Suite 8.1.0 supports Windows 10/11 64 bit, Linux x86_64 and Linux aarch64 with glibc version >= 2.31 or newer,
+  macOS Sonoma or newer.
 * pylon vTools are supported on pylon 7.0.0 and newer.
 * pylon vTools are supported on pypylon 3.0 and newer only on Windows 10/11 64 bit, Linux x86_64 and Linux aarch64. 
 * For pylon vTools that require a license refer to: https://www.baslerweb.com/en/software/pylon-vtools/
