@@ -1097,6 +1097,12 @@ class BuildSupportMacOS(BuildSupport):
                         binary.write(output_path)
                     # Recombine into a universal binary
                     fat_binary.write(str(p))
+                    # Repair/replace signature of patched libusb
+                    info("Create AdHoc signature for \"" +  os.path.basename(str(p)) +  "\"...")
+                    subprocess.run(["codesign", "--force", "-s", "-", str(p)], check=True)
+                # Repair/replace signature of pylon.framework
+                info("Create AdHoc signature for \"" +  os.path.basename(full_dst) + "\"...")
+                subprocess.run(["codesign", "--force", "-s", "-", full_dst], check=True)
 
     def include_pylon_data_processing(self):
         return False
