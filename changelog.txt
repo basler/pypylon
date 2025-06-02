@@ -1,9 +1,5 @@
-Version 4.2.0rc2
-    - Date 2025-04-30
-    - Update README.md
-
-Version 4.2.0rc1
-    - Date 2025-04-24
+Version 4.2.0
+    - Date 2025-06-02
     - Updated to pylon Software Suite 8.1.0 on all platforms.
     - Added support for pylon data processing method BuildersRecipe.SaveAs
     - Add support for pylon GigE Accelerator on macOS. It can be downloaded
