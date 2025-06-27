@@ -106,5 +106,6 @@ const Pylon::DeviceInfoList_t&
 %}
 
 
+%nodefaultdtor Pylon::IDeviceFactory;
 %include <pylon/DeviceFactory.h>;
 
