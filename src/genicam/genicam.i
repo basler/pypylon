@@ -3,7 +3,7 @@
 
 %define GENICAM_DOCSTRING
 "
-Copyright (C) 2017-2023 Basler AG
+Copyright (C) 2017-2025 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
