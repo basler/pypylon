@@ -97,20 +97,36 @@ if(WIN32 AND PYLON_FOUND)
         )
         copy_files_matching(${PYLON_BIN_DIR} pypylon "${DP_PATTERNS}")
         
-        # Data processing plugin directories
-        set(DP_PLUGIN_DIR "${PYLON_ROOT}/Runtime/pylonDataProcessingPlugins")
-        if(EXISTS "${DP_PLUGIN_DIR}")
-            copy_directory("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
+        # Ensure PYLON_ROOT is available for plugin directories
+        if(NOT DEFINED PYLON_ROOT AND DEFINED ENV{PYLON_DEV_DIR})
+            set(PYLON_ROOT $ENV{PYLON_DEV_DIR})
         endif()
         
-        set(DP_CREATOR_DIR "${PYLON_ROOT}/Runtime/DataProcessingPluginsB")
-        if(EXISTS "${DP_CREATOR_DIR}")
-            copy_directory("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
+        # Data processing plugin directories
+        if(DEFINED PYLON_ROOT)
+            set(DP_PLUGIN_DIR "${PYLON_ROOT}/Runtime/pylonDataProcessingPlugins")
+            if(EXISTS "${DP_PLUGIN_DIR}")
+                copy_directory("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
+            endif()
+            
+            set(DP_CREATOR_DIR "${PYLON_ROOT}/Runtime/DataProcessingPluginsB")
+            if(EXISTS "${DP_CREATOR_DIR}")
+                copy_directory("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
+            endif()
         endif()
     endif()
 
 elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
     message(STATUS "Copying Linux runtime files...")
+    
+    # Ensure PYLON_ROOT has a default value for Linux
+    if(NOT DEFINED PYLON_ROOT)
+        if(DEFINED ENV{PYLON_ROOT})
+            set(PYLON_ROOT $ENV{PYLON_ROOT})
+        else()
+            set(PYLON_ROOT "/opt/pylon")
+        endif()
+    endif()
     
     # Get Pylon library directory - check both lib64 and lib
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS "${PYLON_ROOT}/lib64")

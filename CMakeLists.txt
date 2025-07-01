@@ -112,6 +112,7 @@ elseif(UNIX)
             -g0
             -Wl,--enable-new-dtags
             -Wl,-rpath,$ORIGIN
+            -Wl,-rpath,$ORIGIN/pypylon
         )
     endif()
 endif()
@@ -178,6 +179,14 @@ function(add_swig_python_module module_name swig_file)
         ${PYLON_LIBRARIES}
     )
     
+    # Set rpath for the extension module to find bundled Pylon libraries
+    if(UNIX AND NOT APPLE)
+        set_target_properties(${module_name} PROPERTIES
+            INSTALL_RPATH "$ORIGIN"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    endif()
+    
     target_include_directories(${module_name} 
         PRIVATE 
         ${CMAKE_SOURCE_DIR}/src/genicam
@@ -192,7 +201,7 @@ function(add_swig_python_module module_name swig_file)
     # Install the SWIG-generated Python wrapper file
     install(FILES ${CMAKE_BINARY_DIR}/${module_name}.py DESTINATION pypylon)
     
-    # Add version information to the SWIG-generated Python file (like setup.py did)
+    # Add version information to the SWIG-generated Python file
     add_custom_command(TARGET ${module_name} POST_BUILD
         COMMAND ${CMAKE_COMMAND} 
             -DMODULE_FILE=${CMAKE_BINARY_DIR}/${module_name}.py
@@ -222,10 +231,36 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/
         PATTERN "__pycache__" EXCLUDE
 )
 
-# setuptools_scm will generate _version.py automatically, so we don't need to install it
+# Install Pylon license files directly from SDK to wheel metadata directory
+if(DEFINED SKBUILD_METADATA_DIR AND DEFINED ENV{PYLON_ROOT})
+    set(PYLON_LICENSE_DIR "$ENV{PYLON_ROOT}/share/pylon/licenses")
+    
+    if(EXISTS "${PYLON_LICENSE_DIR}/License.txt")
+        message(STATUS "Installing Pylon license directly from SDK to metadata directory")
+        install(FILES "${PYLON_LICENSE_DIR}/License.txt"
+                DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
+                RENAME "PYLON_LICENSE.txt")
+    else()
+        message(WARNING "Pylon license not found at ${PYLON_LICENSE_DIR}/License.txt")
+    endif()
+    
+    if(EXISTS "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
+        message(STATUS "Installing Pylon third-party licenses directly from SDK to metadata directory")
+        install(FILES "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt"
+                DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
+                RENAME "PYLON_THIRD_PARTY_LICENSES.txt")
+    else()
+        message(WARNING "Pylon third-party licenses not found at ${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
+    endif()
+else()
+    message(WARNING "SKBUILD_METADATA_DIR not defined or PYLON_ROOT not set")
+endif()
 
 # Copy runtime dependencies
 include(cmake/CopyRuntimeDeps.cmake)
+
+# Note: Pylon license files are now installed directly from SDK to wheel metadata directory
+# in the install section above, so no intermediate copying is needed here
 
 # Set version for the package
 if(SKBUILD)

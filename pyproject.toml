@@ -14,7 +14,7 @@ authors = [
     {name = "Basler AG", email = "oss@baslerweb.com"}
 ]
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause AND LicenseRef-Proprietary-Pylon"
 classifiers = [
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
@@ -35,6 +35,9 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = []
 dynamic = ["version"]
+license-files = [
+    "LICENSE" 
+]
 
 [tool.setuptools_scm]
 write_to = "src/pypylon/_version.py"
@@ -50,9 +53,11 @@ Repository = "https://github.com/basler/pypylon"
 cmake.version = ">=3.20"
 build.verbose = true
 logging.level = "DEBUG"
-wheel.expand-macos-universal-tags = true
-wheel.py-api = "cp39"  # Limited API for Python 3.9+
-wheel.packages = ["src/pypylon"]
+
+[tool.scikit-build.wheel]
+expand-macos-universal-tags = true
+py-api = "cp39"  # Limited API for Python 3.9+
+packages = ["src/pypylon"]
 
 [tool.scikit-build.cmake.define]
 PYPYLON_USE_LIMITED_API = "ON"

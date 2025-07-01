@@ -43,3 +43,4 @@ wheelhouse
 # macOS
 .DS_Store
 src/pypylon/_version.py
+licenses/
