@@ -39,7 +39,7 @@
     PyObject* AttachMemoryView(PyObject* object, Pylon::EPixelType pixelType, unsigned int width, unsigned int height, size_t paddingX) {
 %#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030b0000
         Py_buffer buffer;
-        if (PyObject_GetBuffer(memoryView, &buffer, PyBUF_SIMPLE) == -1) {
+        if (PyObject_GetBuffer(object, &buffer, PyBUF_SIMPLE) == -1) {
             PyErr_SetString(PyExc_RuntimeError, "Expected a buffer-compatible object");
             Py_RETURN_FALSE;
         }
