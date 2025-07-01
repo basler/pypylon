@@ -1,3 +1,6 @@
+#ifndef PYPYLON_GENICAM_I_INCLUDED
+#define PYPYLON_GENICAM_I_INCLUDED
+
 %define GENICAM_DOCSTRING
 "
 Copyright (C) 2017-2023 Basler AG
@@ -27,6 +30,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %module(directors="1", package="pypylon", docstring=GENICAM_DOCSTRING) genicam
 %include "DoxyGenApi.i";
+
+// Ignore problematic constructs BEFORE SWIG sees them
+%ignore operator[];
+%ignore operator++;
+%ignore operator--;
+
 %begin %{
 
 #ifdef Py_LIMITED_API
@@ -126,6 +135,8 @@ using namespace GENAPI_NAMESPACE;
 //////  stdint ////////
 ///////////////////////
 
+#ifndef PYPYLON_STDINT_TYPES_DEFINED
+#define PYPYLON_STDINT_TYPES_DEFINED
 
 %include <swigarch.i>
 
@@ -277,6 +288,8 @@ typedef unsigned long long int  uintmax_t;
 #endif
 
 #endif // _WIN32
+
+#endif // PYPYLON_STDINT_TYPES_DEFINED
 
 ////////////////////////////////////////////
 
@@ -893,6 +906,8 @@ namespace GENICAM_NAMESPACE {
 %define ADD_PROP_GETSET(class, name)
     %pythoncode %{ class ## .name = property(class ## .Get ## name,class ## .Set ## name) %}
 %enddef
+
+#endif // PYPYLON_GENICAM_I_INCLUDED
 
 
 

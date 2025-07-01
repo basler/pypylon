@@ -1,3 +1,6 @@
+#ifndef PYPYLON_PYLON_I_INCLUDED
+#define PYPYLON_PYLON_I_INCLUDED
+
 %define PYLON_DOCSTRING
 "
 Copyright (C) 2017-2023 Basler AG
@@ -27,6 +30,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %module(directors="1", package="pypylon", docstring=PYLON_DOCSTRING) pylon
 %include "DoxyPylon.i";
+
+// Ignore problematic constructs BEFORE SWIG sees them
+%ignore operator[];
+%ignore operator++;
+%ignore operator--;
+%ignore "operator const Pylon::IImage&";
+
+
 %begin %{
 
 #ifdef Py_LIMITED_API
@@ -690,3 +701,5 @@ void GetPylonVersion(
     unsigned int* build
     );
 const char* GetPylonVersionString();
+
+#endif // PYPYLON_PYLON_I_INCLUDED
