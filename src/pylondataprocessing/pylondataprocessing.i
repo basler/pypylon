@@ -27,6 +27,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %module(directors="1", package="pypylon", docstring=PYLONDP_DOCSTRING) pylondataprocessing
 %include "DoxyPylonDataProcessing.i";
+
+// Ignore problematic constructs BEFORE SWIG sees them
+%ignore operator[];
+%ignore operator++;
+%ignore operator--;
+%ignore Pylon::DataProcessing::CVariantContainer::operator[];
+%ignore Pylon::DataProcessing::CVariantContainer::const_iterator::operator++;
+%ignore Pylon::DataProcessing::CVariantContainer::iterator::operator++;
+%ignore "Pylon::DataProcessing::CRegion::CRegion(Pylon::DataProcessing::CRegion &&)";
+
+// Filter specific warnings for SDK elements we can't implement  
+%warnfilter(403) Pylon::CPylonImageBase;
+%warnfilter(403) Pylon::IReusableImage::IsSupportedPixelType;
+
 %begin %{
 
 #ifdef Py_LIMITED_API

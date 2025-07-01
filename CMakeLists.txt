@@ -171,10 +171,6 @@ function(add_swig_python_module module_name swig_file)
         PREFIX ""
     )
     
-    if(PYPYLON_USE_LIMITED_API AND Python_LIMITED_API)
-        target_compile_definitions(${module_name} PRIVATE Py_LIMITED_API)
-    endif()
-    
     # Link with Python and Pylon
     target_link_libraries(${module_name} 
         PRIVATE 
