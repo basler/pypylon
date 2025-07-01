@@ -11,6 +11,7 @@ generated/
 __pycache__
 *.pyc
 python*/
+*.whl
 
 # Ignore compiler stuff
 *.idb
@@ -41,3 +42,4 @@ wheelhouse
 
 # macOS
 .DS_Store
+src/pypylon/_version.py
