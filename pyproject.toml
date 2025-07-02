@@ -77,6 +77,10 @@ testpaths = [
     "tests/pylon_tests/emulated", 
     "tests/pylondataprocessing_tests",
 ]
+filterwarnings = [
+    "ignore:builtin type .* has no __module__ attribute:DeprecationWarning",
+    "ignore:importing from 'genicam' is deprecated:DeprecationWarning",
+]
 
 [tool.cibuildwheel.windows]
 archs = "AMD64"
