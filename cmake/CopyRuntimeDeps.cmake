@@ -23,8 +23,22 @@ function(copy_files_matching source_dir dest_dir patterns)
 
         foreach(file ${matching_files})
             get_filename_component(filename ${file} NAME)
-            message(STATUS "Copying runtime file: ${filename}")
-            install(FILES ${file} DESTINATION pypylon)
+            
+            # Resolve symlinks to get the actual file
+            if(UNIX AND NOT APPLE)
+                get_filename_component(resolved_file ${file} REALPATH)
+                if(EXISTS ${resolved_file})
+                    message(STATUS "Copying runtime file: ${filename} (resolved from symlink)")
+                    # Copy the resolved file but keep the original name
+                    install(FILES ${resolved_file} DESTINATION pypylon RENAME ${filename})
+                else()
+                    message(STATUS "Copying runtime file: ${filename}")
+                    install(FILES ${file} DESTINATION pypylon)
+                endif()
+            else()
+                message(STATUS "Copying runtime file: ${filename}")
+                install(FILES ${file} DESTINATION pypylon)
+            endif()
         endforeach()
     endforeach()
 endfunction()
@@ -34,6 +48,17 @@ function(copy_directory source_dir dest_dir)
     if(EXISTS ${source_dir})
         message(STATUS "Copying runtime directory: ${source_dir}")
         install(DIRECTORY ${source_dir}/ DESTINATION pypylon/${dest_dir})
+    endif()
+endfunction()
+
+# Function to copy directories excluding Editor packages
+function(copy_directory_excluding_editors source_dir dest_dir)
+    if(EXISTS ${source_dir})
+        message(STATUS "Copying runtime directory (excluding editors): ${source_dir}")
+        install(DIRECTORY ${source_dir}/ 
+                DESTINATION pypylon/${dest_dir}
+                PATTERN "*Editor.so" EXCLUDE
+                PATTERN "*Editor.dll" EXCLUDE)
     endif()
 endfunction()
 
@@ -102,16 +127,16 @@ if(WIN32 AND PYLON_FOUND)
             set(PYLON_ROOT $ENV{PYLON_DEV_DIR})
         endif()
         
-        # Data processing plugin directories
+        # Data processing plugin directories (excluding Editor packages)
         if(DEFINED PYLON_ROOT)
             set(DP_PLUGIN_DIR "${PYLON_ROOT}/Runtime/pylonDataProcessingPlugins")
             if(EXISTS "${DP_PLUGIN_DIR}")
-                copy_directory("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
+                copy_directory_excluding_editors("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
             endif()
             
             set(DP_CREATOR_DIR "${PYLON_ROOT}/Runtime/DataProcessingPluginsB")
             if(EXISTS "${DP_CREATOR_DIR}")
-                copy_directory("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
+                copy_directory_excluding_editors("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
             endif()
         endif()
     endif()
@@ -171,7 +196,7 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
     elseif(PYLON_VERSION VERSION_LESS "9.0.3")
         # Newer naming scheme
         set(BASE_PATTERNS
-            "libpylonbase\\.so\\.\\d+\\.\\d+"
+            "libpylonbase\\.so\\.[0-9]+$"
             "libGCBase_.*\\.so"
             "libGenApi_.*\\.so"
             "liblog4cpp_.*\\.so"
@@ -183,12 +208,12 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         
         set(GIGE_PATTERNS
             "libpylon_TL_gige\\.so"
-            "libgxapi\\.so\\.\\d+\\.\\d+"
+            "libgxapi\\.so\\.[0-9]+$"
         )
         
         set(USB_PATTERNS
             "libpylon_TL_usb\\.so"
-            "libuxapi\\.so\\.\\d+\\.\\d+"
+            "libuxapi\\.so\\.[0-9]+$"
             "pylon-libusb-.*\\.so"
         )
         
@@ -197,8 +222,8 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         )
         
         set(EXTRA_PATTERNS
-            "libpylonutility\\.so\\.\\d+\\.\\d+"
-            "libpylonutilitypcl\\.so\\.\\d+\\.\\d+"
+            "libpylonutility\\.so\\.[0-9]+$"
+            "libpylonutilitypcl\\.so\\.[0-9]+$"
         )
         
         set(GENTL_PATTERNS
@@ -207,17 +232,17 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         
         if(PYLON_DATA_PROCESSING_FOUND)
             set(DP_PATTERNS
-                "libPylonDataProcessing\\.so\\.\\d+"
+                "libPylonDataProcessing\\.so\\.[0-9]+$"
                 "libPylonDataProcessing.sig"
-                "libPylonDataProcessingCore\\.so\\.\\d+"
+                "libPylonDataProcessingCore\\.so\\.[0-9]+$"
             )
         endif()
         
     else()
         # Latest naming scheme  
         set(BASE_PATTERNS
-            "libpylonbase\\.so\\.[0-9]+.*"
-            "libpylonutility\\.so\\.[0-9]+.*"
+            "libpylonbase\\.so\\.[0-9]+$"
+            "libpylonutility\\.so\\.[0-9]+$"
             "libGCBase_.*\\.so"
             "libGenApi_.*\\.so"
             "liblog4cpp_.*\\.so"
@@ -229,12 +254,12 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         
         set(GIGE_PATTERNS
             "libpylon_TL_gige\\.so"
-            "libgxapi\\.so\\.\\d+"
+            "libgxapi\\.so\\.[0-9]+$"
         )
         
         set(USB_PATTERNS
             "libpylon_TL_usb\\.so"
-            "libuxapi\\.so\\.\\d+"
+            "libuxapi\\.so\\.[0-9]+$"
             "pylon-libusb-.*\\.so"
         )
         
@@ -243,7 +268,7 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         )
         
         set(EXTRA_PATTERNS
-            "libpylonutilitypcl\\.so\\.[0-9]+.*"
+            "libpylonutilitypcl\\.so\\.[0-9]+$"
         )
         
         set(GENTL_PATTERNS
@@ -252,9 +277,9 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         
         if(PYLON_DATA_PROCESSING_FOUND)
             set(DP_PATTERNS
-                "libPylonDataProcessing\\.so\\.[0-9]+.*"
+                "libPylonDataProcessing\\.so\\.[0-9]+$"
                 "libPylonDataProcessing.sig"
-                "libPylonDataProcessingCore\\.so\\.[0-9]+.*"
+                "libPylonDataProcessingCore\\.so\\.[0-9]+$"
             )
         endif()
     endif()
@@ -272,15 +297,15 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
     if(PYLON_DATA_PROCESSING_FOUND)
         copy_files_matching(${PYLON_LIB_DIR} pypylon "${DP_PATTERNS}")
         
-        # Data processing plugin directories
+        # Data processing plugin directories (excluding Editor packages)
         set(DP_PLUGIN_DIR "${PYLON_ROOT}/lib/pylondataprocessingplugins")
         if(EXISTS "${DP_PLUGIN_DIR}")
-            copy_directory("${DP_PLUGIN_DIR}" "pylondataprocessingplugins")
+            copy_directory_excluding_editors("${DP_PLUGIN_DIR}" "pylondataprocessingplugins")
         endif()
         
         set(DP_CREATOR_DIR "${PYLON_ROOT}/lib/dataprocessingpluginsb")
         if(EXISTS "${DP_CREATOR_DIR}")
-            copy_directory("${DP_CREATOR_DIR}" "dataprocessingpluginsb")
+            copy_directory_excluding_editors("${DP_CREATOR_DIR}" "dataprocessingpluginsb")
         endif()
     endif()
 
