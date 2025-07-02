@@ -20,7 +20,7 @@ function(copy_files_matching source_dir dest_dir patterns)
                 endif()
             endforeach()
         endif()
-        
+
         foreach(file ${matching_files})
             get_filename_component(filename ${file} NAME)
             message(STATUS "Copying runtime file: ${filename}")
@@ -40,7 +40,7 @@ endfunction()
 # Platform-specific runtime copying
 if(WIN32 AND PYLON_FOUND)
     message(STATUS "Copying Windows runtime files...")
-    
+
     # Base runtime files
     set(BASE_PATTERNS
         "PylonBase_*.dll"
@@ -53,27 +53,27 @@ if(WIN32 AND PYLON_FOUND)
         "MathParser_MD_*.dll"
     )
     copy_files_matching(${PYLON_BIN_DIR} pypylon "${BASE_PATTERNS}")
-    
+
     # GigE runtime files
     set(GIGE_PATTERNS
         "PylonGigE_*.dll"
         "gxapi*.dll"
     )
     copy_files_matching(${PYLON_BIN_DIR} pypylon "${GIGE_PATTERNS}")
-    
+
     # USB runtime files
     set(USB_PATTERNS
         "PylonUsb_*.dll"
         "uxapi*.dll"
     )
     copy_files_matching(${PYLON_BIN_DIR} pypylon "${USB_PATTERNS}")
-    
+
     # Camera emulation runtime files
     set(CAMEMU_PATTERNS
         "PylonCamEmu_*.dll"
     )
     copy_files_matching(${PYLON_BIN_DIR} pypylon "${CAMEMU_PATTERNS}")
-    
+
     # Extra runtime files
     set(EXTRA_PATTERNS
         "PylonGUI_*.dll"
@@ -128,13 +128,9 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         endif()
     endif()
     
-    # Get Pylon library directory - check both lib64 and lib
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS "${PYLON_ROOT}/lib64")
-        set(PYLON_LIB_DIR "${PYLON_ROOT}/lib64")
-    else()
-        set(PYLON_LIB_DIR "${PYLON_ROOT}/lib")
-    endif()
-    
+    # Get Pylon library directory
+    set(PYLON_LIB_DIR "${PYLON_ROOT}/lib")
+
     # Determine Pylon version to use appropriate patterns
     if(PYLON_VERSION VERSION_LESS "6.3.0")
         # Older naming scheme
@@ -277,12 +273,12 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         copy_files_matching(${PYLON_LIB_DIR} pypylon "${DP_PATTERNS}")
         
         # Data processing plugin directories
-        set(DP_PLUGIN_DIR "${PYLON_ROOT}/lib64/pylondataprocessingplugins")
+        set(DP_PLUGIN_DIR "${PYLON_ROOT}/lib/pylondataprocessingplugins")
         if(EXISTS "${DP_PLUGIN_DIR}")
             copy_directory("${DP_PLUGIN_DIR}" "pylondataprocessingplugins")
         endif()
         
-        set(DP_CREATOR_DIR "${PYLON_ROOT}/lib64/dataprocessingpluginsb")
+        set(DP_CREATOR_DIR "${PYLON_ROOT}/lib/dataprocessingpluginsb")
         if(EXISTS "${DP_CREATOR_DIR}")
             copy_directory("${DP_CREATOR_DIR}" "dataprocessingpluginsb")
         endif()
