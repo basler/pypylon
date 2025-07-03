@@ -280,19 +280,19 @@ endfunction()
 
 # Create the modules
 add_swig_python_module(genicam ${CMAKE_SOURCE_DIR}/src/genicam/genicam.i)
-add_swig_python_module(pypylon_pylon ${CMAKE_SOURCE_DIR}/src/pylon/pylon.i)
+add_swig_python_module(pylon ${CMAKE_SOURCE_DIR}/src/pylon/pylon.i)
 
 # Handle data processing module if available
 if(PYPYLON_INCLUDE_DATA_PROCESSING AND PYLON_DATA_PROCESSING_FOUND)
     add_swig_python_module(pylondataprocessing ${CMAKE_SOURCE_DIR}/src/pylondataprocessing/pylondataprocessing.i)
     
-         # Link with data processing target (created by local finder)
-     if(TARGET pylon::DataProcessing)
-         target_link_libraries(pylondataprocessing INTERFACE pylon::DataProcessing)
-         message(STATUS "Linking pylondataprocessing with pylon::DataProcessing")
-     else()
-         message(WARNING "Data processing found but pylon::DataProcessing target not available")
-     endif()
+    # Link with data processing target (created by local finder)
+    if(TARGET pylon::DataProcessing)
+        target_link_libraries(pylondataprocessing PRIVATE pylon::DataProcessing)
+        message(STATUS "Linking pylondataprocessing with pylon::DataProcessing")
+    else()
+        message(WARNING "Data processing found but pylon::DataProcessing target not available")
+    endif()
     
     message(STATUS "Including pylon data processing support")
 else()
@@ -336,8 +336,8 @@ if(DEFINED SKBUILD_METADATA_DIR)
         message(WARNING "Pylon third-party licenses not found at expected location")
     endif()
 else()
-         message(WARNING "SKBUILD_METADATA_DIR not defined")
- endif()
+    message(WARNING "SKBUILD_METADATA_DIR not defined")
+endif()
 
 # Copy runtime dependencies
 # Pass pylon version to runtime dependencies and include
@@ -348,7 +348,11 @@ include(cmake/CopyRuntimeDeps.cmake)
 if(SKBUILD)
     # setuptools_scm handles version detection automatically
     set_property(TARGET genicam PROPERTY SWIG_COMPILE_DEFINITIONS PYPYLON_VERSION="${PYPYLON_VERSION_STRING}")
-    set_property(TARGET pypylon_pylon PROPERTY SWIG_COMPILE_DEFINITIONS PYPYLON_VERSION="${PYPYLON_VERSION_STRING}")
+    set_property(TARGET pylon PROPERTY SWIG_COMPILE_DEFINITIONS PYPYLON_VERSION="${PYPYLON_VERSION_STRING}")
+    # Handle data processing module if available
+    if(PYPYLON_INCLUDE_DATA_PROCESSING AND PYLON_DATA_PROCESSING_FOUND)
+        set_property(TARGET pylondataprocessing PROPERTY SWIG_COMPILE_DEFINITIONS PYPYLON_VERSION="${PYPYLON_VERSION_STRING}")
+    endif()
 endif()
 
 message(STATUS "CMake configuration complete with version: ${PYPYLON_VERSION_STRING}")

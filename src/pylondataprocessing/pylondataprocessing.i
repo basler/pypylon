@@ -1,3 +1,6 @@
+#ifndef PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
+#define PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
+
 %define PYLONDP_DOCSTRING
 "
 Copyright (C) 2024-2025 Basler AG
@@ -40,6 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Filter specific warnings for SDK elements we can't implement  
 %warnfilter(403) Pylon::CPylonImageBase;
 %warnfilter(403) Pylon::IReusableImage::IsSupportedPixelType;
+%warnfilter(509) Pylon::DataProcessing::CRegion;  // Move constructor shadowing
 
 %begin %{
 
@@ -802,3 +806,5 @@ ADD_PROP_GET(Update, NumPrecedingUpdates)
 ADD_PROP_GET(Recipe, RecipeContext)
 ADD_PROP_GET(GenericOutputObserver, NumResults)
 ADD_PROP_GET(GenericOutputObserver, WaitObject)
+
+#endif // PYPYLON_PYLONDATAPROCESSING_I_INCLUDED

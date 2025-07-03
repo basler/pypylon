@@ -13,7 +13,7 @@ For additional technical assistance, please reach out to our official [Support](
 
 # Getting Started
 
- * Install [pylon](https://www.baslerweb.com/pylon)
+ * Install [pylon](https://www.baslerweb.com/pylon) (v8.0 or newer)
    This is strongly recommended but not mandatory. See [known issues](#known-issues) for further details.
  * Install pypylon: ```pip3 install pypylon```
    For more installation options and the supported systems please read the [Installation](#Installation) paragraph.
@@ -104,9 +104,9 @@ To identify the locations in your code that have to be updated, run with enabled
 
 # Installation
 ## Prerequisites
- * Installed [pylon](https://www.baslerweb.com/pylon)
+ * Installed [pylon](https://www.baslerweb.com/pylon) (v8.0 or newer)
    For the binary installation this is not mandatory but strongly recommended. See [known issues](#known-issues) for further details.
- * Installed [python](https://www.python.org/) with [pip](https://pip.pypa.io/en/stable/)
+ * Installed [python](https://www.python.org/) 3.9 or newer with [pip](https://pip.pypa.io/en/stable/)
  * Installed [CodeMeter Runtime](https://www.wibu.com/support/user/user-software.html) when you want to use pylon vTools and the pylon Data Processing API extension on your platform.
 
 ## pylon OS Versions and Features
@@ -151,9 +151,9 @@ The following versions are available on pypi:
 Building the pypylon bindings is supported and tested on Windows, Linux and macOS
 
 You need a few more things to compile pypylon:
- * An installation of pylon SDK for your platform
+ * An installation of pylon SDK v8.0 or newer for your platform
  * A compiler for your system (Visual Studio on Windows, gcc on linux, xCode commandline tools on macOS)
- * Python development files (e.g. `sudo apt install python-dev` on linux)
+ * Python 3.9+ development files (e.g. `sudo apt install python3-dev` on linux)
  * [swig](http://www.swig.org) 4.3
    * For all 64bit platforms you can install the tool via `pip install "swig==4.3"`
 
