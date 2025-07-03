@@ -1,6 +1,11 @@
 #ifndef PYPYLON_PYLON_I_INCLUDED
 #define PYPYLON_PYLON_I_INCLUDED
 
+// Suppress common SWIG warnings
+%warnfilter(403) Pylon::CPylonImageBase;  // Abstract class warnings
+%warnfilter(403) Pylon::IReusableImage;   // Pure virtual method warnings
+%warnfilter(509) Pylon::DataProcessing::CRegion;  // Move constructor shadowing
+
 %define PYLON_DOCSTRING
 "
 Copyright (C) 2017-2025 Basler AG
@@ -598,9 +603,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "InterfaceInfo.i"
 %include "TlInfo.i"
 %include "DeviceFactory.i"
-#if PYLON_VERSION_MAJOR >= 6
 %include "Interface.i"
-#endif
 %include "TransportLayer.i"
 %include "GigETransportLayer.i"
 %include "TlFactory.i"
@@ -628,10 +631,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "PylonGUI.i"
 #endif
 %include "FeaturePersistence.i"
-#if (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR >= 1) || PYLON_VERSION_MAJOR > 6
 %include "ImageDecompressor.i"
-#endif
-#if (PYLON_VERSION_MAJOR == 6 && PYLON_VERSION_MINOR >= 2) || PYLON_VERSION_MAJOR > 6
 %include "PylonDataComponent.i"
 %include "PylonDataContainer.i"
 ADD_PROP_GET(PylonDataContainer, DataComponentCount)
@@ -647,7 +647,6 @@ ADD_PROP_GET(PylonDataComponent, DataSize)
 ADD_PROP_GET(PylonDataComponent, TimeStamp)
 ADD_PROP_GET(PylonDataComponent, Array)
 ADD_PROP_GET(PylonDataComponent, ImageFormat)
-#endif
 
 ADD_PROP_GET(GrabResult, ErrorDescription)
 ADD_PROP_GET(GrabResult, ErrorCode)

@@ -6,6 +6,9 @@
 %ignore GetBufferConst;
 %rename(GetBuffer) GetBuffer2;
 
+// Suppress move constructor shadowing warnings
+%ignore Pylon::DataProcessing::CRegion::CRegion(Pylon::DataProcessing::CRegion &&);
+
 %include <pylondataprocessing/Region.h>;
 
 %extend Pylon::DataProcessing::CRegion {
