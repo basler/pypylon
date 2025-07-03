@@ -63,7 +63,7 @@ function(copy_directory_excluding_editors source_dir dest_dir)
 endfunction()
 
 # Platform-specific runtime copying
-if(WIN32 AND PYLON_FOUND)
+if(WIN32 AND (PYLON_FOUND OR pylon_FOUND))
     message(STATUS "Copying Windows runtime files...")
 
     # Base runtime files
@@ -141,7 +141,7 @@ if(WIN32 AND PYLON_FOUND)
         endif()
     endif()
 
-elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
+elseif(UNIX AND NOT APPLE AND (PYLON_FOUND OR pylon_FOUND))
     message(STATUS "Copying Linux runtime files...")
     
     # Ensure PYLON_ROOT has a default value for Linux
@@ -157,7 +157,15 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
     set(PYLON_LIB_DIR "${PYLON_ROOT}/lib")
 
     # Determine Pylon version to use appropriate patterns
-    if(PYLON_VERSION VERSION_LESS "6.3.0")
+    set(RUNTIME_PYLON_VERSION ${PYLON_VERSION_FOR_RUNTIME})
+    if(NOT RUNTIME_PYLON_VERSION)
+        set(RUNTIME_PYLON_VERSION ${pylon_VERSION})
+    endif()
+    if(NOT RUNTIME_PYLON_VERSION)
+        set(RUNTIME_PYLON_VERSION ${PYLON_VERSION})
+    endif()
+    
+    if(RUNTIME_PYLON_VERSION VERSION_LESS "6.3.0")
         # Older naming scheme
         set(BASE_PATTERNS
             "libpylonbase-.*\\.so"
@@ -193,7 +201,7 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
             "libpylon_TL_gtc-.*\\.so"
         )
         
-    elseif(PYLON_VERSION VERSION_LESS "9.0.3")
+    elseif(RUNTIME_PYLON_VERSION VERSION_LESS "9.0.3")
         # Newer naming scheme
         set(BASE_PATTERNS
             "libpylonbase\\.so\\.[0-9]+$"
@@ -286,7 +294,7 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
     
     # Copy all pattern sets
     message(STATUS "Pylon library directory: ${PYLON_LIB_DIR}")
-    message(STATUS "Pylon version: ${PYLON_VERSION}")
+    message(STATUS "Pylon version for runtime: ${RUNTIME_PYLON_VERSION}")
     copy_files_matching(${PYLON_LIB_DIR} pypylon "${BASE_PATTERNS}")
     copy_files_matching(${PYLON_LIB_DIR} pypylon "${GIGE_PATTERNS}")
     copy_files_matching(${PYLON_LIB_DIR} pypylon "${USB_PATTERNS}")
@@ -309,7 +317,7 @@ elseif(UNIX AND NOT APPLE AND PYLON_FOUND)
         endif()
     endif()
 
-elseif(APPLE AND PYLON_FOUND)
+elseif(APPLE AND (PYLON_FOUND OR pylon_FOUND))
     message(STATUS "macOS: Runtime dependencies handled by framework")
     # On macOS, the framework handles most dependencies
     # Additional runtime copying may be needed for specific versions
