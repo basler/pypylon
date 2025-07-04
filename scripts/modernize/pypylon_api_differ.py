@@ -181,6 +181,11 @@ class PylonAPIDiffer:
         
         self._compare_modules(ref_modules, cur_modules, "")
         
+        # Compare pydoc documentation
+        ref_pydoc = reference_data.get("pydoc_documentation", {})
+        cur_pydoc = current_data.get("pydoc_documentation", {})
+        self._compare_pydoc_documentation(ref_pydoc, cur_pydoc)
+        
         # Calculate statistics
         self._calculate_stats()
         
@@ -422,6 +427,80 @@ class PylonAPIDiffer:
             else:
                 self._compare_items(ref_members, cur_members, member_path)
     
+    def _compare_pydoc_documentation(self, ref_pydoc: Dict[str, Any], 
+                                   cur_pydoc: Dict[str, Any]) -> None:
+        """Compare pydoc documentation between reference and current"""
+        
+        all_module_names = set(ref_pydoc.keys()) | set(cur_pydoc.keys())
+        
+        for module_name in all_module_names:
+            ref_doc = ref_pydoc.get(module_name)
+            cur_doc = cur_pydoc.get(module_name)
+            
+            if ref_doc is None:
+                # Documentation added
+                if cur_doc and cur_doc.get("success"):
+                    self.differences.append(APIDifference(
+                        "added", f"pydoc.{module_name}", module_name,
+                        new_item=APIItem(module_name, {
+                            "type": "pydoc_documentation",
+                            "doc": cur_doc.get("documentation", ""),
+                            "doc_length": cur_doc.get("doc_length", 0),
+                            "doc_lines": cur_doc.get("doc_lines", 0)
+                        }, f"pydoc.{module_name}")
+                    ))
+            elif cur_doc is None:
+                # Documentation removed
+                if ref_doc and ref_doc.get("success"):
+                    self.differences.append(APIDifference(
+                        "removed", f"pydoc.{module_name}", module_name,
+                        old_item=APIItem(module_name, {
+                            "type": "pydoc_documentation",
+                            "doc": ref_doc.get("documentation", ""),
+                            "doc_length": ref_doc.get("doc_length", 0),
+                            "doc_lines": ref_doc.get("doc_lines", 0)
+                        }, f"pydoc.{module_name}")
+                    ))
+            else:
+                # Documentation exists in both - compare content
+                if ref_doc.get("success") and cur_doc.get("success"):
+                    ref_doc_text = ref_doc.get("documentation", "")
+                    cur_doc_text = cur_doc.get("documentation", "")
+                    
+                    if ref_doc_text != cur_doc_text:
+                        # Create diff for documentation
+                        doc_diff = list(difflib.unified_diff(
+                            ref_doc_text.splitlines(),
+                            cur_doc_text.splitlines(),
+                            lineterm='',
+                            n=3
+                        ))
+                        
+                        self.differences.append(APIDifference(
+                            "changed", f"pydoc.{module_name}", module_name,
+                            old_item=APIItem(module_name, {
+                                "type": "pydoc_documentation",
+                                "doc": ref_doc_text,
+                                "doc_length": ref_doc.get("doc_length", 0),
+                                "doc_lines": ref_doc.get("doc_lines", 0)
+                            }, f"pydoc.{module_name}"),
+                            new_item=APIItem(module_name, {
+                                "type": "pydoc_documentation",
+                                "doc": cur_doc_text,
+                                "doc_length": cur_doc.get("doc_length", 0),
+                                "doc_lines": cur_doc.get("doc_lines", 0)
+                            }, f"pydoc.{module_name}"),
+                            details={
+                                "documentation": {
+                                    "old_length": ref_doc.get("doc_length", 0),
+                                    "new_length": cur_doc.get("doc_length", 0),
+                                    "old_lines": ref_doc.get("doc_lines", 0),
+                                    "new_lines": cur_doc.get("doc_lines", 0),
+                                    "diff_preview": doc_diff[:50]  # First 50 lines of diff
+                                }
+                            }
+                        ))
+    
     def _calculate_stats(self) -> None:
         """Calculate summary statistics"""
         self.stats = {
@@ -465,6 +544,81 @@ def load_api_dump(file_path: Path) -> Dict[str, Any]:
     else:
         with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
+
+
+def load_documentation_files(api_data: Dict[str, Any], base_path: Path) -> Dict[str, str]:
+    """Load documentation files referenced in API dump"""
+    doc_files = {}
+    
+    metadata = api_data.get("metadata", {})
+    doc_file_info = metadata.get("documentation_files", {})
+    
+    for module_name, file_info in doc_file_info.items():
+        if isinstance(file_info, dict) and "path" in file_info:
+            try:
+                doc_file_path = base_path.parent / file_info["path"]
+                if doc_file_path.exists():
+                    with open(doc_file_path, 'r', encoding='utf-8') as f:
+                        doc_files[module_name] = f.read()
+                    print(f"📄 Loaded documentation: {module_name} ({len(doc_files[module_name])} chars)")
+                else:
+                    print(f"⚠️  Documentation file not found: {doc_file_path}")
+            except Exception as e:
+                print(f"⚠️  Failed to load documentation for {module_name}: {e}")
+    
+    return doc_files
+
+
+def generate_side_by_side_diff_html(ref_text: str, cur_text: str, module_name: str) -> str:
+    """Generate HTML for side-by-side diff view of documentation using diff2html"""
+    
+    print(f"📝 generate_side_by_side_diff_html called:")
+    print(f"   module_name: {module_name}")
+    print(f"   ref_text length: {len(ref_text)}")
+    print(f"   cur_text length: {len(cur_text)}")
+    
+    # Create a unique container ID
+    container_id = f"diff-{module_name.replace('.', '-').replace('_', '-')}"
+    print(f"   container_id: {container_id}")
+    
+    # Use json.dumps for safe JS string embedding
+    ref_text_escaped = json.dumps(ref_text)
+    cur_text_escaped = json.dumps(cur_text)
+    
+    print(f"   ref_text_escaped length: {len(ref_text_escaped)}")
+    print(f"   cur_text_escaped length: {len(cur_text_escaped)}")
+    print(f"   cur_text_escaped value: {cur_text_escaped[:100]}...")
+    
+    html_parts = []
+    html_parts.append(f"""
+    <div class="side-by-side-diff">
+        <div class="diff-header">
+            <h3>📚 Documentation Comparison: {html.escape(module_name)}</h3>
+            <div class="diff-stats">
+                <span class="stat">Reference: {len(ref_text.splitlines())} lines, {len(ref_text)} chars</span>
+                <span class="stat">Current: {len(cur_text.splitlines())} lines, {len(cur_text)} chars</span>
+            </div>
+        </div>
+        <div class="diff-controls">
+            <button class="active" onclick="toggleDiffMode('{container_id}', 'side-by-side')">Side by Side</button>
+            <button onclick="toggleDiffMode('{container_id}', 'unified')">Unified</button>
+            <button onclick="toggleDiffContext('{container_id}', 3)" class="context-btn active">Compact (3 lines)</button>
+            <button onclick="toggleDiffContext('{container_id}', 10)" class="context-btn">More Context (10 lines)</button>
+            <button onclick="toggleDiffContext('{container_id}', 0)" class="context-btn">Full View</button>
+            <div class="diff-mode">Professional diff viewer</div>
+        </div>
+        <div id="{container_id}" class="diff-container">
+            <!-- Diff2Html will render here -->
+        </div>
+        <script type="application/json" id="{container_id}-data">{{
+            "oldText": {ref_text_escaped},
+            "newText": {cur_text_escaped},
+            "fileName": "{html.escape(module_name)}.txt"
+        }}</script>
+    </div>
+    """)
+    
+    return '\n'.join(html_parts)
 
 
 def generate_text_report(differences: List[APIDifference], 
@@ -546,7 +700,9 @@ def generate_html_report(differences: List[APIDifference],
                         reference_file: str,
                         current_file: str,
                         reference_stats: Dict[str, Any] = None,
-                        current_stats: Dict[str, Any] = None) -> str:
+                        current_stats: Dict[str, Any] = None,
+                        reference_data: Dict[str, Any] = None,
+                        current_data: Dict[str, Any] = None) -> str:
     """Generate HTML report of API differences"""
     
     # HTML template
@@ -601,6 +757,66 @@ def generate_html_report(differences: List[APIDifference],
         .doc-header {{ background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd; }}
         .doc-content {{ margin: 0; padding: 15px; background: white; max-height: 400px; overflow-y: auto; 
                        font-family: 'Courier New', monospace; font-size: 0.85em; line-height: 1.4; }}
+        
+        /* Tab styles */
+        .tabs {{ display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; }}
+        .tab {{ padding: 12px 24px; background: #f8f9fa; border: none; cursor: pointer; 
+                border-radius: 6px 6px 0 0; margin-right: 4px; font-weight: 500; }}
+        .tab.active {{ background: #667eea; color: white; }}
+        .tab:hover:not(.active) {{ background: #e9ecef; }}
+        .tab-content {{ display: none; }}
+        .tab-content.active {{ display: block; }}
+        
+        /* Pydoc diff styles */
+        .pydoc-diff {{ background: #f8f9fa; border-radius: 6px; margin: 15px 0; overflow: hidden; }}
+        .pydoc-diff-header {{ background: #e9ecef; padding: 15px; border-bottom: 1px solid #ddd; }}
+        .pydoc-diff-content {{ padding: 20px; }}
+        .pydoc-module {{ margin-bottom: 30px; }}
+        .pydoc-module h4 {{ color: #495057; margin-bottom: 15px; }}
+        .pydoc-stats {{ display: flex; gap: 20px; margin-bottom: 15px; }}
+        .pydoc-stat {{ background: white; padding: 10px; border-radius: 4px; text-align: center; }}
+        .pydoc-stat-number {{ font-size: 1.2em; font-weight: bold; color: #667eea; }}
+        .pydoc-stat-label {{ font-size: 0.8em; color: #666; }}
+        .pydoc-text-diff {{ background: white; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }}
+        .pydoc-text-diff pre {{ margin: 0; padding: 15px; max-height: 500px; overflow-y: auto; 
+                                font-family: 'Courier New', monospace; font-size: 0.85em; line-height: 1.4; }}
+        .diff-line {{ padding: 2px 0; }}
+        .diff-line.added {{ background: #d4edda; }}
+        .diff-line.removed {{ background: #f8d7da; }}
+        .diff-line.context {{ background: #f8f9fa; }}
+        
+        /* Side-by-side diff styles */
+        .side-by-side-diff {{ margin: 20px 0; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }}
+        .side-by-side-diff .diff-header {{ background: #f8f9fa; padding: 15px; border-bottom: 1px solid #ddd; }}
+        .side-by-side-diff .diff-header h3 {{ margin: 0 0 10px 0; color: #495057; }}
+        .side-by-side-diff .diff-stats {{ display: flex; gap: 20px; }}
+        .side-by-side-diff .diff-stats .stat {{ background: white; padding: 5px 10px; border-radius: 4px; font-size: 0.9em; color: #666; }}
+        
+        /* Diff2Html styles */
+        .d2h-wrapper {{ margin: 0; }}
+        .d2h-file-header {{ background: #e9ecef; padding: 10px 15px; border-bottom: 1px solid #ddd; }}
+        .d2h-file-header h2 {{ margin: 0; font-size: 1.2em; color: #495057; }}
+        .d2h-diff-table {{ border: 1px solid #ddd; border-radius: 0 0 6px 6px; overflow: hidden; }}
+        .d2h-files-diff {{ margin: 0; }}
+        .d2h-file-side-diff {{ margin: 0; }}
+        .d2h-diff-tbody {{ font-family: 'Courier New', monospace; font-size: 0.85em; line-height: 1.4; }}
+        .d2h-code-line {{ padding: 2px 15px; }}
+        .d2h-code-line.d2h-del {{ background: #f8d7da; }}
+        .d2h-code-line.d2h-ins {{ background: #d4edda; }}
+        .d2h-code-line.d2h-cntx {{ background: white; }}
+        
+        /* Custom diff controls */
+        .diff-controls {{ background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #ddd; display: flex; gap: 10px; align-items: center; }}
+        .diff-controls button {{ padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 0.9em; }}
+        .diff-controls button:hover {{ background: #e9ecef; }}
+        .diff-controls button.active {{ background: #667eea; color: white; border-color: #667eea; }}
+        .diff-controls .context-btn {{ background: #e9ecef; color: #495057; }}
+        .diff-controls .context-btn.active {{ background: #28a745; color: white; border-color: #28a745; }}
+        .diff-controls .diff-mode {{ margin-left: auto; font-size: 0.8em; color: #666; }}
+        .diff-container {{ margin: 0; min-height: 200px; }}
+        .diff-side {{ border: 1px solid #ddd; }}
+        .diff-side-header {{ background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd; }}
+        .diff-content {{ padding: 15px; }}
     </style>
 </head>
 <body>
@@ -624,10 +840,393 @@ def generate_html_report(differences: List[APIDifference],
             
             {api_overview_html}
             
-            <h2>🔍 Detailed Differences</h2>
-            {differences_html}
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('api-diff')">API Differences</button>
+                <button class="tab" onclick="showTab('pydoc-diff')">Pydoc Documentation</button>
+            </div>
+            
+            <!-- API Differences Tab -->
+            <div id="api-diff" class="tab-content active">
+                <h2>🔍 Detailed API Differences</h2>
+                {differences_html}
+            </div>
+            
+            <!-- Pydoc Documentation Tab -->
+            <div id="pydoc-diff" class="tab-content">
+                <h2>📚 Pydoc Documentation Differences</h2>
+                {pydoc_differences_html}
+            </div>
         </div>
     </div>
+    
+    <!-- Diff libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/diff2html@3.4.42/bundles/js/diff2html.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/diff2html@3.4.42/bundles/css/diff2html.min.css" />
+    
+    <script>
+    // All functions defined globally
+    function createDiff2HtmlViewer(containerId, oldText, newText, fileName, contextLines) {{
+        try {{
+            // Use custom context lines or default to 3
+            if (typeof contextLines === 'undefined') contextLines = 3;
+            
+            console.log('Creating diff for container:', containerId, 'with context:', contextLines);
+            console.log('Old text length:', oldText.length, 'New text length:', newText.length);
+            
+            // Check if texts are identical
+            if (oldText === newText) {{
+                document.getElementById(containerId).innerHTML = '<p style="padding: 20px; color: #666; text-align: center;">📋 No differences found - documentation is identical.</p>';
+                return;
+            }}
+            
+            // Handle empty texts
+            if (!oldText && !newText) {{
+                document.getElementById(containerId).innerHTML = '<p style="padding: 20px; color: #666; text-align: center;">📋 No documentation available for either version.</p>';
+                return;
+            }}
+            
+            // Create a compact line-by-line diff with context
+            var oldLines = (oldText || '').split('\\n');
+            var newLines = (newText || '').split('\\n');
+            // contextLines parameter controls how much context to show (0 = full view)
+            
+            // Find all changed lines
+            var maxLines = Math.max(oldLines.length, newLines.length);
+            var changedLines = [];
+            var diffFound = false;
+            
+            for (var i = 0; i < maxLines; i++) {{
+                var oldLine = oldLines[i] || '';
+                var newLine = newLines[i] || '';
+                if (oldLine !== newLine) {{
+                    changedLines.push(i);
+                    diffFound = true;
+                }}
+            }}
+            
+            if (!diffFound) {{
+                document.getElementById(containerId).innerHTML = '<p style="padding: 20px; color: #666; text-align: center;">📋 No differences found - documentation is identical.</p>';
+                return;
+            }}
+            
+            // Build hunks (groups of changes with context)
+            var hunks = [];
+            var currentHunk = null;
+            
+            if (contextLines === 0) {{
+                // Full view - show everything
+                hunks = [{{ start: 0, end: maxLines - 1 }}];
+            }} else {{
+                // Compact view - build hunks around changes
+                changedLines.forEach(function(lineNum) {{
+                    var hunkStart = Math.max(0, lineNum - contextLines);
+                    var hunkEnd = Math.min(maxLines - 1, lineNum + contextLines);
+                    
+                    if (!currentHunk || hunkStart > currentHunk.end + 1) {{
+                        // Start new hunk
+                        if (currentHunk) hunks.push(currentHunk);
+                        currentHunk = {{ start: hunkStart, end: hunkEnd }};
+                    }} else {{
+                        // Extend current hunk
+                        currentHunk.end = Math.max(currentHunk.end, hunkEnd);
+                    }}
+                }});
+                if (currentHunk) hunks.push(currentHunk);
+            }}
+            
+            // Generate HTML for hunks
+            var leftContent = [];
+            var rightContent = [];
+            
+            hunks.forEach(function(hunk, hunkIndex) {{
+                if (hunkIndex > 0 && contextLines > 0) {{
+                    // Add separator between hunks (only in compact view)
+                    leftContent.push('<div style="background: #f0f0f0; color: #666; text-align: center; padding: 10px; margin: 5px 0; border: 1px dashed #ccc;">⋮⋮⋮ Lines ' + (hunks[hunkIndex-1].end + 2) + ' to ' + hunk.start + ' unchanged ⋮⋮⋮</div>');
+                    rightContent.push('<div style="background: #f0f0f0; color: #666; text-align: center; padding: 10px; margin: 5px 0; border: 1px dashed #ccc;">⋮⋮⋮ Lines ' + (hunks[hunkIndex-1].end + 2) + ' to ' + hunk.start + ' unchanged ⋮⋮⋮</div>');
+                }}
+                
+                for (var i = hunk.start; i <= hunk.end; i++) {{
+                    var oldLine = oldLines[i] || '';
+                    var newLine = newLines[i] || '';
+                    var isChanged = oldLine !== newLine;
+                    var lineNum = i + 1;
+                    
+                    var lineStyle = isChanged ? 
+                        'background: #ffebee; border-left: 3px solid #f44336; padding: 2px 5px; margin: 1px 0;' : 
+                        (contextLines > 0 ? 'background: #f8f8f8; padding: 2px 5px; margin: 1px 0; color: #666;' : 'background: transparent; padding: 2px 5px; margin: 1px 0;');
+                    var lineStyleNew = isChanged ? 
+                        'background: #e8f5e8; border-left: 3px solid #4caf50; padding: 2px 5px; margin: 1px 0;' : 
+                        (contextLines > 0 ? 'background: #f8f8f8; padding: 2px 5px; margin: 1px 0; color: #666;' : 'background: transparent; padding: 2px 5px; margin: 1px 0;');
+                    
+                    var lineNumStyle = 'display: inline-block; width: 40px; text-align: right; margin-right: 8px; color: #999; font-size: 0.8em;';
+                    
+                    leftContent.push('<div style="' + lineStyle + '"><span style="' + lineNumStyle + '">' + lineNum + '</span>' + (oldLine ? oldLine.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;') + '</div>');
+                    rightContent.push('<div style="' + lineStyleNew + '"><span style="' + lineNumStyle + '">' + lineNum + '</span>' + (newLine ? newLine.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;') + '</div>');
+                }}
+            }});
+            
+            // Create a highlighted side-by-side diff
+            var targetElement = document.getElementById(containerId);
+            targetElement.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden;">
+                    <div style="background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd; color: #dc3545;">Reference Version</div>
+                    <div style="background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd; color: #28a745;">Current Version</div>
+                    <div style="max-height: 500px; overflow-y: auto; padding: 10px; font-family: 'Courier New', monospace; font-size: 0.85em; line-height: 1.4; background: #fafafa;">` + leftContent.join('') + `</div>
+                    <div style="max-height: 500px; overflow-y: auto; padding: 10px; font-family: 'Courier New', monospace; font-size: 0.85em; line-height: 1.4; background: #fafafa;">` + rightContent.join('') + `</div>
+                </div>
+            `;
+            
+            // Check if libraries are loaded (original code kept for later)
+            if (typeof Diff2Html === 'undefined' || typeof Diff === 'undefined') {{
+                console.error('Diff libraries not loaded, using fallback');
+                // Fallback already handled above
+                return;
+            }}
+            
+            // Convert to unified diff format with context (compact view by default)
+            var contextLines = 3; // Number of context lines to show
+            var unifiedDiff = '';
+            var oldLineNum = 1;
+            var newLineNum = 1;
+            unifiedDiff += '--- ' + fileName + '\\n';
+            unifiedDiff += '+++ ' + fileName + '\\n';
+
+            // Build hunks: each hunk is a group of changes with context
+            var hunks = [];
+            var currentHunk = null;
+            var unchangedBuffer = [];
+            var oldLine = 1;
+            var newLine = 1;
+            function flushHunk() {{
+                if (currentHunk) {{
+                    // Add trailing context
+                    currentHunk.lines = currentHunk.lines.concat(unchangedBuffer.slice(0, contextLines));
+                    currentHunk.oldLines += unchangedBuffer.slice(0, contextLines).filter(l => l[0] !== '+').length;
+                    currentHunk.newLines += unchangedBuffer.slice(0, contextLines).filter(l => l[0] !== '-').length;
+                    hunks.push(currentHunk);
+                    currentHunk = null;
+                }}
+                unchangedBuffer = [];
+            }}
+            
+            var diffResult = Diff.diffLines(oldText, newText, {{
+                ignoreWhitespace: false,
+                newlineIsToken: true
+            }});
+            
+            diffResult.forEach(function(part, idx) {{
+                var lines = part.value.split('\\n');
+                if (lines[lines.length-1] === '') lines.pop();
+                if (!part.added && !part.removed) {{
+                    // Unchanged
+                    if (currentHunk) {{
+                        unchangedBuffer = unchangedBuffer.concat(lines.map(l => ' ' + l));
+                        // If buffer is too big, flush hunk
+                        if (unchangedBuffer.length > 2 * contextLines) {{
+                            flushHunk();
+                        }}
+                    }}
+                    oldLine += lines.length;
+                    newLine += lines.length;
+                }} else {{
+                    // Change: flush buffer as context
+                    if (!currentHunk) {{
+                        // Start new hunk, include leading context
+                        var leadingContext = unchangedBuffer.slice(-contextLines);
+                        currentHunk = {{
+                            oldStart: oldLine - leadingContext.length,
+                            newStart: newLine - leadingContext.length,
+                            oldLines: leadingContext.filter(l => l[0] !== '+').length,
+                            newLines: leadingContext.filter(l => l[0] !== '-').length,
+                            lines: leadingContext.slice()
+                        }};
+                    }}
+                    if (part.added) {{
+                        lines.forEach(function(l) {{
+                            currentHunk.lines.push('+' + l);
+                            currentHunk.newLines++;
+                            newLine++;
+                        }});
+                    }} else if (part.removed) {{
+                        lines.forEach(function(l) {{
+                            currentHunk.lines.push('-' + l);
+                            currentHunk.oldLines++;
+                            oldLine++;
+                        }});
+                    }}
+                    unchangedBuffer = [];
+                }}
+            }});
+            flushHunk();
+            // Output hunks
+            hunks.forEach(function(hunk) {{
+                unifiedDiff += '@@ -' + hunk.oldStart + ',' + hunk.oldLines + ' +' + hunk.newStart + ',' + hunk.newLines + ' @@\\n';
+                hunk.lines.forEach(function(line) {{
+                    unifiedDiff += line + '\\n';
+                }});
+            }});
+            
+            // Use Diff2Html to render
+            var diffHtml = Diff2Html.html(unifiedDiff, {{
+                drawFileList: false,
+                matching: 'lines',
+                outputFormat: 'side-by-side'
+            }});
+            
+            var targetElement = document.getElementById(containerId);
+            targetElement.innerHTML = diffHtml;
+            
+            // Store the unified diff data for mode switching
+            var diffWrapper = targetElement.querySelector('.d2h-wrapper');
+            if (diffWrapper) {{
+                diffWrapper.setAttribute('data-unified-diff', unifiedDiff);
+                diffWrapper.setAttribute('data-old-text', oldText);
+                diffWrapper.setAttribute('data-new-text', newText);
+                diffWrapper.setAttribute('data-file-name', fileName);
+            }}
+            
+        }} catch (error) {{
+            console.error('Error creating diff viewer:', error);
+            // Fallback to simple text comparison
+            var targetElement = document.getElementById(containerId);
+            targetElement.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden;">
+                    <div style="background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd;">Reference Version</div>
+                    <div style="background: #f8f9fa; padding: 10px; font-weight: bold; border-bottom: 1px solid #ddd;">Current Version</div>
+                    <div style="max-height: 400px; overflow-y: auto; padding: 15px; font-family: monospace; font-size: 0.85em; white-space: pre-wrap; background: #f8d7da;">` + oldText + `</div>
+                    <div style="max-height: 400px; overflow-y: auto; padding: 15px; font-family: monospace; font-size: 0.85em; white-space: pre-wrap; background: #d4edda;">` + newText + `</div>
+                </div>
+            `;
+        }}
+    }}
+    function toggleDiffMode(containerId, mode) {{
+        var container = document.getElementById(containerId);
+        var buttons = container.parentElement.querySelectorAll('.diff-controls button:not(.context-btn)');
+        
+        // Update button states
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Get stored data from JSON script tag
+        var dataScript = document.getElementById(containerId + '-data');
+        if (!dataScript) {{
+            console.error('No data script found for container:', containerId);
+            return;
+        }}
+        
+        var data;
+        try {{
+            data = JSON.parse(dataScript.textContent);
+        }} catch (e) {{
+            console.error('Failed to parse JSON data for container:', containerId, e);
+            return;
+        }}
+        
+        var oldText = data.oldText;
+        var newText = data.newText;
+        var fileName = data.fileName;
+        
+        if (oldText && newText && fileName) {{
+            // For now, our simple diff viewer only supports side-by-side mode
+            // Just recreate the diff viewer
+            createDiff2HtmlViewer(containerId, oldText, newText, fileName, 3);
+        }}
+    }}
+    function toggleDiffContext(containerId, contextLines) {{
+        var container = document.getElementById(containerId);
+        var buttons = container.parentElement.querySelectorAll('.context-btn');
+        
+        // Update button states
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Get stored data from JSON script tag
+        var dataScript = document.getElementById(containerId + '-data');
+        if (!dataScript) {{
+            console.error('No data script found for container:', containerId);
+            return;
+        }}
+        
+        var data;
+        try {{
+            data = JSON.parse(dataScript.textContent);
+        }} catch (e) {{
+            console.error('Failed to parse JSON data for container:', containerId, e);
+            return;
+        }}
+        
+        var oldText = data.oldText;
+        var newText = data.newText;
+        var fileName = data.fileName;
+        
+        if (oldText && newText && fileName) {{
+            // Recreate the diff viewer with the new context
+            createDiff2HtmlViewer(containerId, oldText, newText, fileName, contextLines);
+        }}
+         }}
+    function showTab(tabId) {{
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(function(content) {{
+            content.classList.remove('active');
+        }});
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(function(tab) {{
+            tab.classList.remove('active');
+        }});
+        // Show selected tab content
+        document.getElementById(tabId).classList.add('active');
+        // Mark selected tab as active
+        event.target.classList.add('active');
+    }}
+    document.addEventListener('DOMContentLoaded', function() {{
+        console.log('DOM loaded, initializing diff viewers');
+        // For each .diff-container, call createDiff2HtmlViewer with data attributes
+        var containers = document.querySelectorAll('.diff-container');
+        console.log('Found', containers.length, 'diff containers');
+        
+        containers.forEach(function(container) {{
+            // Read data from JSON script tag
+            var dataScript = document.getElementById(container.id + '-data');
+            if (!dataScript) {{
+                console.error('No data script found for container:', container.id);
+                return;
+            }}
+            
+            var data;
+            try {{
+                data = JSON.parse(dataScript.textContent);
+            }} catch (e) {{
+                console.error('Failed to parse JSON data for container:', container.id, e);
+                return;
+            }}
+            
+            var oldText = data.oldText;
+            var newText = data.newText;
+            var fileName = data.fileName;
+            
+            console.log('Processing container:', container.id, 'fileName:', fileName);
+            console.log('Has old text:', !!oldText, 'Has new text:', !!newText);
+            console.log('Old text length:', oldText ? oldText.length : 0);
+            console.log('New text length:', newText ? newText.length : 0);
+            
+            if (oldText && newText && fileName) {{
+                // Handle case where JSON.parse resulted in empty string
+                oldText = oldText || "";
+                newText = newText || "";
+                console.log('Calling createDiff2HtmlViewer for:', fileName);
+                createDiff2HtmlViewer(container.id, oldText, newText, fileName, 3);
+            }} else {{
+                console.log('Missing data for container:', container.id);
+                console.log('  oldText is null:', oldText === null);
+                console.log('  newText is null:', newText === null);
+                console.log('  fileName is null:', fileName === null);
+                container.innerHTML = '<p style="padding: 20px; color: #666;">❌ Missing diff data</p>';
+            }}
+        }});
+    }});
+    </script>
 </body>
 </html>
     """
@@ -795,6 +1394,11 @@ def generate_html_report(differences: List[APIDifference],
             """
             differences_html.append(diff_html)
     
+    # Generate pydoc differences HTML
+    pydoc_differences_html = generate_pydoc_differences_html(
+        reference_data, current_data, differences, reference_file, current_file
+    )
+    
     # Generate final HTML
     return html_template.format(
         reference_file=html.escape(reference_file),
@@ -802,8 +1406,72 @@ def generate_html_report(differences: List[APIDifference],
         timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         summary_cards='\n'.join(summary_cards),
         api_overview_html=api_overview_html,
-        differences_html='\n'.join(differences_html)
+        differences_html='\n'.join(differences_html),
+        pydoc_differences_html=pydoc_differences_html
     )
+
+
+def generate_pydoc_differences_html(reference_data: Dict[str, Any], 
+                                  current_data: Dict[str, Any],
+                                  differences: List[APIDifference],
+                                  reference_file: str = None,
+                                  current_file: str = None) -> str:
+    """Generate HTML for pydoc documentation differences using side-by-side diff view"""
+    
+    if not reference_data or not current_data:
+        return "<p>No pydoc documentation data available for comparison.</p>"
+    
+    html_parts = []
+    
+    # Load documentation files if available
+    ref_docs = {}
+    cur_docs = {}
+    
+    if reference_file:
+        try:
+            ref_docs = load_documentation_files(reference_data, Path(reference_file))
+        except Exception as e:
+            print(f"⚠️  Failed to load reference documentation files: {e}")
+    
+    if current_file:
+        try:
+            cur_docs = load_documentation_files(current_data, Path(current_file))
+        except Exception as e:
+            print(f"⚠️  Failed to load current documentation files: {e}")
+    
+    # Get all available modules
+    all_modules = set(ref_docs.keys()) | set(cur_docs.keys())
+    
+    if not all_modules:
+        return "<p>No documentation files found for comparison.</p>"
+    
+    html_parts.append("<h3>📚 Documentation Comparison</h3>")
+    html_parts.append("<p>Side-by-side comparison of pydoc documentation for each module:</p>")
+    
+    for module_name in sorted(all_modules):
+        ref_text = ref_docs.get(module_name, "")
+        cur_text = cur_docs.get(module_name, "")
+        
+        print(f"🔍 Processing module: {module_name}")
+        print(f"   Reference text length: {len(ref_text)}")
+        print(f"   Current text length: {len(cur_text)}")
+        
+        if ref_text and cur_text:
+            # Both versions available - show side-by-side diff
+            print(f"   → Generating diff: both versions available")
+            html_parts.append(generate_side_by_side_diff_html(ref_text, cur_text, module_name))
+        elif ref_text:
+            # Only reference available - use empty string for current
+            print(f"   → Generating diff: reference only")
+            html_parts.append(generate_side_by_side_diff_html(ref_text, "", module_name))
+        elif cur_text:
+            # Only current available - use empty string for reference
+            print(f"   → Generating diff: current only")
+            html_parts.append(generate_side_by_side_diff_html("", cur_text, module_name))
+        else:
+            print(f"   → Skipping: no documentation found")
+    
+    return '\n'.join(html_parts)
 
 
 def compare_api_dumps(reference_file: str, current_file: str, 
@@ -845,7 +1513,7 @@ def compare_api_dumps(reference_file: str, current_file: str,
         # Generate HTML report
         html_report = generate_html_report(
             differences, summary, reference_file, current_file,
-            reference_stats, current_stats
+            reference_stats, current_stats, reference_data, current_data
         )
         
         output_path = Path(output_file)
