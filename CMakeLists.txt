@@ -65,10 +65,8 @@ if(WIN32)
     set(PYLON_HINTS
         "$ENV{PYLON_ROOT}"
         "$ENV{PYLON_DEV_DIR}"
-        "C:/Program Files/Basler/pylon 7"
-        "C:/Program Files/Basler/pylon 6"
-        "C:/Program Files (x86)/Basler/pylon 7"
-        "C:/Program Files (x86)/Basler/pylon 6"
+        "C:/Program Files/Basler/pylon 8"
+        "C:/Program Files (x86)/Basler/pylon 8"
     )
 elseif(APPLE)
     set(PYLON_HINTS
