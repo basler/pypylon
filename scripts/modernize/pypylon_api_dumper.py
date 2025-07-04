@@ -22,7 +22,14 @@ from typing import Dict, Any, List, Optional, Union, Set
 import hashlib
 from datetime import datetime
 import os
+import io
+import pydoc
 
+# Always disable pagers for pydoc
+os.environ["PAGER"] = "cat"
+
+# Suppress warnings during introspection
+warnings.filterwarnings("ignore")
 
 class PylonAPIExtractor:
     """Extracts comprehensive API information from pypylon modules"""
@@ -107,9 +114,179 @@ import os
 from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 import traceback
+import io
+import pydoc
 
 # Suppress warnings during introspection
 warnings.filterwarnings("ignore")
+
+def get_pydoc_documentation(module_name):
+    """Get pydoc documentation for a module"""
+    try:
+        # Import the module
+        module = __import__(module_name)
+        
+        # For submodules, try to get the actual submodule object
+        if "." in module_name:
+            parts = module_name.split(".")
+            current = module
+            for part in parts[1:]:  # Skip the first part (already imported)
+                try:
+                    current = getattr(current, part)
+                except AttributeError:
+                    # If we can't get the submodule, fall back to the parent
+                    print(f"Warning: Could not access submodule {part} in {module_name}, using parent", file=sys.stderr)
+                    break
+        
+        # Use the reliable stdout capture method that works well
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        
+        try:
+            # Get pydoc documentation using help() - this is the most reliable method
+            pydoc.help(current)
+            doc_output = sys.stdout.getvalue()
+        finally:
+            sys.stdout = old_stdout
+        
+        # Check if we got reasonable output and it's not just the parent package
+        if len(doc_output) < 50 or (module_name != "pypylon" and "Help on package pypylon" in doc_output):
+            print(f"Warning: Got parent package documentation for {module_name}, trying manual extraction", file=sys.stderr)
+            
+            # Try to manually extract submodule documentation
+            try:
+                # For submodules, try to get specific documentation
+                if "." in module_name:
+                    doc_parts = []
+                    doc_parts.append(f"Help on module {module_name}")
+                    doc_parts.append("=" * (len(module_name) + 15))
+                    doc_parts.append("")
+                    
+                    # Try to get the actual submodule
+                    submodule_name = module_name.split(".")[-1]
+                    try:
+                        submodule = getattr(module, submodule_name)
+                        
+                        if hasattr(submodule, "__doc__") and submodule.__doc__:
+                            doc_parts.append("DESCRIPTION")
+                            doc_parts.append("-" * 12)
+                            doc_parts.append(submodule.__doc__)
+                            doc_parts.append("")
+                        
+                        # Get all public attributes from the submodule
+                        public_attrs = [attr for attr in dir(submodule) if not attr.startswith("_")]
+                        
+                        if public_attrs:
+                            doc_parts.append("PUBLIC ATTRIBUTES")
+                            doc_parts.append("-" * 17)
+                            for attr_name in sorted(public_attrs):
+                                try:
+                                    attr = getattr(submodule, attr_name)
+                                    attr_type = type(attr).__name__
+                                    doc_parts.append(f"{attr_name} ({attr_type})")
+                                    
+                                    # Get docstring if available
+                                    if hasattr(attr, "__doc__") and attr.__doc__:
+                                        doc_lines = attr.__doc__.strip().split('\\n')
+                                        for line in doc_lines[:3]:  # First 3 lines
+                                            doc_parts.append(f"    {line}")
+                                        if len(doc_lines) > 3:
+                                            doc_parts.append("    ...")
+                                except Exception:
+                                    doc_parts.append(f"{attr_name} (inaccessible)")
+                                doc_parts.append("")
+                        
+                        doc_output = "\\n".join(doc_parts)
+                        print(f"Manual extraction for {module_name}: {len(doc_output)} chars", file=sys.stderr)
+                        
+                    except AttributeError:
+                        # If we can't get the submodule, try to find it in the package
+                        print(f"Could not find submodule {submodule_name} in {module_name}", file=sys.stderr)
+                        
+                        # List what's available in the module
+                        doc_parts = []
+                        doc_parts.append(f"Help on module {module_name}")
+                        doc_parts.append("=" * (len(module_name) + 15))
+                        doc_parts.append("")
+                        doc_parts.append("NOTE: This module may not be directly accessible.")
+                        doc_parts.append("Available attributes in parent module:")
+                        doc_parts.append("")
+                        
+                        public_attrs = [attr for attr in dir(module) if not attr.startswith("_")]
+                        for attr_name in sorted(public_attrs):
+                            try:
+                                attr = getattr(module, attr_name)
+                                attr_type = type(attr).__name__
+                                doc_parts.append(f"{attr_name} ({attr_type})")
+                            except Exception:
+                                doc_parts.append(f"{attr_name} (inaccessible)")
+                            doc_parts.append("")
+                        
+                        doc_output = "\\n".join(doc_parts)
+                
+                else:
+                    # For top-level modules, use the original fallback
+                    try:
+                        doc_output = pydoc.text.document(module)
+                    except Exception as fallback_error:
+                        print(f"Fallback also failed for {module_name}: {fallback_error}", file=sys.stderr)
+                        # Use manual inspection as last resort
+                        doc_parts = []
+                        doc_parts.append(f"Help on module {module_name}")
+                        doc_parts.append("=" * (len(module_name) + 15))
+                        doc_parts.append("")
+                        
+                        if hasattr(module, "__doc__") and module.__doc__:
+                            doc_parts.append("DESCRIPTION")
+                            doc_parts.append("-" * 12)
+                            doc_parts.append(module.__doc__)
+                            doc_parts.append("")
+                        
+                        # Get all public attributes
+                        public_attrs = [attr for attr in dir(module) if not attr.startswith("_")]
+                        
+                        if public_attrs:
+                            doc_parts.append("PUBLIC ATTRIBUTES")
+                            doc_parts.append("-" * 17)
+                            for attr_name in sorted(public_attrs):
+                                try:
+                                    attr = getattr(module, attr_name)
+                                    attr_type = type(attr).__name__
+                                    doc_parts.append(f"{attr_name} ({attr_type})")
+                                    
+                                    # Get docstring if available
+                                    if hasattr(attr, "__doc__") and attr.__doc__:
+                                        doc_lines = attr.__doc__.strip().split('\\n')
+                                        for line in doc_lines[:3]:  # First 3 lines
+                                            doc_parts.append(f"    {line}")
+                                        if len(doc_lines) > 3:
+                                            doc_parts.append("    ...")
+                                except Exception:
+                                    doc_parts.append(f"{attr_name} (inaccessible)")
+                                doc_parts.append("")
+                        
+                        doc_output = "\\n".join(doc_parts)
+                        
+            except Exception as manual_error:
+                print(f"Manual extraction failed for {module_name}: {manual_error}", file=sys.stderr)
+                # Use the original output as fallback
+                pass
+        
+        return {
+            "module_name": module_name,
+            "documentation": doc_output,
+            "doc_length": len(doc_output),
+            "doc_lines": doc_output.count('\\n'),
+            "success": True
+        }
+            
+    except Exception as e:
+        return {
+            "module_name": module_name,
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "success": False
+        }
 
 def safe_getattr(obj, name, default=None):
     """Safely get attribute, handling access errors"""
@@ -477,7 +654,8 @@ def extract_pypylon_api():
                 "extraction_type": "comprehensive",
                 "system_info": get_system_info()
             },
-            "modules": {}
+            "modules": {},
+            "pydoc_documentation": {}
         }
         print("✅ API data structure created", file=sys.stderr)
         
@@ -550,6 +728,25 @@ def extract_pypylon_api():
                     "error": str(e),
                     "traceback": traceback.format_exc()
                 }
+        
+        # Extract pydoc documentation for key modules
+        print("📚 Extracting pydoc documentation...", file=sys.stderr)
+        pydoc_modules = ["pypylon.pylon", "pypylon.genicam", "pypylon.pylondataprocessing"]
+        
+        for module_name in pydoc_modules:
+            print(f"📖 Getting pydoc for {module_name}...", file=sys.stderr)
+            doc_info = get_pydoc_documentation(module_name)
+            api_data["pydoc_documentation"][module_name] = doc_info
+            
+            if doc_info["success"]:
+                print(f"✅ Pydoc extracted for {module_name}: {doc_info['doc_length']} chars, {doc_info['doc_lines']} lines", file=sys.stderr)
+                if doc_info.get("fallback_used"):
+                    print(f"   ⚠️  Used fallback method for {module_name}", file=sys.stderr)
+                # Show first few lines for debugging
+                doc_preview = doc_info["documentation"][:500] if len(doc_info["documentation"]) > 500 else doc_info["documentation"]
+                print(f"   📄 Preview: {repr(doc_preview)}", file=sys.stderr)
+            else:
+                print(f"❌ Pydoc failed for {module_name}: {doc_info['error']}", file=sys.stderr)
         
         # Add global statistics
         print("📈 Computing global statistics...", file=sys.stderr)
@@ -628,7 +825,7 @@ except Exception as e:
 '''
 
 def save_api_dump(api_data: Dict[str, Any], output_file: Path, compress: bool = False) -> None:
-    """Save API data to JSON file with integrity verification"""
+    """Save API data to JSON file with integrity verification and documentation files"""
     
     # Add file metadata
     content = json.dumps(api_data, indent=2, sort_keys=True, default=str)
@@ -643,6 +840,38 @@ def save_api_dump(api_data: Dict[str, Any], output_file: Path, compress: bool = 
         "checksum": hashlib.sha256(content.encode()).hexdigest()
     }
     
+    # Create documentation directory
+    docs_dir = output_file.parent / f"{output_file.stem}_docs"
+    docs_dir.mkdir(exist_ok=True)
+    
+    # Save documentation files
+    pydoc_data = api_data.get("pydoc_documentation", {})
+    doc_files = {}
+    
+    for module_name, doc_info in pydoc_data.items():
+        if doc_info.get("success") and doc_info.get("documentation"):
+            # Create safe filename
+            safe_name = module_name.replace(".", "_").replace("/", "_")
+            doc_file = docs_dir / f"{safe_name}.txt"
+            
+            try:
+                with open(doc_file, 'w', encoding='utf-8') as f:
+                    f.write(doc_info["documentation"])
+                
+                doc_files[module_name] = {
+                    "filename": doc_file.name,
+                    "path": str(doc_file.relative_to(output_file.parent)),
+                    "size_bytes": doc_file.stat().st_size,
+                    "lines": doc_info.get("doc_lines", 0)
+                }
+                print(f"📄 Documentation saved: {doc_file}")
+            except Exception as e:
+                print(f"⚠️  Failed to save documentation for {module_name}: {e}")
+                doc_files[module_name] = {"error": str(e)}
+    
+    # Add documentation file info to metadata
+    api_data["metadata"]["documentation_files"] = doc_files
+    
     # Save file
     if compress:
         import gzip
@@ -654,6 +883,8 @@ def save_api_dump(api_data: Dict[str, Any], output_file: Path, compress: bool = 
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(api_data, f, indent=2, sort_keys=True, default=str)
         print(f"💾 API dump saved to: {output_file}")
+    
+    print(f"📚 Documentation files saved to: {docs_dir}")
 
 
 def create_api_dump(python_executable: str = None, 
