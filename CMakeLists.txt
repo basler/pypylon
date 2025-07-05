@@ -59,11 +59,20 @@ endif()
 
 message(STATUS "Building for platform: ${PYPYLON_PLATFORM} ${PYPYLON_ARCH}")
 
+# Add local cmake directory to module path for our finders
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 # Use the same approach as official pylon samples
 # for Unix system. All other OS PYLON_ROOT will be empty
 list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_ROOT})
 # for Windows system. All other OS PYLON_DEV_DIR will be empty
 list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_DEV_DIR})
+
+# For Windows, set pylon_DIR directly to where the CMake config files are located
+if(WIN32 AND DEFINED ENV{PYLON_DEV_DIR})
+    set(pylon_DIR "$ENV{PYLON_DEV_DIR}/CMake/pylon")
+    message(STATUS "Setting pylon_DIR to: ${pylon_DIR}")
+endif()
 
 # Find pylon using the official CMake configuration
 find_package(pylon REQUIRED)
@@ -86,9 +95,6 @@ else()
         endif()
     endif()
 endif()
-
-# Add local cmake directory to module path for our finders
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Check for data processing support using local finder
 if(PYPYLON_INCLUDE_DATA_PROCESSING)
@@ -310,11 +316,6 @@ else()
     message(WARNING "SKBUILD_METADATA_DIR not defined")
 endif()
 
-# Copy runtime dependencies
-# Pass pylon version to runtime dependencies and include
-set(PYLON_VERSION_FOR_RUNTIME ${pylon_VERSION})
-include(cmake/CopyRuntimeDeps.cmake)
-
 # Set version for the package
 if(SKBUILD)
     # setuptools_scm handles version detection automatically
@@ -325,5 +326,13 @@ if(SKBUILD)
         set_property(TARGET pylondataprocessing PROPERTY SWIG_COMPILE_DEFINITIONS PYPYLON_VERSION="${PYPYLON_VERSION_STRING}")
     endif()
 endif()
+
+# Set PYLON_BIN_DIR for Windows to the correct runtime DLL directory
+if(WIN32 AND DEFINED ENV{PYLON_DEV_DIR})
+    file(TO_CMAKE_PATH "$ENV{PYLON_DEV_DIR}/../Runtime/x64" PYLON_BIN_DIR)
+    message(STATUS "Setting PYLON_BIN_DIR to: ${PYLON_BIN_DIR}")
+endif()
+
+include(cmake/CopyRuntimeDeps.cmake)
 
 message(STATUS "CMake configuration complete with version: ${PYPYLON_VERSION_STRING}")

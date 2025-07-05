@@ -184,6 +184,71 @@ jobs:
           $process = Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Runtime;USB_Runtime;Camera_Link_Runtime;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK;DataProcessing_vTools;DataProcessing_AI' -PassThru
           Write-Host "Process finished with return code:" $process.ExitCode
 
+      - name: Set PYLON_DEV_DIR environment variable
+        run: |
+          # Find the pylon installation directory - check multiple possible locations
+          $possiblePaths = @(
+            "C:\Program Files\Basler",
+            "D:\Program Files\Basler", 
+            "C:\Program Files (x86)\Basler",
+            "D:\Program Files (x86)\Basler"
+          )
+          
+          $pylonDir = $null
+          foreach ($basePath in $possiblePaths) {
+            if (Test-Path $basePath) {
+              Write-Host "Checking for pylon in: $basePath"
+              $pylonDirs = Get-ChildItem -Path $basePath -Directory -Filter "pylon*" -ErrorAction SilentlyContinue | Sort-Object Name -Descending
+              if ($pylonDirs.Count -gt 0) {
+                $pylonDirName = $pylonDirs[0].Name
+                $candidateDir = Join-Path $basePath $pylonDirName "Development"
+                Write-Host "Found pylon candidate at: $candidateDir (from directory: $pylonDirName)"
+                
+                # Verify this is a valid pylon SDK installation
+                if (Test-Path "$candidateDir\include\pylon\PylonIncludes.h") {
+                  $pylonDir = $candidateDir
+                  Write-Host "Valid pylon SDK found at: $pylonDir"
+                  break
+                } else {
+                  Write-Host "Invalid pylon SDK structure at: $candidateDir"
+                  # Let's also check what's actually in the directory for debugging
+                  if (Test-Path $candidateDir) {
+                    Write-Host "Directory exists but missing PylonIncludes.h. Contents:"
+                    Get-ChildItem -Path $candidateDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
+                  } else {
+                    Write-Host "Directory does not exist: $candidateDir"
+                  }
+                }
+              }
+            }
+          }
+          
+          if ($pylonDir) {
+            # Set environment variable for current session
+            $env:PYLON_DEV_DIR = $pylonDir
+            
+            # Set environment variable for subsequent steps
+            echo "PYLON_DEV_DIR=$pylonDir" >> $env:GITHUB_ENV
+            
+            Write-Host "PYLON_DEV_DIR set to: $pylonDir"
+            
+            # Show some additional info about the installation
+            $pylonVersion = Split-Path (Split-Path $pylonDir -Parent) -Leaf
+            Write-Host "Pylon version directory: $pylonVersion"
+          } else {
+            Write-Host "Error: No valid pylon installation found in any of the checked locations:"
+            foreach ($path in $possiblePaths) {
+              Write-Host "  - $path"
+              if (Test-Path $path) {
+                Write-Host "    Exists, contains:"
+                Get-ChildItem -Path $path -Directory -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      - $($_.Name)" }
+              } else {
+                Write-Host "    Does not exist"
+              }
+            }
+            exit 1
+          }
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
 
