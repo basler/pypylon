@@ -1,0 +1,123 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "1.0.0",
+    "MinRequiredSoftwareVersion": "1.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "UiGraphInputOutput": [
+        {
+          "id": "<GraphInput>",
+          "x": 75.19999999999999,
+          "y": 106.4
+        },
+        {
+          "id": "<GraphOutput>",
+          "x": 981.4000000000005,
+          "y": 87.60000000000014
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "RegionMorphology",
+          "x": 424.20000000000005,
+          "y": 97.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "RegionMorphology",
+              "pinName": "Regions",
+              "pinDirection": "Output"
+            }
+          ]
+        }
+      ],
+      "PylonMetaData": {
+        "ObjectVersion": "1.3.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      }
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "RegionMorphology",
+          "Enabled": true,
+          "NodeTypeID": "D7DA88CD-D685-4D6B-9BDF-C80C02BCBD74",
+          "Type": "Plugin::PylonVToolPackageA::RegionMorphology",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "2.0.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "mop": {
+              "MopVersion": 1,
+              "MorphOp": 2,
+              "MaskShape": 0,
+              "MaskRadius": 3.5,
+              "MaskWidth": 3,
+              "MaskHeight": 3,
+              "FindConnected": false,
+              "MaskLinked": true
+            }
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "Connection",
+          "Source": "<GraphInput>",
+          "Sink": "RegionMorphology",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Regions",
+          "SinkInputPath": "Regions",
+          "ValueTypeID": "9CFA0F2B-5E9C-577C-84B4-C4C3A1C47CF9"
+        },
+        {
+          "Name": "Connection2",
+          "Source": "RegionMorphology",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Regions",
+          "SinkInputPath": "Regions",
+          "ValueTypeID": "83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": [
+            {
+              "Name": "Regions",
+              "Type": "Pylon::DataProcessing::Core::IRegion",
+              "ValueTypeID": "9CFA0F2B-5E9C-577C-84B4-C4C3A1C47CF9"
+            }
+          ]
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "Regions",
+              "Type": "Pylon::DataProcessing::Core::IRegionArray",
+              "ValueTypeID": "83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.0.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 8
+        }
+      }
+    }
+  }
+}

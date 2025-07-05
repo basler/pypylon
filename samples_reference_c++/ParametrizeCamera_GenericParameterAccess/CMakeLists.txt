@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_GenericParameterAccess ParametrizeCamera_GenericParameterAccess.cpp)
+target_link_libraries( ParametrizeCamera_GenericParameterAccess PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_GenericParameterAccess )

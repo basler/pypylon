@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_NativeParameterAccess ParametrizeCamera_NativeParameterAccess.cpp)
+target_link_libraries( ParametrizeCamera_NativeParameterAccess PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_NativeParameterAccess )
