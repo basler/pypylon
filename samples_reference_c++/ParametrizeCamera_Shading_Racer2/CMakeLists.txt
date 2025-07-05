@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_Shading_Racer2 ParametrizeCamera_Shading_Racer2.cpp)
+target_link_libraries( ParametrizeCamera_Shading_Racer2 PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_Shading_Racer2 )

@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainDialog</class>
+ <widget class="QDialog" name="MainDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>769</width>
+    <height>614</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Pylon GUI MultiCam Sample</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,10,1,1,1,1,1,1,1,1,1,0" columnstretch="1,1,1,0,1,1,1">
+   <item row="4" column="4" colspan="3">
+    <widget class="QWidget" name="image_2" native="true"/>
+   </item>
+   <item row="3" column="6">
+    <widget class="QLineEdit" name="editUserID_2">
+     <property name="toolTip">
+      <string>Check for a device user ID in the camera list and enter it here. You may need to specify a device user ID in the pylon Viewer first.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Exposure Time</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="6">
+    <widget class="QComboBox" name="cameraList"/>
+   </item>
+   <item row="11" column="1" colspan="2">
+    <widget class="QComboBox" name="triggerSource_1"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="editSN_1">
+     <property name="toolTip">
+      <string>Check for a camera serial number in the camera list and enter it here.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="pixelFormatLabel_1">
+     <property name="text">
+      <string>Pixel Format</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="6" column="6">
+    <widget class="QPushButton" name="stop_2">
+     <property name="text">
+      <string>Stop</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Gain</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QSlider" name="gain_1">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="gainLabel_1">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLineEdit" name="editUserID_1">
+     <property name="toolTip">
+      <string>Check for a device user ID in the camera list and enter it here. You may need to specify a device user ID in the pylon Viewer first.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="4">
+    <widget class="QPushButton" name="close_2">
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="5">
+    <widget class="QLineEdit" name="editSN_2">
+     <property name="toolTip">
+      <string>Check for a camera serial number in the camera list and enter it here.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QWidget" name="image_1" native="true"/>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="openSelected_2">
+     <property name="text">
+      <string>Open Selected</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="triggerModeLabel_1">
+     <property name="text">
+      <string>Frame Start Trigger</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QPushButton" name="singleShot_1">
+     <property name="text">
+      <string>Single Shot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1" colspan="2">
+    <widget class="QComboBox" name="triggerMode_1"/>
+   </item>
+   <item row="2" column="5">
+    <widget class="QPushButton" name="openBySN_2">
+     <property name="text">
+      <string>Open by SN</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="softwareTriggerLabel_1">
+     <property name="text">
+      <string>Software Trigger</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="6">
+    <widget class="QPushButton" name="openByUserID_2">
+     <property name="text">
+      <string>Open by User ID</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="4" colspan="3">
+    <widget class="QLineEdit" name="statusbar_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="openSelected_1">
+     <property name="text">
+      <string>Open Selected</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QPushButton" name="continuous_1">
+     <property name="text">
+      <string>Continuous Shot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="stop_1">
+     <property name="text">
+      <string>Stop</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1" colspan="2">
+    <widget class="QComboBox" name="pixelFormat_1"/>
+   </item>
+   <item row="7" column="4">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Exposure Time</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="scanButton">
+     <property name="text">
+      <string>Discover Cameras</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="QLineEdit" name="statusbar_1">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="5" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QSlider" name="exposure_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="exposureLabel_2">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="13" column="1" colspan="2">
+    <widget class="QCheckBox" name="invertPixel_1">
+     <property name="text">
+      <string>Enable</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="4">
+    <widget class="QPushButton" name="singleShot_2">
+     <property name="text">
+      <string>Single Shot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1" colspan="2">
+    <widget class="QPushButton" name="softwareTrigger_1">
+     <property name="text">
+      <string>Execute</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="openBySN_1">
+     <property name="text">
+      <string>Open by SN</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QSlider" name="exposure_1">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="exposureLabel_1">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="openByUserID_1">
+     <property name="text">
+      <string>Open by User ID</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="close_1">
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0">
+    <widget class="QLabel" name="invertPixelLabel_1">
+     <property name="text">
+      <string>Invert Pixels</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="triggerSourceLabel_1">
+     <property name="text">
+      <string>Trigger Source</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="5">
+    <widget class="QPushButton" name="continuous_2">
+     <property name="text">
+      <string>Continuous Shot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="5" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QSlider" name="gain_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="gainLabel_2">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="9" column="4">
+    <widget class="QLabel" name="pixelFormatLabel_2">
+     <property name="text">
+      <string>Pixel Format</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="4">
+    <widget class="QLabel" name="triggerModeLabel_2">
+     <property name="text">
+      <string>Frame Start Trigger</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="5" colspan="2">
+    <widget class="QComboBox" name="pixelFormat_2"/>
+   </item>
+   <item row="10" column="5" colspan="2">
+    <widget class="QComboBox" name="triggerMode_2"/>
+   </item>
+   <item row="11" column="5" colspan="2">
+    <widget class="QComboBox" name="triggerSource_2"/>
+   </item>
+   <item row="11" column="4">
+    <widget class="QLabel" name="triggerSourceLabel_2">
+     <property name="text">
+      <string>Trigger Source</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="5">
+    <widget class="QPushButton" name="softwareTrigger_2">
+     <property name="text">
+      <string>Execute</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="4">
+    <widget class="QLabel" name="softwareTriggerLabel_2">
+     <property name="text">
+      <string>Software Trigger</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="4">
+    <widget class="QLabel" name="invertPixelLabel_2">
+     <property name="text">
+      <string>Invert Pixels</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="5">
+    <widget class="QCheckBox" name="invertPixel_2">
+     <property name="text">
+      <string>Enable</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3" rowspan="12">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="4">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Gain</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,261 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "1.0.0",
+    "MinRequiredSoftwareVersion": "1.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "UiGraphInputOutput": [
+        {
+          "id": "<GraphInput>",
+          "x": 75.19999999999999,
+          "y": 106.4
+        },
+        {
+          "id": "<GraphOutput>",
+          "x": 1373.4000000000005,
+          "y": 89.60000000000011
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "RegionFeatureExtraction",
+          "x": 1029.5999999999997,
+          "y": -39.799999999999955,
+          "WatchNodePins": [
+            {
+              "nodeName": "RegionFeatureExtraction",
+              "pinName": "Regions",
+              "pinDirection": "Input"
+            },
+            {
+              "nodeName": "RegionFeatureExtraction",
+              "pinName": "Areas_px",
+              "pinDirection": "Output"
+            }
+          ]
+        },
+        {
+          "id": "MyCamera",
+          "x": 196.8,
+          "y": 138.39999999999998,
+          "WatchNodePins": [
+            {
+              "nodeName": "MyCamera",
+              "pinName": "Image",
+              "pinDirection": "Output"
+            }
+          ]
+        },
+        {
+          "id": "RegionMorphology",
+          "x": 745.2,
+          "y": -3.7999999999998977,
+          "WatchNodePins": [
+            {
+              "nodeName": "RegionMorphology",
+              "pinName": "Regions",
+              "pinDirection": "Output"
+            }
+          ]
+        },
+        {
+          "id": "AbsoluteThresholding",
+          "x": 467.79999999999995,
+          "y": 38.799999999999955,
+          "WatchNodePins": [
+            {
+              "nodeName": "AbsoluteThresholding",
+              "pinName": "Image",
+              "pinDirection": "Input"
+            },
+            {
+              "nodeName": "AbsoluteThresholding",
+              "pinName": "Region",
+              "pinDirection": "Output"
+            }
+          ]
+        }
+      ],
+      "PylonMetaData": {
+        "ObjectVersion": "1.1.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      }
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.1.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "AbsoluteThresholding",
+          "Enabled": true,
+          "NodeTypeID": "71FFB218-2C31-4059-863E-6AF19C448117",
+          "Type": "Plugin::PylonVToolPackageA::ThresholdAbsolute",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.2.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "settings": {
+              "SettingsVersion": 1,
+              "MinGray": 0,
+              "MaxGray": 254
+            }
+          }
+        },
+        {
+          "Name": "MyCamera",
+          "Enabled": true,
+          "NodeTypeID": "846BCA11-6BF2-4895-88C4-FE038F5A659C",
+          "Type": "Plugin::PylonVToolPackageBase::Camera",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.1.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "DeviceProperties": {
+              "DeviceClass": "BaslerCamEmu",
+              "ModelName": "Emulation"
+            },
+            "AcquisitionMode": 1,
+            "FixCorruptImages": 1,
+            "FeatureStreams": {
+              "@CameraDevice": "# {05D8C294-F295-4dfb-9D01-096BD04049F4}\n# GenApi persistence file (version 3.1.0)\n# Device = Basler::BaslerCamEmu -- Basler Cam Emu interface -- Device version = 1.0.1 -- Product GUID = B97DE549-CB9A-44f8-937D-64C48BDECFA3 -- Product version GUID = A2DCDE14-73E4-408a-AFA8-81852ECB5D9A\nGainRaw\t192\nGain\t0.000e+00\nGainAuto\tOff\nBlackLevel\t0.000\nGamma\t1.0000\nDigitalShift\t0\nReverseX\t0\nReverseY\t0\nBinningHorizontalMode\tSum\nBinningHorizontal\t1\nBinningVerticalMode\tSum\nBinningVertical\t1\nWidthMax\t4096\nHeightMax\t4096\nWidth\t800\nHeight\t600\nOffsetX\t0\nOffsetY\t0\nPixelFormat\tMono8\nTestImageSelector\tOff\nImageFilename\t\nImageFileMode\tOn\nImageCompressionMode\tOff\nImageCompressionRateOption\tLossless\nExposureTimeAbs\t10000\nExposureTimeBaseAbs\t1\nExposureTimeRaw\t10000\nExposureTime\t10000.0\nAcquisitionMode\tContinuous\nExposureAuto\tOff\nExposureMode\tTimed\nTriggerSelector\tFrameBurstStart\nTriggerMode\tOff\nTriggerSelector\tFrameBurstEnd\nTriggerMode\tOff\nTriggerSelector\tFrameBurstActive\nTriggerMode\tOff\nTriggerSelector\tFrameStart\nTriggerMode\tOff\nTriggerSelector\tFrameEnd\nTriggerMode\tOff\nTriggerSelector\tFrameActive\nTriggerMode\tOff\nTriggerSelector\tExposureStart\nTriggerMode\tOff\nTriggerSelector\tExposureEnd\nTriggerMode\tOff\nTriggerSelector\tExposureActive\nTriggerMode\tOff\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerSource\tSoftware\nTriggerSelector\tFrameBurstEnd\nTriggerSource\tSoftware\nTriggerSelector\tFrameBurstActive\nTriggerSource\tSoftware\nTriggerSelector\tFrameStart\nTriggerSource\tSoftware\nTriggerSelector\tFrameEnd\nTriggerSource\tSoftware\nTriggerSelector\tFrameActive\nTriggerSource\tSoftware\nTriggerSelector\tExposureStart\nTriggerSource\tSoftware\nTriggerSelector\tExposureEnd\nTriggerSource\tSoftware\nTriggerSelector\tExposureActive\nTriggerSource\tSoftware\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameBurstEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameBurstActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerDelay\t0.0\nTriggerSelector\tFrameBurstEnd\nTriggerDelay\t0.0\nTriggerSelector\tFrameBurstActive\nTriggerDelay\t0.0\nTriggerSelector\tFrameStart\nTriggerDelay\t0.0\nTriggerSelector\tFrameEnd\nTriggerDelay\t0.0\nTriggerSelector\tFrameActive\nTriggerDelay\t0.0\nTriggerSelector\tExposureStart\nTriggerDelay\t0.0\nTriggerSelector\tExposureEnd\nTriggerDelay\t0.0\nTriggerSelector\tExposureActive\nTriggerDelay\t0.0\nTriggerSelector\tFrameStart\nAcquisitionFrameRateEnable\t1\nAcquisitionStatusSelector\tFrameTriggerWait\nLineSelector\tLine1\nLineInverter\t0\nLineSelector\tLine2\nLineInverter\t0\nLineSelector\tLine3\nLineInverter\t0\nLineSelector\tLine1\nLineSelector\tLine1\nLineMode\tInput\nLineSelector\tLine2\nLineMode\tInput\nLineSelector\tLine3\nLineMode\tInput\nLineSelector\tLine1\nLineSelector\tLine1\nLineSource\tOff\nLineSelector\tLine2\nLineSource\tOff\nLineSelector\tLine3\nLineSource\tOff\nLineSelector\tLine1\nUserOutputSelector\tUserOutput1\nUserOutputValue\t0\nUserOutputSelector\tUserOutput2\nUserOutputValue\t0\nUserOutputSelector\tUserOutput3\nUserOutputValue\t0\nUserOutputSelector\tUserOutput1\nDeviceUserID\t\nDeviceFirmwareVersionOverride\t1.1\nDeviceDelayRegister\t0\nForceFailedBufferCount\t100\n"
+            }
+          }
+        },
+        {
+          "Name": "RegionFeatureExtraction",
+          "Enabled": true,
+          "NodeTypeID": "C1CDD06B-D169-4EC6-AEC0-A4BC60B1D2A4",
+          "Type": "Plugin::PylonVToolPackageA::FeatureExtraction",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.2.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "RegionFeatures": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "Name": "RegionMorphology",
+          "Enabled": true,
+          "NodeTypeID": "D7DA88CD-D685-4D6B-9BDF-C80C02BCBD74",
+          "Type": "Plugin::PylonVToolPackageA::RegionMorphology",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.2.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "mop": {
+              "MopVersion": 1,
+              "MorphOp": 5,
+              "MaskShape": 0,
+              "MaskRadius": 3.5,
+              "MaskWidth": 3,
+              "MaskHeight": 3,
+              "FindConnected": true
+            }
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "Connection",
+          "Source": "MyCamera",
+          "Sink": "AbsoluteThresholding",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image"
+        },
+        {
+          "Name": "Connection2",
+          "Source": "AbsoluteThresholding",
+          "Sink": "RegionMorphology",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Region",
+          "SinkInputPath": "Regions"
+        },
+        {
+          "Name": "Connection3",
+          "Source": "RegionMorphology",
+          "Sink": "RegionFeatureExtraction",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Regions",
+          "SinkInputPath": "Regions"
+        },
+        {
+          "Name": "Connection4",
+          "Source": "RegionFeatureExtraction",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Centers_px",
+          "SinkInputPath": "Centers"
+        },
+        {
+          "Name": "Connection5",
+          "Source": "MyCamera",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image"
+        },
+        {
+          "Name": "Connection6",
+          "Source": "RegionFeatureExtraction",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "AlignedBoxes_px",
+          "SinkInputPath": "Boxes"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": []
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "Centers",
+              "Type": "Pylon::DataProcessing::Core::IPointFArray"
+            },
+            {
+              "Name": "Boxes",
+              "Type": "Pylon::DataProcessing::Core::IRectangleFArray"
+            },
+            {
+              "Name": "Image",
+              "Type": "Pylon::DataProcessing::Core::IImage"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.0.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 8
+        }
+      }
+    }
+  }
+}

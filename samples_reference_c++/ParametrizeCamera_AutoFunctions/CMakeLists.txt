@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_AutoFunctions ParametrizeCamera_AutoFunctions.cpp)
+target_link_libraries( ParametrizeCamera_AutoFunctions PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_AutoFunctions )

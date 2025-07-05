@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_Configurations ParametrizeCamera_Configurations.cpp)
+target_link_libraries( ParametrizeCamera_Configurations PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_Configurations )

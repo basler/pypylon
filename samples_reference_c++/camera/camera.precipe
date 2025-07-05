@@ -1,0 +1,112 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "1.0.0",
+    "MinRequiredSoftwareVersion": "1.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "UiGraphInputOutput": [
+        {
+          "id": "<GraphInput>",
+          "x": 32.0,
+          "y": 48.0
+        },
+        {
+          "id": "<GraphOutput>",
+          "x": 492.0,
+          "y": 91.0
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "MyCamera",
+          "x": 165.0,
+          "y": 93.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "MyCamera",
+              "pinName": "Image",
+              "pinDirection": "Output"
+            }
+          ]
+        }
+      ],
+      "PylonMetaData": {
+        "ObjectVersion": "1.1.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      }
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.1.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "MyCamera",
+          "Enabled": true,
+          "NodeTypeID": "846BCA11-6BF2-4895-88C4-FE038F5A659C",
+          "Type": "Plugin::PylonVToolPackageBase::Camera",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.1.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "DeviceProperties": {
+              "SerialNumber": "0815-0000",
+              "ModelName": "Emulation",
+              "VendorName": "Basler",
+              "UserDefinedName": "",
+              "DeviceClass": "BaslerCamEmu",
+              "InterfaceID": "DefaultInterface",
+              "TLType": "CamEmu"
+            },
+            "AcquisitionMode": 1,
+            "FixCorruptImages": 1,
+            "FeatureStreams": {
+              "@CameraInstance": "# {05D8C294-F295-4dfb-9D01-096BD04049F4}\n# GenApi persistence file (version 3.1.0)\n# Device = Basler::InstantCameraParams -- Interface to instant camera parameters -- Device version = 0.0.1 -- Product GUID = de84890e-dd06-40c5-964b-f8979b0c9dd4 -- Product version GUID = 7d810a53-c787-46eb-a3ef-87720f01c5ee\nMaxNumBuffer\t10\nMaxNumQueuedBuffer\t50\nMaxNumGrabResults\t4294967295\nChunkNodeMapsEnable\t1\nStaticChunkNodeMapPoolSize\t0\nClearBufferModeEnable\t0\nAcquisitionStartStopExecutionEnable\t1\nInternalGrabEngineThreadPriorityOverride\t0\n",
+              "@StreamGrabber0": "# {05D8C294-F295-4dfb-9D01-096BD04049F4}\n# GenApi persistence file (version 3.1.0)\n# Device = Basler::BaslerCamEmu -- Interface to the CamEmu stream parameters -- Device version = 1.0.0 -- Product GUID = F7355D57-5D3F-4102-A956-16306CE5FC66 -- Product version GUID = ED8256A1-5099-4096-A451-2D392B502F3E\n",
+              "@CameraDevice": "# {05D8C294-F295-4dfb-9D01-096BD04049F4}\n# GenApi persistence file (version 3.1.0)\n# Device = Basler::BaslerCamEmu -- Basler Cam Emu interface -- Device version = 1.0.1 -- Product GUID = B97DE549-CB9A-44f8-937D-64C48BDECFA3 -- Product version GUID = A2DCDE14-73E4-408a-AFA8-81852ECB5D9A\nGainRaw\t326\nGain\t0.000e+00\nGainAuto\tOff\nBlackLevel\t0.000\nGamma\t1.0000\nDigitalShift\t0\nReverseX\t0\nReverseY\t0\nBinningHorizontalMode\tSum\nBinningHorizontal\t1\nBinningVerticalMode\tSum\nBinningVertical\t1\nWidthMax\t4096\nHeightMax\t4096\nWidth\t640\nHeight\t480\nOffsetX\t0\nOffsetY\t0\nPixelFormat\tMono8\nTestImageSelector\tTestimage1\nImageFilename\t\nImageFileMode\tOff\nImageCompressionMode\tOff\nImageCompressionRateOption\tLossless\nExposureTimeAbs\t10000\nExposureTimeBaseAbs\t1\nExposureTimeRaw\t10000\nExposureTime\t10000.0\nAcquisitionMode\tContinuous\nExposureAuto\tOff\nExposureMode\tTimed\nTriggerSelector\tFrameBurstStart\nTriggerMode\tOff\nTriggerSelector\tFrameBurstEnd\nTriggerMode\tOff\nTriggerSelector\tFrameBurstActive\nTriggerMode\tOff\nTriggerSelector\tFrameStart\nTriggerMode\tOff\nTriggerSelector\tFrameEnd\nTriggerMode\tOff\nTriggerSelector\tFrameActive\nTriggerMode\tOff\nTriggerSelector\tExposureStart\nTriggerMode\tOff\nTriggerSelector\tExposureEnd\nTriggerMode\tOff\nTriggerSelector\tExposureActive\nTriggerMode\tOff\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerSource\tSoftware\nTriggerSelector\tFrameBurstEnd\nTriggerSource\tSoftware\nTriggerSelector\tFrameBurstActive\nTriggerSource\tSoftware\nTriggerSelector\tFrameStart\nTriggerSource\tSoftware\nTriggerSelector\tFrameEnd\nTriggerSource\tSoftware\nTriggerSelector\tFrameActive\nTriggerSource\tSoftware\nTriggerSelector\tExposureStart\nTriggerSource\tSoftware\nTriggerSelector\tExposureEnd\nTriggerSource\tSoftware\nTriggerSelector\tExposureActive\nTriggerSource\tSoftware\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameBurstEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameBurstActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureStart\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureEnd\nTriggerActivation\tRisingEdge\nTriggerSelector\tExposureActive\nTriggerActivation\tRisingEdge\nTriggerSelector\tFrameStart\nTriggerSelector\tFrameBurstStart\nTriggerDelay\t0.0\nTriggerSelector\tFrameBurstEnd\nTriggerDelay\t0.0\nTriggerSelector\tFrameBurstActive\nTriggerDelay\t0.0\nTriggerSelector\tFrameStart\nTriggerDelay\t0.0\nTriggerSelector\tFrameEnd\nTriggerDelay\t0.0\nTriggerSelector\tFrameActive\nTriggerDelay\t0.0\nTriggerSelector\tExposureStart\nTriggerDelay\t0.0\nTriggerSelector\tExposureEnd\nTriggerDelay\t0.0\nTriggerSelector\tExposureActive\nTriggerDelay\t0.0\nTriggerSelector\tFrameStart\nAcquisitionFrameRateEnable\t1\nAcquisitionStatusSelector\tFrameTriggerWait\nLineSelector\tLine1\nLineInverter\t0\nLineSelector\tLine2\nLineInverter\t0\nLineSelector\tLine3\nLineInverter\t0\nLineSelector\tLine1\nLineSelector\tLine1\nLineMode\tInput\nLineSelector\tLine2\nLineMode\tInput\nLineSelector\tLine3\nLineMode\tInput\nLineSelector\tLine1\nLineSelector\tLine1\nLineSource\tOff\nLineSelector\tLine2\nLineSource\tOff\nLineSelector\tLine3\nLineSource\tOff\nLineSelector\tLine1\nUserOutputSelector\tUserOutput1\nUserOutputValue\t0\nUserOutputSelector\tUserOutput2\nUserOutputValue\t0\nUserOutputSelector\tUserOutput3\nUserOutputValue\t0\nUserOutputSelector\tUserOutput1\nDeviceUserID\t\nDeviceFirmwareVersionOverride\t1.1\nDeviceDelayRegister\t0\nForceFailedBufferCount\t100\n",
+              "@DeviceTransportLayer": "# {05D8C294-F295-4dfb-9D01-096BD04049F4}\n# GenApi persistence file (version 3.1.0)\n# Device = :: --  -- Device version = 0.0.0 -- Product GUID =  -- Product version GUID = \n"
+            }
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "Connection2",
+          "Source": "MyCamera",
+          "Sink": "<GraphOutput>",
+          "QueueMode": 0,
+          "MaxSize": 1,
+          "SourceOutputPath": "Image",
+          "SinkInputPath": "Image"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": []
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "Image",
+              "Type": "Pylon::DataProcessing::Core::IImage"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.0.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 8
+        }
+      }
+    }
+  }
+}

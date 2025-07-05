@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_LookupTable ParametrizeCamera_LookupTable.cpp)
+target_link_libraries( ParametrizeCamera_LookupTable PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_LookupTable )

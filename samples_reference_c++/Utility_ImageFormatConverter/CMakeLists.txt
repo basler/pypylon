@@ -1,0 +1,3 @@
+add_executable( Utility_ImageFormatConverter Utility_ImageFormatConverter.cpp)
+target_link_libraries( Utility_ImageFormatConverter PRIVATE pylon::pylon )
+install( TARGETS Utility_ImageFormatConverter )

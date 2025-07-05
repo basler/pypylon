@@ -1,0 +1,3 @@
+add_executable( ParametrizeCamera_SerialCommunication ParametrizeCamera_SerialCommunication.cpp)
+target_link_libraries( ParametrizeCamera_SerialCommunication PRIVATE pylon::pylon )
+install( TARGETS ParametrizeCamera_SerialCommunication )
