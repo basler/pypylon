@@ -59,41 +59,14 @@ endif()
 
 message(STATUS "Building for platform: ${PYPYLON_PLATFORM} ${PYPYLON_ARCH}")
 
-# Find pylon using official CMake configuration directly
-# Set up pylon installation hints based on platform
-if(WIN32)
-    set(PYLON_HINTS
-        "$ENV{PYLON_ROOT}"
-        "$ENV{PYLON_DEV_DIR}"
-        "C:/Program Files/Basler/pylon 8"
-        "C:/Program Files (x86)/Basler/pylon 8"
-    )
-elseif(APPLE)
-    set(PYLON_HINTS
-        "$ENV{PYLON_ROOT}"
-        "/Library/Frameworks/pylon.framework"
-        "/opt/pylon"
-        "/usr/local/pylon"
-    )
-elseif(UNIX)
-    set(PYLON_HINTS
-        "$ENV{PYLON_ROOT}"
-        "/opt/pylon"
-        "/usr/local/pylon"
-        "/usr/pylon"
-    )
-endif()
+# Use the same approach as official pylon samples
+# for Unix system. All other OS PYLON_ROOT will be empty
+list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_ROOT})
+# for Windows system. All other OS PYLON_DEV_DIR will be empty
+list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_DEV_DIR})
 
 # Find pylon using the official CMake configuration
-find_package(pylon REQUIRED
-    HINTS ${PYLON_HINTS}
-    PATH_SUFFIXES 
-        lib/cmake/pylon
-        lib64/cmake/pylon
-        cmake
-        share/cmake/pylon
-        share/pylon/cmake
-)
+find_package(pylon REQUIRED)
 
 message(STATUS "Found pylon: ${pylon_DIR}")
 
