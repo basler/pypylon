@@ -188,6 +188,9 @@ if(UNIX AND NOT APPLE)
     else()
         list(APPEND CMAKE_SWIG_FLAGS -DSWIGWORDSIZE32)
     endif()
+elseif(WIN32)
+    # Also define _WIN32 for the genicam.i file
+    list(APPEND CMAKE_SWIG_FLAGS -D_WIN32)
 endif()
 
 # Function to create a SWIG Python module
