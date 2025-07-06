@@ -1,3 +1,17 @@
+Version 4.x.y
+    - Date 2025-07-06
+    - Migrated from setuptools to scikit-build-core for improved build reliability
+    - Fixed Windows build issues in GitHub Actions:
+      - Automatic pylon installation detection and environment setup
+      - Fixed CMake configuration and runtime dependency paths
+      - Added Windows-specific SWIG flags
+    - Enhanced Python limited API support with proper SABI component configuration
+    - Improved build diagnostics and error reporting
+    - Added API compatibility checking tools in scripts/modernize:
+      - pypylon_api_dumper.py for comprehensive API extraction
+      - pypylon_api_differ.py for detailed API comparison
+      - pypylon_compatibility_checker.py for automated compatibility workflows
+
 Version 4.2.0
     - Date 2025-06-02
     - Updated to pylon Software Suite 8.1.0 on all platforms.
