@@ -62,7 +62,6 @@ py-api = "cp39"  # Limited API for Python 3.9+
 packages = ["src/pypylon"]
 
 [tool.scikit-build.cmake.define]
-PYPYLON_USE_LIMITED_API = "ON"
 PYPYLON_INCLUDE_DATA_PROCESSING = "ON"
 
 # Additional CMake arguments (can be extended via CMAKE_ARGS environment variable)

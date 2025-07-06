@@ -38,3 +38,7 @@ wheelhouse
 .DS_Store
 src/pypylon/_version.py
 licenses/
+
+# pixi environments
+.pixi
+*.egg-info

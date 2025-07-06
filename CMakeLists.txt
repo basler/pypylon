@@ -30,8 +30,31 @@ option(PYPYLON_USE_LIMITED_API "Use Python Limited API for stable ABI" ON)
 option(PYPYLON_INCLUDE_DATA_PROCESSING "Include pylon data processing support" ON)
 set(PYPYLON_MIN_LIMITED_API_VERSION "0x03090000" CACHE STRING "Minimum Python version for limited API")
 
-# Find required packages
-find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+# Find required packages - use scikit-build-core's SABI component if available
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module ${SKBUILD_SABI_COMPONENT})
+
+# Check if we're using limited API
+if(NOT "${SKBUILD_SABI_VERSION}" STREQUAL "")
+    set(Python_LIMITED_API TRUE)
+    add_compile_definitions(Py_LIMITED_API=${PYPYLON_MIN_LIMITED_API_VERSION})
+    message(STATUS "Using Python Limited API: ${PYPYLON_MIN_LIMITED_API_VERSION}")
+    message(STATUS "SABI Version: ${SKBUILD_SABI_VERSION}")
+    message(STATUS "SABI Component: ${SKBUILD_SABI_COMPONENT}")
+else()
+    message(STATUS "Using regular Python API")
+endif()
+
+# For limited API builds, ensure we're using the correct Python library
+if(PYPYLON_USE_LIMITED_API AND Python_VERSION VERSION_GREATER_EQUAL "3.9")
+    # When using limited API, we need to ensure the Python library is correctly configured
+    if(TARGET Python::Module)
+        # Get the Python library path and ensure it's correct
+        get_target_property(PYTHON_LIBRARY Python::Module IMPORTED_LOCATION)
+        if(PYTHON_LIBRARY)
+            message(STATUS "Python library for limited API: ${PYTHON_LIBRARY}")
+        endif()
+    endif()
+endif()
 find_package(SWIG 4.3 REQUIRED)
 
 # Include SWIG
@@ -116,6 +139,17 @@ if(PYPYLON_USE_LIMITED_API AND Python_VERSION VERSION_GREATER_EQUAL "3.9")
     set(Python_LIMITED_API TRUE)
     add_compile_definitions(Py_LIMITED_API=${PYPYLON_MIN_LIMITED_API_VERSION})
     message(STATUS "Using Python Limited API: ${PYPYLON_MIN_LIMITED_API_VERSION}")
+    
+    # For limited API builds, we might need to adjust the Python library configuration
+    if(TARGET Python::Module)
+        # Ensure the Python library is correctly set for limited API
+        get_target_property(PYTHON_LIBRARY Python::Module IMPORTED_LOCATION)
+        if(PYTHON_LIBRARY)
+            message(STATUS "Python library configured: ${PYTHON_LIBRARY}")
+        endif()
+    endif()
+else()
+    message(STATUS "Python Limited API disabled")
 endif()
 
 # Common compile definitions
@@ -215,11 +249,22 @@ function(add_swig_python_module module_name swig_file)
     )
     
     # Link with Python and pylon using official targets
-    target_link_libraries(${module_name} 
-        PRIVATE 
-        Python::Module
-        pylon::pylon
-    )
+    # Use the appropriate Python target based on SABI component
+    if(NOT "${SKBUILD_SABI_COMPONENT}" STREQUAL "")
+        target_link_libraries(${module_name} 
+            PRIVATE 
+            Python::SABIModule
+            pylon::pylon
+        )
+        message(STATUS "Linking ${module_name} with Python::SABIModule")
+    else()
+        target_link_libraries(${module_name} 
+            PRIVATE 
+            Python::Module
+            pylon::pylon
+        )
+        message(STATUS "Linking ${module_name} with Python::Module")
+    endif()
     
     # CRUCIAL: Tell SWIG to use target include directories (requires CMake 3.13+)
     set_property(TARGET ${module_name} PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
