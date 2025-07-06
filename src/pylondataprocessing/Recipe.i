@@ -88,4 +88,95 @@
         Pylon::DataProcessing::CUpdate result = self->TriggerUpdate(inputCollection, timeoutMs, timeoutHandling, pObserver, userProvidedId);
         return result;
     }
+
+    %pythoncode %{
+        def __getattr__(self, attribute):
+            if attribute.startswith("_") or attribute in ("thisown", "this"):
+                return object.__getattribute__(self, attribute)
+            
+            # Return type-specific enhanced wrapper with modern C++ API methods
+            # Use pylon module's factory functions to ensure consistent types
+            try:
+                import pypylon.pylon as pylon
+                wrapper = pylon.CreateParameterWrapperTyped(self.GetParameters().GetNodeMap(), attribute)
+                if wrapper is None:
+                    raise AttributeError(f"Parameter '{attribute}' not found or not available")
+                return wrapper
+            except Exception as e:
+                raise AttributeError(f"Failed to access parameter '{attribute}': {str(e)}")
+        
+        def __setattr__(self, attribute, val):
+            if attribute.startswith("_") or attribute in ("thisown", "this"):
+                object.__setattr__(self, attribute, val)
+            else:
+                # Support setting parameter values directly via attribute access
+                try:
+                    import pypylon.pylon as pylon
+                    wrapper = pylon.CreateParameterWrapperSafe(self.GetParameters().GetNodeMap(), attribute)
+                    if wrapper and wrapper.IsWritable():
+                        # Try to determine the appropriate setter based on value type
+                        if isinstance(val, bool):
+                            wrapper.SetValue(val)
+                        elif isinstance(val, (int, float, str)):
+                            wrapper.SetValue(val)
+                        else:
+                            wrapper.SetValue(str(val))
+                    else:
+                        if wrapper and not wrapper.IsWritable():
+                            raise AttributeError(f"Parameter '{attribute}' is not writable")
+                        else:
+                            object.__setattr__(self, attribute, val)
+                except Exception as e:
+                    raise AttributeError(f"Failed to set parameter '{attribute}': {str(e)}") from e
+        
+        def __dir__(self):
+            """Provide autocompletion support by listing all available parameters."""
+            l = []
+            l += [x for x in dir(type(self))]
+            l += [x for x in self.__dict__.keys()]
+            try:
+                nodes = self.GetParameters().GetNodeMap().GetNodes()
+                features = filter(lambda n: n.GetNode().IsFeature(), nodes)
+                # Skip ICategory nodes as they are just organizational containers
+                l += [x.GetNode().GetName() for x in features 
+                      if x.GetNode().GetPrincipalInterfaceType() != genicam.intfICategory]
+            except:
+                pass
+            return sorted(set(l))
+        
+        def GetParameter(self, name):
+            """Get a parameter wrapper with extended methods."""
+            import pypylon.pylon as pylon
+            return pylon.CreateParameterWrapperSafe(self.GetParameters().GetNodeMap(), name)
+        
+        def HasParameter(self, name):
+            """Check if a parameter exists and is valid."""
+            try:
+                import pypylon.pylon as pylon
+                wrapper = pylon.CreateParameterWrapperSafe(self.GetParameters().GetNodeMap(), name)
+                return wrapper is not None and wrapper.IsValid()
+            except:
+                return False
+        
+        def IsParameterWritable(self, name):
+            """Check if a parameter is writable."""
+            try:
+                import pypylon.pylon as pylon
+                wrapper = pylon.CreateParameterWrapperSafe(self.GetParameters().GetNodeMap(), name)
+                return wrapper is not None and wrapper.IsWritable()
+            except:
+                return False
+        
+        def TrySetParameter(self, name, value):
+            """Try to set a parameter value safely."""
+            try:
+                import pypylon.pylon as pylon
+                wrapper = pylon.CreateParameterWrapperSafe(self.GetParameters().GetNodeMap(), name)
+                if wrapper and wrapper.IsWritable():
+                    wrapper.SetValue(value)
+                    return True
+                return False
+            except:
+                return False
+    %}
 }

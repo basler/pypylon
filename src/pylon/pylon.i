@@ -36,6 +36,91 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %module(directors="1", package="pypylon", docstring=PYLON_DOCSTRING) pylon
 %include "DoxyPylon.i";
 
+// Module-level Python code for enhanced nodemap wrappers
+%pythoncode %{
+# Enhanced NodeMap wrapper classes for autocompletion and parameter access
+class _NodeMapWrapper:
+    """Base wrapper for nodemap providing enhanced parameter access and autocompletion."""
+    
+    def __init__(self, nodemap):
+        self._nodemap = nodemap
+    
+    def __getattr__(self, attribute):
+        if attribute.startswith("_") or attribute in ("thisown", "this"):
+            return object.__getattribute__(self, attribute)
+        
+        # Return type-specific enhanced wrapper with modern C++ API methods
+        try:
+            wrapper = CreateParameterWrapperTyped(self._nodemap, attribute)
+            if wrapper is None:
+                raise AttributeError(f"Parameter '{attribute}' not found or not available")
+            return wrapper
+        except Exception as e:
+            raise AttributeError(f"Failed to access parameter '{attribute}': {str(e)}")
+    
+    def __setattr__(self, attribute, val):
+        if attribute.startswith("_") or attribute in ("thisown", "this"):
+            object.__setattr__(self, attribute, val)
+        else:
+            # Support setting parameter values directly via attribute access
+            try:
+                wrapper = CreateParameterWrapperSafe(self._nodemap, attribute)
+                if wrapper and wrapper.IsWritable():
+                    # Try to determine the appropriate setter based on value type
+                    if isinstance(val, bool):
+                        wrapper.SetValue(val)
+                    elif isinstance(val, (int, float, str)):
+                        wrapper.SetValue(val)
+                    else:
+                        wrapper.SetValue(str(val))
+                else:
+                    if wrapper and not wrapper.IsWritable():
+                        raise AttributeError(f"Parameter '{attribute}' is not writable")
+                    else:
+                        object.__setattr__(self, attribute, val)
+            except Exception as e:
+                raise AttributeError(f"Failed to set parameter '{attribute}': {str(e)}") from e
+    
+    def __dir__(self):
+        """Provide autocompletion support by listing all available parameters."""
+        l = []
+        l += [x for x in dir(type(self))]
+        l += [x for x in self.__dict__.keys()]
+        try:
+            nodes = self._nodemap.GetNodes()
+            features = filter(lambda n: n.GetNode().IsFeature(), nodes)
+            # Skip ICategory nodes as they are just organizational containers
+            l += [x.GetNode().GetName() for x in features 
+                  if x.GetNode().GetPrincipalInterfaceType() != genicam.intfICategory]
+        except:
+            pass
+        return sorted(set(l))
+    
+    def GetParameter(self, name):
+        """Get a parameter wrapper with extended methods."""
+        return CreateParameterWrapperSafe(self._nodemap, name)
+    
+    def HasParameter(self, name):
+        """Check if a parameter exists and is valid."""
+        try:
+            wrapper = CreateParameterWrapperSafe(self._nodemap, name)
+            return wrapper is not None and wrapper.IsValid()
+        except:
+            return False
+
+class _StreamGrabberWrapper(_NodeMapWrapper):
+    """Enhanced StreamGrabber nodemap wrapper."""
+    pass
+
+class _TransportLayerWrapper(_NodeMapWrapper):
+    """Enhanced TransportLayer nodemap wrapper."""
+    pass
+
+class _EventGrabberWrapper(_NodeMapWrapper):
+    """Enhanced EventGrabber nodemap wrapper."""
+    pass
+%}
+
 // Ignore problematic constructs BEFORE SWIG sees them
 %ignore operator[];
 %ignore operator++;
@@ -576,6 +661,95 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 
 %enddef
 
+// Enhanced version with modern C++ API methods
+%define GENICAM_EX_PROP_ENHANCED(name, type)
+    %ignore name;
+
+    type& _GetBaseType_##name()
+    {
+        return static_cast<type&>($self->name);
+    }
+    
+    // Modern C++ API methods
+    bool _Is##name##Writable() const {
+        return GENAPI_NAMESPACE::IsWritable(&($self->name));
+    }
+    
+    bool _Is##name##Readable() const {
+        return GENAPI_NAMESPACE::IsReadable(&($self->name));
+    }
+    
+    bool _Is##name##Valid() const {
+        return GENAPI_NAMESPACE::IsValid(&($self->name));
+    }
+    
+    bool _Is##name##Implemented() const {
+        return GENAPI_NAMESPACE::IsImplemented(&($self->name));
+    }
+    
+    bool _Is##name##Available() const {
+        return GENAPI_NAMESPACE::IsAvailable(&($self->name));
+    }
+
+    %pythoncode
+    %{
+        class _Enhanced##name##Property:
+            def __init__(self, parent):
+                self._parent = parent
+            
+            @property
+            def Value(self):
+                return self._parent._GetBaseType_##name().GetValue()
+            
+            @Value.setter
+            def Value(self, val):
+                self._parent._GetBaseType_##name().SetValue(val)
+            
+            @property
+            def Min(self):
+                return self._parent._GetBaseType_##name().GetMin()
+            
+            @property
+            def Max(self):
+                return self._parent._GetBaseType_##name().GetMax()
+            
+            def IsWritable(self):
+                return self._parent._Is##name##Writable()
+            
+            def IsReadable(self):
+                return self._parent._Is##name##Readable()
+            
+            def IsValid(self):
+                return self._parent._Is##name##Valid()
+            
+            def IsImplemented(self):
+                return self._parent._Is##name##Implemented()
+            
+            def IsAvailable(self):
+                return self._parent._Is##name##Available()
+            
+            def SetToMinimum(self):
+                self._parent._GetBaseType_##name().SetValue(self.Min)
+            
+            def SetToMaximum(self):
+                self._parent._GetBaseType_##name().SetValue(self.Max)
+            
+            # Backward compatibility
+            def SetValue(self, val):
+                self.Value = val
+                
+            def GetValue(self):
+                return self.Value
+        
+        def _Get_##name(self):
+           return self._Enhanced##name##Property(self)
+        def _Set_##name(self, value):
+           self._Enhanced##name##Property(self).Value = value
+        name = property(_Get_##name, _Set_##name )
+    %}
+
+%enddef
+
 // ignore assignment operator in all classes
 %ignore *::operator=;
 
@@ -612,6 +786,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "WaitObject.i"
 %include "WaitObjects.i"
 %include "InstantCameraParams.i"
+%include "NodeWrapper.i"
 %include "InstantCamera.i"
 %include "InstantCameraArray.i"
 %include "ImageEventHandler.i"

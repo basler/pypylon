@@ -31,6 +31,89 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %module(directors="1", package="pypylon", docstring=PYLONDP_DOCSTRING) pylondataprocessing
 %include "DoxyPylonDataProcessing.i";
 
+// Define a guard to prevent wrapper classes from being defined in pylondataprocessing
+#define PYPYLON_PYLONDATAPROCESSING_MODULE
+
+// Include NodeWrapper functionality for enhanced parameter access
+%include "../pylon/NodeWrapper.i"
+
+// Import wrapper classes from pylon module to ensure type consistency
+%pythoncode %{
+# Import wrapper classes from pylon module to ensure type consistency
+import pypylon.pylon as pylon
+
+# Enhanced NodeMap wrapper classes for autocompletion and parameter access
+class _DataProcessingNodeMapWrapper:
+    """Base wrapper for dataprocessing nodemap providing enhanced parameter access and autocompletion."""
+    
+    def __init__(self, recipe):
+        self._recipe = recipe
+    
+    def __getattr__(self, attribute):
+        if attribute.startswith("_") or attribute in ("thisown", "this"):
+            return object.__getattribute__(self, attribute)
+        
+        # Return type-specific enhanced wrapper with modern C++ API methods
+        # Use pylon module's factory functions to ensure consistent types
+        try:
+            wrapper = pylon.CreateParameterWrapperTyped(self._recipe.GetParameters().GetNodeMap(), attribute)
+            if wrapper is None:
+                raise AttributeError(f"Parameter '{attribute}' not found or not available")
+            return wrapper
+        except Exception as e:
+            raise AttributeError(f"Failed to access parameter '{attribute}': {str(e)}")
+    
+    def __setattr__(self, attribute, val):
+        if attribute.startswith("_") or attribute in ("thisown", "this"):
+            object.__setattr__(self, attribute, val)
+        else:
+            # Support setting parameter values directly via attribute access
+            try:
+                wrapper = pylon.CreateParameterWrapperSafe(self._recipe.GetParameters().GetNodeMap(), attribute)
+                if wrapper and wrapper.IsWritable():
+                    # Try to determine the appropriate setter based on value type
+                    if isinstance(val, bool):
+                        wrapper.SetValue(val)
+                    elif isinstance(val, (int, float, str)):
+                        wrapper.SetValue(val)
+                    else:
+                        wrapper.SetValue(str(val))
+                else:
+                    if wrapper and not wrapper.IsWritable():
+                        raise AttributeError(f"Parameter '{attribute}' is not writable")
+                    else:
+                        object.__setattr__(self, attribute, val)
+            except Exception as e:
+                raise AttributeError(f"Failed to set parameter '{attribute}': {str(e)}") from e
+    
+    def __dir__(self):
+        """Provide autocompletion support by listing all available parameters."""
+        l = []
+        l += [x for x in dir(type(self))]
+        l += [x for x in self.__dict__.keys()]
+        try:
+            nodes = self._recipe.GetParameters().GetNodeMap().GetNodes()
+            features = filter(lambda n: n.GetNode().IsFeature(), nodes)
+            # Skip ICategory nodes as they are just organizational containers
+            l += [x.GetNode().GetName() for x in features 
+                  if x.GetNode().GetPrincipalInterfaceType() != genicam.intfICategory]
+        except:
+            pass
+        return sorted(set(l))
+    
+    def GetParameter(self, name):
+        """Get a parameter wrapper with extended methods."""
+        return pylon.CreateParameterWrapperSafe(self._recipe.GetParameters().GetNodeMap(), name)
+    
+    def HasParameter(self, name):
+        """Check if a parameter exists and is valid."""
+        try:
+            wrapper = pylon.CreateParameterWrapperSafe(self._recipe.GetParameters().GetNodeMap(), name)
+            return wrapper is not None and wrapper.IsValid()
+        except:
+            return False
+%}
+
 // Ignore problematic constructs BEFORE SWIG sees them
 %ignore operator[];
 %ignore operator++;
@@ -387,6 +470,8 @@ def needs_numpy(func):
 ///////////////////////////////////
 //// fetch pylon definitions ////
 ///////////////////////////////////
+// Disable NodeWrapper classes for pylondataprocessing module
+#define PYPYLON_NODEWRAPPER_DISABLE
 %import "../pylon/pylon.i"
 
 ////////////////////////////////////////////////////////////////////////////////
