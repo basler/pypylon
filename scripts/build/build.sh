@@ -99,7 +99,7 @@ if [ -z "$DISABLE_TESTS" ]; then
     $PYTHON -m pip wheel . --no-deps --wheel-dir dist
 
     # Install the wheel for testing
-    $PYTHON -m pip install --user --find-links dist pypylon --force-reinstall
+    $PYTHON -m pip install --user --no-index --find-links dist pypylon --force-reinstall
 
     # Run tests using pytest
     $PYTHON -m pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests || echo "Tests completed with issues (non-fatal for now)"
