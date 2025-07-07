@@ -91,6 +91,12 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_ROOT})
 # for Windows system. All other OS PYLON_DEV_DIR will be empty
 list(APPEND CMAKE_PREFIX_PATH $ENV{PYLON_DEV_DIR})
 
+# For macOS, handle framework location
+if(APPLE AND DEFINED ENV{PYLON_FRAMEWORK_LOCATION})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{PYLON_FRAMEWORK_LOCATION}")
+    message(STATUS "Adding PYLON_FRAMEWORK_LOCATION to CMAKE_PREFIX_PATH: $ENV{PYLON_FRAMEWORK_LOCATION}")
+endif()
+
 # For Windows, set pylon_DIR directly to where the CMake config files are located
 if(WIN32 AND DEFINED ENV{PYLON_DEV_DIR})
     set(pylon_DIR "$ENV{PYLON_DEV_DIR}/CMake/pylon")
@@ -101,6 +107,20 @@ endif()
 find_package(pylon REQUIRED)
 
 message(STATUS "Found pylon: ${pylon_DIR}")
+
+# Debug pylon target properties
+if(TARGET pylon::pylon)
+    get_target_property(PYLON_INCLUDE_DIRS pylon::pylon INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "pylon::pylon INTERFACE_INCLUDE_DIRECTORIES: ${PYLON_INCLUDE_DIRS}")
+    
+    get_target_property(PYLON_COMPILE_DEFINITIONS pylon::pylon INTERFACE_COMPILE_DEFINITIONS)
+    message(STATUS "pylon::pylon INTERFACE_COMPILE_DEFINITIONS: ${PYLON_COMPILE_DEFINITIONS}")
+    
+    get_target_property(PYLON_LINK_LIBRARIES pylon::pylon INTERFACE_LINK_LIBRARIES)
+    message(STATUS "pylon::pylon INTERFACE_LINK_LIBRARIES: ${PYLON_LINK_LIBRARIES}")
+else()
+    message(WARNING "pylon::pylon target not found")
+endif()
 
 # Display pylon version info if available
 if(DEFINED pylon_VERSION)
@@ -216,13 +236,15 @@ set(CMAKE_SWIG_FLAGS
 )
 
 # Platform-specific SWIG flags
-if(UNIX AND NOT APPLE)
+if(UNIX)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         list(APPEND CMAKE_SWIG_FLAGS -DSWIGWORDSIZE64)
     else()
         list(APPEND CMAKE_SWIG_FLAGS -DSWIGWORDSIZE32)
     endif()
-elseif(WIN32)
+endif()
+
+if(WIN32)
     # Also define _WIN32 for the genicam.i file
     list(APPEND CMAKE_SWIG_FLAGS -D_WIN32)
 endif()
@@ -269,6 +291,17 @@ function(add_swig_python_module module_name swig_file)
     # CRUCIAL: Tell SWIG to use target include directories (requires CMake 3.13+)
     set_property(TARGET ${module_name} PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
     
+    # For macOS, explicitly add pylon framework include directories to SWIG
+    if(APPLE AND TARGET pylon::pylon)
+        get_target_property(PYLON_INCLUDE_DIRS pylon::pylon INTERFACE_INCLUDE_DIRECTORIES)
+        if(PYLON_INCLUDE_DIRS)
+            foreach(INCLUDE_DIR ${PYLON_INCLUDE_DIRS})
+                set_property(SOURCE ${swig_file} APPEND_STRING PROPERTY SWIG_FLAGS " -I${INCLUDE_DIR}")
+            endforeach()
+            message(STATUS "Added pylon include directories to SWIG for ${module_name}: ${PYLON_INCLUDE_DIRS}")
+        endif()
+    endif()
+    
     # Set rpath for the extension module to find bundled pylon libraries
     if(UNIX AND NOT APPLE)
         set_target_properties(${module_name} PROPERTIES
@@ -286,6 +319,9 @@ function(add_swig_python_module module_name swig_file)
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_BINARY_DIR}/generated
     )
+    
+    # The pylon target should provide its own include directories
+    # No need to add them manually as they're handled by the pylon::pylon target
     
     # Install the module
     install(TARGETS ${module_name} DESTINATION pypylon)

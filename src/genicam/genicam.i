@@ -193,7 +193,7 @@ typedef unsigned long long uintmax_t;
 /* Exact integral types.  */
 
 #if !defined(SWIGWORDSIZE64) && !defined(SWIGWORDSIZE32)
-#error "On linux either SWIGWORDSIZE64 or SWIGWORDSIZE32 must be defined on the command line."
+#error "On Unix systems (Linux/macOS) either SWIGWORDSIZE64 or SWIGWORDSIZE32 must be defined on the command line."
 #endif
 
 /* Signed.  */
