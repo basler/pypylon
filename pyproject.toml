@@ -69,7 +69,7 @@ PYPYLON_INCLUDE_DATA_PROCESSING = "ON"
 
 [tool.cibuildwheel]
 skip = "pp* cp36-* cp37-* cp38-*"
-build-verbosity = "0"
+build-verbosity = "2"
 test-requires = "pytest numpy"
 
 [tool.pytest.ini_options]
