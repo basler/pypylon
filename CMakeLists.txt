@@ -373,45 +373,43 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/
         PATTERN "__pycache__" EXCLUDE
 )
 
-# Install Pylon license files - get path from pylon target
+# Install Pylon license files
 if(DEFINED SKBUILD_METADATA_DIR)
-    # Try to get pylon installation directory from the target
-    get_target_property(PYLON_IMPORTED_LOCATION pylon::pylon IMPORTED_LOCATION)
-    if(PYLON_IMPORTED_LOCATION)
-        get_filename_component(PYLON_LIB_DIR ${PYLON_IMPORTED_LOCATION} DIRECTORY)
-        get_filename_component(PYLON_ROOT_DIR ${PYLON_LIB_DIR} DIRECTORY)
-        if(WIN32)
+    # Get license directory based on platform
+    if(WIN32)
+        if(DEFINED ENV{PYLON_DEV_DIR})
             set(PYLON_LICENSE_DIR "$ENV{PYLON_DEV_DIR}/../Licenses")
-        elseif(APPLE)
-            set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources/licenses")
-        else()
-            set(PYLON_LICENSE_DIR "${PYLON_ROOT_DIR}/share/pylon/licenses")
+        elseif(DEFINED ENV{PYLON_ROOT}) 
+            set(PYLON_LICENSE_DIR "$ENV{PYLON_ROOT}/Licenses")
         endif()
-    elseif(DEFINED ENV{PYLON_ROOT})
-        if(WIN32)
-            set(PYLON_LICENSE_DIR "$ENV{PYLON_DEV_DIR}/../Licenses")
-        elseif(APPLE)
-            set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources/licenses")
-        else()
+    elseif(APPLE)
+        set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources/licenses")
+    else() # Linux
+        if(DEFINED ENV{PYLON_ROOT})
             set(PYLON_LICENSE_DIR "$ENV{PYLON_ROOT}/share/pylon/licenses")
         endif()
     endif()
-    
-    if(DEFINED PYLON_LICENSE_DIR AND EXISTS "${PYLON_LICENSE_DIR}/License.txt")
-        message(STATUS "Installing Pylon license from ${PYLON_LICENSE_DIR}")
+
+    # Output license directory for debugging
+    message(STATUS "Pylon license directory: ${PYLON_LICENSE_DIR}")
+
+
+    # Install main license if found
+    if(EXISTS "${PYLON_LICENSE_DIR}/License.txt")
         install(FILES "${PYLON_LICENSE_DIR}/License.txt"
                 DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
                 RENAME "PYLON_LICENSE.txt")
     else()
-        message(FATAL_ERROR "Pylon license not found at expected location: ${PYLON_LICENSE_DIR}")
+        message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}")
     endif()
-    
-    if(DEFINED PYLON_LICENSE_DIR AND EXISTS "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
+
+    # Install third-party licenses if found
+    if(EXISTS "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
         install(FILES "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt"
                 DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
                 RENAME "PYLON_THIRD_PARTY_LICENSES.txt")
     else()
-        message(WARNING "Pylon third-party licenses not found at expected location: ${PYLON_LICENSE_DIR}")
+        message(FATAL_ERROR "Pylon third-party license not found at: ${PYLON_LICENSE_DIR}")                
     endif()
 else()
     message(WARNING "SKBUILD_METADATA_DIR not defined")
