@@ -122,22 +122,16 @@ if(WIN32 AND (PYLON_FOUND OR pylon_FOUND))
         )
         copy_files_matching(${PYLON_BIN_DIR} pypylon "${DP_PATTERNS}")
         
-        # Ensure PYLON_ROOT is available for plugin directories
-        if(NOT DEFINED PYLON_ROOT AND DEFINED ENV{PYLON_DEV_DIR})
-            set(PYLON_ROOT $ENV{PYLON_DEV_DIR})
+        # Windows data processing plugin directories
+        # Use PYLON_BIN_DIR for the base runtime directory
+        set(DP_PLUGIN_DIR "${PYLON_BIN_DIR}/pylonDataProcessingPlugins")
+        if(EXISTS "${DP_PLUGIN_DIR}")
+            copy_directory_excluding_editors("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
         endif()
         
-        # Data processing plugin directories (excluding Editor packages)
-        if(DEFINED PYLON_ROOT)
-            set(DP_PLUGIN_DIR "${PYLON_ROOT}/Runtime/pylonDataProcessingPlugins")
-            if(EXISTS "${DP_PLUGIN_DIR}")
-                copy_directory_excluding_editors("${DP_PLUGIN_DIR}" "pylonDataProcessingPlugins")
-            endif()
-            
-            set(DP_CREATOR_DIR "${PYLON_ROOT}/Runtime/DataProcessingPluginsB")
-            if(EXISTS "${DP_CREATOR_DIR}")
-                copy_directory_excluding_editors("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
-            endif()
+        set(DP_CREATOR_DIR "${PYLON_BIN_DIR}/DataProcessingPluginsB")
+        if(EXISTS "${DP_CREATOR_DIR}")
+            copy_directory_excluding_editors("${DP_CREATOR_DIR}" "DataProcessingPluginsB")
         endif()
     endif()
 
@@ -165,43 +159,7 @@ elseif(UNIX AND NOT APPLE AND (PYLON_FOUND OR pylon_FOUND))
         set(RUNTIME_PYLON_VERSION ${PYLON_VERSION})
     endif()
     
-    if(RUNTIME_PYLON_VERSION VERSION_LESS "6.3.0")
-        # Older naming scheme
-        set(BASE_PATTERNS
-            "libpylonbase-.*\\.so"
-            "libGCBase_.*\\.so"
-            "libGenApi_.*\\.so"
-            "liblog4cpp_.*\\.so"
-            "libLog_.*\\.so"
-            "libNodeMapData_.*\\.so"
-            "libXmlParser_.*\\.so"
-            "libMathParser_.*\\.so"
-        )
-        
-        set(GIGE_PATTERNS
-            "libpylon_TL_gige-.*\\.so"
-            "libgxapi-.*\\.so"
-        )
-        
-        set(USB_PATTERNS
-            "libpylon_TL_usb-.*\\.so"
-            "libuxapi-.*\\.so"
-            "pylon-libusb-.*\\.so"
-        )
-        
-        set(CAMEMU_PATTERNS
-            "libpylon_TL_camemu-.*\\.so"
-        )
-        
-        set(EXTRA_PATTERNS
-            "libpylonutility-.*\\.so"
-        )
-        
-        set(GENTL_PATTERNS
-            "libpylon_TL_gtc-.*\\.so"
-        )
-        
-    elseif(RUNTIME_PYLON_VERSION VERSION_LESS "9.0.3")
+    if(RUNTIME_PYLON_VERSION VERSION_LESS "9.0.3")
         # Newer naming scheme
         set(BASE_PATTERNS
             "libpylonbase\\.so\\.[0-9]+$"
