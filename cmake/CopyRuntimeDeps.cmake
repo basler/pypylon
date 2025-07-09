@@ -57,8 +57,8 @@ function(copy_directory_excluding_editors source_dir dest_dir)
         message(STATUS "Copying runtime directory (excluding editors): ${source_dir}")
         install(DIRECTORY ${source_dir}/ 
                 DESTINATION pypylon/${dest_dir}
-                PATTERN "*Editor.so" EXCLUDE
-                PATTERN "*Editor.dll" EXCLUDE)
+                PATTERN "*Editor*.so" EXCLUDE
+                PATTERN "*Editor*.dll" EXCLUDE)
     endif()
 endfunction()
 
