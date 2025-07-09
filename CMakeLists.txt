@@ -108,6 +108,34 @@ find_package(pylon REQUIRED)
 
 message(STATUS "Found pylon: ${pylon_DIR}")
 
+# Set global Pylon base dir
+if(WIN32)
+    if(DEFINED ENV{PYLON_DEV_DIR})
+        # PYLON_DEV_DIR points to .../Development, so go up one level
+        get_filename_component(PYPYLON_PYLON_BASE_DIR "$ENV{PYLON_DEV_DIR}/.." ABSOLUTE)
+    elseif(DEFINED ENV{PYLON_ROOT})
+        set(PYPYLON_PYLON_BASE_DIR "$ENV{PYLON_ROOT}")
+    elseif(DEFINED pylon_DIR)
+        get_filename_component(PYPYLON_PYLON_BASE_DIR "${pylon_DIR}/../../.." ABSOLUTE)
+    endif()
+else()
+    if(DEFINED ENV{PYLON_ROOT})
+        set(PYPYLON_PYLON_BASE_DIR "$ENV{PYLON_ROOT}")
+    elseif(DEFINED ENV{PYLON_DEV_DIR})
+        set(PYPYLON_PYLON_BASE_DIR "$ENV{PYLON_DEV_DIR}")
+    elseif(DEFINED pylon_DIR)
+        get_filename_component(PYPYLON_PYLON_BASE_DIR "${pylon_DIR}/../../.." ABSOLUTE)
+    elseif(TARGET pylon::pylon)
+        get_target_property(PYLON_INCLUDE_DIRS pylon::pylon INTERFACE_INCLUDE_DIRECTORIES)
+        if(PYLON_INCLUDE_DIRS AND NOT PYLON_INCLUDE_DIRS STREQUAL "PYLON_INCLUDE_DIRS-NOTFOUND")
+            list(GET PYLON_INCLUDE_DIRS 0 FIRST_INCLUDE_DIR)
+            get_filename_component(PYPYLON_PYLON_BASE_DIR "${FIRST_INCLUDE_DIR}/../.." ABSOLUTE)
+        endif()
+    endif()
+endif()
+
+message(STATUS "PYPYLON_PYLON_BASE_DIR: ${PYPYLON_PYLON_BASE_DIR}")
+
 # Debug pylon target properties
 if(TARGET pylon::pylon)
     get_target_property(PYLON_INCLUDE_DIRS pylon::pylon INTERFACE_INCLUDE_DIRECTORIES)
@@ -367,7 +395,7 @@ endif()
 
 # Install Python package files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/ 
-        DESTINATION .
+        DESTINATION pypylon
         FILES_MATCHING 
         PATTERN "*.py"
         PATTERN "__pycache__" EXCLUDE
@@ -377,16 +405,14 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/
 if(DEFINED SKBUILD_METADATA_DIR)
     # Get license directory based on platform
     if(WIN32)
-        if(DEFINED ENV{PYLON_DEV_DIR})
-            set(PYLON_LICENSE_DIR "$ENV{PYLON_DEV_DIR}/../Licenses")
-        elseif(DEFINED ENV{PYLON_ROOT}) 
-            set(PYLON_LICENSE_DIR "$ENV{PYLON_ROOT}/Licenses")
+        if(DEFINED PYPYLON_PYLON_BASE_DIR)
+            set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/Licenses")
         endif()
     elseif(APPLE)
         set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources")
     else() # Linux
-        if(DEFINED ENV{PYLON_ROOT})
-            set(PYLON_LICENSE_DIR "$ENV{PYLON_ROOT}/share/pylon/licenses")
+        if(DEFINED PYPYLON_PYLON_BASE_DIR)
+            set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/share/pylon/licenses")
         endif()
     endif()
 
@@ -439,8 +465,8 @@ if(SKBUILD)
 endif()
 
 # Set PYLON_BIN_DIR for Windows to the correct runtime DLL directory
-if(WIN32 AND DEFINED ENV{PYLON_DEV_DIR})
-    file(TO_CMAKE_PATH "$ENV{PYLON_DEV_DIR}/../Runtime/x64" PYLON_BIN_DIR)
+if(WIN32 AND DEFINED PYPYLON_PYLON_BASE_DIR)
+    file(TO_CMAKE_PATH "${PYPYLON_PYLON_BASE_DIR}/Runtime/x64" PYLON_BIN_DIR)
     message(STATUS "Setting PYLON_BIN_DIR to: ${PYLON_BIN_DIR}")
 endif()
 
