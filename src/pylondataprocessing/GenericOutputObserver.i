@@ -1,24 +1,24 @@
-%rename(GenericOutputObserverResult) Pylon::DataProcessing::SGenericOutputObserverResult;
-%rename(GenericOutputObserver) Pylon::DataProcessing::CGenericOutputObserver;
-%rename(RetrieveFullResult) Pylon::DataProcessing::CGenericOutputObserver::GetResult;
-%rename(RetrieveResult) Pylon::DataProcessing::CGenericOutputObserver::GetResultContainer;
-%ignore SGenericOutputObserverResult::Container;
+%rename(GenericOutputObserverResult) Pylon::DataProcessing::SGenericOutputObserverResult2;
+%rename(GenericOutputObserver) Pylon::DataProcessing::CGenericOutputObserver2;
+%rename(RetrieveFullResult) Pylon::DataProcessing::CGenericOutputObserver2::GetResult;
+%rename(RetrieveResult) Pylon::DataProcessing::CGenericOutputObserver2::GetResultContainer;
+%ignore SGenericOutputObserverResult2::Container;
 
 namespace Pylon
 {
     namespace DataProcessing
     {
-        struct SGenericOutputObserverResult
+        struct SGenericOutputObserverResult2
         {
             CUpdate Update; //!< The update the output belongs to.
             intptr_t UserProvidedID = 0; //!< The user provided id belonging to the update.
             CVariantContainer Container; //!< The output data of the recipe.
         };
     
-        class CGenericOutputObserver : public IOutputObserver
+        class CGenericOutputObserver2 : public IOutputObserver
         {
         public:
-            CGenericOutputObserver()
+            CGenericOutputObserver2()
                 : m_waitObject(Pylon::WaitObjectEx::Create())
             {
             }
@@ -38,7 +38,7 @@ namespace Pylon
                 // The following variables are not used here:
                 PYLON_UNUSED(recipe);
 
-                SGenericOutputObserverResult outputData = {update, userProvidedId, value};
+                SGenericOutputObserverResult2 outputData = {update, userProvidedId, value};
                 m_queue.emplace_back(outputData);
                 m_waitObject.Signal();
             }
@@ -80,7 +80,7 @@ namespace Pylon
                 return resultDataOut.Container;
             }
             
-            SGenericOutputObserverResult GetResult()
+            SGenericOutputObserverResult2 GetResult()
             {
                 AutoLock scopedLock(m_memberLock);
                 if (m_queue.empty())
@@ -100,12 +100,12 @@ namespace Pylon
         private:
             mutable CLock m_memberLock;
             WaitObjectEx m_waitObject;
-            std::list<SGenericOutputObserverResult> m_queue;
+            std::list<SGenericOutputObserverResult2> m_queue;
         };
     }
 }
 
-%extend Pylon::DataProcessing::SGenericOutputObserverResult {
+%extend Pylon::DataProcessing::SGenericOutputObserverResult2 {
     CVariantContainer GetContainer()
     {
         return $self->Container;

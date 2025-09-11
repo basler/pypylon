@@ -1,0 +1,231 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "2.0.0",
+    "MinRequiredSoftwareVersion": "2.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "PylonMetaData": {
+        "ObjectVersion": "3.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "UiGraphInputOutput": [
+        {
+          "id": "str:<GraphInput>",
+          "x": 102.5,
+          "y": 200.0
+        },
+        {
+          "id": "str:<GraphOutput>",
+          "x": 820.5,
+          "y": 200.0
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "str:BarcodeReaderStarter",
+          "x": 371.5,
+          "y": 130.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "str:BarcodeReaderStarter",
+              "pinName": "str:Image",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:BarcodeReaderStarter",
+              "pinName": "str:Roi",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:BarcodeReaderStarter",
+              "pinName": "str:Texts",
+              "pinDirection": "str:Output"
+            },
+            {
+              "nodeName": "str:BarcodeReaderStarter",
+              "pinName": "str:Regions",
+              "pinDirection": "str:Output"
+            }
+          ]
+        },
+        {
+          "id": "str:DataMatrixCodeReaderStarter",
+          "x": 377.0,
+          "y": 315.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "str:DataMatrixCodeReaderStarter",
+              "pinName": "str:Image",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:DataMatrixCodeReaderStarter",
+              "pinName": "str:Roi",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:DataMatrixCodeReaderStarter",
+              "pinName": "str:Texts",
+              "pinDirection": "str:Output"
+            },
+            {
+              "nodeName": "str:DataMatrixCodeReaderStarter",
+              "pinName": "str:Regions",
+              "pinDirection": "str:Output"
+            }
+          ]
+        }
+      ]
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "str:BarcodeReaderStarter",
+          "Enabled": true,
+          "NodeTypeID": "str:45BE752B-A55E-4B48-9AE4-521F0990841A",
+          "Type": "str:Plugin::PylonVToolPackageB::BarcodeReaderStarter",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "5.0.1",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "settings": {
+              "SettingsVersion": 1,
+              "BarcodeType": 9,
+              "MaxNumCodes": 2
+            }
+          }
+        },
+        {
+          "Name": "str:DataMatrixCodeReaderStarter",
+          "Enabled": true,
+          "NodeTypeID": "str:7F0C2ADB-B407-4443-9D56-18BC85791951",
+          "Type": "str:Plugin::PylonVToolPackageB::DataMatrixCodeReaderStarter",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "5.0.1",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "settings": {
+              "SettingsVersion": 1,
+              "MaxNumDataMatrixCodes": 3
+            }
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "str:Connection",
+          "Source": "str:<GraphInput>",
+          "Sink": "str:BarcodeReaderStarter",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Image",
+          "SinkInputPath": "str:Image",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "str:Connection2",
+          "Source": "str:<GraphInput>",
+          "Sink": "str:DataMatrixCodeReaderStarter",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Image",
+          "SinkInputPath": "str:Image",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "str:Connection3",
+          "Source": "str:BarcodeReaderStarter",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Texts",
+          "SinkInputPath": "str:Barcodes",
+          "ValueTypeID": "str:74341A22-4AF6-5824-AC1F-4873DD93013B"
+        },
+        {
+          "Name": "str:Connection4",
+          "Source": "str:DataMatrixCodeReaderStarter",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Texts",
+          "SinkInputPath": "str:DataMatrixCodes",
+          "ValueTypeID": "str:74341A22-4AF6-5824-AC1F-4873DD93013B"
+        },
+        {
+          "Name": "str:Connection5",
+          "Source": "str:BarcodeReaderStarter",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Regions",
+          "SinkInputPath": "str:BarcodeRegions",
+          "ValueTypeID": "str:83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+        },
+        {
+          "Name": "str:Connection6",
+          "Source": "str:DataMatrixCodeReaderStarter",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Regions",
+          "SinkInputPath": "str:DataMatrixCodeRegions",
+          "ValueTypeID": "str:83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": [
+            {
+              "Name": "str:Image",
+              "Type": "str:Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+            }
+          ]
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "str:Barcodes",
+              "Type": "str:Pylon::DataProcessing::Core::IStringArray",
+              "ValueTypeID": "str:74341A22-4AF6-5824-AC1F-4873DD93013B"
+            },
+            {
+              "Name": "str:DataMatrixCodes",
+              "Type": "str:Pylon::DataProcessing::Core::IStringArray",
+              "ValueTypeID": "str:74341A22-4AF6-5824-AC1F-4873DD93013B"
+            },
+            {
+              "Name": "str:BarcodeRegions",
+              "Type": "str:Pylon::DataProcessing::Core::IRegionArray",
+              "ValueTypeID": "str:83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+            },
+            {
+              "Name": "str:DataMatrixCodeRegions",
+              "Type": "str:Pylon::DataProcessing::Core::IRegionArray",
+              "ValueTypeID": "str:83CCAD00-301A-5507-9DDF-ED6B2960D57E"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.1.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 8
+        }
+      }
+    }
+  }
+}
