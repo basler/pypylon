@@ -22,7 +22,7 @@ env:
   # TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
 jobs:
-  setup:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
       is_release_build: ${{ env.RELEASE_BUILD == '1' }}
@@ -37,9 +37,18 @@ jobs:
  
     - name: Checkout repository
       uses: actions/checkout@v4
- 
+
+    - name: Check for release build and tag
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        TAG_NAME="${GITHUB_REF#refs/tags/}"
+        echo "Build release for $TAG_NAME"
+        echo "RELEASE_BUILD=1" >> $GITHUB_ENV
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
     # login
-    - run: |
+    - name: Authenticate to Artifactory
+      run: |
         jf c add --url=$JF_URL --access-token=$JF_ACCESS_TOKEN --interactive=false
 
     # download 
@@ -50,49 +59,45 @@ jobs:
         set -e
         build_config=$(cat .github/workflows/build_config.json)
         for os in $(echo $build_config | jq -r 'keys[]'); do
-          for pylon_sdk in $(echo $build_config | jq -r --arg os "$os" '.[$os].pylon_sdks[]'); do
-            if [[ $os == "windows" || $os == "macos" ]]; then
-              jf rt dl --flat --props "pylon_os=${os,,};pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./${os,,}_sdk/
-            elif [[ $os == "linux-x86_64" ]]; then
-              jf rt dl --flat --props "pylon_architecture=x86_64;pylon_os=linux;pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./linux_x86_64_sdk/
-            elif [[ $os == "linux-aarch64" ]]; then
-              jf rt dl --flat --props "pylon_architecture=aarch64;pylon_os=linux;pylon_version=$pylon_sdk" "pylon-sdks-generic/*" ./linux_aarch64_sdk/
-            fi
+          # Get the target pylon version for the current os
+          pylon_version=$(echo $build_config | jq -r --arg os "$os" '.[$os].pylon_version[]')
+          # When TAG_NAME is set (release build), use the pylon version from the tag
+          tag="${TAG_NAME:-$pylon_version}"
+          echo "Downloading control files for $os using pylon $tag"
+          for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/report_$os*.json" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
+            jf rt dl --flat $path ./${os,,}/report_${os,,}.json
           done
         done
 
-    - name: Upload Pylon SDK for Linux aarch64
+    - name: Upload control files for Linux aarch64
       uses: actions/upload-artifact@v4
       with:
         name: Linux_aarch64_Pylon
-        path: linux_aarch64_sdk
+        path: linux_aarch64
     
-    - name: Upload Pylon SDK for Linux x86_64
+    - name: Upload control files for Linux x86_64
       uses: actions/upload-artifact@v4
       with:
         name: Linux_x86_64_Pylon
-        path: linux_x86_64_sdk
+        path: linux_x86_64
 
-    - name: Upload Pylon SDK for Windows
+    - name: Upload control files for Windows
       uses: actions/upload-artifact@v4
       with:
         name: Windows_Pylon
-        path: windows_sdk
+        path: windows
 
-    - name: Upload Pylon SDK for macOS
+    - name: Upload control files for macOS
       uses: actions/upload-artifact@v4
       with:
         name: macOS_Pylon
-        path: macos_sdk
+        path: macos
 
-    - name: Check for release build
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        echo "Build release for $GITHUB_REF"
-        echo "RELEASE_BUILD=1" >> $GITHUB_ENV
+
+
 
   build-linux:
-    needs: setup
+    needs: prepare
     strategy:
       fail-fast: false
       matrix:
@@ -157,7 +162,7 @@ jobs:
 
 
   build-windows:
-    needs: setup
+    needs: prepare
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -209,7 +214,7 @@ jobs:
 
 
   build-macos:
-    needs: setup
+    needs: prepare
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -263,7 +268,7 @@ jobs:
   cleanup:
     if: always()
     needs: [
-            setup,
+            prepare,
             build-linux,
             build-macos,
             build-windows
