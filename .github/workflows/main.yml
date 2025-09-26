@@ -37,6 +37,8 @@ jobs:
  
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Check for release build and tag
       if: startsWith(github.ref, 'refs/tags/')
@@ -52,7 +54,7 @@ jobs:
         jf c add --url=$JF_URL --access-token=$JF_ACCESS_TOKEN --interactive=false
 
     # download 
-    - name: Download files from Artifactory
+    - name: Download control files from Artifactory
       id: get_sdks
       run: |
         set +x
@@ -93,11 +95,76 @@ jobs:
         name: macOS_Pylon
         path: macos
 
+  consume:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-14, windows-latest ]
+        arch: [ x64, arm64 ]
+        exclude:
+          # Exclude ARM64 architecture for windows-latest
+          - os: windows-latest
+            arch: arm64
+          # Exclude ARM64 architecture for macos-14
+          - os: macos-14
+            arch: arm64
+          # Exclude ARM64 architecture for ubuntu-24.04
+          - os: ubuntu-24.04
+            arch: arm64
+          # Exclude X64 architecture for ubuntu-24.04-arm
+          - os: ubuntu-24.04-arm
+            arch: x64
 
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Detect running os
+        id: osname
+        run: |
+          import re
+          import os
+          
+          os_str = "${{ matrix.os }}"
+          os_name = re.sub(r'-.*', '', os_str)
+          os_name = os_name.replace('ubuntu', 'linux').replace('windows', 'windows').replace('macos', 'macos')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"value={os_name}\n")
+        shell: python
+
+      - name: Install Conan V1
+        run: pip install "conan<2"
+
+      - name: Add conan remote and authenticate (Python)
+        env:
+          JF_URL: ${{ secrets.SDK_URL }}
+          JF_USER: ${{ secrets.SDK_USER }}
+          JF_ACCESS_TOKEN: ${{ secrets.SDK_TOKEN }}
+        run: |
+          import os
+          import subprocess
+      
+          subprocess.run(["conan", "config", "set", "general.revisions_enabled=1"], check=True)
+          subprocess.run([
+              "conan", "remote", "add", "pylon-conan-prod",
+              f"{os.environ['JF_URL']}/artifactory/api/conan/pylon-conan-prod", "--insert", "0"
+          ], check=True)
+          subprocess.run([
+              "conan", "user", "-p", os.environ["JF_ACCESS_TOKEN"],
+              "-r", "pylon-conan-prod", os.environ["JF_USER"]
+          ], check=True)
+        shell: python
 
   build-linux:
-    needs: prepare
+    needs: consume
     strategy:
       fail-fast: false
       matrix:
@@ -162,7 +229,7 @@ jobs:
 
 
   build-windows:
-    needs: prepare
+    needs: consume
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -214,7 +281,7 @@ jobs:
 
 
   build-macos:
-    needs: prepare
+    needs: consume
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -269,6 +336,7 @@ jobs:
     if: always()
     needs: [
             prepare,
+            consume,
             build-linux,
             build-macos,
             build-windows
