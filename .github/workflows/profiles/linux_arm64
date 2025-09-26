@@ -1,0 +1,11 @@
+[env]
+CC=gcc-9
+CXX=g++-9
+
+[settings]
+arch=armv8
+build_type=Release
+compiler=gcc
+compiler.libcxx=libstdc++11
+compiler.version=9
+os=Linux
