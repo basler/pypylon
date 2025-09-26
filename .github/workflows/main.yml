@@ -95,7 +95,7 @@ jobs:
         name: macOS_Pylon
         path: macos
 
-  consume:
+  download:
     needs: prepare
     strategy:
       fail-fast: false
@@ -106,9 +106,9 @@ jobs:
           # Exclude ARM64 architecture for windows-latest
           - os: windows-latest
             arch: arm64
-          # Exclude ARM64 architecture for macos-14
+          # Exclude X64 architecture for macos-14
           - os: macos-14
-            arch: arm64
+            arch: x64
           # Exclude ARM64 architecture for ubuntu-24.04
           - os: ubuntu-24.04
             arch: arm64
@@ -134,16 +134,33 @@ jobs:
           import os
           
           os_str = "${{ matrix.os }}"
+          os_name_arch = "${{ matrix.arch }}"
           os_name = re.sub(r'-.*', '', os_str)
-          os_name = os_name.replace('ubuntu', 'linux').replace('windows', 'windows').replace('macos', 'macos')
+          os_name = os_name.replace('ubuntu', 'linux')
+
+          if os_name == 'linux' and os_name_arch == 'arm64':
+              os_name_arch = 'linux_aarch64'
+          elif os_name == 'linux' and os_name_arch == 'x64':
+              os_name_arch = 'linux_x86_64'
+          elif os_name == 'macos':
+              os_name_arch = 'macos'
+          elif os_name == 'windows':
+              os_name_arch = 'windows'
+
+          os_name_camel = os_name.replace('linux', 'Linux').replace('windows', 'Windows').replace('macos', 'macOS')
+          os_name_arch_camel = os_name_arch.replace('linux', 'Linux').replace('windows', 'Windows').replace('macos', 'macOS')
+          
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
             f.write(f"value={os_name}\n")
+            f.write(f"value_camel={os_name_camel}\n")
+            f.write(f"value_arch={os_name_arch}\n")
+            f.write(f"value_arch_camel={os_name_arch_camel}\n")
         shell: python
 
-      - name: Install Conan V1
+      - name: Install conan v1
         run: pip install "conan<2"
 
-      - name: Add conan remote and authenticate (Python)
+      - name: Add conan v1 remote and authenticate
         env:
           JF_URL: ${{ secrets.SDK_URL }}
           JF_USER: ${{ secrets.SDK_USER }}
@@ -163,8 +180,37 @@ jobs:
           ], check=True)
         shell: python
 
+      - name: Download ${{ steps.osname.outputs.value_arch_camel }} control artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ steps.osname.outputs.value_camel }}*Pylon
+          merge-multiple: true
+          path: pylon-install-files
+
+      - name: Download need pylon modules
+        run: |
+          import os
+          import subprocess
+      
+          subprocess.run([
+              "conan", "install", "--update", "--install-folder", "conan",
+              "-pr", os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "profiles", "${{ steps.osname.outputs.value }}_${{ matrix.arch }}"),
+              "-o", f"pypylon:build_config={os.path.join(os.environ['GITHUB_WORKSPACE'], '.github', 'workflows', 'build_config.json')}",
+              "-o", f"pypylon:control_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'report_${{ steps.osname.outputs.value_arch }}.json')}",
+              "-c", "tools.system.package_manager:mode=install",
+              "-c", "tools.system.package_manager:sudo=True",
+              os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "conanfile.py")
+          ], check=True)
+        shell: python
+
+      - name: Upload pylon SDK for ${{ steps.osname.outputs.value_arch_camel }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.osname.outputs.value_arch_camel }}_Pylon_SDK
+          path: conan
+
   build-linux:
-    needs: consume
+    needs: download
     strategy:
       fail-fast: false
       matrix:
@@ -229,7 +275,7 @@ jobs:
 
 
   build-windows:
-    needs: consume
+    needs: download
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -281,7 +327,7 @@ jobs:
 
 
   build-macos:
-    needs: consume
+    needs: download
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -336,7 +382,7 @@ jobs:
     if: always()
     needs: [
             prepare,
-            consume,
+            download,
             build-linux,
             build-macos,
             build-windows
@@ -348,9 +394,13 @@ jobs:
       with:
         name: |
           Linux_x86_64_Pylon
+          Linux_x86_64_Pylon_SDK
           Linux_aarch64_Pylon
+          Linux_aarch64_Pylon_SDK
           Windows_Pylon
+          Windows_Pylon_SDK
           macOS_Pylon
+          macOS_Pylon_SDK
 
   unit-tests:
     if: success()
