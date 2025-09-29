@@ -181,7 +181,7 @@ jobs:
         shell: python
 
       - name: Download ${{ steps.osname.outputs.value_arch_camel }} control artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: ${{ steps.osname.outputs.value_camel }}*Pylon
           merge-multiple: true
@@ -203,11 +203,15 @@ jobs:
           ], check=True)
         shell: python
 
+      - name: Tar pylon SDK files
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: cd conan && tar -czf ../pylon_sdk.tar.gz .
+
       - name: Upload pylon SDK for ${{ steps.osname.outputs.value_arch_camel }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.osname.outputs.value_arch_camel }}_Pylon_SDK
-          path: conan
+          path: ${{ runner.os == 'Windows' && 'conan' || 'pylon_sdk.tar.gz' }}
 
   build-linux:
     needs: download
@@ -215,7 +219,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04, ubuntu-24.04-arm ]
-        a: [cp39]
+        a: [3.9]
         p: [manylinux_2_31_x86_64, manylinux_2_31_aarch64]
         exclude:
           # Exclude manylinux_2_31_aarch64 on ubuntu-24.04
@@ -236,27 +240,80 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Detect docker parameters
+        id: dockerparams
+        run: |
+          import re
+          import os
+          
+          # Extract python version and remove dot for pyver_tag
+          pyver_tag = "${{ matrix.a }}"
+          pyver_tag_nodot = pyver_tag.replace('.', '')
+          
+          # Extract ubuntu version and architecture from the os string
+          os_str = "${{ matrix.os }}"
+          match = re.match(r'(ubuntu-\d+\.\d+)(?:-(arm))?', os_str)
+          if match:
+              base_os = match.group(1)
+              arch_from_os = match.group(2)
+              if arch_from_os == "arm":
+                  artifacts_name = "Linux_aarch64_Pylon_SDK"
+                  docker_base_arch = "arm64v8"
+                  docker_platform = "linux/arm64"
+                  qemu_target_arch = "aarch64"
+              else:
+                  artifacts_name = "Linux_x86_64_Pylon_SDK"
+                  docker_base_arch = "amd64"
+                  docker_platform = "linux/amd64"
+                  qemu_target_arch = "x86_64"
+          else:
+              raise ValueError(f"Unexpected OS format: {os_str}")
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"docker_base_arch={docker_base_arch}\n")
+            f.write(f"docker_platform={docker_platform}\n")
+            f.write(f"qemu_target_arch={qemu_target_arch}\n")
+            f.write(f"artifacts_name={artifacts_name}\n")
+            f.write(f"pyver_tag=cp{pyver_tag_nodot}\n")
+        shell: python
+
       # download the pylon sdks          
       - name: download linux artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
-          pattern: Linux*Pylon
-          merge-multiple: true          
-          path: pylon-installer
+          pattern: ${{ steps.dockerparams.outputs.artifacts_name }}
+          path: pylon-sdk
+
+      - name: Unpack pylon SDK to pylon-sdk folder
+        run: |
+          tar -xzf pylon-sdk/pylon_sdk.tar.gz -C pylon-sdk
 
       - name: Display Structure of downloaded files
-        run: ls -R pylon-installer
+        run: ls pylon-sdk
 
-      - name: Build with docker
+      - name: Build docker container for pypylon build
         run: |
-          pwd
-          ls
-          ls pylon-installer
-          ./scripts/build/build-arch.sh --platform-tag $P --abi-tag $A --pylon-dir ./pylon-installer $ARGS
+          docker build --platform "${{ steps.dockerparams.outputs.docker_platform }}" \
+            --build-arg "QEMU_TARGET_ARCH=${{ steps.dockerparams.outputs.qemu_target_arch }}" \
+            --build-arg "DOCKER_BASE_IMAGE=${{ steps.dockerparams.outputs.docker_base_arch }}/python:${{ matrix.a }}-bullseye" \
+            --build-arg "CMD_WRAPPER=linux64" \
+            --tag "pypylon-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}-${{ github.run_id }}" - < ${{ github.workspace }}/scripts/build/Dockerfile.debian
+
+      - name: Build pypylon wheel
+        run: |
+          docker run -v "${{ github.workspace }}:/work" \
+            -v "${{ github.workspace }}/.github/workflows/scripts:/work/scripts/cibuild" \
+            -v "${{ github.workspace }}/pylon-sdk/pylon:/opt/pylon" -e PYLON_ROOT="/opt/pylon" \
+            --user $(id -u) pypylon-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}-${{ github.run_id }} /work/scripts/cibuild/build.sh --update-platform-tag ${{ matrix.p }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-results-${{ matrix.p }}-${{ matrix.a }}
+          name: build-results-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}
           path: dist/*
 
       - name: Upload Release Asset
@@ -287,23 +344,19 @@ jobs:
         with:
           python-version: "3.9"
 
-      - uses: actions/download-artifact@v4
+      - name: Download pylon SDK
+        uses: actions/download-artifact@v5
         with:
-          name: Windows_Pylon
-          path: pylon-installer
+          pattern: Windows_Pylon_SDK
+          path: pylon-sdk
 
       - name: Display Structure of downloaded files
-        run: dir pylon-installer
-
-      - name: Setup pylon
-        run: |
-          cd pylon-installer
-          ren Basler-pylon-*.exe Basler-pylon.exe
-          $process = Start-Process Basler-pylon.exe -Wait -ArgumentList '/quiet /install=GigE_Runtime;USB_Runtime;Camera_Link_Runtime;GenTL_Consumer_Support;CamEmu_Support;SDKs;DataProcessing_SDK;DataProcessing_vTools;DataProcessing_AI' -PassThru
-          Write-Host "Process finished with return code:" $process.ExitCode
+        run: dir pylon-sdk
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
+        env:
+          PYLON_DEV_DIR: ${{ github.workspace }}\pylon-sdk\pylon\Development
 
       - uses: actions/upload-artifact@v4
         with:
@@ -339,24 +392,23 @@ jobs:
         with:
           python-version: "3.9"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
-          name: macOS_Pylon
-          path: pylon-installer
+          name: macOS_Pylon_SDK
+          path: pylon-sdk
 
-      - name: Setup pylon
+      - name: Unpack pylon SDK to pylon-sdk folder
         run: |
-          # install universal
-          cd pylon-installer
-          hdiutil attach pylon-*.dmg
-          sudo installer -pkg /Volumes/pylon\ *\ Software\ Suite/pylon-*.pkg  -target /
-          hdiutil detach /Volumes/pylon\ *\ Software\ Suite
+          tar -xzf pylon-sdk/pylon_sdk.tar.gz -C pylon-sdk
+
+      - name: Display Structure of downloaded files
+        run: ls pylon-sdk
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
         env:
-          PYLON_FRAMEWORK_ARM64: /Library/Frameworks
-          PYLON_FRAMEWORK_X86_64: /Library/Frameworks
+          PYLON_FRAMEWORK_ARM64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
+          PYLON_FRAMEWORK_X86_64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
 
       - uses: actions/upload-artifact@v4
         with:
