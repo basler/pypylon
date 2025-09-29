@@ -1078,8 +1078,8 @@ class BuildSupportMacOS(BuildSupport):
                     if re.match(r".*TL_[a-z]+\.so", p.name):
                         info(f"DELETE {p}")
                         os.remove(p)
-            # Patch minimum required OS version for pylon 10.0.2 for external provided libusb
-            if self.get_pylon_version() == "10.0.2.471":
+            # Patch minimum required OS version for pylon 10.0.2 or newer for external provided libusb
+            if self.get_pylon_version() >= "10.0.2.471":
                 import lief
                 import tempfile
                 # Create a temp directory
