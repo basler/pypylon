@@ -1,14 +1,76 @@
 {
-    "linux-x86_64": {
-        "pylon_sdks": ["8.1.0"]
+    "linux_x86_64": {
+        "requirements": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-package-a",
+            "pylon-vtool-package-a-sasl",
+            "pylon-vtool-package-b",
+            "pylon-vtool-package-base",
+            "pylon-vtool-package-utils",
+            "pylon-vtools-utils-b",
+            "pylon-vtool-package-communication",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ],
+        "imports": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-*",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ]
     },
-    "linux-aarch64": {
-        "pylon_sdks": ["8.1.0"]
+    "linux_aarch64": {
+        "requirements": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-package-a",
+            "pylon-vtool-package-a-sasl",
+            "pylon-vtool-package-b",
+            "pylon-vtool-package-base",
+            "pylon-vtool-package-utils",
+            "pylon-vtools-utils-b",
+            "pylon-vtool-package-communication",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ],
+        "imports": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-*",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ]
     },
     "windows": {
-        "pylon_sdks": ["8.1.0"]
+        "requirements": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-package-a",
+            "pylon-vtool-package-a-sasl",
+            "pylon-vtool-package-b",
+            "pylon-vtool-package-base",
+            "pylon-vtool-package-utils",
+            "pylon-vtools-utils-b",
+            "pylon-vtool-package-communication",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ],
+        "imports": [
+            "pylon-core",
+            "pylon-dataprocessing",
+            "pylon-vtool-*",
+            "vtool-creator-adapters",
+            "pylon-ai-vtools"
+        ]
     },
     "macos": {
-        "pylon_sdks": ["8.1.0"]
+        "requirements": [
+            "pylon-core"
+        ],
+        "imports": [
+            "pylon-core"
+        ]
     }
 }
