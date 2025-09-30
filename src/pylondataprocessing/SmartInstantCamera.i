@@ -1,7 +1,10 @@
 %ignore RegisterSmartResultEventHandler;
 %ignore DeregisterSmartResultEventHandler;
+%ignore GetParameters;
 %rename(RegisterSmartResultEventHandler) RegisterSmartResultEventHandler2;
 %rename(DeregisterSmartResultEventHandler) DeregisterSmartResultEventHandler2;
+%rename(StartGrabbingMax) StartGrabbing( bool startRecipe, size_t maxImages, EGrabStrategy strategy, EGrabLoop grabLoopType, EGrabLoop grabLoopTypeDataProcessing);
+
 %include <pylondataprocessing/SmartInstantCamera.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +56,23 @@
     virtual bool DeregisterSmartResultEventHandler2( Pylon::DataProcessing::CSmartResultEventHandlerT< Pylon::CInstantCamera, Pylon::DataProcessing::SSmartInstantCameraResultT< Pylon::CGrabResultPtr > >* pSmartResultEventHandler )
     {
         return ($self)->DeregisterSmartResultEventHandler(pSmartResultEventHandler);
+    }
+
+    void GetAllParameterNames(StringList_t& result)
+    {
+      result = $self->GetParameters().GetAllParameterNames();
+    }
+
+    bool ContainsParameter(const Pylon::String_t& fullname)
+    {
+      bool result = $self->GetParameters().Contains(fullname);
+      return result;
+    }
+
+    GenApi::INode* GetParameter(const Pylon::String_t& fullname)
+    {
+      GenApi::INode* pNode = $self->GetParameters().Get(fullname).GetNode();
+      return pNode;
     }
 };
 

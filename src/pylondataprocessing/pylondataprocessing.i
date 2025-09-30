@@ -462,7 +462,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 ////////////////////////////////////////////////////////////////////////////////
 
 // the INode* factory
-%typemap(out) GENAPI_NAMESPACE::INode* Pylon::DataProcessing::CRecipe::GetParameter
+%typemap(out) GENAPI_NAMESPACE::INode* GENAPI_INODE_RETURN
 %{
     // Need a new scope here, so this block can be skipped
     // by a 'goto' or 'SWIG_fail'.
@@ -536,6 +536,9 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
         $result = SWIG_NewPointerObj(outptr, outtype, $owner);
     }
 %}
+
+%apply GENAPI_NAMESPACE::INode* GENAPI_INODE_RETURN { GENAPI_NAMESPACE::INode* Pylon::DataProcessing::CRecipe::GetParameter };
+%apply GENAPI_NAMESPACE::INode* GENAPI_INODE_RETURN { GENAPI_NAMESPACE::INode* Pylon::DataProcessing::CSmartInstantCameraT< Pylon::CInstantCamera, Pylon::DataProcessing::SSmartInstantCameraResultT<Pylon::CGrabResultPtr> >::GetParameter };
 ////////////////////////////////////////////////////////////////////////////////
 
 // Check typemap to make the TriggerUpdate overloads working with python dictionaries
