@@ -1,6 +1,5 @@
 {
     "linux_x86_64": {
-        "pylon_version": ["25.09"],
         "requirements": [
             "pylon-core",
             "pylon-dataprocessing",
@@ -23,7 +22,6 @@
         ]
     },
     "linux_aarch64": {
-        "pylon_version": ["25.09"],
         "requirements": [
             "pylon-core",
             "pylon-dataprocessing",
@@ -46,7 +44,6 @@
         ]
     },
     "windows": {
-        "pylon_version": ["25.09"],
         "requirements": [
             "pylon-core",
             "pylon-dataprocessing",
@@ -69,7 +66,6 @@
         ]
     },
     "macos": {
-        "pylon_version": ["25.09"],
         "requirements": [
             "pylon-core"
         ],

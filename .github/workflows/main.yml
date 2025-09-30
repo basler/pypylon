@@ -60,11 +60,11 @@ jobs:
         set +x
         set -e
         build_config=$(cat .github/workflows/build_config.json)
+        # Get the latest pylon version from Artifactory
+        pylon_default_version=$(jf rt s "pylon-artifacts-generic-prod/setup/*" | jq '.[] | .path' | awk -F'/' '{print $3}' | sort -V | uniq | tac | head -n 1)
         for os in $(echo $build_config | jq -r 'keys[]'); do
-          # Get the target pylon version for the current os
-          pylon_version=$(echo $build_config | jq -r --arg os "$os" '.[$os].pylon_version[]')
           # When TAG_NAME is set (release build), use the pylon version from the tag
-          tag="${TAG_NAME:-$pylon_version}"
+          tag="${TAG_NAME:-$pylon_default_version}"
           echo "Downloading control files for $os using pylon $tag"
           for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/report_$os*.json" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
             jf rt dl --flat $path ./${os,,}/report_${os,,}.json
