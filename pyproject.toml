@@ -92,7 +92,8 @@ before-all = 'echo "Building: %CIBW_BUILD%"'
 archs = "x86_64 arm64"
 build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
-repair-wheel-command = ""
+# Patch the framework for macOS 14+ compatibility and move to dest_dir
+repair-wheel-command = "python cmake/patch_macos_framework.py {wheel} && mv {wheel} {dest_dir}/"
 test-skip = [
     "tests/pylondataprocessing_tests"
 ]

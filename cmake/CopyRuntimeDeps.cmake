@@ -276,9 +276,46 @@ elseif(UNIX AND NOT APPLE AND (PYLON_FOUND OR pylon_FOUND))
     endif()
 
 elseif(APPLE AND (PYLON_FOUND OR pylon_FOUND))
-    message(STATUS "macOS: Runtime dependencies handled by framework")
-    # On macOS, the framework handles most dependencies
-    # Additional runtime copying may be needed for specific versions
+    message(STATUS "macOS: Copying pylon.framework to pypylon package")
+    
+    # Determine framework path
+    if(DEFINED ENV{PYLON_FRAMEWORK_LOCATION})
+        set(PYLON_FRAMEWORK_PATH "$ENV{PYLON_FRAMEWORK_LOCATION}")
+    else()
+        set(PYLON_FRAMEWORK_PATH "/Library/Frameworks")
+    endif()
+    
+    set(FRAMEWORK_SOURCE "${PYLON_FRAMEWORK_PATH}/pylon.framework")
+    
+    if(EXISTS "${FRAMEWORK_SOURCE}")
+        message(STATUS "Copying pylon.framework from: ${FRAMEWORK_SOURCE}")
+        
+        # Copy the entire framework, excluding headers, CMake files, and Tools
+        install(DIRECTORY "${FRAMEWORK_SOURCE}"
+                DESTINATION pypylon
+                USE_SOURCE_PERMISSIONS
+                PATTERN "*.h" EXCLUDE
+                PATTERN "Headers" EXCLUDE
+                PATTERN "CMake" EXCLUDE
+                PATTERN "Tools" EXCLUDE
+        )
+        
+        # Optionally copy data processing framework if found
+        set(DP_FRAMEWORK_SOURCE "${PYLON_FRAMEWORK_PATH}/pylondataprocessing.framework")
+        if(PYLON_DATA_PROCESSING_FOUND AND EXISTS "${DP_FRAMEWORK_SOURCE}")
+            message(STATUS "Copying pylondataprocessing.framework from: ${DP_FRAMEWORK_SOURCE}")
+            install(DIRECTORY "${DP_FRAMEWORK_SOURCE}"
+                    DESTINATION pypylon
+                    USE_SOURCE_PERMISSIONS
+                    PATTERN "*.h" EXCLUDE
+                    PATTERN "Headers" EXCLUDE
+                    PATTERN "CMake" EXCLUDE
+                    PATTERN "Tools" EXCLUDE
+            )
+        endif()
+    else()
+        message(FATAL_ERROR "pylon.framework not found at: ${FRAMEWORK_SOURCE}")
+    endif()
     
 endif()
 
