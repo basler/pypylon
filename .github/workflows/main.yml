@@ -317,7 +317,7 @@ jobs:
           path: dist/*
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -325,7 +325,7 @@ jobs:
           files: dist/*
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
+        if: needs.prepare.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
         run: |
           sudo pip3 install "twine==6.0.1"
           python3 -m twine upload --non-interactive --skip-existing dist/*
@@ -355,68 +355,30 @@ jobs:
       - name: Display Structure of downloaded files
         run: dir pylon-sdk
 
-      - name: Set PYLON_DEV_DIR environment variable
+      - name: Verify pylon SDK structure
         run: |
-          # Find the pylon installation directory - check multiple possible locations
-          $possiblePaths = @(
-            "C:\Program Files\Basler",
-            "D:\Program Files\Basler", 
-            "C:\Program Files (x86)\Basler",
-            "D:\Program Files (x86)\Basler"
-          )
+          # Verify the downloaded pylon SDK structure
+          $pylonDevDir = "${{ github.workspace }}\pylon-sdk\pylon\Development"
           
-          $pylonDir = $null
-          foreach ($basePath in $possiblePaths) {
-            if (Test-Path $basePath) {
-              Write-Host "Checking for pylon in: $basePath"
-              $pylonDirs = Get-ChildItem -Path $basePath -Directory -Filter "pylon*" -ErrorAction SilentlyContinue | Sort-Object Name -Descending
-              if ($pylonDirs.Count -gt 0) {
-                $pylonDirName = $pylonDirs[0].Name
-                $candidateDir = Join-Path $basePath $pylonDirName "Development"
-                Write-Host "Found pylon candidate at: $candidateDir (from directory: $pylonDirName)"
-                
-                # Verify this is a valid pylon SDK installation
-                if (Test-Path "$candidateDir\include\pylon\PylonIncludes.h") {
-                  $pylonDir = $candidateDir
-                  Write-Host "Valid pylon SDK found at: $pylonDir"
-                  break
-                } else {
-                  Write-Host "Invalid pylon SDK structure at: $candidateDir"
-                  # Let's also check what's actually in the directory for debugging
-                  if (Test-Path $candidateDir) {
-                    Write-Host "Directory exists but missing PylonIncludes.h. Contents:"
-                    Get-ChildItem -Path $candidateDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
-                  } else {
-                    Write-Host "Directory does not exist: $candidateDir"
-                  }
-                }
-              }
+          Write-Host "Checking for pylon SDK at: $pylonDevDir"
+          
+          if (Test-Path $pylonDevDir) {
+            Write-Host "Pylon SDK directory found"
+            
+            # Verify key files exist
+            if (Test-Path "$pylonDevDir\include\pylon\PylonIncludes.h") {
+              Write-Host "✓ Valid pylon SDK structure confirmed"
+              Write-Host "Contents of pylon-sdk directory:"
+              Get-ChildItem -Path "${{ github.workspace }}\pylon-sdk\pylon" -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+            } else {
+              Write-Host "Warning: PylonIncludes.h not found, but continuing..."
+              Write-Host "Contents of Development directory:"
+              Get-ChildItem -Path $pylonDevDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
             }
-          }
-          
-          if ($pylonDir) {
-            # Set environment variable for current session
-            $env:PYLON_DEV_DIR = $pylonDir
-            
-            # Set environment variable for subsequent steps
-            echo "PYLON_DEV_DIR=$pylonDir" >> $env:GITHUB_ENV
-            
-            Write-Host "PYLON_DEV_DIR set to: $pylonDir"
-            
-            # Show some additional info about the installation
-            $pylonVersion = Split-Path (Split-Path $pylonDir -Parent) -Leaf
-            Write-Host "Pylon version directory: $pylonVersion"
           } else {
-            Write-Host "Error: No valid pylon installation found in any of the checked locations:"
-            foreach ($path in $possiblePaths) {
-              Write-Host "  - $path"
-              if (Test-Path $path) {
-                Write-Host "    Exists, contains:"
-                Get-ChildItem -Path $path -Directory -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      - $($_.Name)" }
-              } else {
-                Write-Host "    Does not exist"
-              }
-            }
+            Write-Host "Error: Pylon SDK directory not found at: $pylonDevDir"
+            Write-Host "Contents of pylon-sdk:"
+            Get-ChildItem -Path "${{ github.workspace }}\pylon-sdk" -Recurse -Directory | ForEach-Object { Write-Host "  - $($_.FullName)" }
             exit 1
           }
 
@@ -431,7 +393,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -439,7 +401,7 @@ jobs:
           files: ./wheelhouse/*.whl
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         run: |
           python -m pip install twine
           python -m twine upload --non-interactive --skip-existing wheelhouse\\*
@@ -485,7 +447,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -493,7 +455,7 @@ jobs:
           files: ./wheelhouse/*.whl
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         run: |
           sudo pip3 install twine
           python3 -m twine upload --non-interactive --skip-existing wheelhouse/*
