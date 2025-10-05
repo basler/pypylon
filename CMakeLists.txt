@@ -439,56 +439,61 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/
 )
 
 # Install Pylon license files
-if(DEFINED SKBUILD_METADATA_DIR)
-    # Get license directory based on platform
-    if(WIN32)
-        if(DEFINED PYPYLON_PYLON_BASE_DIR)
-            set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/Licenses")
+# TEMPORARILY DISABLED: Conan downloads don't provide license files
+# TODO: Re-enable once license files are available in conan packages
+if(FALSE)  # Disabled for testing
+    if(DEFINED SKBUILD_METADATA_DIR)
+        # Get license directory based on platform
+        if(WIN32)
+            if(DEFINED PYPYLON_PYLON_BASE_DIR)
+                set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/Licenses")
+            endif()
+        elseif(APPLE)
+            set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources")
+        else() # Linux
+            if(DEFINED PYPYLON_PYLON_BASE_DIR)
+                set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/share/pylon/licenses")
+            endif()
         endif()
-    elseif(APPLE)
-        set(PYLON_LICENSE_DIR "/Library/Frameworks/pylon.framework/Resources")
-    else() # Linux
-        if(DEFINED PYPYLON_PYLON_BASE_DIR)
-            set(PYLON_LICENSE_DIR "${PYPYLON_PYLON_BASE_DIR}/share/pylon/licenses")
-        endif()
-    endif()
 
-    # Output license directory for debugging
-    message(STATUS "Pylon license directory: ${PYLON_LICENSE_DIR}")
+        # Output license directory for debugging
+        message(STATUS "Pylon license directory: ${PYLON_LICENSE_DIR}")
 
 
-    # Install main license if found
-    if(APPLE)
-        # macOS has license.txt (lowercase) in Resources folder
-        if(EXISTS "${PYLON_LICENSE_DIR}/license.txt")
-            install(FILES "${PYLON_LICENSE_DIR}/license.txt"
-                    DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
-                    RENAME "PYLON_LICENSE.txt")
+        # Install main license if found
+        if(APPLE)
+            # macOS has license.txt (lowercase) in Resources folder
+            if(EXISTS "${PYLON_LICENSE_DIR}/license.txt")
+                install(FILES "${PYLON_LICENSE_DIR}/license.txt"
+                        DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
+                        RENAME "PYLON_LICENSE.txt")
+            else()
+                message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}/license.txt")
+            endif()
         else()
-            message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}/license.txt")
+            # Windows and Linux have License.txt (uppercase)
+            if(EXISTS "${PYLON_LICENSE_DIR}/License.txt")
+                install(FILES "${PYLON_LICENSE_DIR}/License.txt"
+                        DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
+                        RENAME "PYLON_LICENSE.txt")
+            else()
+                message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}/License.txt")
+            endif()
+
+            # Install third-party licenses if found (Windows and Linux only)
+            if(EXISTS "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
+                install(FILES "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt"
+                        DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
+                        RENAME "PYLON_THIRD_PARTY_LICENSES.txt")
+            else()
+                message(FATAL_ERROR "Pylon third-party license not found at: ${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")                
+            endif()
         endif()
     else()
-        # Windows and Linux have License.txt (uppercase)
-        if(EXISTS "${PYLON_LICENSE_DIR}/License.txt")
-            install(FILES "${PYLON_LICENSE_DIR}/License.txt"
-                    DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
-                    RENAME "PYLON_LICENSE.txt")
-        else()
-            message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}/License.txt")
-        endif()
-
-        # Install third-party licenses if found (Windows and Linux only)
-        if(EXISTS "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")
-            install(FILES "${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt"
-                    DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
-                    RENAME "PYLON_THIRD_PARTY_LICENSES.txt")
-        else()
-            message(FATAL_ERROR "Pylon third-party license not found at: ${PYLON_LICENSE_DIR}/pylon_Third-Party_Licenses.txt")                
-        endif()
+        message(WARNING "SKBUILD_METADATA_DIR not defined")
     endif()
-else()
-    message(WARNING "SKBUILD_METADATA_DIR not defined")
 endif()
+message(STATUS "License installation temporarily disabled for testing")
 
 # Set version for the package
 if(SKBUILD)
