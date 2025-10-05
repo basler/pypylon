@@ -300,6 +300,27 @@ elseif(APPLE AND (PYLON_FOUND OR pylon_FOUND))
                 PATTERN "Tools" EXCLUDE
         )
         
+        # Patch pylon-libusb for macOS 14+ compatibility
+        # This uses LIEF (which is in build-requires for macOS) to adjust the minimum OS version
+        message(STATUS "Installing post-install script to patch pylon-libusb for macOS 14+")
+        install(CODE "
+            message(STATUS \"Patching pylon.framework for macOS 14+ compatibility...\")
+            execute_process(
+                COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/patch_macos_framework.py 
+                        \${CMAKE_INSTALL_PREFIX}/pypylon/pylon.framework
+                RESULT_VARIABLE PATCH_RESULT
+                OUTPUT_VARIABLE PATCH_OUTPUT
+                ERROR_VARIABLE PATCH_ERROR
+            )
+            if(NOT PATCH_RESULT EQUAL 0)
+                message(WARNING \"pylon.framework patching failed (this is non-fatal):\")
+                message(WARNING \"  \${PATCH_OUTPUT}\")
+                message(WARNING \"  \${PATCH_ERROR}\")
+            else()
+                message(STATUS \"Successfully patched pylon.framework\")
+            endif()
+        ")
+        
         # Optionally copy data processing framework if found
         set(DP_FRAMEWORK_SOURCE "${PYLON_FRAMEWORK_PATH}/pylondataprocessing.framework")
         if(PYLON_DATA_PROCESSING_FOUND AND EXISTS "${DP_FRAMEWORK_SOURCE}")

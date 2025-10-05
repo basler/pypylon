@@ -316,24 +316,61 @@ function(add_swig_python_module module_name swig_file)
         message(STATUS "Linking ${module_name} with Python::Module")
     endif()
     
+    # For macOS, handle framework include directories for SWIG
+    # macOS frameworks don't have a pylon/ subdirectory in Headers, so we need to create a staging area
+    if(APPLE)
+        # Create a staging directory with proper structure for SWIG
+        set(PYLON_SWIG_STAGING_DIR "${CMAKE_BINARY_DIR}/pylon_swig_includes")
+        file(MAKE_DIRECTORY "${PYLON_SWIG_STAGING_DIR}")
+        
+        # Determine framework headers location
+        set(FRAMEWORK_HEADERS_DIR "/Library/Frameworks/pylon.framework/Headers")
+        if(DEFINED ENV{PYLON_FRAMEWORK_LOCATION})
+            set(FRAMEWORK_HEADERS_DIR "$ENV{PYLON_FRAMEWORK_LOCATION}/pylon.framework/Headers")
+        endif()
+        
+        # Create the pylon subdirectory as a symlink to the actual headers
+        if(EXISTS "${FRAMEWORK_HEADERS_DIR}")
+            set(PYLON_SYMLINK "${PYLON_SWIG_STAGING_DIR}/pylon")
+            # Remove existing symlink if it exists and points to wrong location
+            if(EXISTS "${PYLON_SYMLINK}" OR IS_SYMLINK "${PYLON_SYMLINK}")
+                file(REMOVE "${PYLON_SYMLINK}")
+            endif()
+            # Create the symlink
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E create_symlink "${FRAMEWORK_HEADERS_DIR}" "${PYLON_SYMLINK}"
+                RESULT_VARIABLE SYMLINK_RESULT
+            )
+            if(SYMLINK_RESULT EQUAL 0)
+                message(STATUS "Created SWIG staging link: ${PYLON_SYMLINK} -> ${FRAMEWORK_HEADERS_DIR}")
+            else()
+                message(WARNING "Failed to create symlink, trying copy instead")
+                file(COPY "${FRAMEWORK_HEADERS_DIR}/" DESTINATION "${PYLON_SYMLINK}")
+            endif()
+        endif()
+        
+        # Add the staging directory and GenICam headers to target include directories
+        # This ensures they're available both for C++ compilation and SWIG
+        set(GENICAM_HEADERS_DIR "/Library/Frameworks/pylon.framework/Versions/A/Headers/GenICam")
+        if(DEFINED ENV{PYLON_FRAMEWORK_LOCATION})
+            set(GENICAM_HEADERS_DIR "$ENV{PYLON_FRAMEWORK_LOCATION}/pylon.framework/Versions/A/Headers/GenICam")
+        endif()
+        
+        target_include_directories(${module_name} PRIVATE 
+            ${PYLON_SWIG_STAGING_DIR}
+            ${GENICAM_HEADERS_DIR}
+        )
+        
+        message(STATUS "Added pylon SWIG staging directory for ${module_name}: ${PYLON_SWIG_STAGING_DIR}")
+    endif()
+    
+    # On macOS, explicitly link to pylon::Headers to get include directories for SWIG
+    if(APPLE AND TARGET pylon::Headers)
+        target_link_libraries(${module_name} PRIVATE pylon::Headers)
+    endif()
+    
     # CRUCIAL: Tell SWIG to use target include directories (requires CMake 3.13+)
     set_property(TARGET ${module_name} PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
-    
-    # For macOS, explicitly add pylon framework include directories to SWIG
-    if(APPLE AND TARGET pylon::pylon)
-        get_target_property(PYLON_INCLUDE_DIRS pylon::pylon INTERFACE_INCLUDE_DIRECTORIES)
-        if(PYLON_INCLUDE_DIRS)
-            foreach(INCLUDE_DIR ${PYLON_INCLUDE_DIRS})
-                set_property(SOURCE ${swig_file} APPEND_STRING PROPERTY SWIG_FLAGS " -I${INCLUDE_DIR}")
-            endforeach()
-            message(STATUS "Added pylon include directories to SWIG for ${module_name}: ${PYLON_INCLUDE_DIRS}")
-        else()
-            # Fallback: manually add common pylon framework include paths
-            set_property(SOURCE ${swig_file} APPEND_STRING PROPERTY SWIG_FLAGS " -I/Library/Frameworks/pylon.framework/Headers")
-            set_property(SOURCE ${swig_file} APPEND_STRING PROPERTY SWIG_FLAGS " -I/Library/Frameworks/pylon.framework/Headers/GenICam")
-            message(STATUS "Added fallback pylon include directories to SWIG for ${module_name}")
-        endif()
-    endif()
     
     # Set rpath for the extension module to find bundled pylon libraries
     if(UNIX AND NOT APPLE)
