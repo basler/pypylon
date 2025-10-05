@@ -94,7 +94,7 @@ build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
 # Framework patching now happens during CMake install step
 # Keep repair-wheel-command for compatibility with older builds or manual invocation
-repair-wheel-command = "python cmake/patch_macos_framework.py {wheel} && mv {wheel} {dest_dir}/"
+repair-wheel-command = "mv {wheel} {dest_dir}/"
 test-skip = [
     "tests/pylondataprocessing_tests"
 ]
