@@ -273,8 +273,7 @@ if(UNIX)
 endif()
 
 if(WIN32)
-    # Also define _WIN32 for the genicam.i file
-    list(APPEND CMAKE_SWIG_FLAGS -D_WIN32)
+    list(APPEND CMAKE_SWIG_FLAGS -D_WIN32 -D_WIN64)
 endif()
 
 # Function to create a SWIG Python module
