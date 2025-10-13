@@ -14,7 +14,7 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         self.assertEqual(testee.NumSubValues, 0)
         self.assertEqual(testee.GetNumArrayValues(), 0)
         self.assertEqual(testee.NumArrayValues, 0)
-        
+
     def getImageTestValue1(self):
         result = pylon.PylonImage()
         result.Reset(pylon.PixelType_Mono8, 101, 201)
@@ -65,8 +65,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_Int64)
         self.assertEqual(testee1.ToInt64(), testvalue1)
+        self.assertEqual(testee1.ToData(), testvalue1)
         testee1.FromInt64(testvalue2)
         self.assertEqual(testee1.ToInt64(), testvalue2)
+        self.assertEqual(testee1.ToData(), testvalue2)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -75,6 +77,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromInt64(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_Int64)
         self.assertEqual(testee4.ToInt64(), testvalue1)
+        self.assertEqual(testee4.ToData(), testvalue1)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0], testvalue1)
+        self.assertEqual(asArray[1], testvalue2)
 
     def test_UInt64(self):
         testvalue1 = 100
@@ -85,8 +95,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1.FromUInt64(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_UInt64)
         self.assertEqual(testee1.ToUInt64(), testvalue1)
+        self.assertEqual(testee1.ToData(), testvalue1)
         testee1.FromUInt64(testvalue2)
         self.assertEqual(testee1.ToUInt64(), testvalue2)
+        self.assertEqual(testee1.ToData(), testvalue2)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -95,6 +107,16 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromUInt64(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_UInt64)
         self.assertEqual(testee4.ToUInt64(), testvalue1)
+        self.assertEqual(testee4.ToData(), testvalue1)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testee5 = pylondataprocessing.Variant.MakeVariant(pylondataprocessing.VariantDataType_UInt64)
+        testee5.FromUInt64(testvalue2)
+        testeeA.SetArrayItemValue(0, testee4)
+        testeeA.SetArrayItemValue(1, testee5)
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0], testvalue1)
+        self.assertEqual(asArray[1], testvalue2)
 
     def test_Boolean(self):
         testvalue1 = True
@@ -102,8 +124,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_Boolean)
         self.assertEqual(testee1.ToBool(), testvalue1)
+        self.assertEqual(testee1.ToData(), testvalue1)
         testee1.FromBool(testvalue2)
         self.assertEqual(testee1.ToBool(), testvalue2)
+        self.assertEqual(testee1.ToData(), testvalue2)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -112,6 +136,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromBool(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_Boolean)
         self.assertEqual(testee4.ToBool(), testvalue1)
+        self.assertEqual(testee4.ToData(), testvalue1)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0], testvalue1)
+        self.assertEqual(asArray[1], testvalue2)
 
     def test_String(self):
         testvalue1 = "testvalue1"
@@ -119,8 +151,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_String)
         self.assertEqual(testee1.ToString(), testvalue1)
+        self.assertEqual(testee1.ToData(), testvalue1)
         testee1.FromString(testvalue2)
         self.assertEqual(testee1.ToString(), testvalue2)
+        self.assertEqual(testee1.ToData(), testvalue2)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -129,6 +163,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromString(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_String)
         self.assertEqual(testee4.ToString(), testvalue1)
+        self.assertEqual(testee4.ToData(), testvalue1)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0], testvalue1)
+        self.assertEqual(asArray[1], testvalue2)
 
     def test_Float(self):
         testvalue1 = 1.2
@@ -136,8 +178,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_Float)
         self.assertEqual(testee1.ToDouble(), testvalue1)
+        self.assertEqual(testee1.ToData(), testvalue1)
         testee1.FromDouble(testvalue2)
         self.assertEqual(testee1.ToDouble(), testvalue2)
+        self.assertEqual(testee1.ToData(), testvalue2)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -146,6 +190,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromDouble(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_Float)
         self.assertEqual(testee4.ToDouble(), testvalue1)
+        self.assertEqual(testee4.ToData(), testvalue1)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0], testvalue1)
+        self.assertEqual(asArray[1], testvalue2)
 
     def test_PylonImage(self):
         testvalue1 = self.getImageTestValue1()
@@ -153,8 +205,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_PylonImage)
         self.assertEqual(testee1.ToImage().GetHeight(), testvalue1.GetHeight())
+        self.assertEqual(testee1.ToData().GetHeight(), testvalue1.GetHeight())
         testee1.FromImage(testvalue2)
         self.assertEqual(testee1.ToImage().GetHeight(), testvalue2.GetHeight())
+        self.assertEqual(testee1.ToData().GetHeight(), testvalue2.GetHeight())
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -163,6 +217,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromImage(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_PylonImage)
         self.assertEqual(testee4.ToImage().GetHeight(), testvalue1.GetHeight())
+        self.assertEqual(testee4.ToData().GetHeight(), testvalue1.GetHeight())
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0].GetHeight(), testvalue1.GetHeight())
+        self.assertEqual(asArray[1].GetHeight(), testvalue2.GetHeight())
 
     def test_Region(self):
         testvalue1 = pylondataprocessing.Region(pylondataprocessing.RegionType_RLE32, 12)
@@ -183,8 +245,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_Region)
         self.assertEqual(testee1.ToRegion().GetDataSize(), testvalue1.GetDataSize())
+        self.assertEqual(testee1.ToData().GetDataSize(), testvalue1.GetDataSize())
         testee1.FromRegion(testvalue2)
         self.assertEqual(testee1.ToRegion().GetDataSize(), testvalue2.GetDataSize())
+        self.assertEqual(testee1.ToData().GetDataSize(), testvalue2.GetDataSize())
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -193,6 +257,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromRegion(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_Region)
         self.assertEqual(testee4.ToRegion().GetDataSize(), testvalue1.GetDataSize())
+        self.assertEqual(testee4.ToData().GetDataSize(), testvalue1.GetDataSize())
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(asArray[0].GetDataSize(), testvalue1.GetDataSize())
+        self.assertEqual(asArray[1].GetDataSize(), testvalue2.GetDataSize())
 
     def test_TransformationData(self):
         testvalue1 = pylondataprocessing.TransformationData(2, 3)
@@ -200,8 +272,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_TransformationData)
         self.assertEqual(testee1.ToTransformationData().GetColumnCount(), testvalue1.GetColumnCount())
+        self.assertEqual(testee1.ToData().GetColumnCount(), testvalue1.GetColumnCount())
         testee1.FromTransformationData(testvalue2)
         self.assertEqual(testee1.ToTransformationData().GetColumnCount(), testvalue2.GetColumnCount())
+        self.assertEqual(testee1.ToData().GetColumnCount(), testvalue2.GetColumnCount())
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -210,6 +284,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromTransformationData(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_TransformationData)
         self.assertEqual(testee4.ToTransformationData().GetColumnCount(), testvalue1.GetColumnCount())
+        self.assertEqual(testee4.ToData().GetColumnCount(), testvalue1.GetColumnCount())
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_PointF2D(self):
         testvalue1 = pylondataprocessing.PointF2D(1.2, 2.3)
@@ -217,8 +299,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_PointF2D)
         self.assertEqual(testee1.ToPointF2D().X, testvalue1.X)
+        self.assertEqual(testee1.ToData().X, testvalue1.X)
         testee1.FromPointF2D(testvalue2)
         self.assertEqual(testee1.ToPointF2D().X, testvalue2.X)
+        self.assertEqual(testee1.ToData().X, testvalue2.X)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -227,6 +311,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromPointF2D(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_PointF2D)
         self.assertEqual(testee4.ToPointF2D().X, testvalue1.X)
+        self.assertEqual(testee4.ToData().X, testvalue1.X)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_LineF2D(self):
         testvalue1 = pylondataprocessing.LineF2D(1.2, 2.3, 4.5, 5.6)
@@ -234,8 +326,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_LineF2D)
         self.assertEqual(testee1.ToLineF2D().PointA.X, testvalue1.PointA.X)
+        self.assertEqual(testee1.ToData().PointA.X, testvalue1.PointA.X)
         testee1.FromLineF2D(testvalue2)
         self.assertEqual(testee1.ToLineF2D().PointA.X, testvalue2.PointA.X)
+        self.assertEqual(testee1.ToData().PointA.X, testvalue2.PointA.X)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -244,6 +338,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromLineF2D(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_LineF2D)
         self.assertEqual(testee4.ToLineF2D().PointA.X, testvalue1.PointA.X)
+        self.assertEqual(testee4.ToData().PointA.X, testvalue1.PointA.X)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_RectangleF(self):
         testvalue1 = pylondataprocessing.RectangleF(1.2, 3.4, 5.6, 7.8, 9.0)
@@ -251,8 +353,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_RectangleF)
         self.assertEqual(testee1.ToRectangleF().Rotation, testvalue1.Rotation)
+        self.assertEqual(testee1.ToData().Rotation, testvalue1.Rotation)
         testee1.FromRectangleF(testvalue2)
         self.assertEqual(testee1.ToRectangleF().Rotation, testvalue2.Rotation)
+        self.assertEqual(testee1.ToData().Rotation, testvalue2.Rotation)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -261,6 +365,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromRectangleF(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_RectangleF)
         self.assertEqual(testee4.ToRectangleF().Rotation, testvalue1.Rotation)
+        self.assertEqual(testee4.ToData().Rotation, testvalue1.Rotation)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_CircleF(self):
         testvalue1 = pylondataprocessing.CircleF(1.2, 2.3, 4.5)
@@ -268,8 +380,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_CircleF)
         self.assertEqual(testee1.ToCircleF().Radius, testvalue1.Radius)
+        self.assertEqual(testee1.ToData().Radius, testvalue1.Radius)
         testee1.FromCircleF(testvalue2)
         self.assertEqual(testee1.ToCircleF().Radius, testvalue2.Radius)
+        self.assertEqual(testee1.ToData().Radius, testvalue2.Radius)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -278,6 +392,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromCircleF(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_CircleF)
         self.assertEqual(testee4.ToCircleF().Radius, testvalue1.Radius)
+        self.assertEqual(testee4.ToData().Radius, testvalue1.Radius)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_EllipseF(self):
         testvalue1 = pylondataprocessing.EllipseF(1.2, 3.4, 5.6, 7.8, 9.0)
@@ -285,8 +407,10 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1 = pylondataprocessing.Variant(testvalue1)
         self.assertEqual(testee1.GetDataType(), pylondataprocessing.VariantDataType_EllipseF)
         self.assertEqual(testee1.ToEllipseF().Rotation, testvalue1.Rotation)
+        self.assertEqual(testee1.ToData().Rotation, testvalue1.Rotation)
         testee1.FromEllipseF(testvalue2)
         self.assertEqual(testee1.ToEllipseF().Rotation, testvalue2.Rotation)
+        self.assertEqual(testee1.ToData().Rotation, testvalue2.Rotation)
         testee2 = testee1.Copy()
         testee3 = pylondataprocessing.Variant(testee1)
         self.assertFalse(testee1.IsEqualInstance(testee2))
@@ -295,6 +419,14 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee4.FromEllipseF(testvalue1)
         self.assertEqual(testee4.GetDataType(), pylondataprocessing.VariantDataType_EllipseF)
         self.assertEqual(testee4.ToEllipseF().Rotation, testvalue1.Rotation)
+        self.assertEqual(testee4.ToData().Rotation, testvalue1.Rotation)
+        testeeA = pylondataprocessing.Variant.MakeVariant(testee1.GetDataType(), pylondataprocessing.VariantContainerType_Array, 2)
+        testeeA.SetArrayItemValue(0, pylondataprocessing.Variant(testvalue1))
+        testeeA.SetArrayItemValue(1, pylondataprocessing.Variant(testvalue2))
+        asArray = testeeA.ToData();
+        self.assertEqual(len(asArray), 2)
+        self.assertEqual(str(asArray[0]), str(testvalue1))
+        self.assertEqual(str(asArray[1]), str(testvalue2))
 
     def test_equalsOperator(self):
         #same object referenced semantics
@@ -310,7 +442,7 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1.SetError("Error message")
         self.assertTrue(testee1.HasError())
         self.assertEqual(testee1.GetErrorDescription(), "Error message")
-        
+
     def test_convert(self):
         testee1 = pylondataprocessing.Variant("A")
         testee2 = pylondataprocessing.Variant("1")
@@ -330,6 +462,9 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         testee1.SetArrayItemValue(1, pylondataprocessing.Variant(True))
         self.assertEqual(testee1.GetArrayValue(0).ToBool(), False)
         self.assertEqual(testee1.GetArrayValue(1).ToBool(), True)
+        asArray = testee1.ToData();
+        self.assertEqual(asArray[0], False)
+        self.assertEqual(asArray[1], True)
 
     def test_subvalues(self):
         testee1 = pylondataprocessing.Variant(pylondataprocessing.PointF2D(1.2, 2.3))

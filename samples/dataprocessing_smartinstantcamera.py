@@ -1,15 +1,10 @@
 # ===============================================================================
-#    This sample illustrates how to grab and process images using the CInstantCamera class.
-#    The images are grabbed and processed asynchronously, i.e.,
-#    while the application is processing a buffer, the acquisition of the next buffer is done
-#    in parallel.
+#    This sample illustrates how to grab and process images using
+#    the SmartInstantCamera class.
 #
-#    The CInstantCamera class uses a pool of buffers to retrieve image data
-#    from the camera device. Once a buffer is filled and ready,
-#    the buffer can be retrieved from the camera object for processing. The buffer
-#    and additional image data are collected in a grab result. The grab result is
-#    held by a smart pointer after retrieval. The buffer is automatically reused
-#    when explicitly released or when the smart pointer object is destroyed.
+#    The SmartInstantCamera class convenient access to a camera device
+#    and pylon data processing using a recipe as appended processing stage.
+#    Extends the Instant Camera class.
 # ===============================================================================
 import os
 num = 2
@@ -65,24 +60,39 @@ try:
             print("SizeY: ", result.GrabResult.Height)
             img = result.GrabResult.Array
             print("Gray value of first pixel: ", img[0, 0])
-            # Print the barcodes
-            variant = result.Container["Barcodes"]
-            if not variant.HasError():
-                # Print result data
-                for barcodeIndex in range(0, variant.NumArrayValues):
-                    print(variant.GetArrayValue(barcodeIndex).ToString())
-            else:
-                print("Error: " + variant.GetErrorDescription())
-            # Print the data matrix codes
-            variant = result.Container["DataMatrixCodes"]
-            if not variant.HasError():
-                # Print result data
-                for barcodeIndex in range(0, variant.NumArrayValues):
-                    print(variant.GetArrayValue(barcodeIndex).ToString())
-            else:
-                print("Error: " + variant.GetErrorDescription())
+
+            # Iterate over all output pins in the container.
+            # Container is a dictionary. Key is of type string and the value of type Variant.
+            print("Processing recipe outputs:")
+            for key, variant in result.Container.items():
+                # Key contains the name of the recipe output pin.
+                print(f"Output pin '{key}':")
+                if not variant.HasError():
+                    # Print result data.
+                    # Check if variant is an array.
+                    if variant.IsArray():
+                        print(f"  Array with {variant.GetNumArrayValues()} items:")
+                        data_array = variant.ToData() #ToData returns the data inside the variant as corresponding python type.
+                        for i, item in enumerate(data_array):
+                            if variant.GetDataType() == pylondataprocessing.VariantDataType_Region:
+                                print(f"    [{i}] Region with {item.GetDataSize()} bytes")
+                            elif variant.GetDataType() == pylondataprocessing.VariantDataType_PylonImage:
+                                print(f"    [{i}] Image {item.GetWidth()}x{item.GetHeight()}")
+                            else:
+                                print(f"    [{i}] Data: {item}")
+                    else:
+                        data = variant.ToData() #ToData returns the data inside the variant as corresponding python type.
+                        if variant.GetDataType() == pylondataprocessing.VariantDataType_Region:
+                            print(f"  Region with {data.GetDataSize()} bytes")
+                        elif variant.GetDataType() == pylondataprocessing.VariantDataType_PylonImage:
+                            print(f"  Image {data.GetWidth()}x{data.GetHeight()}")
+                        else:
+                            print(f"  Data: {data}")
+                else:
+                    print(f"  Error: {variant.GetErrorDescription()}")
         else:
             print("Error: ", result.GrabResult.ErrorCode, result.GrabResult.ErrorDescription)
+
         result.Release()
     camera.Close()
 

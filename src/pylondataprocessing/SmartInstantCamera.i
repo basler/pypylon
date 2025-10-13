@@ -4,6 +4,10 @@
 %rename(RegisterSmartResultEventHandler) RegisterSmartResultEventHandler2;
 %rename(DeregisterSmartResultEventHandler) DeregisterSmartResultEventHandler2;
 %rename(StartGrabbingMax) StartGrabbing( bool startRecipe, size_t maxImages, EGrabStrategy strategy, EGrabLoop grabLoopType, EGrabLoop grabLoopTypeDataProcessing);
+%ignore ResultWithUpdate;
+%ignore CStickyEventHandler;
+%ignore COutputObserver;
+%ignore SmartResultEventHandlerData;
 
 %include <pylondataprocessing/SmartInstantCamera.h>
 

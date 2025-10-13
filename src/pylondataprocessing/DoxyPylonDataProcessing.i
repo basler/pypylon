@@ -63,12 +63,17 @@ Parameters
 * `vToolTypeIDs` :  
     A string list to store the available vTools' type IDs in.  
 
+pre:  
+
+    *   A recipe is loaded.  
+
 post:  
 
     *   `vToolTypeIDs` contains the type IDs of the available vTool types in
         alphabetical order.  
 
-\\error Doesn't throw C++ exceptions, except when memory allocation fails.  
+\\error Throws an exception if the preconditions aren't met, or when memory
+allocation fails.  
 
 Returns
 -------
@@ -88,6 +93,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `vToolTypeID` refers to an available vTool type (use
         `GetAvailableVToolTypeIDs()` to get a list of all available vTool type
         IDs).  
@@ -116,6 +122,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `identifier` is a valid C++ identifier and must not start with an
         underscore.  
     *   No vTool with the same `identifier` already exists in the recipe.  
@@ -148,6 +155,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `vToolTypeID` refers to an available vTool type (use
         `GetAvailableVToolTypeIDs()` to get a list of all available vTool type
         IDs).  
@@ -179,12 +187,17 @@ Parameters
 * `identifiers` :  
     A string list to store the vTool identifiers in.  
 
+pre:  
+
+    *   A recipe is loaded.  
+
 post:  
 
     *   `identifiers` contains the identifiers of all vTools in the recipe in
         alphabetical order.  
 
-\\error Doesn't throw C++ exceptions, except when memory allocation fails.  
+\\error Throws exceptions if the preconditions aren't met or when memory
+allocation fails.  
 
 Returns
 -------
@@ -224,7 +237,11 @@ Parameters
 * `identifier` :  
     Identifier of the vTool.  
 
-\\error Doesn't throw C++ exceptions.  
+pre:  
+
+    *   The recipe is loaded.  
+
+\\error Throws an exception if the preconditions aren't met.  
 
 Returns
 -------
@@ -247,6 +264,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a vTool with the identifier `oldIdentifier`.  
     *   `newIdentifier` is a valid C++ identifier and must not start with an
         underscore.  
@@ -275,6 +293,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a vTool with the identifier `identifier`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
@@ -305,6 +324,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `inputFullName` is a valid C++ identifier and must not start with an
         underscore.  
     *   The recipe doesn't contain an input with the identifier `inputFullName`.  
@@ -340,6 +360,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `inputDataType` refers to an actual data type and is not equal to
         `VariantDataType_Composite`, `VariantDataType_None`, or
         `VariantDataType_Unsupported`.  
@@ -374,6 +395,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains an input with the identifier `oldInputFullName`.  
     *   `newInputFullName` is a valid C++ identifier and must not start with an
         underscore.  
@@ -428,6 +450,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe has an input with the identifier `inputFullName`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
@@ -457,6 +480,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `outputFullName` is a valid C++ identifier and must not start with an
         underscore.  
     *   The recipe doesn't contain an output with the identifier
@@ -527,6 +551,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains an output with the identifier `oldOutputFullName`.  
     *   `newOutputFullName` is a valid C++ identifier and must not start with an
         underscore.  
@@ -557,6 +582,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains an output with the identifier `outputFullName`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
@@ -601,6 +627,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `identifier` is a valid C++ identifier and must not start with an
         underscore.  
     *   The recipe must not contain a connection with the same `identifier`.  
@@ -652,6 +679,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `sourceFullName` must specify the full name of an existing vTool output
         pin or an existing recipe input.  
     *   `destinationFullName` must specify the full name of an existing vTool
@@ -689,6 +717,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
 
 \\error Throws an exception if the preconditions aren't met.  
@@ -711,6 +740,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
 
 \\error Throws an exception if the preconditions aren't met.  
@@ -733,6 +763,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
 
 \\error Throws an exception if the preconditions aren't met.  
@@ -755,6 +786,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
 
 \\error Throws an exception if the preconditions aren't met.  
@@ -775,7 +807,11 @@ Parameters
 * `identifier` :  
     Identifier of the connection.  
 
-\\error Doesn't throw C++ exceptions.  
+pre:  
+
+    *   A recipe is loaded.  
+
+\\error Throws an exception if the preconditions aren't met.  
 
 Returns
 -------
@@ -795,12 +831,17 @@ Parameters
 * `identifiers` :  
     A string list to store the connection identifiers in.  
 
+pre:  
+
+    *   A recipe is loaded.  
+
 post:  
 
     *   `identifiers` contains the identifiers of all connections in the recipe
         in alphabetical order.  
 
-\\error Doesn't throw C++ exceptions, except when memory allocation fails.  
+\\error Throws an exception if the preconditions aren't met, or when memory
+allocation fails.  
 
 Returns
 -------
@@ -822,6 +863,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `oldIdentifier`.  
     *   `newIdentifier` is a valid C++ identifier and must not start with an
         underscore.  
@@ -854,6 +896,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
     *   `maxQueueSize` must be greater than 0 and lower than the maximum value
         of size_t.  
@@ -882,6 +925,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
@@ -907,6 +951,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
     *   `maxQueueSize` must be greater than 0 and lower than the maximum value
         of size_t.  
@@ -932,6 +977,7 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   The recipe contains a connection with the identifier `identifier`.  
     *   The recipe hasn't been started (i.e., IsStarted() must return false).  
 
@@ -958,12 +1004,43 @@ Parameters
 
 pre:  
 
+    *   A recipe is loaded.  
     *   `fileName` is a writable file path and a valid file path for your
         platform.  
 
 post:  
 
     *   The recipe has been written to the specified file path and can be loaded
+        using the `CRecipe` API.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CBuildersRecipe::SaveAs "
+Pylon::DataProcessing::CBuildersRecipe::SaveAs
+Writes the recipe to a recipe file in a format specified by you.  
+
+Parameters
+----------
+* `format` :  
+    The format the recipe file will be stored in (see `ERecipeFileFormat` for
+    all available options).  
+* `fileName` :  
+    Path to the file to store the recipe in. This can be an absolute or a
+    relative path. If it is relative, the file will be saved relative to your
+    current working directory.  
+
+pre:  
+
+    *   A recipe is loaded.  
+    *   `fileName` is a writable file path and a valid file path for your
+        platform.  
+
+post:  
+
+    *   The recipe has been written to the file path specified and can be loaded
         using the `CRecipe` API.  
 
 \\error Throws an exception if the preconditions aren't met.  
@@ -1314,6 +1391,8 @@ C++ includes: ParameterNames.h
 
 %feature("docstring") Pylon::DataProcessing::CommandParameterName::CommandParameterName "
 Pylon::DataProcessing::CommandParameterName::CommandParameterName";
+
+// File: class_pylon_1_1_data_processing_1_1_c_smart_instant_camera_t_1_1_c_output_observer.xml
 
 // File: class_pylon_1_1_data_processing_1_1_c_recipe.xml
 
@@ -2241,6 +2320,57 @@ If an observer is not found, nothing is done.
 observer handling.  
 ";
 
+%feature("docstring") Pylon::DataProcessing::CRecipe::HasError "
+Pylon::DataProcessing::CRecipe::HasError
+Checks to see whether any of the vTools in the recipe has an error (see also the
+`RegisterEventObserver` method to get a notification when an error state
+changes).  
+
+pre:  
+
+    *   A recipe is loaded.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRecipe::IsVToolEnabled "
+Pylon::DataProcessing::CRecipe::IsVToolEnabled
+Checks to see whether a vTool is enabled.  
+
+pre:  
+
+    *   A recipe is loaded.  
+    *   The vTool exists in the recipe.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRecipe::SetVToolEnabled "
+Pylon::DataProcessing::CRecipe::SetVToolEnabled
+Enables or disables the vTool with the provided identifier.  
+
+Parameters
+----------
+* `identifier` :  
+    The identifier of the vTool.  
+* `enable` :  
+    Enables or disables the vTool.  
+
+pre:  
+
+    *   A recipe is loaded.  
+    *   The recipe is not started.  
+    *   The recipe contains a vTool with the identifier `identifier`.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
 %feature("docstring") Pylon::DataProcessing::CRecipe::GetLock "
 Pylon::DataProcessing::CRecipe::GetLock
 Provides access to the lock used for synchronizing the access to the recipe.  
@@ -2267,9 +2397,10 @@ par: Buffer Handling:
     The buffer that is automatically created by the CRegion class or is replaced
     by a larger buffer if Reset() is called (only if required). The size of the
     allocated buffer is never decreased. Referenced user buffers are never
-    automatically replaced by a larger buffer. See the Reset() method for more
-    details. The Release() method can be used to detach a user buffer or to free
-    an allocated buffer.  
+    automatically replaced by a larger buffer. Referenced user buffers can be
+    replaced by a new buffer if the non-const version of GetBuffer() is called.
+    See the Reset() method for more details. The Release() method can be used to
+    detach a user buffer or to free an allocated buffer.  
 
 \\threading The CRegion class isn't thread-safe.  
 
@@ -2336,6 +2467,25 @@ post:
 
     *   Another reference to the source region buffer is created.  
     *   Creates an invalid region if the source region is invalid.  
+
+\\error Doesn't throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CRegion::CRegion "
+Pylon::DataProcessing::CRegion::CRegion
+Move constructor. Constructs the region with the contents of `source` using move
+semantics. `source` is left invalid.  
+
+Parameters
+----------
+* `source` :  
+    The source region.  
+
+post:  
+
+    *   The new region now contains the data from `source` or is invalid if
+        `source` was invalid.  
+    *   `source` is invalid.  
 
 \\error Doesn't throw C++ exceptions.  
 ";
@@ -2729,6 +2879,10 @@ Returns the pointer to the buffer used or NULL if the region is invalid.
 pre: The region's buffer is not read-only. Use, e.g., GetBufferConst() in this
     case.  
 
+post: This GetBuffer overload implements copy-on-write. If IsUnique() returns
+    false, a new buffer is allocated and the region data is copied to the new
+    buffer. The old buffer is replaced by the new buffer.  
+
 \\error Throws an exception if the preconditions aren't met.  
 ";
 
@@ -2905,6 +3059,840 @@ Parameters
 
 \\error This method must not throw any exceptions.  
 ";
+
+// File: class_pylon_1_1_data_processing_1_1_c_smart_instant_camera_t.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT "
+
+Provides convenient access to a camera device and pylon data processing using a
+recipe as appended processing stage.  
+
+Extends an Instant Camera class and uses the CBuildersRecipe internally.  
+
+C++ includes: SmartInstantCamera.h
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT "
+Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT
+Creates a Smart Instant Camera object with no attached Pylon device and no
+recipe configured.  
+
+\\error Does not throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT "
+Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT
+Creates a Smart Instant Camera object and calls Attach(). No recipe is
+configured.  
+
+See Attach() for more information.  
+
+Parameters
+----------
+* `pDevice` :  
+    The Pylon device to attach.  
+* `cleanupProcedure` :  
+    If cleanupProcedure equals Cleanup_Delete, the Pylon device is destroyed
+    when the Instant Camera object is destroyed.  
+
+\\error May throw an exception if the passed Pylon device is open. Does not
+throw C++ exceptions if the passed Pylon device is closed or NULL.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT "
+Pylon::DataProcessing::CSmartInstantCameraT::CSmartInstantCameraT
+Creates a Smart Instant Camera object and calls Attach(). Sets the filename of
+the recipe to be loaded when Open() is called.  
+
+See Attach() for more information.  
+
+Parameters
+----------
+* `pDevice` :  
+    The Pylon device to attach.  
+* `filename` :  
+    The name and path of the recipe loaded at every call to Open().  
+* `cleanupProcedure` :  
+    If cleanupProcedure equals Cleanup_Delete, the Pylon device is destroyed
+    when the Instant Camera object is destroyed.  
+
+\\error May throw an exception if the passed Pylon device is open. Does not
+throw C++ exceptions if the passed Pylon device is closed or NULL.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::~CSmartInstantCameraT "
+Pylon::DataProcessing::CSmartInstantCameraT::~CSmartInstantCameraT
+Destroys a Smart Instant Camera object.  
+
+*   Stops the grab to stop data processing.  
+*   Calls Attach(NULL) for destroying or removing a Pylon device depending on
+    the passed cleanup procedure.  
+
+\\error Does not throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::SetRecipeFilename "
+Pylon::DataProcessing::CSmartInstantCameraT::SetRecipeFilename
+Sets the filename of the recipe to be loaded when Open() is called.  
+
+If the filename is empty not recipe is opened. The recipe does not change its
+state.  
+
+Parameters
+----------
+* `filename` :  
+    The name and path of the recipe loaded at every call to Open().  
+
+\\error Does not throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GetRecipeFilename "
+Pylon::DataProcessing::CSmartInstantCameraT::GetRecipeFilename
+Retrieves the filename of the recipe that will be loaded when Open() is called.  
+
+Returns
+-------
+Provides the filename of the recipe that will be loaded when Open() is called.  
+
+\\error Does not throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::Open "
+Pylon::DataProcessing::CSmartInstantCameraT::Open
+Opens the attached Pylon device.  
+
+*   Opened by user flag is set, preventing closing of the device on
+    StopGrabbing().  
+*   If the Pylon device is already open, nothing more is done.  
+*   The OnOpen configuration event is fired. The notification of event handlers
+    stops when an event call triggers an exception.  
+*   The Pylon device is opened and a connection to the camera device is
+    established.  
+*   The instant camera migration mode setting is applied to the Pylon device
+    transport layer node map.  
+*   A device removal call back is registered at the Pylon device.  
+*   Callbacks for camera events are registered at the camera node map.  
+*   The OnOpened configuration event is fired if the Pylon device has been
+    opened successfully. The notification of event handlers stops when an event
+    call triggers an exception.  
+*   If the recipe filename is not empty and the recipe is not loaded, the recipe
+    is loaded using that filename. Alternatively you can load the recipe
+    separately using one of the load methods.  
+*   If the recipe filename is not empty and the recipe has been loaded, a flag
+    is set to unload the recipe on camera close.  
+
+pre: A Pylon device is attached.  
+
+post:  
+
+    *   The Pylon device is open and a connection to the camera device has been
+        established.  
+    *   Opened by user flag is set, preventing closing of the Pylon device on
+        StopGrabbing().  
+    *   If the recipe filename is not empty and the recipe is not loaded, the
+        recipe is loaded.  
+
+\\error The Instant Camera object is still valid after error. The Pylon device
+open may throw. Configuration event calls may throw. Callback registrations may
+throw. The Pylon device is closed with Close() if the OnOpened event call
+triggers an exception.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::IsLoaded "
+Pylon::DataProcessing::CSmartInstantCameraT::IsLoaded
+Checks whether a recipe is loaded.  
+
+Returns
+-------
+`true` if a recipe is loaded. \\error Doesn't throw C++ exceptions. \\threading
+This method is synchronized using the lock provided by `GetLock()` of the
+recipe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::Load "
+Pylon::DataProcessing::CSmartInstantCameraT::Load
+Loads a recipe from disk and creates the objects of the design described by the
+recipe. Relative paths , i.e., relative to the directory the recipe file is
+located in, are used for loading external recipe components, e.g., images.  
+
+Parameters
+----------
+* `filename` :  
+    The name and path of the recipe.  
+* `unloadOnCameraClose` :  
+    If set to true the recipe is unloaded when the camera is closed.  
+
+pre:  
+
+    *   The given file name must be a valid file path of an existing file
+        containing valid recipe data.  
+
+post:  
+
+    *   A recipe is loaded. You can use `IsLoaded()` to check whether a recipe
+        is loaded. Implicitly called `Unload()` and unregisters all observers
+        already connected.  
+
+\\error Throws an exception if the recipe can't be loaded. No recipe is loaded
+if an error occurred.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::LoadFromBinary "
+Pylon::DataProcessing::CSmartInstantCameraT::LoadFromBinary
+Loads a recipe from binary buffer and creates the objects of the design
+described by the recipe. Relative paths, i.e., relative to the current
+directory, are used for loading external recipe components, e.g., images.  
+
+Parameters
+----------
+* `pBuffer` :  
+    Buffer pointer to binary recipe.  
+* `bufferSize` :  
+    Buffer size for binary recipe buffer in bytes.  
+* `unloadOnCameraClose` :  
+    If set to true the recipe is unloaded when the camera is closed.  
+
+pre:  
+
+    *   The buffer specified by pBuffer and bufferSize must contain valid recipe
+        data.  
+
+post:  
+
+    *   A recipe is loaded. You can use `IsLoaded()` to check whether a recipe
+        is loaded. Implicitly called `Unload()` and unregisters all observers
+        already connected.  
+
+\\error Throws an exception if the recipe can't be loaded. No recipe is loaded
+if an error occurred.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::LoadFromBinary "
+Pylon::DataProcessing::CSmartInstantCameraT::LoadFromBinary
+Loads a recipe from binary buffer and creates the objects of the design
+described by the recipe.  
+
+Parameters
+----------
+* `pBuffer` :  
+    Buffer pointer to binary recipe.  
+* `bufferSize` :  
+    Buffer size for binary recipe buffer in bytes.  
+* `directory` :  
+    External recipe components, e.g., images, will be loaded relative to this
+    directory.  
+* `unloadOnCameraClose` :  
+    If set to true the recipe is unloaded when the camera is closed.  
+
+pre:  
+
+    *   The buffer specified by pBuffer and bufferSize must contain valid recipe
+        data.  
+
+post:  
+
+    *   A recipe is loaded. You can use `IsLoaded()` to check whether a recipe
+        is loaded. Implicitly calls `Unload()` and unregisters all observers
+        already connected.  
+
+\\error Throws an exception if the recipe can't be loaded. No recipe is loaded
+if an error occurred.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::PreAllocateResources "
+Pylon::DataProcessing::CSmartInstantCameraT::PreAllocateResources
+Optional method to pre-allocate resources of the recipe used.  
+
+All resources that could be allocated successfully stay allocated until a call
+to `DeallocateResources()`.  
+
+pre:  
+
+    *   A recipe is loaded.  
+    *   The recipe must not be started.  
+
+post:  
+
+    *   All resources are allocated.  
+
+\\error Throws an exception if:  
+
+*   The preconditions aren't met.  
+*   The resources couldn't be allocated.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::DeallocateResources "
+Pylon::DataProcessing::CSmartInstantCameraT::DeallocateResources
+Deallocates all resources used by the recipe.  
+
+Calls recipes `Stop()` method if the design described by the recipe has been
+started.  
+
+post:  
+
+    *   No resources are allocated.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::Unload "
+Pylon::DataProcessing::CSmartInstantCameraT::Unload
+Unloads the recipe currently loaded.  
+
+Calls `DeallocateResources()` if the design described by the recipe has
+allocated resources. Unregisters all observers that have been connected.  
+
+pre:  
+
+    *   Data received via `IOutputObserver::OutputDataPush` must be freed.  
+
+post:  
+
+    *   No recipe is loaded.  
+
+\\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::Close "
+Pylon::DataProcessing::CSmartInstantCameraT::Close
+Closes the attached Pylon device. Can unload the recipe.  
+
+*   If no Pylon device is attached, nothing is done.  
+*   If the Pylon device is already closed, nothing is done.  
+*   If a grab is in progress, it is stopped by calling StopGrabbing().  
+*   The configuration event OnClose is fired. Possible C++ exceptions from event
+    calls are caught and ignored. All event handlers are notified.  
+*   The connection to the camera device is closed and the Pylon device is
+    closed.  
+*   The configuration event OnClosed is fired if the Pylon device has been
+    closed successfully. Possible C++ exceptions from event calls are caught and
+    ignored. All event handlers are notified.  
+*   If the unload flag is set the recipe is unloaded.  
+
+post: The connection to the camera device is closed and the Pylon device is
+    closed.  
+
+\\error Does not throw C++ exceptions. Possible C++ exceptions are caught and
+ignored.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing
+Starts the grabbing of images.  
+
+*   If a grab loop thread has been used in the last grab session, the grab loop
+    thread context is joined with the caller's context.  
+*   If the Pylon device is not already open, it is opened by calling Open().  
+*   The configuration event OnGrabStart is fired. The notification of event
+    handlers stops when an event call triggers an exception.  
+*   Grab-specific parameters of the camera object are locked, e.g. MaxNumBuffer.  
+*   If the camera device parameter ChunkModeActive is enabled, the Instant
+    Camera chunk parsing support is initialized.  
+*   If the Instant Camera parameter GrabCameraEvents is enabled, the Instant
+    Camera event grabbing support is initialized.  
+*   The grabbing is started.  
+*   The AcquisitionStart command of the camera device is executed.  
+*   The configuration event OnGrabStarted is fired if the grab has been started
+    successfully. The notification of event handlers stops when an event call
+    triggers an exception.  
+*   If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is started calling RetrieveResult( GrabLoopThreadTimeout,
+    smartResult) in a loop.  
+
+Parameters
+----------
+* `strategy` :  
+    The grab strategy. See Pylon::EGrabStrategy for more information  
+* `grabLoopType` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the grab loop. This grab loop type is also used
+    for the data processing grab loop.  
+
+pre:  
+
+    *   A Pylon device is attached.  
+    *   The stream grabber of the Pylon device is closed.  
+    *   The grabbing is stopped.  
+    *   The attached Pylon device supports grabbing.  
+    *   Must not be called while holding the lock provided by GetLock() when
+        using the grab loop thread.  
+
+post:  
+
+    *   The grabbing is started.  
+    *   Grab-specific parameters of the camera object are locked, e.g.
+        MaxNumBuffer.  
+    *   If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional
+        grab loop thread is running that calls RetrieveResult(
+        GrabLoopThreadTimeout, grabResult) in a loop. Images are processed by
+        registered image event handlers.  
+    *   Operating the stream grabber from outside the camera object will result
+        in undefined behavior.  
+
+\\error The Instant Camera object is still valid after error. Open() may throw.
+Configuration event calls may throw. The grab implementation may throw. The
+grabbing is stopped with StopGrabbing() if the OnGrabStarted event call triggers
+an exception. Throws a C++ exception, if Upcoming Image grab strategy is used
+together with USB camera devices.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing
+Starts the grabbing for a maximum number of images.  
+
+Extends the StartGrabbing(EStrategy, EGrabLoop) by a number of images to grab.
+If the passed count of images has been reached, StopGrabbing is called
+automatically. The images are counted according to the grab strategy. Skipped
+images are not taken into account.  
+
+The amount of allocated buffers is reduced to maxImages when grabbing fewer
+images than according to the value of the CInstantCamera MaxNumBuffer parameter
+and the grab strategy is GrabStrategy_OneByOne.  
+
+Parameters
+----------
+* `maxImages` :  
+    The count of images to grab. This value must be larger than zero.  
+* `strategy` :  
+    The grab strategy. See Pylon::InstantCamera::EStrategy for more information.  
+* `grabLoopType` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the grab loop. This grab loop type is also used
+    for the data processing grab loop.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing
+Starts the grabbing. This method is an overload that with additional parameters.  
+
+See the corresponding StartGrabbing() method for more information.  
+
+Parameters
+----------
+* `startRecipe` :  
+    If true the data processing using the recipe is started otherwise it is
+    bypassed, e.g. for setting up the camera only.  
+* `strategy` :  
+    The grab strategy. See Pylon::InstantCamera::EStrategy for more information.  
+* `grabLoopType` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the grab loop.  
+* `grabLoopTypeDataProcessing` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the data processing loop.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StartGrabbing
+Starts the grabbing for a maximum number of images. This method is an overload
+that with additional parameters.  
+
+See the corresponding StartGrabbing() method for more information.  
+
+Parameters
+----------
+* `startRecipe` :  
+    If true the data processing using the recipe is started otherwise it is
+    bypassed, e.g. for setting up the camera only.  
+* `maxImages` :  
+    The count of images to grab. This value must be larger than zero.  
+* `strategy` :  
+    The grab strategy. See Pylon::InstantCamera::EStrategy for more information.  
+* `grabLoopType` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the grab loop.  
+* `grabLoopTypeDataProcessing` :  
+    If grabLoopType equals GrabLoop_ProvidedByInstantCamera, an additional grab
+    loop thread is used to run the data processing loop.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::RetrieveResult "
+Pylon::DataProcessing::CSmartInstantCameraT::RetrieveResult
+Retrieves a smart result according to the strategy, waits if it is not yet
+available.  
+
+*   The content of the passed smart result is released.  
+*   If no Pylon device is attached or the grabbing is not started, the method
+    returns immediately \"false\".  
+*   Wait for a smart result if it is not yet available. The access to the camera
+    is not locked during waiting. Camera events are handled.  
+*   Only if camera events are used: Incoming camera events are handled.  
+*   One smart result is retrieved per call according to the strategy applied.  
+*   Only if chunk mode is used: The chunk data parsing is performed. The smart
+    result data is updated using chunk data.  
+*   The image event OnImagesSkipped is fired if grab results have been skipped
+    according to the strategy. The notification of event handlers stops when an
+    event call triggers an exception.  
+*   The image event OnImageGrabbed is fired if a grab result becomes available.
+    The notification of event handlers stops when an event call triggers an
+    exception.  
+*   The smart result event OnResult is fired.  
+*   Stops the grabbing by calling StopGrabbing() if the maximum number of images
+    has been grabbed.  
+  
+
+It needs to be checked whether the grab represented by the smart result has been
+successful, see CGrabResultData::GrabSucceeded().  
+
+Parameters
+----------
+* `timeoutMs` :  
+    A timeout value in ms for waiting for a smart result, or the INFINITE value.  
+* `result` :  
+    Receives the smart result.  
+* `timeoutHandling` :  
+    If timeoutHandling equals TimeoutHandling_ThrowException, a timeout
+    exception is thrown on timeout.  
+
+Returns
+-------
+True if the call successfully retrieved a smart result, false otherwise.  
+
+pre:  
+
+    *   There is no other thread waiting for a result. This will be the case
+        when the Instant Camera grab loop thread is used.  
+
+post:  
+
+    *   If a smart result has been retrieved, one image is removed from the
+        output queue and is returned in the grabResult parameter.  
+    *   If no smart result has been retrieved, an empty smart result is returned
+        in the result parameter.  
+    *   If the maximum number of images has been grabbed, the grabbing is
+        stopped.  
+    *   If camera event handling is enabled and camera events were received, at
+        least one or more camera event messages have been processed.  
+
+\\error The Instant Camera object is still valid after error. The grabbing is
+stopped if an exception is thrown.  
+
+\\threading This method is synchronized using the lock provided by GetLock()
+while not waiting.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GetParameters "
+Pylon::DataProcessing::CSmartInstantCameraT::GetParameters
+Returns a parameter collection to access the parameters of the recipe.  
+
+note: The `IParameterCollection` returns objects based on `CParameter` that can
+    be used while a recipe is loaded. Before unloading a recipe, the parameter
+    objects must be cleared by calling `CParameter::Release()`. For parameters
+    that become available only when resources are allocated, e.g., a camera,
+    `CParameter::Release()` must be called before deallocating a resource.  
+
+Returns
+-------
+A reference to the `IParameterCollection`.  
+
+pre:  
+
+    *   A recipe is loaded.  
+
+\\error Throws an exception if the preconditions aren't met.  
+
+\\threading This method is synchronized using the lock provided by `GetLock()`
+of the recipe.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StopGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StopGrabbing
+Stops the grabbing of smart results.  
+
+*   Nothing is done if the Instant Camera is not currently grabbing.  
+*   The configuration event OnGrabStop is fired. Possible C++ exceptions from
+    event calls are caught and ignored. All event handlers are notified.  
+*   The AcquisitionStop command of the camera device is executed.  
+*   The grabbing is stopped.  
+*   All buffer queues of the Smart Instant Camera are cleared.  
+*   The OnGrabStopped configuration event is fired if the grab has been stopped
+    successfully. Possible C++ exceptions from event calls are caught and
+    ignored. All event handlers are notified.  
+*   If the Instant Camera has been opened by StartGrabbing, it is closed by
+    calling Close().  
+*   Grab-specific parameters of the camera object are unlocked, e.g.
+    MaxNumBuffer.  
+
+post:  
+
+    *   The grabbing is stopped.  
+    *   If the Pylon device has been opened by StartGrabbing and no other camera
+        object service requires it to be open, it is closed.  
+    *   Grab specific parameters of the camera object are unlocked, e.g.
+        MaxNumBuffer.  
+
+\\error Does not throw C++ exceptions. Possible C++ exceptions are caught and
+ignored.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::StopGrabbing "
+Pylon::DataProcessing::CSmartInstantCameraT::StopGrabbing
+Stops the grabbing of smart results. This method is an overload that with an
+additional parameters.  
+
+See the other StopGrabbing overload for more information.  
+
+\\error Does not throw C++ exceptions. Possible C++ exceptions are caught and
+ignored.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GrabOne "
+Pylon::DataProcessing::CSmartInstantCameraT::GrabOne
+Grabs one image.  
+
+The following code shows a simplified version of what is done (happy path):  
+
+
+GrabOne() can be used to together with the CAcquireSingleFrameConfiguration.  
+
+note: Using GrabOne is more efficient if the Pylon device is already open,
+    otherwise the Pylon device is opened and closed for each call.  
+
+note: Grabbing single images using Software Trigger
+    (CSoftwareTriggerConfiguration) is recommended if you want to maximize frame
+    rate. This is because the overhead per grabbed image is reduced compared to
+    Single Frame Acquisition. The grabbing can be started using StartGrabbing().
+    Images are grabbed using the WaitForFrameTriggerReady(),
+    ExecuteSoftwareTrigger() and RetrieveResult() methods instead of using
+    GrabOne. The grab can be stopped using StopGrabbing() when done.  
+
+Parameters
+----------
+* `timeoutMs` :  
+    A timeout value in ms for waiting for a grab result, or the INFINITE value.  
+* `grabResult` :  
+    Receives the grab result.  
+* `timeoutHandling` :  
+    If timeoutHandling equals TimeoutHandling_ThrowException, a timeout
+    exception is thrown on timeout.  
+
+Returns
+-------
+Returns true if the call successfully retrieved a grab result and the grab
+succeeded (CGrabResultData::GrabSucceeded()).  
+
+pre: Must meet the preconditions of start grabbing.  
+
+post: Meets the postconditions of stop grabbing.  
+
+\\error The Instant Camera object is still valid after error. See
+StartGrabbing(), RetrieveResult(), and StopGrabbing() . In the case of
+exceptions after StartGrabbing() the grabbing is stopped using StopGrabbing().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GrabOne "
+Pylon::DataProcessing::CSmartInstantCameraT::GrabOne
+Grabs one smart result.  
+
+The following code shows a simplified version of what is done (happy path):  
+
+
+GrabOne() can be used to together with the CAcquireSingleFrameConfiguration.  
+
+note: Using GrabOne is more efficient if the Pylon device is already open,
+    otherwise the Pylon device is opened and closed for each call.  
+
+note: Grabbing single images using Software Trigger
+    (CSoftwareTriggerConfiguration) is recommended if you want to maximize frame
+    rate. This is because the overhead per grabbed image is reduced compared to
+    Single Frame Acquisition. The grabbing can be started using StartGrabbing().
+    Images are grabbed using the WaitForFrameTriggerReady(),
+    ExecuteSoftwareTrigger() and RetrieveResult() methods instead of using
+    GrabOne. The grab can be stopped using StopGrabbing() when done.  
+
+Parameters
+----------
+* `startRecipe` :  
+    If true the data processing using the recipe is started otherwise it is
+    bypassed, e.g. for setting up the camera only.  
+* `timeoutMs` :  
+    A timeout value in ms for waiting for a smart result, or the INFINITE value.  
+* `result` :  
+    Receives the smart result.  
+* `timeoutHandling` :  
+    If timeoutHandling equals TimeoutHandling_ThrowException, a timeout
+    exception is thrown on timeout.  
+
+Returns
+-------
+Returns true if the call successfully retrieved a smart result and the grab
+succeeded (CGrabResultData::GrabSucceeded()).  
+
+pre: Must meet the preconditions of start grabbing.  
+
+post: Meets the postconditions of stop grabbing.  
+
+\\error The Instant Camera object is still valid after error. See
+StartGrabbing(), RetrieveResult(), and StopGrabbing() . In the case of
+exceptions after StartGrabbing() the grabbing is stopped using StopGrabbing().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GetSmartResultWaitObject "
+Pylon::DataProcessing::CSmartInstantCameraT::GetSmartResultWaitObject
+Provides access to a wait object indicating available smart results.  
+
+Returns
+-------
+A wait object indicating available smart results.  
+
+\\error Does not throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::RegisterSmartResultEventHandler "
+Pylon::DataProcessing::CSmartInstantCameraT::RegisterSmartResultEventHandler
+Adds an smart result event handler to the list of registered smart result event
+handler objects.  
+
+*   If mode equals RegistrationMode_ReplaceAll, the list of registered smart
+    result event handlers is cleared.  
+*   If pointer `pImageEventHandler` is not NULL, it is appended to the list of
+    smart result event handlers.  
+
+Parameters
+----------
+* `pSmartResultEventHandler` :  
+    The receiver of smart result events.  
+* `mode` :  
+    Indicates how to register the new smartResultEventHandler.  
+* `cleanupProcedure` :  
+    If cleanupProcedure equals Cleanup_Delete, the passed event handler is
+    deleted when no longer needed.  
+
+post: The `pSmartResultEventHandler` is registered and called on data processing
+    related events.  
+
+\\error Does not throw C++ exceptions, except when memory allocation fails.  
+
+\\threading This method is synchronized using the internal smart result event
+handler registry lock.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::DeregisterSmartResultEventHandler "
+Pylon::DataProcessing::CSmartInstantCameraT::DeregisterSmartResultEventHandler
+Removes an smart result event handler from the list of registered smart result
+event handler objects.  
+
+If the smart result event handler is not found, nothing is done.  
+
+Parameters
+----------
+* `pSmartResultEventHandler` :  
+    The registered receiver of configuration events.  
+
+Returns
+-------
+True if successful  
+
+post:  
+
+    *   The smartResultEventHandler is deregistered.  
+    *   If the smart result event handler has been registered by passing a
+        pointer and the cleanup procedure is Cleanup_Delete, the event handler
+        is deleted.  
+
+\\error Does not throw C++ exceptions.  
+
+\\threading This method is synchronized using the internal smart result event
+handler registry lock.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartInstantCameraT::GetGrabStopWaitObject "
+Pylon::DataProcessing::CSmartInstantCameraT::GetGrabStopWaitObject
+Provides access to a wait object indicating that the grabbing has stopped.  
+
+Returns
+-------
+A wait object indicating that the grabbing has stopped.  
+
+\\error Does not throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by GetLock().  
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_smart_result_event_handler_t.xml
+
+
+%feature("docstring") Pylon::DataProcessing::CSmartResultEventHandlerT "
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartResultEventHandlerT::~CSmartResultEventHandlerT "
+Pylon::DataProcessing::CSmartResultEventHandlerT::~CSmartResultEventHandlerT";
+
+%feature("docstring") Pylon::DataProcessing::CSmartResultEventHandlerT::OnResult "
+Pylon::DataProcessing::CSmartResultEventHandlerT::OnResult
+This method is called when a data processing result is ready.  
+
+Parameters
+----------
+* `camera` :  
+    The source of the call. You can use a downcast to get your specific smart
+    instant camera.  
+* `grabResult` :  
+    The grab result data.  
+
+\\error Exceptions from this call will propagate through. The notification of
+event handlers stops when an exception is triggered.  
+
+
+\\threading This method is called outside the lock of the camera object but
+inside the lock of the smart result event handler registry.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CSmartResultEventHandlerT::OnDataProcessingError "
+Pylon::DataProcessing::CSmartResultEventHandlerT::OnDataProcessingError
+This method is called when an exception has been triggered using the data
+processing recipe.  
+
+An exception has been triggered by the data processing grab loop thread. The
+grab will be stopped after this event call.  
+
+Parameters
+----------
+* `camera` :  
+    The source of the call. You can use a downcast to get your specific smart
+    instant camera.  
+* `errorMessage` :  
+    The message of the exception that signaled an error during grabbing.  
+
+\\error C++ exceptions from this call will be caught and ignored. All event
+handlers are notified.  
+
+
+\\threading This method is called inside the lock of the camera object.  
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_smart_instant_camera_t_1_1_c_sticky_event_handler.xml
 
 // File: class_pylon_1_1_data_processing_1_1_c_transformation_data.xml
 
@@ -3408,12 +4396,34 @@ post:
 
 %feature("docstring") Pylon::DataProcessing::CVariant::CVariant "
 Pylon::DataProcessing::CVariant::CVariant
-Creates a `CVariant` of type `VariantDataType_PylonImage`.  
+Creates a `CVariant` of type `VariantDataType_PylonImage`. The image will be
+allowed to be modified by the recipe.  
 
 Parameters
 ----------
 * `value` :  
     The value to assign.  
+
+post:  
+
+    *   The `value` passed is shallow-copied (see `CPylonImage` copy constructor
+        for more information) and held by the `CVariant` created.  
+    *   `GetDataType()` returns `VariantDataType_PylonImage`.  
+
+\\error Doesn't throw C++ exceptions.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CVariant::CVariant "
+Pylon::DataProcessing::CVariant::CVariant
+Creates a `CVariant` of type `VariantDataType_PylonImage` and lets you specify
+if the image can be changed by the recipe.  
+
+Parameters
+----------
+* `value` :  
+    The value to assign.  
+* `readOnly` :  
+    If true the image must not be changed by the recipe and false otherwise.  
 
 post:  
 
@@ -4427,12 +5437,39 @@ post:
 
 %feature("docstring") Pylon::DataProcessing::CVariant::FromImage "
 Pylon::DataProcessing::CVariant::FromImage
-Changes the value referenced by the variant.  
+Changes the value referenced by the variant. The image will be allowed to be
+modified by the recipe.  
 
 Parameters
 ----------
 * `newValue` :  
     The new value for the referenced value.  
+
+pre:  
+
+    *   `newValue` must be a valid image.  
+    *   `IsArray()` returns `false`.  
+    *   The type of this `CVariant` is `VariantDataType_PylonImage`.  
+
+post:  
+
+    *   The referenced value has been changed to the value of `newValue`.  
+    *   The data type returned by `GetDataType()` hasn't changed.  
+
+\\error Throws an exception if the preconditions aren't met.  
+";
+
+%feature("docstring") Pylon::DataProcessing::CVariant::FromImage "
+Pylon::DataProcessing::CVariant::FromImage
+Changes the value referenced by the variant and allow to specify if the image
+may be modified by the recipe.  
+
+Parameters
+----------
+* `newValue` :  
+    The new value for the referenced value.  
+* `readOnly` :  
+    If true the image must not be changed by the recipe and false otherwise.  
 
 pre:  
 
@@ -5064,6 +6101,8 @@ C++ includes: ParameterNames.h
 %feature("docstring") Pylon::DataProcessing::ParameterName::ParameterName "
 Pylon::DataProcessing::ParameterName::ParameterName";
 
+// File: struct_pylon_1_1_data_processing_1_1_c_smart_instant_camera_t_1_1_result_with_update.xml
+
 // File: struct_pylon_1_1_data_processing_1_1_s_circle_f.xml
 
 
@@ -5211,6 +6250,18 @@ Parameters
     Point B of the line.  
 ";
 
+// File: class_smart_result_event_handler.xml
+
+
+%feature("docstring") SmartResultEventHandler "
+
+The configuration event handler base class.  
+
+C++ includes: SmartResultEventHandler.h
+";
+
+// File: class_pylon_1_1_data_processing_1_1_c_smart_instant_camera_t_1_1_smart_result_event_handler_data.xml
+
 // File: struct_pylon_1_1_data_processing_1_1_s_point_f2_d.xml
 
 
@@ -5295,6 +6346,95 @@ sorted line-wise starting with line 0 and then column-wise starting with column
 C++ includes: RegionEntry.h
 ";
 
+// File: struct_pylon_1_1_data_processing_1_1_s_smart_instant_camera_result_t.xml
+
+
+%feature("docstring") Pylon::DataProcessing::SSmartInstantCameraResultT "
+
+A container for smart camera output data.  
+
+You can create your own result data type using duck typing. A smart result class
+needs the methods: void SetGrabResult(const CGrabResultPtr& ptrGrabResult); void
+SetInitialUpdate(const CUpdate& update); void SetVariantContainer(const CUpdate&
+update, CVariantContainer&& container); void Release();  
+
+Depending on your use case you can:  
+
+*   Keep or discard the update object.  
+*   Keep or discard the grab result.  
+*   Unpack the variant container in SetVariantContainer.  
+
+Configure you smart instant camera like this typedef
+CSmartInstantCameraT<CInstantCamera, CMyResultObject> CSmartInstantCamera;  
+
+C++ includes: SmartResult.h
+";
+
+%feature("docstring") Pylon::DataProcessing::SSmartInstantCameraResultT::SetGrabResult "
+Pylon::DataProcessing::SSmartInstantCameraResultT::SetGrabResult
+Sets the grab result.  
+
+Parameters
+----------
+* `ptrGrabResult` :  
+    The grab result data.  
+
+\\error Exceptions thrown from this call will stop the grab.  
+
+\\threading This method is called outside the lock of the camera object but
+inside the lock of the image event handler registry. The thread calling this
+method is the thread calling RetrieveResult(). This can be a user thread or the
+internal grab loop thread of the CInstantCamera.  
+";
+
+%feature("docstring") Pylon::DataProcessing::SSmartInstantCameraResultT::SetInitialUpdate "
+Pylon::DataProcessing::SSmartInstantCameraResultT::SetInitialUpdate
+Sets the update returned by CRecipe::TriggerUpdateAsync() or an invalid Update
+if the recipe is not started.  
+
+Parameters
+----------
+* `update` :  
+    The update.  
+
+\\error Exceptions thrown from this call will stop the grab.  
+
+\\threading This method is called outside the lock of the camera object but
+inside the lock of the image event handler registry. The thread calling this
+method is the thread calling RetrieveResult(). This can be a user thread or the
+internal grab loop thread of the CInstantCamera.  
+";
+
+%feature("docstring") Pylon::DataProcessing::SSmartInstantCameraResultT::SetVariantContainer "
+Pylon::DataProcessing::SSmartInstantCameraResultT::SetVariantContainer
+Moves the variant container that contains the result from data processing to
+this object.  
+
+Parameters
+----------
+* `update` :  
+    The update (from IOutputObserver::OutputDataPush()).  
+* `container` :  
+    The data processing result data (from IOutputObserver::OutputDataPush()).  
+
+\\error Exceptions thrown from this call will stop the grab. \\threading Running
+on a thread from the recipe thread pool. C++ exceptions thrown by this method
+are caught and ignored.  
+";
+
+%feature("docstring") Pylon::DataProcessing::SSmartInstantCameraResultT::Release "
+Pylon::DataProcessing::SSmartInstantCameraResultT::Release
+The currently held data is released.  
+
+post: The currently held data is released.  
+
+\\error Still valid after error.  
+
+\\threading This method is called outside the lock of the camera object. The
+thread calling this method is usually the thread calling RetrieveResult(). This
+can be a user thread or the internal grab loop thread of the CInstantCamera.  
+";
+
 // File: struct_pylon_1_1_data_processing_1_1_string_parameter_name.xml
 
 
@@ -5328,6 +6468,9 @@ Returns
 Pylon::CParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5345,6 +6488,9 @@ Returns
 Pylon::CParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5362,6 +6508,9 @@ Returns
 Pylon::CIntegerParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5379,6 +6528,9 @@ Returns
 Pylon::CFloatParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5396,6 +6548,9 @@ Returns
 Pylon::CStringParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5413,6 +6568,9 @@ Returns
 Pylon::CBooleanParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5430,6 +6588,9 @@ Returns
 Pylon::CArrayParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5447,6 +6608,9 @@ Returns
 Pylon::CCommandParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Get "
@@ -5464,6 +6628,9 @@ Returns
 Pylon::CEnumParameter if `parameterName` is not contained.  
 
 \\error Doesn't throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5484,6 +6651,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5504,6 +6674,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5525,6 +6698,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5546,6 +6722,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5566,6 +6745,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5586,6 +6768,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5606,6 +6791,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5626,6 +6814,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::Contains "
@@ -5647,6 +6838,9 @@ Exceptions
 ----------
 * `Doesn't` :  
     throw C++ exceptions.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::GetAllParameterNames "
@@ -5657,6 +6851,9 @@ collection.
 Returns
 -------
 `StringList_t` with the names of all parameters in this parameter collection.  
+
+\\threading This method is synchronized using the lock provided by
+`CRecipe::GetLock()`.  
 ";
 
 %feature("docstring") Pylon::DataProcessing::IsValidRegionType "
@@ -5719,6 +6916,29 @@ of region elements.
 \\error Throws an exception if the preconditions aren't met.  
 ";
 
+%feature("docstring") Pylon::DataProcessing::ComputeRegionEntryCount "
+Pylon::DataProcessing::ComputeRegionEntryCount
+Determines the number of region elements that fit in the given region size in
+bytes.  
+
+Parameters
+----------
+* `regionType` :  
+    The region type to be used.  
+* `regionSize` :  
+    The region size in bytes to compute the entry count from.  
+
+pre:  
+
+    *   The region type must be valid.  
+
+Returns
+-------
+The number of region elements that fit in the given region size in bytes.  
+
+\\error Throws an exception if the preconditions aren't met.  
+";
+
 // File: _acquisition_mode_8h.xml
 
 // File: _builders_recipe_8h.xml
@@ -5759,6 +6979,8 @@ of region elements.
 
 // File: _recipe_8h.xml
 
+// File: _recipe_file_format_8h.xml
+
 // File: _rectangle_f_8h.xml
 
 // File: _region_8h.xml
@@ -5768,6 +6990,12 @@ of region elements.
 // File: _region_type_8h.xml
 
 // File: _region_user_buffer_event_handler_8h.xml
+
+// File: _smart_instant_camera_8h.xml
+
+// File: _smart_result_8h.xml
+
+// File: _smart_result_event_handler_8h.xml
 
 // File: _transformation_data_8h.xml
 
@@ -5783,13 +7011,13 @@ of region elements.
 
 // File: dir_5043b2f144d5f322b3d454b2efef9db4.xml
 
-// File: dir_6253a1aaf92bae6c2d2e9ee40ee5135c.xml
+// File: dir_af9bb8737c55f5611432d4cc677ceb6f.xml
 
-// File: dir_c3360addf176ad57f7364093e004800e.xml
+// File: dir_fe434566b258aa8bf049cded0f256ae4.xml
 
 // File: dir_7a153bad9178605b17280b5b16bdfe05.xml
 
-// File: dir_8bf978817657829de860156342dc6797.xml
+// File: dir_0f607d4bdd74fcc03ea5fbef7b1612e0.xml
 
-// File: dir_f75f1aac289c542387affbfce84ea76e.xml
+// File: dir_6da13fe8e64f545d83d168f37854bac0.xml
 

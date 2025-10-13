@@ -18,14 +18,12 @@ class TSmartResultEventHandler(pylondataprocessing.SmartResultEventHandler):
         self.OnDataProcessingErrorCallCount = 0
 
     def OnResult(self, camera, result):
-        print("OnResult")
         self.Result = result
-        self.camera = camera
+        self.Camera = camera
         self.OnResultCallCount += 1
 
     def OnDataProcessingError(self, camera, message):
-        print("OnDataProcessingError")
-        self.camera = camera
+        self.Camera = camera
         self.Message = message
         self.OnDataProcessingErrorCallCount += 1
     
@@ -38,79 +36,31 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
         di.SetDeviceClass(device_class)
         return di
 
-
-    def test_init(self):
-        testee1 = pylondataprocessing.SmartInstantCamera()
-        smartresulthandler = TSmartResultEventHandler()
-        
-        # Load the recipe file.
-        thisdir = os.path.dirname(__file__)
-        recipefilename = os.path.join(thisdir, 'smartinstantcamera_test.precipe')
-
-        # Create an instant camera object with the camera device found first.
-        camera = pylondataprocessing.SmartInstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice(self.get_filter()), recipefilename)
-        camera.Open()
-
-        # The parameter MaxNumBuffer can be used to control the count of buffers
-        # allocated for grabbing. The default value of this parameter is 10.
-        camera.MaxNumBuffer.Value = 5
-
-        # Start the grabbing of c_countOfImagesToGrab images.
-        # The camera device is parameterized with a default configuration which
-        # sets up free-running continuous acquisition.
-        camera.StartGrabbingMax(3)
-        
-        camera.RegisterSmartResultEventHandler(smartresulthandler, pylon.RegistrationMode_Append, pylon.Cleanup_None)
-
-        # Camera.StopGrabbing() is called automatically by the RetrieveResult() method
-        # when c_countOfImagesToGrab images have been retrieved.
-        while camera.IsGrabbing():
-            # Wait for an image and then retrieve it. A timeout of 5000 ms is used.
-            result = camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
-            
-            # Image grabbed successfully?
-            if result.GrabResult.GrabSucceeded():
-                # Access the image data.
-                print("SizeX: ", result.GrabResult.Width)
-                print("SizeY: ", result.GrabResult.Height)
-                img = result.GrabResult.Array
-                print("Gray value of first pixel: ", img[0, 0])
-                # Print the barcodes
-                variant = result.Container["Barcodes"]
-                if not variant.HasError():
-                    # Print result data
-                    for barcodeIndex in range(0, variant.NumArrayValues):
-                        print(variant.GetArrayValue(barcodeIndex).ToString())
-                else:
-                    print("Error: " + variant.GetErrorDescription())
-                # Print the data matrix codes
-                variant = result.Container["DataMatrixCodes"]
-                if not variant.HasError():
-                    # Print result data
-                    for barcodeIndex in range(0, variant.NumArrayValues):
-                        print(variant.GetArrayValue(barcodeIndex).ToString())
-                else:
-                    print("Error: " + variant.GetErrorDescription())
-            else:
-                print("Error: ", result.GrabResult.ErrorCode, result.GrabResult.ErrorDescription)
-            result.Release()
-        camera.Close()
-
     def test_constructor(self):
         # CSmartInstantCameraT()
         testee = pylondataprocessing.SmartInstantCamera()
         self.assertEqual(testee.GetRecipeFilename(), "")
         self.assertFalse(testee.IsLoaded())
+        self.assertFalse(testee.IsOpen())
+        self.assertFalse(testee.IsGrabbing())
+        self.assertFalse(testee.IsPylonDeviceAttached())
         # CSmartInstantCameraT(IPylonDevice* pDevice, ECleanup cleanupProcedure = Cleanup_Delete)
         testee1 = pylondataprocessing.SmartInstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice(self.get_filter()))
         self.assertEqual(testee1.GetRecipeFilename(), "")
         self.assertFalse(testee1.IsLoaded())
+        self.assertFalse(testee1.IsOpen())
+        self.assertFalse(testee1.IsGrabbing())
+        self.assertTrue(testee1.IsPylonDeviceAttached())
         # CSmartInstantCameraT(IPylonDevice* pDevice, const String_t& filename , ECleanup cleanupProcedure = Cleanup_Delete)
         thisdir = os.path.dirname(__file__)
         recipefilename = os.path.join(thisdir, 'smartinstantcamera_test.precipe')
         testee2 = pylondataprocessing.SmartInstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice(self.get_filter()), recipefilename)
         self.assertEqual(testee2.GetRecipeFilename(), recipefilename)
         self.assertFalse(testee2.IsLoaded())
+        self.assertFalse(testee2.IsOpen())
+        self.assertFalse(testee2.IsGrabbing())
+        self.assertTrue(testee2.IsPylonDeviceAttached())
+        testee2.Unload();
 
     def test_setrecipefilename(self):
         thisdir = os.path.dirname(__file__)
@@ -171,20 +121,35 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
 
         testee.Open()
         testee.StartGrabbingMax(3, pylon.GrabStrategy_OneByOne)
+        numgrabbed = 0
         while testee.IsGrabbing():
+            numgrabbed += 1
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.assertTrue(result.GrabResult.GrabSucceeded())
+            self.assertEqual(numgrabbed, result.GrabResult.ImageNumber)
         self.assertFalse(testee.IsGrabbing())
         testee.Close()
 
         testee.Open()
         # StartGrabbing for an amount of images with starting the recipe
-        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser, pylon.GrabLoop_ProvidedByUser)
+        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByUser)
+        self.assertTrue(testee.IsLoaded())
+        self.assertTrue(testee.IsOpen())
+        self.assertTrue(testee.IsGrabbing())
+        self.assertTrue(testee.IsPylonDeviceAttached())
+        numgrabbed = 0
         while testee.IsGrabbing():
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+            numgrabbed += 1
             self.assertTrue(result.GrabResult.GrabSucceeded())
+            self.assertEqual(numgrabbed, result.GrabResult.ImageNumber)
         self.assertFalse(testee.IsGrabbing())
         testee.Close()
+        self.assertEqual(numgrabbed, 3)
+        self.assertFalse(testee.IsLoaded())
+        self.assertFalse(testee.IsOpen())
+        self.assertFalse(testee.IsGrabbing())
+        self.assertTrue(testee.IsPylonDeviceAttached())
 
         testee.Open()
         testee.StartGrabbing(pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser)
@@ -193,17 +158,19 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.assertTrue(result.GrabResult.GrabSucceeded())
             numgrabbed += 1
+            self.assertEqual(numgrabbed, result.GrabResult.ImageNumber)
         testee.StopGrabbing()
         self.assertFalse(testee.IsGrabbing())
         testee.Close()
 
         testee.Open()
-        testee.StartGrabbing(True, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser, pylon.GrabLoop_ProvidedByUser)
+        testee.StartGrabbing(True, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByUser)
         numgrabbed = 0
         while testee.IsGrabbing() and numgrabbed<5:
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.assertTrue(result.GrabResult.GrabSucceeded())
             numgrabbed += 1
+            self.assertEqual(numgrabbed, result.GrabResult.ImageNumber)
         testee.StopGrabbing(1000)
         self.assertFalse(testee.IsGrabbing())
         testee.Close()
@@ -215,13 +182,14 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
         testee.Load(recipefilename)
 
         testee.Open()
-        testee.StartGrabbing(True, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser, pylon.GrabLoop_ProvidedByUser)
+        testee.StartGrabbing(True, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByUser)
         numgrabbed = 0
         while testee.IsGrabbing() and numgrabbed<5:
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.assertTrue(result.GrabResult.GrabSucceeded())
             self.assertTrue(len(result.GetContainer())>0)
             numgrabbed += 1
+            self.assertEqual(numgrabbed, result.GrabResult.ImageNumber)
         testee.StopGrabbing(1000)
 
     def test_grabone(self):
@@ -270,24 +238,34 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
         recipefilename = os.path.join(thisdir, 'smartinstantcamera_test.precipe')
         testee = pylondataprocessing.SmartInstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice(self.get_filter()), recipefilename)
         testee.Open()
+        testee.SetCameraContext(1234)
 
         # Grab with registered EventHandler
         testee.RegisterSmartResultEventHandler(smartresulthandler, pylon.RegistrationMode_Append, pylon.Cleanup_None)
-        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser, pylon.GrabLoop_ProvidedByUser)
+        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByUser)
+        numgrabbed = 0
         while testee.IsGrabbing():
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+            numgrabbed += 1
             self.assertTrue(result.GrabResult.GrabSucceeded())
+            self.assertEqual(smartresulthandler.Result.Container, result.Container)
+            self.assertEqual(smartresulthandler.Result.GrabResult.ImageNumber, result.GrabResult.ImageNumber)
+            self.assertEqual(smartresulthandler.Camera.CameraContext, 1234)
+            self.assertEqual(smartresulthandler.Message, None)
         self.assertFalse(testee.IsGrabbing())
         self.assertEqual(smartresulthandler.OnResultCallCount, 3)
+        self.assertEqual(smartresulthandler.OnDataProcessingErrorCallCount, 0)
 
         # Grab with deregistered EventHandler
-        testee.DeregisterSmartResultEventHandler(smartresulthandler)
-        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByUser, pylon.GrabLoop_ProvidedByUser)
+        self.assertTrue(testee.DeregisterSmartResultEventHandler(smartresulthandler))
+        self.assertFalse(testee.DeregisterSmartResultEventHandler(smartresulthandler))
+        testee.StartGrabbingMax(True, 3, pylon.GrabStrategy_OneByOne, pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByUser)
         while testee.IsGrabbing():
             result = testee.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             self.assertTrue(result.GrabResult.GrabSucceeded())
         self.assertFalse(testee.IsGrabbing())
         self.assertEqual(smartresulthandler.OnResultCallCount, 3)
+        self.assertEqual(smartresulthandler.OnDataProcessingErrorCallCount, 0)
         testee.Close()
 
     def test_waitobject(self):
@@ -319,7 +297,6 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
             self.assertTrue(result.GrabResult.GrabSucceeded())
             self.assertTrue(result.Update.IsValid())
             self.assertTrue(len(result.Container) == 4)
-
 
 
 if __name__ == "__main__":
