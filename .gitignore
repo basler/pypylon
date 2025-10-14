@@ -11,6 +11,7 @@ generated/
 __pycache__
 *.pyc
 python*/
+*.whl
 
 # Ignore compiler stuff
 *.idb
@@ -20,19 +21,13 @@ python*/
 /linux-build/
 /linux-build-tools/
 
-# Ignore Genicamtest XML Stuff
-/xml
-scripts/xml
-tests/genicam/xml/
-
 # Ignore .idea folder
 /.idea/
 
 # Ignore reference_types.txt
 scripts/reference_types.txt
 
-# Ignore NodeMap.pfs
-NodeMap.pfs
+
 
 #ignore generated html
 pypylon.*.html
@@ -41,6 +36,9 @@ wheelhouse
 
 # macOS
 .DS_Store
+src/pypylon/_version.py
+licenses/
 
-# Ignore pylon installer
-pylon*/
+# pixi environments
+.pixi
+*.egg-info
