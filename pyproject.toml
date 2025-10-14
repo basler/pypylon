@@ -1,17 +1,86 @@
 [build-system]
-requires = ["setuptools>=42,<72", "swig==4.3", "wheel", "lief; sys_platform == 'darwin'"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "scikit-build-core>=0.8.0",
+    "setuptools_scm[toml]>=8.0",
+    "swig==4.3",
+    "lief; sys_platform == 'darwin'"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pypylon"
+description = "The python wrapper for the Basler pylon Camera Software Suite."
+authors = [
+    {name = "Basler AG", email = "oss@baslerweb.com"}
+]
+readme = "README.md"
+license = "BSD-3-Clause AND LicenseRef-Proprietary-Pylon"
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10", 
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: Microsoft :: Windows :: Windows 7",
+    "Operating System :: Microsoft :: Windows :: Windows 8", 
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
+    "Topic :: Multimedia :: Video :: Capture",
+    "Topic :: Scientific/Engineering",
+]
+requires-python = ">=3.9"
+dependencies = []
+dynamic = ["version"]
+license-files = [
+    "LICENSE" 
+]
+
+[tool.setuptools_scm]
+write_to = "src/pypylon/_version.py"
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.setuptools_scm"
+
+[project.urls]
+Homepage = "https://github.com/basler/pypylon"
+Repository = "https://github.com/basler/pypylon"
+
+[tool.scikit-build]
+cmake.version = ">=3.20"
+build.verbose = true
+logging.level = "DEBUG"
+
+[tool.scikit-build.wheel]
+expand-macos-universal-tags = true
+py-api = "cp39"  # Limited API for Python 3.9+
+packages = ["src/pypylon"]
+
+[tool.scikit-build.cmake.define]
+PYPYLON_INCLUDE_DATA_PROCESSING = "ON"
+
+# Additional CMake arguments (can be extended via CMAKE_ARGS environment variable)
+# cmake.args = []  # Uncomment and add specific args if needed
 
 [tool.cibuildwheel]
 skip = "pp* cp36-* cp37-* cp38-*"
-build-verbosity = "0"
+build-verbosity = "2"
 test-requires = "pytest numpy"
 
 [tool.pytest.ini_options]
 testpaths = [
     "tests/genicam_tests",
-    "tests/pylon_tests/emulated",
+    "tests/pylon_tests/emulated", 
     "tests/pylondataprocessing_tests",
+]
+filterwarnings = [
+    "ignore:builtin type .* has no __module__ attribute:DeprecationWarning",
+    "ignore:importing from 'genicam' is deprecated:DeprecationWarning",
 ]
 
 [tool.cibuildwheel.windows]
@@ -23,7 +92,9 @@ before-all = 'echo "Building: %CIBW_BUILD%"'
 archs = "x86_64 arm64"
 build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
-repair-wheel-command = ""
+# Framework patching now happens during CMake install step
+# Keep repair-wheel-command for compatibility with older builds or manual invocation
+repair-wheel-command = "mv {wheel} {dest_dir}/"
 test-skip = [
     "tests/pylondataprocessing_tests"
 ]
