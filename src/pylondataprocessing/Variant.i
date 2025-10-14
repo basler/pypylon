@@ -105,5 +105,72 @@
 
             result = "".join(resultList)
             return result
+
+        # A method that takes a variant as input and returns the contained data type according to the value returned by GetDataType().
+        def ToData(self):
+            """
+            Returns the value contained in a pylondataprocessing.Variant by calling the appropriate To* method based on its data type.
+            If the variant is an array, returns a list of values for each array item.
+            Uses a switch-case like structure for data type handling, with a loop for every data type. Calls GetDataType only once.
+            """
+            dt = self.GetDataType()
+            if self.GetContainerType() == VariantContainerType_Array:
+                if (dt == VariantDataType_Int64):
+                    return [self.GetArrayValue(i).ToInt64() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_UInt64):
+                    return [self.GetArrayValue(i).ToUInt64() for i in range(self.GetNumArrayValues())]
+                elif (dt ==  VariantDataType_Boolean):
+                    return [self.GetArrayValue(i).ToBool() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_String):
+                    return [self.GetArrayValue(i).ToString() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_Float):
+                    return [self.GetArrayValue(i).ToDouble() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_PylonImage):
+                    return [self.GetArrayValue(i).ToImage() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_Region):
+                    return [self.GetArrayValue(i).ToRegion() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_TransformationData):
+                    return [self.GetArrayValue(i).ToTransformationData() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_PointF2D):
+                    return [self.GetArrayValue(i).ToPointF2D() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_LineF2D):
+                    return [self.GetArrayValue(i).ToLineF2D() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_RectangleF):
+                    return [self.GetArrayValue(i).ToRectangleF() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_CircleF):
+                    return [self.GetArrayValue(i).ToCircleF() for i in range(self.GetNumArrayValues())]
+                elif (dt == VariantDataType_EllipseF):
+                    return [self.GetArrayValue(i).ToEllipseF() for i in range(self.GetNumArrayValues())]
+                else:
+                    return [None for _ in range(self.GetNumArrayValues())]
+            else:
+                if (dt == VariantDataType_Int64):
+                    return self.ToInt64()
+                elif (dt == VariantDataType_UInt64):
+                    return self.ToUInt64()
+                elif (dt == VariantDataType_Boolean):
+                    return self.ToBool()
+                elif (dt == VariantDataType_String):
+                    return self.ToString()
+                elif (dt == VariantDataType_Float):
+                    return self.ToDouble()
+                elif (dt == VariantDataType_PylonImage):
+                    return self.ToImage()
+                elif (dt == VariantDataType_Region):
+                    return self.ToRegion()
+                elif (dt == VariantDataType_TransformationData):
+                    return self.ToTransformationData()
+                elif (dt == VariantDataType_PointF2D):
+                    return self.ToPointF2D()
+                elif (dt == VariantDataType_LineF2D):
+                    return self.ToLineF2D()
+                elif (dt == VariantDataType_RectangleF):
+                    return self.ToRectangleF()
+                elif (dt == VariantDataType_CircleF):
+                    return self.ToCircleF()
+                elif (dt == VariantDataType_EllipseF):
+                    return self.ToEllipseF()
+                else:
+                    return None
     %}
 }

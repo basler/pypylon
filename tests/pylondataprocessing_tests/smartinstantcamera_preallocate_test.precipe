@@ -1,0 +1,198 @@
+{
+  "PylonMetaData": {
+    "ObjectVersion": "2.0.0",
+    "MinRequiredSoftwareVersion": "2.0.0"
+  },
+  "PylonContent": {
+    "Ui": {
+      "PylonMetaData": {
+        "ObjectVersion": "3.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "UiGraphInputOutput": [
+        {
+          "id": "str:<GraphInput>",
+          "x": 138.5,
+          "y": 110.5
+        },
+        {
+          "id": "str:<GraphOutput>",
+          "x": 906.5,
+          "y": 110.5
+        }
+      ],
+      "UiNodes": [
+        {
+          "id": "str:TestImageGenerator",
+          "x": 236.0,
+          "y": 226.0,
+          "WatchNodePins": [
+            {
+              "nodeName": "str:TestImageGenerator",
+              "pinName": "str:Image",
+              "pinDirection": "str:Output"
+            }
+          ]
+        },
+        {
+          "id": "str:DataSynchronizer",
+          "x": 540.0,
+          "y": 127.5,
+          "WatchNodePins": [
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data1",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data2",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data3",
+              "pinDirection": "str:Input"
+            },
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data1",
+              "pinDirection": "str:Output"
+            },
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data2",
+              "pinDirection": "str:Output"
+            },
+            {
+              "nodeName": "str:DataSynchronizer",
+              "pinName": "str:Data3",
+              "pinDirection": "str:Output"
+            }
+          ]
+        }
+      ]
+    },
+    "Graph": {
+      "PylonMetaData": {
+        "ObjectVersion": "1.2.0",
+        "MinRequiredSoftwareVersion": "1.0.0"
+      },
+      "Nodes": [
+        {
+          "Name": "str:DataSynchronizer",
+          "Enabled": true,
+          "NodeTypeID": "str:D9A6F99A-EAF5-4726-BADF-88BC9CA81166",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.0.2",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "SynchronizationMode": 0,
+            "InputPinNames": [
+              "str:Data1",
+              "str:Data2",
+              "str:Data3"
+            ]
+          }
+        },
+        {
+          "Name": "str:TestImageGenerator",
+          "Enabled": true,
+          "NodeTypeID": "str:7C3FC795-36DE-402A-A638-E3D1E505A65C",
+          "NodeData": {
+            "PylonMetaData": {
+              "ObjectVersion": "1.0.0",
+              "MinRequiredSoftwareVersion": "1.0.0"
+            },
+            "imagePattern": 0,
+            "triggerMode": 0,
+            "frameRate": 10.0,
+            "errorProbability": 0.0,
+            "pixelFormat": 17301505,
+            "width": 1200,
+            "height": 800
+          }
+        }
+      ],
+      "Connections": [
+        {
+          "Name": "str:Connection",
+          "Source": "str:<GraphInput>",
+          "Sink": "str:DataSynchronizer",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Image",
+          "SinkInputPath": "str:Data1",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "str:Connection2",
+          "Source": "str:DataSynchronizer",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Data1",
+          "SinkInputPath": "str:Image",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "str:Connection3",
+          "Source": "str:TestImageGenerator",
+          "Sink": "str:DataSynchronizer",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Image",
+          "SinkInputPath": "str:Data2",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        },
+        {
+          "Name": "str:Connection4",
+          "Source": "str:DataSynchronizer",
+          "Sink": "str:<GraphOutput>",
+          "QueueMode": 3,
+          "MaxSize": 1,
+          "SourceOutputPath": "str:Data2",
+          "SinkInputPath": "str:TestImage",
+          "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+        }
+      ],
+      "GraphInput": {
+        "NodeData": {
+          "Outputs": [
+            {
+              "Name": "str:Image",
+              "Type": "str:Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+            }
+          ]
+        }
+      },
+      "GraphOutput": {
+        "NodeData": {
+          "Inputs": [
+            {
+              "Name": "str:Image",
+              "Type": "str:Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+            },
+            {
+              "Name": "str:TestImage",
+              "Type": "str:Pylon::DataProcessing::Core::IImage",
+              "ValueTypeID": "str:2C893358-0EEF-5260-B262-8CB32DF2C394"
+            }
+          ]
+        }
+      },
+      "Resources": {
+        "ThreadPool": {
+          "PylonMetaData": {
+            "ObjectVersion": "1.1.0",
+            "MinRequiredSoftwareVersion": "1.0.0"
+          },
+          "MaxThreadCount": 16
+        }
+      }
+    }
+  }
+}

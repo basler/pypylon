@@ -23,7 +23,9 @@ class GenericOutputObserverTestSuite(PylonDataProcessingTestCase):
     def test_push(self):
         inputData = {"Image" : pylondataprocessing.Variant(pylondataprocessing.VariantDataType_PylonImage)}
         testee1 = pylondataprocessing.GenericOutputObserver()
-        testee1.OutputDataPush(pylondataprocessing.Recipe(), inputData, pylondataprocessing.Update(), 892);
+        recipe = pylondataprocessing.Recipe()
+        recipe.SetRecipeContext(17)
+        testee1.OutputDataPush(recipe, inputData, pylondataprocessing.Update(), 892);
         self.assertTrue(testee1.GetWaitObject().Wait(0))
         self.assertEqual(testee1.GetNumResults(), 1)
         testee2 = testee1.RetrieveFullResult()
@@ -33,6 +35,7 @@ class GenericOutputObserverTestSuite(PylonDataProcessingTestCase):
         self.assertEqual(len(testee2.Container), 1)
         self.assertEqual(testee2.UserProvidedID, 892)
         self.assertFalse(testee2.Update.IsValid())
+        self.assertEqual(testee2.RecipeContext, 17)
         testee1.OutputDataPush(pylondataprocessing.Recipe(), inputData, pylondataprocessing.Update(), 892);
         self.assertTrue(testee1.GetWaitObject().Wait(0))
         self.assertEqual(testee1.GetNumResults(), 1)

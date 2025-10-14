@@ -63,7 +63,7 @@
     GenApi::INode* GetParameter(const Pylon::String_t& fullname)
     {
         GenApi::INode* pNode = $self->GetParameters().Get(fullname).GetNode();
-		return pNode;
+        return pNode;
     }
     
     void RegisterOutputObserver2(const StringList_t& outputFullNames, IOutputObserver* pObserver, ERegistrationMode mode, intptr_t userProvidedId = 0)
