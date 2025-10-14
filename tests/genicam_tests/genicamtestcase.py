@@ -13,7 +13,9 @@ CNodeMapRef__LoadXMLFromFile = CNodeMapRef._LoadXMLFromFile
 
 
 def _LoadXMLFromFile(self, vendor, model):
-    return CNodeMapRef__LoadXMLFromFile(self, os.path.join("xml", vendor, model) + ".xml")
+    # Use the temporary XML directory instead of hardcoded 'xml'
+    xml_temp_dir = snipper.get_xml_temp_dir()
+    return CNodeMapRef__LoadXMLFromFile(self, os.path.join(xml_temp_dir, vendor, model + ".xml"))
 
 
 class GenicamTestCase(unittest.TestCase):
