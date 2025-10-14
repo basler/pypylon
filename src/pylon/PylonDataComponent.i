@@ -2,6 +2,7 @@
 
 %ignore CPylonDataComponentImpl;
 %ignore operator IImage&;
+%ignore operator const IImage&;
 %ignore GetData() const;
 
 %pythoncode %{

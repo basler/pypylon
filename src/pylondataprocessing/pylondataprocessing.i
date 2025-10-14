@@ -1,6 +1,9 @@
+#ifndef PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
+#define PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
+
 %define PYLONDP_DOCSTRING
 "
-Copyright (C) 2023 Basler AG
+Copyright (C) 2024-2025 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
@@ -27,6 +30,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %module(directors="1", package="pypylon", docstring=PYLONDP_DOCSTRING) pylondataprocessing
 %include "DoxyPylonDataProcessing.i";
+
+// Ignore problematic constructs BEFORE SWIG sees them
+%ignore operator[];
+%ignore operator++;
+%ignore operator--;
+%ignore Pylon::DataProcessing::CVariantContainer::operator[];
+%ignore Pylon::DataProcessing::CVariantContainer::const_iterator::operator++;
+%ignore Pylon::DataProcessing::CVariantContainer::iterator::operator++;
+%ignore "Pylon::DataProcessing::CRegion::CRegion(Pylon::DataProcessing::CRegion &&)";
+
+// Filter specific warnings for SDK elements we can't implement  
+%warnfilter(403) Pylon::CPylonImageBase;
+%warnfilter(403) Pylon::IReusableImage::IsSupportedPixelType;
+%warnfilter(509) Pylon::DataProcessing::CRegion;  // Move constructor shadowing
+
 %begin %{
 
 #ifdef Py_LIMITED_API
@@ -703,3 +721,5 @@ ADD_PROP_GET(Update, NumPrecedingUpdates)
 ADD_PROP_GET(Recipe, RecipeContext)
 ADD_PROP_GET(GenericOutputObserver, NumResults)
 ADD_PROP_GET(GenericOutputObserver, WaitObject)
+
+#endif // PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
