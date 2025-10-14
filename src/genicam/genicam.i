@@ -1,6 +1,9 @@
+#ifndef PYPYLON_GENICAM_I_INCLUDED
+#define PYPYLON_GENICAM_I_INCLUDED
+
 %define GENICAM_DOCSTRING
 "
-Copyright (C) 2017-2023 Basler AG
+Copyright (C) 2017-2025 Basler AG
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright notice,
@@ -27,6 +30,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %module(directors="1", package="pypylon", docstring=GENICAM_DOCSTRING) genicam
 %include "DoxyGenApi.i";
+
+// Ignore problematic constructs BEFORE SWIG sees them
+%ignore operator[];
+%ignore operator++;
+%ignore operator--;
+
 %begin %{
 
 #ifdef Py_LIMITED_API
@@ -126,6 +135,8 @@ using namespace GENAPI_NAMESPACE;
 //////  stdint ////////
 ///////////////////////
 
+#ifndef PYPYLON_STDINT_TYPES_DEFINED
+#define PYPYLON_STDINT_TYPES_DEFINED
 
 %include <swigarch.i>
 
@@ -182,7 +193,7 @@ typedef unsigned long long uintmax_t;
 /* Exact integral types.  */
 
 #if !defined(SWIGWORDSIZE64) && !defined(SWIGWORDSIZE32)
-#error "On linux either SWIGWORDSIZE64 or SWIGWORDSIZE32 must be defined on the command line."
+#error "On Unix systems (Linux/macOS) either SWIGWORDSIZE64 or SWIGWORDSIZE32 must be defined on the command line."
 #endif
 
 /* Signed.  */
@@ -277,6 +288,8 @@ typedef unsigned long long int  uintmax_t;
 #endif
 
 #endif // _WIN32
+
+#endif // PYPYLON_STDINT_TYPES_DEFINED
 
 ////////////////////////////////////////////
 
@@ -894,6 +907,8 @@ namespace GENICAM_NAMESPACE {
 %define ADD_PROP_GETSET(class, name)
     %pythoncode %{ class ## .name = property(class ## .Get ## name,class ## .Set ## name) %}
 %enddef
+
+#endif // PYPYLON_GENICAM_I_INCLUDED
 
 
 
