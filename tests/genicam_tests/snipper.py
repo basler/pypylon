@@ -8,7 +8,12 @@ import sys
 import re
 import os
 import errno
+import tempfile
+import atexit
+import shutil
 
+# Global temporary directory for XML files
+_temp_xml_dir = None
 
 def mkdir_p(path):
     try:
@@ -19,6 +24,15 @@ def mkdir_p(path):
         else:
             raise
 
+def get_xml_temp_dir():
+    """Get or create a temporary directory for XML files."""
+    global _temp_xml_dir
+    if _temp_xml_dir is None:
+        _temp_xml_dir = tempfile.mkdtemp(prefix='pypylon_xml_')
+        # Register cleanup function to remove temp directory on exit
+        atexit.register(lambda: shutil.rmtree(_temp_xml_dir, ignore_errors=True))
+        print(f"Using temporary XML directory: {_temp_xml_dir}")
+    return _temp_xml_dir
 
 def createXMLSnippet(file_content):
     # parse template file extract comment and 
@@ -49,15 +63,20 @@ def createXMLSnippet(file_content):
 
     in_snippet = False
     out_file = None
+    xml_temp_dir = get_xml_temp_dir()
+    
     for l in file_content.splitlines():
         m_s = start_rule.match(l)
         m_e = end_rule.match(l)
         if m_s:
             in_snippet = True
             vendor_name, model_name, option = m_s.groups()
-            file_path = os.path.join("xml", os.path.join(vendor_name, model_name))
+            # Use temporary directory instead of 'xml'
+            # Create file as-is (model_name already includes .xml from docstring)
+            file_path = os.path.join(xml_temp_dir, vendor_name, model_name)
             mkdir_p(os.path.dirname(file_path))
             out_file = open(file_path, "w")
+            # Use model_name as-is for the ModelName attribute in XML header
             out_file.write(header.format(ModelName=model_name, VendorName=vendor_name))
             print("Create Snippet ", file_path)
         elif in_snippet and m_e:
