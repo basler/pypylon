@@ -346,6 +346,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -360,6 +362,33 @@ jobs:
 
       - name: Display Structure of downloaded files
         run: dir pylon-sdk
+
+      - name: Verify pylon SDK structure
+        run: |
+          # Verify the downloaded pylon SDK structure
+          $pylonDevDir = "${{ github.workspace }}\pylon-sdk\pylon\Development"
+          
+          Write-Host "Checking for pylon SDK at: $pylonDevDir"
+          
+          if (Test-Path $pylonDevDir) {
+            Write-Host "Pylon SDK directory found"
+            
+            # Verify key files exist
+            if (Test-Path "$pylonDevDir\include\pylon\PylonIncludes.h") {
+              Write-Host "✓ Valid pylon SDK structure confirmed"
+              Write-Host "Contents of pylon-sdk directory:"
+              Get-ChildItem -Path "${{ github.workspace }}\pylon-sdk\pylon" -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+            } else {
+              Write-Host "Warning: PylonIncludes.h not found, but continuing..."
+              Write-Host "Contents of Development directory:"
+              Get-ChildItem -Path $pylonDevDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
+            }
+          } else {
+            Write-Host "Error: Pylon SDK directory not found at: $pylonDevDir"
+            Write-Host "Contents of pylon-sdk:"
+            Get-ChildItem -Path "${{ github.workspace }}\pylon-sdk" -Recurse -Directory | ForEach-Object { Write-Host "  - $($_.FullName)" }
+            exit 1
+          }
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
@@ -394,6 +423,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Python
         uses: actions/setup-python@v5

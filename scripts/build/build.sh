@@ -75,7 +75,14 @@ popd
 echo "Using pylon SDK from $PYLON_ROOT"
 export PYLON_ROOT
 
-$PYTHON setup.py clean
+# update pip
+$PYTHON -m pip install --user pip --upgrade
+
+# Install build dependencies for modern build system
+$PYTHON -m pip install --user build wheel
+
+# Clean up any previous builds
+rm -rf build/ dist/ *.egg-info/
 
 if [ -z "$DISABLE_TESTS" ]; then
     # Limit numpy version due to issues with build system on armv7l
@@ -85,11 +92,23 @@ if [ -z "$DISABLE_TESTS" ]; then
         $PYTHON -m pip install --user numpy
     fi
 
-    #For now failed tests are accepted until all are fixed
-    $PYTHON setup.py test
+    # Install pytest for testing
+    $PYTHON -m pip install --user pytest
+
+    # Build wheel first (needed for testing)
+    $PYTHON -m pip wheel . --no-deps --wheel-dir dist
+
+    # Install the wheel for testing
+    $PYTHON -m pip install --user --no-index --find-links dist pypylon --force-reinstall
+
+    # Run tests using pytest
+    $PYTHON -m pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests || echo "Tests completed with issues (non-fatal for now)"
+else
+    # Build wheel without testing
+    $PYTHON -m pip wheel . --no-deps --wheel-dir dist
 fi
 
-$PYTHON setup.py bdist_wheel
+# Wheel is already built above, no need for additional build step
 
 #try to use auditwheel to update the platform tag
 if [ -n "$UPDATE_PLATFORM_TAG" ]; then

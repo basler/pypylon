@@ -8,11 +8,14 @@ FROM $DOCKER_BASE_IMAGE
 COPY --from=qemu /usr/bin/* /usr/bin/
 
 
-# install pip from pypi
+# install pip from pypi  
 RUN pip install "swig==4.3"
 
 # install setuptools
 RUN pip install "setuptools<72" --upgrade
+
+# CMake is usually available in manylinux images, but ensure it's there for scikit-build-core
+RUN yum install -y cmake3 || yum install -y cmake || echo "CMake already available"
 
 # one genicam unittest requires a french locale
 RUN yum -y reinstall glibc-common
