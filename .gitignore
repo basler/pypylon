@@ -41,3 +41,6 @@ wheelhouse
 
 # macOS
 .DS_Store
+
+# Ignore pylon installer
+pylon*/
