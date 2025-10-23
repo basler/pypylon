@@ -134,6 +134,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pylondataprocessing/VariantContainerType.h>
 #include <pylondataprocessing/SmartResult.h>
 #include <pylondataprocessing/SmartInstantCamera.h>
+#include <pylondataprocessing/GenericOutputObserver.h>
 #endif
 
 namespace Pylon

@@ -495,6 +495,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 ////////////////////////////////////////////////////////////////////////////////
 
 #define interface struct
+#define PYLON_INTERFACE struct
 #define PYLONUTILITY_API
 #define PYLONBASE_API
 #define PUBLIC_INTERFACE

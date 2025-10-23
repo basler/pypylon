@@ -88,7 +88,7 @@ class BuildSupport(object):
         } [ (get_platform(), get_machinewidth()) ]
 
     # Compatible swig versions
-    SwigVersions = ["4.2.0", "4.2.1"]
+    SwigVersions = ["4.3.0", "4.3.1"]
     SwigOptions = [
         "-c++",
         "-Wextra",
@@ -1079,7 +1079,7 @@ class BuildSupportMacOS(BuildSupport):
                         info(f"DELETE {p}")
                         os.remove(p)
             # Patch minimum required OS version for pylon 10.0.2 or newer for external provided libusb
-            if self.get_pylon_version() >= "10.0.2.471":
+            if "10.0.2.471" <= self.get_pylon_version() < "11.0.0":
                 import lief
                 import tempfile
                 # Create a temp directory

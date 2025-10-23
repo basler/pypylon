@@ -836,6 +836,7 @@ namespace GENICAM_NAMESPACE {
 #define GENAPI_DECL
 
 //TODO Adapt
+#define GENICAM_INTERFACE struct
 #define GENAPI_DECL_ABSTRACT
 #define interface struct
 
