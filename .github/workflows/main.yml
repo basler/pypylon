@@ -66,9 +66,14 @@ jobs:
           # When TAG_NAME is set (release build), use the pylon version from the tag
           tag="${TAG_NAME:-$pylon_default_version}"
           echo "Downloading control files for $os using pylon $tag"
+          # Download control files
           for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/report_$os*.json" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
             jf rt dl --flat $path ./${os,,}/report_${os,,}.json
           done
+          # Download 3rd party licenses
+          for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/oso_$os*.txt" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
+            jf rt dl --flat $path ./${os,,}/pylon_Third-Party_Licenses.txt
+          done        
         done
 
     - name: Upload control files for Linux aarch64
