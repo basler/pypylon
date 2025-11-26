@@ -2,7 +2,7 @@
 requires = [
     "scikit-build-core>=0.8.0",
     "setuptools_scm[toml]>=8.0",
-    "swig==4.3",
+    "swig>=4.3,<4.4.0",
     "lief; sys_platform == 'darwin'"
 ]
 build-backend = "scikit_build_core.build"
