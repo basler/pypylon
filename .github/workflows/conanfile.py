@@ -13,9 +13,9 @@ class PyPylonConanConsumer(ConanFile):
         "third_party_license_file": ["ANY"]
     }
     default_options = {
-        "build_config": ".github/workflows/build_config.json",
-        "control_file": ".github/workflows/control_file_dummy.json",
-        "third_party_license_file": ".github/workflows/3rd_party_license_dummy.txt"
+        "build_config": "Placeholder will be overwritten by the CI",
+        "control_file": "Placeholder will be overwritten by the CI",
+        "third_party_license_file": "Placeholder will be overwritten by the CI"
     }
 
     @property
