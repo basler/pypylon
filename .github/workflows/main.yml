@@ -202,6 +202,7 @@ jobs:
               "-pr", os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "profiles", "${{ steps.osname.outputs.value }}_${{ matrix.arch }}"),
               "-o", f"pypylon:build_config={os.path.join(os.environ['GITHUB_WORKSPACE'], '.github', 'workflows', 'build_config.json')}",
               "-o", f"pypylon:control_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'report_${{ steps.osname.outputs.value_arch }}.json')}",
+              "-o", f"pypylon:third_party_license_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'pylon_Third-Party_Licenses.txt')}",
               "-c", "tools.system.package_manager:mode=install",
               "-c", "tools.system.package_manager:sudo=True",
               os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "conanfile.py")

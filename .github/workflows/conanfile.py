@@ -1,4 +1,6 @@
+import os
 import json
+import shutil
 from conan import ConanFile
 
 
@@ -7,11 +9,13 @@ class PyPylonConanConsumer(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "build_config": ["ANY"],
-        "control_file": ["ANY"]
+        "control_file": ["ANY"],
+        "third_party_license_file": ["ANY"]
     }
     default_options = {
         "build_config": ".github/workflows/build_config.json",
-        "control_file": ".github/workflows/control_file_dummy.json"
+        "control_file": ".github/workflows/control_file_dummy.json",
+        "third_party_license_file": ".github/workflows/3rd_party_license_dummy.txt"
     }
 
     @property
@@ -46,6 +50,9 @@ class PyPylonConanConsumer(ConanFile):
         # Create a mapping of package names to versions from the control file
         version_map = {pkg["name"]: pkg["version"] for pkg in control}
 
+        # License files
+        self.requires("pylon-licenses/20251125@release/potentially-public")
+
         # Determine platform key
         requirements = config.get(self._platform_name, {}).get("requirements", [])
         for req in requirements:
@@ -60,6 +67,24 @@ class PyPylonConanConsumer(ConanFile):
         config_path = str(self.options.build_config)
         with open(config_path) as f:
             config = json.load(f)
+
+        # Copy legal files based on the platform
+        os_name = str(self.settings.os).lower()
+        if os_name == "linux":
+            license_path = os.path.join(self.install_folder, "pylon", "share", "pylon", "licenses")
+            os.makedirs(license_path, exist_ok=True)
+            shutil.copy2(str(self.options.third_party_license_file), license_path)
+            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/share/pylon/licenses", ignore_case=True, keep_path=False)
+        elif os_name == "windows":
+            license_path = os.path.join(self.install_folder, "pylon", "Licenses")
+            os.makedirs(license_path, exist_ok=True)
+            shutil.copy2(str(self.options.third_party_license_file), license_path)
+            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/Licenses", ignore_case=True, keep_path=False)
+        elif os_name == "macos":
+            license_path = os.path.join(self.install_folder, "pylon", "Frameworks", "pylon.framework", "Versions", "A" ,"Resources")
+            os.makedirs(license_path, exist_ok=True)
+            shutil.copy2(str(self.options.third_party_license_file), license_path)
+            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/Frameworks/pylon.framework/Versions/A/Resources", ignore_case=True, keep_path=False)
 
         # Copy the imports based on the platform
         imports = config.get(self._platform_name, {}).get("imports", [])
