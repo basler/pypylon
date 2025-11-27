@@ -66,9 +66,14 @@ jobs:
           # When TAG_NAME is set (release build), use the pylon version from the tag
           tag="${TAG_NAME:-$pylon_default_version}"
           echo "Downloading control files for $os using pylon $tag"
+          # Download control files
           for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/report_$os*.json" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
             jf rt dl --flat $path ./${os,,}/report_${os,,}.json
           done
+          # Download 3rd party licenses
+          for path in $(jf rt s "pylon-artifacts-generic-prod/setup/*/oso_$os*.txt" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path'); do
+            jf rt dl --flat $path ./${os,,}/pylon_Third-Party_Licenses.txt
+          done        
         done
 
     - name: Upload control files for Linux aarch64
@@ -197,6 +202,7 @@ jobs:
               "-pr", os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "profiles", "${{ steps.osname.outputs.value }}_${{ matrix.arch }}"),
               "-o", f"pypylon:build_config={os.path.join(os.environ['GITHUB_WORKSPACE'], '.github', 'workflows', 'build_config.json')}",
               "-o", f"pypylon:control_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'report_${{ steps.osname.outputs.value_arch }}.json')}",
+              "-o", f"pypylon:third_party_license_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'pylon_Third-Party_Licenses.txt')}",
               "-c", "tools.system.package_manager:mode=install",
               "-c", "tools.system.package_manager:sudo=True",
               os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "conanfile.py")
