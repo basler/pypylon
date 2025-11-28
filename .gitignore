@@ -27,7 +27,8 @@ python*/
 # Ignore reference_types.txt
 scripts/reference_types.txt
 
-
+# Ignore local pylon installation
+pylon-*/
 
 #ignore generated html
 pypylon.*.html
@@ -42,3 +43,9 @@ licenses/
 # pixi environments
 .pixi
 *.egg-info
+
+# Unit test outputs
+xml/
+tests/xml/
+NodeMap.pfs
+tests/NodeMap.pfs
