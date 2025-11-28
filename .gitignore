@@ -27,7 +27,8 @@ python*/
 # Ignore reference_types.txt
 scripts/reference_types.txt
 
-
+# Ignore local pylon installation
+pylon-*/
 
 #ignore generated html
 pypylon.*.html
@@ -44,3 +45,8 @@ pylon*/
 
 # Local development files
 conan_package/
+
+# Unit test outputs
+xml/
+tests/xml/
+*NodeMap.pfs
