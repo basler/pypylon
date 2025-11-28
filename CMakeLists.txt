@@ -461,7 +461,7 @@ if(DEFINED SKBUILD_METADATA_DIR)
                 DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
                 RENAME "PYLON_LICENSE.txt")
     else()
-        message(WARNING "Pylon license not found at: ${PYLON_LICENSE_DIR}")
+        message(FATAL_ERROR "Pylon license not found at: ${PYLON_LICENSE_DIR}")
     endif()
 
     # Install third-party licenses
@@ -471,7 +471,7 @@ if(DEFINED SKBUILD_METADATA_DIR)
                 DESTINATION "${SKBUILD_METADATA_DIR}/licenses"
                 RENAME "PYLON_THIRD_PARTY_LICENSES.txt")
     else()
-        message(WARNING "Pylon third-party license not found at: ${PYLON_LICENSE_DIR}")
+        message(FATAL_ERROR "Pylon third-party license not found at: ${PYLON_LICENSE_DIR}")
     endif()
 else()
     message(WARNING "SKBUILD_METADATA_DIR not defined")
