@@ -335,6 +335,26 @@ except:
   pass
 
 import warnings
+
+# Compatibility layer for @deprecated decorator across Python versions
+try:
+  # Try to import the native deprecated decorator (Python 3.13+)
+  from warnings import deprecated
+except ImportError:
+  # Fallback implementation for Python < 3.13
+  def deprecated(message):
+    def decorator(func):
+      def wrapper(*args, **kwargs):
+        import warnings
+        warnings.warn(
+          f"{func.__name__} is deprecated. {message}",
+          DeprecationWarning,
+          stacklevel=2
+        )
+        return func(*args, **kwargs)
+      return wrapper
+    return decorator
+
 def needs_numpy(func):
  def func_wrapper(*args, **kwargs):
     e = None

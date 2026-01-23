@@ -1,5 +1,3 @@
-%include <pylon/PylonVersionNumber.h>
-
 namespace std
 {
     %template(tlinfo_vector) std::vector<CTlInfo>;
@@ -14,10 +12,11 @@ namespace Pylon
     typedef deviceinfo_vector DeviceInfoList_t;
 }
 
-// Handle GenDC Data Component Lists (available since pylon C++ SDK 11.3.0)
+// Add converter to handle PylonDataComponentList correctly, available since pylon C++ SDK 11.3.0
 //
-#if (PYLON_VERSION_MAJOR > 11) || \
-    (PYLON_VERSION_MAJOR == 11 && PYLON_VERSION_MINOR >= 3)
+%include <pylon/PylonVersionNumber.h>;
+
+#if (PYLON_VERSION_MAJOR > 11) || (PYLON_VERSION_MAJOR == 11 && PYLON_VERSION_MINOR >= 3)
 
 namespace std
 {

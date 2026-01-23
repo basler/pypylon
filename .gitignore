@@ -44,3 +44,6 @@ wheelhouse
 
 # Ignore pylon installer
 pylon*/
+
+# Local development files
+conan_package/

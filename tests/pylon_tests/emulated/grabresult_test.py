@@ -42,7 +42,7 @@ class GrabResultTestSuite(PylonEmuTestCase):
         container = grabResult.GetDataContainer();
         self.assertEqual(container.DataComponentCount, 1)
         container.Release()
-        component = grabResult.GetDataComponent(0)
+        component = grabResult.GetDataComponentByIndex(0)
         self.assertEqual(component.Width, 1024)
         component.Release()
 
