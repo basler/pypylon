@@ -13,7 +13,7 @@ class DataContainerTestSuite(PylonEmuTestCase):
         self.assertEqual(testee.GetDataComponentCount(), 0)
         testee.Release()
         try:
-            testee.GetDataComponent(0)
+            testee.GetDataComponentByIndex(0)
         except genicam.OutOfRangeException:
             pass
         else:
@@ -55,7 +55,7 @@ class DataContainerTestSuite(PylonEmuTestCase):
         filename = os.path.join(thisdir, 'little_boxes.gendc')
         testee1.Load(filename)
         self.assertEqual(testee1.DataComponentCount, 3)
-        testee2 = testee1.GetDataComponent(0)
+        testee2 = testee1.GetDataComponentByIndex(0)
         self.assertEqual(testee2.IsValid(), True)
         self.assertEqual(testee2.PixelType, pylon.PixelType_Coord3D_ABC32f)
         self.assertEqual(testee2.ComponentType, pylon.ComponentType_Range)
@@ -70,7 +70,7 @@ class DataContainerTestSuite(PylonEmuTestCase):
         self.assertEqual(testee2.GetData()[0], 79)
         self.assertEqual(testee2.GetMemoryView()[0], 79)
         #self.assertEqual(testee2.Array[0,0], [-468.76804, -338.49225,  746.62396])
-        testee3 = testee1.GetDataComponent(1)
+        testee3 = testee1.GetDataComponentByIndex(1)
         self.assertEqual(testee3.IsValid(), True)
         self.assertEqual(testee3.PixelType, pylon.PixelType_Mono16)
         self.assertEqual(testee3.ComponentType, pylon.ComponentType_Intensity)
@@ -84,7 +84,7 @@ class DataContainerTestSuite(PylonEmuTestCase):
         self.assertEqual(testee3.Array[0,0], 20388)
         self.assertEqual(testee3.GetData()[0], 164)
         self.assertEqual(testee3.GetMemoryView()[0], 164)
-        testee4 = testee1.GetDataComponent(2)
+        testee4 = testee1.GetDataComponentByIndex(2)
         self.assertEqual(testee4.IsValid(), True)
         self.assertEqual(testee4.PixelType, pylon.PixelType_Confidence16)
         self.assertEqual(testee4.ComponentType, pylon.ComponentType_Confidence)
@@ -110,7 +110,7 @@ class DataContainerTestSuite(PylonEmuTestCase):
         filename = os.path.join(thisdir, 'little_boxes.gendc')
         testee1.Load(filename)
         self.assertEqual(testee1.DataComponentCount, 3)
-        testee3 = testee1.GetDataComponent(1)
+        testee3 = testee1.GetDataComponentByIndex(1)
         with testee3.GetArrayZeroCopy() as zc:
             self.assertEqual(zc[0,0], 20388)
         testee3.Release()

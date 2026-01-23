@@ -28,7 +28,7 @@ try:
 
     # Access data components if the component type indicates image data
     for componentIndex in range(pylonDataContainer.DataComponentCount):
-        pylonDataComponent = pylonDataContainer.GetDataComponent(componentIndex);
+        pylonDataComponent = pylonDataContainer.GetDataComponentByIndex(componentIndex);
         # Access the component data.
         print("ComponentType: ", pylonDataComponent.ComponentType)
         print("PixelType: ", pylonDataComponent.PixelType)

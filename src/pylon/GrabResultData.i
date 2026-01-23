@@ -4,8 +4,11 @@
 %ignore CGrabResultDataFactory;
 %ignore GetFrameNumber;
 %ignore GetBuffer() const;
+%ignore GetDataComponent;
 
+%include <pylon/PylonVersionNumber.h>;
 %include <pylon/GrabResultData.h>;
+
 %extend Pylon::CGrabResultData {
 
     // Since 'GetBuffer', 'GetImageBuffer', 'GetMemoryView', 'GetImageMemoryView'
@@ -224,4 +227,22 @@
         return result;
     }
 
+    // Access to get data components overloaded methods
+    %pythoncode %{
+    @deprecated("Use GetDataComponentByIndex instead.")
+    def GetDataComponent(self, param):
+        return self.GetDataComponentByIndex(param)
+    %}
+
+    Pylon::CPylonDataComponent GetDataComponentByIndex(size_t index) {
+        return $self->GetDataComponent(index);
+    }
+
+#if (PYLON_VERSION_MAJOR > 11) || (PYLON_VERSION_MAJOR == 11 && PYLON_VERSION_MINOR >= 3)
+
+    Pylon::PylonDataComponentList GetDataComponentByType(Pylon::EComponentType componentType) {
+        return $self->GetDataComponent(componentType);
+    }
+
+#endif
 };

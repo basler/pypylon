@@ -1,3 +1,15 @@
+Version 26.1.0rc1
+    - Date 2026-01-23
+    - Updated to pylon Software Suite 26.1.0 on all platforms.
+      This contains pylon C++ SDK 11.3.0, pylon Data Processing C++ SDK 4.1.1
+      and is based on GenICam 3.5 reference implementation.
+    - The version scheme has been aligned with the pylon Software Suite
+      and there will be monthly releases going forward.
+    - Deprecated GetDataComponent method. Use GetDataComponentByIndex or
+      with pypylon 26.01 and above the GetDataComponentByType methods of
+      PylonDataContainer or GrabResultData instead.
+    - Update reference version for all platforms.
+
 Version 4.2.0
     - Date 2025-06-02
     - Updated to pylon Software Suite 8.1.0 on all platforms.
