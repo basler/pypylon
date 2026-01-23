@@ -1,6 +1,7 @@
 %rename(PylonDataContainer) Pylon::CPylonDataContainer;
 
 %ignore CPylonDataContainerImpl;
+%ignore GetDataComponent;
 
 %include <pylon/PylonVersionNumber.h>;
 %include <pylon/PylonDataContainer.h>;

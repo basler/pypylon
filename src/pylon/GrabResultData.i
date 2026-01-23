@@ -4,6 +4,7 @@
 %ignore CGrabResultDataFactory;
 %ignore GetFrameNumber;
 %ignore GetBuffer() const;
+%ignore GetDataComponent;
 
 %include <pylon/PylonVersionNumber.h>;
 %include <pylon/GrabResultData.h>;

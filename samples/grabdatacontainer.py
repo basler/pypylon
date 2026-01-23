@@ -53,7 +53,7 @@ try:
             print("Component Count: ", pylonDataContainer.DataComponentCount);
             # Access data components if the component type indicates image data
             for componentIndex in range(pylonDataContainer.DataComponentCount):
-                pylonDataComponent = pylonDataContainer.GetDataComponent(componentIndex);
+                pylonDataComponent = pylonDataContainer.GetDataComponentByIndex(componentIndex);
                 if pylonDataComponent.ComponentType == pylon.ComponentType_Intensity:
                     # Access the component data.
                     print("PixelType: ", pylonDataComponent.PixelType)
