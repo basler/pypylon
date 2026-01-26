@@ -1,3 +1,7 @@
+Version 26.1.0rc2
+    - Date 2026-01-26
+    - Fixed deployment issue to pypi and GitHub releases in GitHub actions.
+
 Version 26.1.0rc1
     - Date 2026-01-23
     - Updated to pylon Software Suite 26.1.0 on all platforms.
