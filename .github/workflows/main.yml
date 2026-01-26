@@ -222,7 +222,7 @@ jobs:
           path: ${{ runner.os == 'Windows' && 'conan' || 'pylon_sdk.tar.gz' }}
 
   build-linux:
-    needs: download
+    needs: [prepare,download]
     strategy:
       fail-fast: false
       matrix:
@@ -340,7 +340,7 @@ jobs:
 
 
   build-windows:
-    needs: download
+    needs: [prepare,download]
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -388,7 +388,7 @@ jobs:
 
 
   build-macos:
-    needs: download
+    needs: [prepare,download]
     runs-on: macos-latest
     strategy:
       fail-fast: false
