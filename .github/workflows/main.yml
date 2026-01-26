@@ -325,7 +325,7 @@ jobs:
           path: dist/*
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -333,7 +333,7 @@ jobs:
           files: dist/*
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
+        if: needs.prepare.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
         run: |
           sudo pip3 install "twine==6.0.1"
           python3 -m twine upload --non-interactive --skip-existing dist/*
@@ -372,7 +372,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -380,7 +380,7 @@ jobs:
           files: ./wheelhouse/*.whl
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         run: |
           python -m pip install twine
           python -m twine upload --non-interactive --skip-existing wheelhouse\\*
@@ -424,7 +424,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -432,7 +432,7 @@ jobs:
           files: ./wheelhouse/*.whl
 
       - name: Publish package to (Test)PyPI
-        if: needs.setup.outputs.is_release_build == 'true'
+        if: needs.prepare.outputs.is_release_build == 'true'
         run: |
           sudo pip3 install twine
           python3 -m twine upload --non-interactive --skip-existing wheelhouse/*
