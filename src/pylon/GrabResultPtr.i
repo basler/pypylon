@@ -82,8 +82,14 @@
             shape, dtype, format = self.GetImageFormat(pt)
             buf = self.GetImageBuffer()
 
+        strides = None
+        if self.PaddingX > 0:
+            # If padding is present, we need to calculate the strides
+            # strides = (bytes per row, bytes per pixel)
+            strides = self.Width * _pylon_numpy.dtype(dtype).itemsize + self.PaddingX, _pylon_numpy.dtype(dtype).itemsize
+
         # Now we will copy the data into an array:
-        return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf)
+        return _pylon_numpy.ndarray(shape, dtype = dtype, buffer=buf, strides=strides)
 
     def GetChunkNode( self, nodeName ):
         return self.GetChunkDataNodeMap().GetNode(nodeName)
