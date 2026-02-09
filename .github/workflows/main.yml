@@ -222,7 +222,7 @@ jobs:
           path: ${{ runner.os == 'Windows' && 'conan' || 'pylon_sdk.tar.gz' }}
 
   build-linux:
-    needs: download
+    needs: [prepare,download]
     strategy:
       fail-fast: false
       matrix:
@@ -335,12 +335,12 @@ jobs:
       - name: Publish package to (Test)PyPI
         if: needs.prepare.outputs.is_release_build == 'true' && startsWith( matrix.p, 'manylinux' )
         run: |
-          sudo pip3 install "twine==6.0.1"
+          python3 -m pip install "twine==6.0.1"
           python3 -m twine upload --non-interactive --skip-existing dist/*
 
 
   build-windows:
-    needs: download
+    needs: [prepare,download]
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -388,7 +388,7 @@ jobs:
 
 
   build-macos:
-    needs: download
+    needs: [prepare,download]
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -434,7 +434,7 @@ jobs:
       - name: Publish package to (Test)PyPI
         if: needs.prepare.outputs.is_release_build == 'true'
         run: |
-          sudo pip3 install twine
+          python3 -m pip install twine
           python3 -m twine upload --non-interactive --skip-existing wheelhouse/*
 
 

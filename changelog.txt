@@ -1,3 +1,7 @@
+Version 26.1.0rc3
+    - Date 2026-02-09
+    - Added stride parameter in ndarray to support PaddingX
+
 Version 26.1.0rc2
     - Date 2026-01-26
     - Fixed deployment issue to pypi and GitHub releases in GitHub actions.
