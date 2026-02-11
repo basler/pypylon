@@ -40,8 +40,6 @@ wheelhouse
 src/pypylon/_version.py
 licenses/
 
-# Ignore pylon installer
-pylon*/
 
 # Local development files
 conan_package/
@@ -50,3 +48,7 @@ conan_package/
 xml/
 tests/xml/
 *NodeMap.pfs
+
+# pixi environments
+.pixi
+*.egg-info

@@ -249,6 +249,11 @@ class RecipeTestSuite(PylonDataProcessingTestCase):
         self.assertEqual(testEventObserver.Events[0].EventType, 2)
         self.assertEqual(testEventObserver.Events[0].EventSourceName, "Camera")
         self.assertTrue(testEventObserver.WaitObject.Wait(500))
+        #
+        # unregister event observer
+        testee.UnregisterEventObserver()
+        #
+        # unload
         testee.Unload()
 
 if __name__ == "__main__":

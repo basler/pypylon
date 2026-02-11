@@ -56,12 +56,14 @@ class PylonCompatibilityChecker:
             dir_path.mkdir(exist_ok=True)
     
     def setup_uv_environment(self, env_name: str, python_version: str = "3.14", 
-                           pypylon_version: str = "latest") -> Path:
+                           pypylon_version: str = "latest", swig_version: str = None) -> Path:
         """Set up environment using uv with specific Python version"""
         
         print(f"🔧 Setting up {env_name} environment with uv...")
         print(f"   Python: {python_version}")
         print(f"   PyPylon: {pypylon_version}")
+        if swig_version:
+            print(f"   SWIG: {swig_version}")
         
         env_dir = self.work_dir / env_name
         
@@ -82,6 +84,15 @@ class PylonCompatibilityChecker:
         else:  # Unix/Linux/macOS
             venv_python = env_dir / "bin" / "python"
         
+        # Install SWIG if specified (matching GitHub workflow: swig==4.3)
+        if swig_version:
+            swig_install_cmd = ["uv", "pip", "install", "--python", str(venv_python), f"swig=={swig_version}"]
+            print(f"📦 Installing SWIG {swig_version}...")
+            result = subprocess.run(swig_install_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"⚠️  SWIG installation warning: {result.stderr}")
+                # Continue anyway - might use system SWIG
+        
         # Install pypylon using uv pip
         if pypylon_version == "local":
             # Install from local source directory (two levels up from scripts/modernize)
@@ -91,6 +102,10 @@ class PylonCompatibilityChecker:
         elif pypylon_version == "latest":
             install_cmd = ["uv", "pip", "install", "--python", str(venv_python), "pypylon"]
             print(f"📦 Installing pypylon {pypylon_version} from PyPI...")
+        elif pypylon_version.startswith("git+"):
+            # Install from git repository
+            install_cmd = ["uv", "pip", "install", "--python", str(venv_python), pypylon_version]
+            print(f"📦 Installing pypylon from git: {pypylon_version}")
         else:
             install_cmd = ["uv", "pip", "install", "--python", str(venv_python), f"pypylon=={pypylon_version}"]
             print(f"📦 Installing pypylon {pypylon_version} from PyPI...")
@@ -143,13 +158,13 @@ except Exception as e:
         return venv_python
     
     def setup_reference_environment(self, python_version: str = "3.14", 
-                                   pypylon_version: str = "latest") -> Path:
-        """Set up reference environment with specific pypylon version from PyPI"""
-        return self.setup_uv_environment("reference_env", python_version, pypylon_version)
+                                   pypylon_version: str = "latest", swig_version: str = None) -> Path:
+        """Set up reference environment with specific pypylon version from PyPI or git"""
+        return self.setup_uv_environment("reference_env", python_version, pypylon_version, swig_version)
     
-    def setup_current_environment(self, python_version: str = "3.14") -> Path:
+    def setup_current_environment(self, python_version: str = "3.14", swig_version: str = None) -> Path:
         """Set up current environment with local pypylon"""
-        return self.setup_uv_environment("current_env", python_version, "local")
+        return self.setup_uv_environment("current_env", python_version, "local", swig_version)
     
     def get_current_python(self, python_path: str = None) -> Path:
         """Get current Python executable path"""
@@ -159,14 +174,15 @@ except Exception as e:
             return Path(sys.executable)
     
     def create_reference_dump(self, python_exe: Path = None, 
-                             pypylon_version: str = "latest") -> Path:
+                             pypylon_version: str = "latest", swig_version: str = None) -> Path:
         """Create API dump from reference environment"""
         
         if python_exe is None:
-            python_exe = self.setup_reference_environment(pypylon_version=pypylon_version)
+            python_exe = self.setup_reference_environment(pypylon_version=pypylon_version, swig_version=swig_version)
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        dump_file = self.dumps_dir / f"pypylon_reference_{pypylon_version}_{timestamp}.json"
+        version_label = pypylon_version.replace("/", "_").replace(":", "_") if pypylon_version.startswith("git+") else pypylon_version
+        dump_file = self.dumps_dir / f"pypylon_reference_{version_label}_{timestamp}.json"
         
         print(f"📸 Creating reference API dump...")
         create_api_dump(
@@ -176,11 +192,11 @@ except Exception as e:
         
         return dump_file
     
-    def create_current_dump(self, python_exe: Path = None) -> Path:
+    def create_current_dump(self, python_exe: Path = None, swig_version: str = None) -> Path:
         """Create API dump from current environment"""
         
         if python_exe is None:
-            python_exe = self.setup_current_environment()
+            python_exe = self.setup_current_environment(swig_version=swig_version)
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         dump_file = self.dumps_dir / f"pypylon_current_{timestamp}.json"
@@ -228,7 +244,7 @@ except Exception as e:
             print(f"❌ Compatibility check failed: {e}")
             raise
     
-    def quick_check(self, output_format: str = "text") -> None:
+    def quick_check(self, output_format: str = "text", swig_version: str = None) -> None:
         """Quick compatibility check using uv environments"""
         
         print("🚀 Starting quick PyPylon compatibility check...")
@@ -236,10 +252,10 @@ except Exception as e:
         
         try:
             # Create reference environment and dump
-            reference_dump = self.create_reference_dump()
+            reference_dump = self.create_reference_dump(swig_version=swig_version)
             
             # Create current environment and dump
-            current_dump = self.create_current_dump()
+            current_dump = self.create_current_dump(swig_version=swig_version)
             
             # Compare dumps
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -258,6 +274,209 @@ except Exception as e:
             
         except Exception as e:
             print(f"❌ Quick check failed: {e}")
+            raise
+    
+    def compare_master_vs_local(self, output_format: str = "html", swig_version: str = "4.3", 
+                                git_repo: str = "https://github.com/basler/pypylon.git",
+                                branch: str = "master", pylon_root: str = None) -> None:
+        """Compare master branch vs local directory, both using specified SWIG version and Pylon SDK"""
+        
+        print("🚀 Starting PyPylon compatibility check: Master vs Local")
+        print("=" * 60)
+        print(f"   Reference: {branch} branch from {git_repo}")
+        print(f"   Current: Local directory")
+        print(f"   SWIG version: {swig_version} (matching GitHub workflow)")
+        
+        # Check Pylon SDK version
+        if pylon_root:
+            pylon_sdk_path = pylon_root
+        else:
+            pylon_sdk_path = os.environ.get("PYLON_ROOT", "/opt/pylon")
+        
+        print(f"   Pylon SDK: {pylon_sdk_path}")
+        
+        # Verify Pylon SDK exists
+        if not os.path.exists(pylon_sdk_path):
+            raise RuntimeError(f"Pylon SDK not found at {pylon_sdk_path}. Please set PYLON_ROOT environment variable.")
+        
+        # Try to detect Pylon SDK version
+        version_file = os.path.join(pylon_sdk_path, "include", "pylon", "PylonVersionNumber.h")
+        if not os.path.exists(version_file):
+            version_file = os.path.join(pylon_sdk_path, "include", "pylon", "PylonVersion.h")
+        
+        if os.path.exists(version_file):
+            try:
+                import re
+                with open(version_file, 'r') as f:
+                    content = f.read()
+                    major = re.search(r'#define\s+PYLON_VERSION_MAJOR\s+(\d+)', content)
+                    minor = re.search(r'#define\s+PYLON_VERSION_MINOR\s+(\d+)', content)
+                    subminor = re.search(r'#define\s+PYLON_VERSION_SUBMINOR\s+(\d+)', content)
+                    if major and minor and subminor:
+                        pylon_version = f"{major.group(1)}.{minor.group(1)}.{subminor.group(1)}"
+                        print(f"   Pylon SDK Version: {pylon_version}")
+                    else:
+                        print(f"   ⚠️  Could not parse Pylon SDK version from {version_file}")
+            except Exception as e:
+                print(f"   ⚠️  Could not detect Pylon SDK version: {e}")
+        else:
+            print(f"   ⚠️  Pylon version file not found at {version_file}")
+        
+        print(f"   ⚠️  WARNING: Both builds will use the same Pylon SDK at {pylon_sdk_path}")
+        print(f"   ⚠️  Ensure this matches the version used in GitHub workflow!")
+        
+        try:
+            # Clone master branch to temporary directory
+            master_dir = self.work_dir / "master_checkout"
+            if master_dir.exists():
+                shutil.rmtree(master_dir)
+            master_dir.mkdir(exist_ok=True)
+            
+            print(f"📥 Cloning {branch} branch...")
+            # Clone without --depth to avoid HEAD issues
+            clone_cmd = ["git", "clone", "--branch", branch, git_repo, str(master_dir)]
+            result = subprocess.run(clone_cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to clone repository: {result.stderr}")
+            
+            # Verify the checkout
+            verify_cmd = ["git", "-C", str(master_dir), "rev-parse", "HEAD"]
+            result = subprocess.run(verify_cmd, capture_output=True, text=True)
+            if result.returncode == 0:
+                commit_hash = result.stdout.strip()[:8]
+                print(f"✅ Cloned {branch} branch (commit: {commit_hash})")
+            
+            # Create reference dump from master branch
+            print(f"🔧 Building reference from {branch} branch...")
+            # Set up environment and install SWIG
+            env_dir = self.work_dir / "reference_env"
+            if env_dir.exists():
+                shutil.rmtree(env_dir)
+            
+            uv_create_cmd = ["uv", "venv", str(env_dir), "--python", "3.14"]
+            result = subprocess.run(uv_create_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to create uv environment: {result.stderr}")
+            
+            if os.name == 'nt':
+                reference_python = env_dir / "Scripts" / "python.exe"
+            else:
+                reference_python = env_dir / "bin" / "python"
+            
+            # Install SWIG
+            if swig_version:
+                swig_install_cmd = ["uv", "pip", "install", "--python", str(reference_python), f"swig=={swig_version}"]
+                print(f"📦 Installing SWIG {swig_version}...")
+                subprocess.run(swig_install_cmd, capture_output=True, text=True)
+            
+            # Install pypylon from master checkout with PYLON_ROOT set
+            install_env = os.environ.copy()
+            if pylon_root:
+                install_env["PYLON_ROOT"] = pylon_root
+            elif "PYLON_ROOT" not in install_env:
+                install_env["PYLON_ROOT"] = "/opt/pylon"
+            
+            install_cmd = ["uv", "pip", "install", "--python", str(reference_python), str(master_dir)]
+            print(f"📦 Installing pypylon from master checkout: {master_dir}")
+            print(f"   Using PYLON_ROOT: {install_env.get('PYLON_ROOT')}")
+            result = subprocess.run(install_cmd, capture_output=True, text=True, env=install_env)
+            if result.returncode != 0:
+                print(f"❌ Installation failed. Command: {' '.join(install_cmd)}")
+                print(f"❌ Error output: {result.stderr}")
+                if result.stdout:
+                    print(f"❌ Standard output: {result.stdout}")
+                raise RuntimeError(f"Failed to install pypylon from master: {result.stderr}")
+            
+            # Verify installation
+            verify_cmd = [str(reference_python), "-c", "import pypylon; print('PyPylon imported successfully')"]
+            result = subprocess.run(verify_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to verify pypylon installation: {result.stderr}")
+            print(f"✅ reference_env environment ready (from master)")
+            
+            reference_dump = self.create_reference_dump(
+                python_exe=reference_python,
+                pypylon_version=f"git+{branch}",
+                swig_version=swig_version
+            )
+            
+            # Create current dump from local directory
+            print(f"🔧 Building current from local directory...")
+            # Ensure PYLON_ROOT is set for current environment too
+            current_env = os.environ.copy()
+            if pylon_root:
+                current_env["PYLON_ROOT"] = pylon_root
+            elif "PYLON_ROOT" not in current_env:
+                current_env["PYLON_ROOT"] = "/opt/pylon"
+            
+            # Set up current environment with PYLON_ROOT
+            env_dir = self.work_dir / "current_env"
+            if env_dir.exists():
+                shutil.rmtree(env_dir)
+            
+            uv_create_cmd = ["uv", "venv", str(env_dir), "--python", "3.14"]
+            result = subprocess.run(uv_create_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to create uv environment: {result.stderr}")
+            
+            if os.name == 'nt':
+                current_python = env_dir / "Scripts" / "python.exe"
+            else:
+                current_python = env_dir / "bin" / "python"
+            
+            # Install SWIG
+            if swig_version:
+                swig_install_cmd = ["uv", "pip", "install", "--python", str(current_python), f"swig=={swig_version}"]
+                print(f"📦 Installing SWIG {swig_version}...")
+                subprocess.run(swig_install_cmd, capture_output=True, text=True)
+            
+            # Install pypylon from local source
+            local_source = Path(__file__).parent.parent.parent
+            install_cmd = ["uv", "pip", "install", "--python", str(current_python), str(local_source)]
+            print(f"📦 Installing pypylon from local source: {local_source}")
+            print(f"   Using PYLON_ROOT: {current_env.get('PYLON_ROOT')}")
+            result = subprocess.run(install_cmd, capture_output=True, text=True, env=current_env)
+            if result.returncode != 0:
+                print(f"❌ Installation failed. Command: {' '.join(install_cmd)}")
+                print(f"❌ Error output: {result.stderr}")
+                if result.stdout:
+                    print(f"❌ Standard output: {result.stdout}")
+                raise RuntimeError(f"Failed to install pypylon from local: {result.stderr}")
+            
+            # Verify installation
+            verify_cmd = [str(current_python), "-c", "import pypylon; print('PyPylon imported successfully')"]
+            result = subprocess.run(verify_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to verify pypylon installation: {result.stderr}")
+            print(f"✅ current_env environment ready (from local)")
+            
+            current_dump = self.create_current_dump(
+                python_exe=current_python,
+                swig_version=swig_version
+            )
+            
+            # Compare dumps
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = self.reports_dir / f"compatibility_report_master_vs_local_{timestamp}.{output_format}"
+            
+            print(f"🔍 Comparing API dumps...")
+            compare_api_dumps(
+                reference_file=str(reference_dump),
+                current_file=str(current_dump),
+                output_file=str(output_file),
+                text_only=(output_format == "text")
+            )
+            
+            print(f"✅ Comparison completed!")
+            print(f"📊 Report saved to: {output_file}")
+            
+            # Cleanup master checkout
+            if master_dir.exists():
+                shutil.rmtree(master_dir)
+            
+        except Exception as e:
+            print(f"❌ Comparison failed: {e}")
             raise
     
     def compare_existing_dumps(self, reference_file: str, current_file: str,
@@ -334,6 +553,9 @@ Examples:
   # Quick compatibility check against latest PyPI version (both using Python 3.14)
   python pypylon_compatibility_checker.py --quick-check
   
+  # Compare master branch vs local directory (both using SWIG 4.3 from GitHub workflow)
+  python pypylon_compatibility_checker.py --master-vs-local
+  
   # Full check with specific pypylon version
   python pypylon_compatibility_checker.py --full-check --pypylon-version 4.0.0
   
@@ -361,6 +583,10 @@ Examples:
     action_group.add_argument(
         "--compare", nargs=2, metavar=("REFERENCE", "CURRENT"),
         help="Compare two existing API dump files"
+    )
+    action_group.add_argument(
+        "--master-vs-local", action="store_true",
+        help="Compare master branch vs local directory (both using SWIG 4.3 from GitHub workflow)"
     )
     action_group.add_argument(
         "--dump-only", action="store_true",
@@ -400,6 +626,22 @@ Examples:
         "--verbose", "-v", action="store_true",
         help="Enable verbose output"
     )
+    parser.add_argument(
+        "--swig-version", default="4.3",
+        help="SWIG version to use (default: 4.3, matching GitHub workflow)"
+    )
+    parser.add_argument(
+        "--git-repo", default="https://github.com/basler/pypylon.git",
+        help="Git repository URL for master comparison (default: https://github.com/basler/pypylon.git)"
+    )
+    parser.add_argument(
+        "--branch", default="master",
+        help="Git branch to compare against (default: master)"
+    )
+    parser.add_argument(
+        "--pylon-root",
+        help="Path to Pylon SDK root directory (default: $PYLON_ROOT or /opt/pylon)"
+    )
     
     args = parser.parse_args()
     
@@ -408,6 +650,15 @@ Examples:
         
         if args.list_dumps:
             checker.list_dumps()
+            
+        elif args.master_vs_local:
+            checker.compare_master_vs_local(
+                output_format=args.format,
+                swig_version=args.swig_version,
+                git_repo=args.git_repo,
+                branch=args.branch,
+                pylon_root=args.pylon_root
+            )
             
         elif args.dump_only:
             if args.output:
