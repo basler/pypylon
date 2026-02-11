@@ -42,6 +42,32 @@
 
 %include <pylondataprocessing/Recipe.h>;
 
+// Add a Python wrapper to Unload() that automatically unregisters event observers
+// to prevent segfaults when Python objects are destroyed
+%pythoncode %{
+    # Store the original Unload method
+    _Recipe_Unload_original = Recipe.Unload
+    
+    def _Recipe_Unload_safe(self):
+        """
+        Safely unload the recipe. Automatically unregisters event observers before unloading
+        to prevent segfaults when Python objects are destroyed.
+        """
+        try:
+            # Try to unregister event observer if one is registered
+            # This prevents segfaults when the Python EventObserver is destroyed
+            # while C++ is still trying to call it during Unload()
+            self.UnregisterEventObserver()
+        except:
+            # Ignore errors - observer might not be registered or already unregistered
+            pass
+        # Call the actual C++ Unload() method
+        return _Recipe_Unload_original(self)
+    
+    # Replace Unload with the safe version
+    Recipe.Unload = _Recipe_Unload_safe
+%}
+
 %extend Pylon::DataProcessing::CRecipe {
 
     void GetOutputNames2(StringList_t& result) const

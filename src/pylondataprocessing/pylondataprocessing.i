@@ -722,4 +722,26 @@ ADD_PROP_GET(Recipe, RecipeContext)
 ADD_PROP_GET(GenericOutputObserver, NumResults)
 ADD_PROP_GET(GenericOutputObserver, WaitObject)
 
+////////////////////////////////////////////////////////////////////////////////
+// Global exception handler to catch director exceptions and prevent segfaults
+// when Python objects are destroyed while C++ is still trying to call them
+%exception {
+    try {
+        $action
+    } catch (const GENICAM_NAMESPACE::GenericException& e) {
+        TranslateGenicamException(&e);
+        SWIG_fail;
+    } catch (Swig::DirectorException &e) {
+        (void)e;
+        // PyErr is still set from director call
+        // This prevents segfaults when Python objects are destroyed
+        // while C++ is still trying to call into them (e.g., during Unload())
+        SWIG_fail;
+    } catch (const std::exception & e) {
+        SWIG_exception(SWIG_RuntimeError, (std::string("C++ std::exception: ") + e.what()).c_str());
+    } catch (...) {
+        SWIG_exception(SWIG_UnknownError, "C++ anonymous exception");
+    }
+}
+
 #endif // PYPYLON_PYLONDATAPROCESSING_I_INCLUDED
