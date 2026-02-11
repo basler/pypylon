@@ -52,3 +52,4 @@ tests/xml/
 # pixi environments
 .pixi
 *.egg-info
+.venv

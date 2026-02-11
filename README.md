@@ -174,17 +174,73 @@ If pylon SDK is not installed in a default location you have to specify the loca
 Pull requests to pypylon are very welcome. To help you getting started with pypylon improvements, here are some hints:
 
 ## Starting Development
+
+Use a virtual environment to avoid conflicts with system-managed Python (see [PEP 668](https://peps.python.org/pep-0668/) on many Linux distributions):
+
 ```console
-python setup.py develop
+python3 -m venv .venv
+source .venv/bin/activate   # On Windows: .venv\Scripts\activate
+pip install -e .
 ```
-This will "link" the local pypylon source directory into your python installation. It will not package the pylon libraries and always use the installed pylon.
-After changing pypylon, execute `python setup.py build` and test...
+
+For development including test dependencies:
+
+```console
+pip install -e ".[dev]"
+```
+
+This gives you an editable install: changes to SWIG (`.i`) files or Python code require a rebuild (`pip install -e .`) before running tests; the installed pylon SDK is used as-is.
 
 ## Running Unit Tests
-> NOTE: The unit tests try to import `pypylon....`, so they run against the *installed* version of pypylon.
+
+> NOTE: The unit tests import `pypylon`, so they run against the *installed* version in your environment.
+
+Use `python -m pytest` to ensure the correct Python (and thus the correct pypylon) is used. Plain `pytest` may resolve to a different installation (e.g. `~/.local/bin/pytest`) that does not see your virtual environment's packages.
+
 ```console
-pytest tests/....
+python -m pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests
 ```
+
+Or run all configured tests (see `pyproject.toml`):
+
+```console
+python -m pytest
+```
+
+Test dependencies (pytest, numpy) are installed with `pip install -e ".[dev]"` or manually: `pip install pytest numpy`.
+
+## Debugging While Developing
+
+### Edit-Rebuild-Test Loop
+
+1. Edit SWIG (`.i`), CMake, or Python sources.
+2. Rebuild: `pip install -e .`
+3. Run tests: `python -m pytest tests/` or a subset, e.g. `tests/pylon_tests/emulated/`
+4. Or run a sample: `python samples/grab.py`, `python samples/helloworld.py`, etc.
+
+### Python-Side Debugging
+
+- **pdb**: Run a script under the debugger:
+  ```console
+  python -m pdb -m pytest tests/pylon_tests/emulated/version_test.py -v
+  ```
+- **IDE**: Configure VS Code or PyCharm to use `.venv/bin/python` and set breakpoints in your Python code or in tests.
+- **Print debugging**: Add `print()` or `logging` in Python files under `src/pypylon/`; rebuild and re-run.
+
+### Native/C++ Extension Debugging
+
+The extension is a SWIG-generated C++ module. To debug into native code:
+
+1. Build with debug symbols:
+   ```console
+   pip install -e . --config-settings=cmake.build-type=Debug
+   ```
+2. Run Python under GDB (Linux) or your platform debugger:
+   ```console
+   gdb --args python samples/helloworld.py
+   ```
+   Or attach to a running process: `gdb -p <pid>` then `continue`. In VS Code, use the C/C++ extension and configure it to attach to the Python process.
+3. Add logging in the C++ sources or SWIG typemaps; rebuild and run tests or samples.
 
 # Known Issues
  * For USB 3.0 cameras to work on Linux, you need to install appropriate udev rules.

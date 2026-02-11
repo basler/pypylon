@@ -37,6 +37,12 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = []
 dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "numpy",
+]
 license-files = [
     "LICENSE" 
 ]
