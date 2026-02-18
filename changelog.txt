@@ -1,13 +1,5 @@
-Version 26.1.0rc3
-    - Date 2026-02-09
-    - Added stride parameter in ndarray to support PaddingX
-
-Version 26.1.0rc2
-    - Date 2026-01-26
-    - Fixed deployment issue to pypi and GitHub releases in GitHub actions.
-
-Version 26.1.0rc1
-    - Date 2026-01-23
+Version 26.1.0
+    - Date 2026-02-18
     - Updated to pylon Software Suite 26.1.0 on all platforms.
       This contains pylon C++ SDK 11.3.0, pylon Data Processing C++ SDK 4.1.1
       and is based on GenICam 3.5 reference implementation.
@@ -17,6 +9,8 @@ Version 26.1.0rc1
       with pypylon 26.01 and above the GetDataComponentByType methods of
       PylonDataContainer or GrabResultData instead.
     - Update reference version for all platforms.
+    - Fixed deployment issue to pypi and GitHub releases in GitHub actions.
+    - Added stride parameter in ndarray to support PaddingX
 
 Version 4.2.0
     - Date 2025-06-02
