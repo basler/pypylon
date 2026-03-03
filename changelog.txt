@@ -1,3 +1,7 @@
+Version 26.2.1
+    - Date 2026-03-03
+    - Updated to pylon Software Suite 26.2.1 on all platforms.
+
 Version 26.1.0
     - Date 2026-02-18
     - Updated to pylon Software Suite 26.1.0 on all platforms.
