@@ -8,7 +8,6 @@
             "pylon-vtool-package-b",
             "pylon-vtool-package-base",
             "pylon-vtool-package-utils",
-            "pylon-vtools-utils-b",
             "pylon-vtool-package-communication",
             "vtool-creator-adapters",
             "pylon-ai-vtools"
@@ -30,7 +29,6 @@
             "pylon-vtool-package-b",
             "pylon-vtool-package-base",
             "pylon-vtool-package-utils",
-            "pylon-vtools-utils-b",
             "pylon-vtool-package-communication",
             "vtool-creator-adapters",
             "pylon-ai-vtools"
@@ -52,7 +50,6 @@
             "pylon-vtool-package-b",
             "pylon-vtool-package-base",
             "pylon-vtool-package-utils",
-            "pylon-vtools-utils-b",
             "pylon-vtool-package-communication",
             "vtool-creator-adapters",
             "pylon-ai-vtools"
