@@ -17,12 +17,12 @@ from pathlib import Path
 from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "11.3.0",
+    "Windows": "11.4.0",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "11.3.0",
+    "Linux": "11.4.0",
     "Linux_armv7l": "6.2.0",
-    "Darwin": "11.3.0"
+    "Darwin": "11.4.0"
 }
 
 ################################################################################
