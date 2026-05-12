@@ -15,6 +15,7 @@ on:
   workflow_dispatch:
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   TWINE_USERNAME: __token__
   # Uncomment the relevant lines to switch between deployment to test.pypi.org or pypi.org
   TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
@@ -36,7 +37,7 @@ jobs:
         disable-job-summary: true
  
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
@@ -79,25 +80,25 @@ jobs:
         done
 
     - name: Upload control files for Linux aarch64
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Linux_aarch64_Pylon
         path: linux_aarch64
     
     - name: Upload control files for Linux x86_64
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Linux_x86_64_Pylon
         path: linux_x86_64
 
     - name: Upload control files for Windows
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Windows_Pylon
         path: windows
 
     - name: Upload control files for macOS
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: macOS_Pylon
         path: macos
@@ -125,7 +126,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -216,7 +217,7 @@ jobs:
         run: cd conan && tar -czf ../pylon_sdk.tar.gz .
 
       - name: Upload pylon SDK for ${{ steps.osname.outputs.value_arch_camel }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ steps.osname.outputs.value_arch_camel }}_Pylon_SDK
           path: ${{ runner.os == 'Windows' && 'conan' || 'pylon_sdk.tar.gz' }}
@@ -244,7 +245,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -319,14 +320,14 @@ jobs:
             -v "${{ github.workspace }}/pylon-sdk/pylon:/opt/pylon" -e PYLON_ROOT="/opt/pylon" \
             --user $(id -u) pypylon-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}-${{ github.run_id }} /work/scripts/cibuild/build.sh --update-platform-tag ${{ matrix.p }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: build-results-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}
           path: dist/*
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -346,7 +347,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -367,14 +368,14 @@ jobs:
         env:
           PYLON_DEV_DIR: ${{ github.workspace }}\pylon-sdk\pylon\Development
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: build-results-windows
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -395,7 +396,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -420,14 +421,14 @@ jobs:
           PYLON_FRAMEWORK_ARM64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
           PYLON_FRAMEWORK_X86_64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: build-results-macos
           path: ./wheelhouse/*.whl
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -496,22 +497,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
-
-      - uses: dkershner6/switch-case-action@v1
-        id: pypylon-wheel-source
-        with:
-          default: "build-results-unknown"
-          conditionals-with-values: |
-            ${{ runner.os == 'Linux' && matrix.architecture == 'arm64' }} => build-results-manylinux_2_31_aarch64-cp39
-            ${{ runner.os == 'Linux' && matrix.architecture == 'x64' }} => build-results-manylinux_2_31_x86_64-cp39
-            ${{ runner.os == 'Windows' }} => build-results-windows
-            ${{ runner.os == 'macOS' }} => build-results-macos
+        uses: actions/checkout@v5
 
       - name: Download pypylon wheels
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
-          name: ${{ steps.pypylon-wheel-source.outputs.value }}
+          name: ${{
+            (runner.os == 'Linux' && matrix.architecture == 'arm64' && 'build-results-manylinux_2_31_aarch64-cp39') ||
+            (runner.os == 'Linux' && matrix.architecture == 'x64' && 'build-results-manylinux_2_31_x86_64-cp39') ||
+            (runner.os == 'Windows' && 'build-results-windows') ||
+            (runner.os == 'macOS' && 'build-results-macos') ||
+            'build-results-unknown'
+          }}
           path: pypylon-wheels
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -535,19 +532,10 @@ jobs:
           pip install --no-index --find-links pypylon-wheels pypylon
           pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests
 
-      - uses: dkershner6/switch-case-action@v1
-        if: runner.os == 'macOS'
-        id: pypylon-macos-arch
-        with:
-          default: "unknown"
-          conditionals-with-values: |
-            ${{ matrix.architecture == 'arm64' }} => arm64
-            ${{ matrix.architecture == 'x64' }} => x86_64
-
       - name: Run pypylon unit tests for Python ${{ matrix.python-version }} without pylon Data Processing
         if: runner.os == 'macOS'
         run: |
-          arch -${{ steps.pypylon-macos-arch.outputs.value }} python -m pip install --upgrade pip
-          arch -${{ steps.pypylon-macos-arch.outputs.value }} pip install pytest numpy
-          arch -${{ steps.pypylon-macos-arch.outputs.value }} pip install --no-index --find-links pypylon-wheels pypylon
-          arch -${{ steps.pypylon-macos-arch.outputs.value }} pytest tests/genicam_tests tests/pylon_tests/emulated
+          arch -${{ matrix.architecture == 'arm64' && 'arm64' || 'x86_64' }} python -m pip install --upgrade pip
+          arch -${{ matrix.architecture == 'arm64' && 'arm64' || 'x86_64' }} pip install pytest numpy
+          arch -${{ matrix.architecture == 'arm64' && 'arm64' || 'x86_64' }} pip install --no-index --find-links pypylon-wheels pypylon
+          arch -${{ matrix.architecture == 'arm64' && 'arm64' || 'x86_64' }} pytest tests/genicam_tests tests/pylon_tests/emulated
