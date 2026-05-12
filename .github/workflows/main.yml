@@ -502,13 +502,14 @@ jobs:
       - name: Download pypylon wheels
         uses: actions/download-artifact@v5
         with:
-          name: ${{
+          name: >-
+            ${{
             (runner.os == 'Linux' && matrix.architecture == 'arm64' && 'build-results-manylinux_2_31_aarch64-cp39') ||
             (runner.os == 'Linux' && matrix.architecture == 'x64' && 'build-results-manylinux_2_31_x86_64-cp39') ||
             (runner.os == 'Windows' && 'build-results-windows') ||
             (runner.os == 'macOS' && 'build-results-macos') ||
             'build-results-unknown'
-          }}
+            }}
           path: pypylon-wheels
 
       - name: Set up Python ${{ matrix.python-version }}
