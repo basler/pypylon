@@ -28,14 +28,14 @@ jobs:
     outputs:
       is_release_build: ${{ env.RELEASE_BUILD == '1' }}
     steps:
-    - uses: jfrog/setup-jfrog-cli@v4
+    - uses: jfrog/setup-jfrog-cli@v5
       env:
        JF_URL: ${{ secrets.SDK_URL }}
        JF_ACCESS_TOKEN: ${{ secrets.SDK_TOKEN }}
       with:
         disable-auto-build-publish: true
         disable-job-summary: true
- 
+
     - name: Checkout repository
       uses: actions/checkout@v5
       with:
@@ -80,25 +80,25 @@ jobs:
         done
 
     - name: Upload control files for Linux aarch64
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Linux_aarch64_Pylon
         path: linux_aarch64
     
     - name: Upload control files for Linux x86_64
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Linux_x86_64_Pylon
         path: linux_x86_64
 
     - name: Upload control files for Windows
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Windows_Pylon
         path: windows
 
     - name: Upload control files for macOS
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: macOS_Pylon
         path: macos
@@ -189,7 +189,7 @@ jobs:
         shell: python
 
       - name: Download ${{ steps.osname.outputs.value_arch_camel }} control artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ steps.osname.outputs.value_camel }}*Pylon
           merge-multiple: true
@@ -217,7 +217,7 @@ jobs:
         run: cd conan && tar -czf ../pylon_sdk.tar.gz .
 
       - name: Upload pylon SDK for ${{ steps.osname.outputs.value_arch_camel }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.osname.outputs.value_arch_camel }}_Pylon_SDK
           path: ${{ runner.os == 'Windows' && 'conan' || 'pylon_sdk.tar.gz' }}
@@ -293,7 +293,7 @@ jobs:
 
       # download the pylon sdks          
       - name: download linux artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ steps.dockerparams.outputs.artifacts_name }}
           path: pylon-sdk
@@ -320,7 +320,7 @@ jobs:
             -v "${{ github.workspace }}/pylon-sdk/pylon:/opt/pylon" -e PYLON_ROOT="/opt/pylon" \
             --user $(id -u) pypylon-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}-${{ github.run_id }} /work/scripts/cibuild/build.sh --update-platform-tag ${{ matrix.p }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: build-results-${{ matrix.p }}-${{ steps.dockerparams.outputs.pyver_tag }}
           path: dist/*
@@ -355,7 +355,7 @@ jobs:
           python-version: "3.9"
 
       - name: Download pylon SDK
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: Windows_Pylon_SDK
           path: pylon-sdk
@@ -368,7 +368,7 @@ jobs:
         env:
           PYLON_DEV_DIR: ${{ github.workspace }}\pylon-sdk\pylon\Development
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: build-results-windows
           path: ./wheelhouse/*.whl
@@ -403,7 +403,7 @@ jobs:
         with:
           python-version: "3.9"
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: macOS_Pylon_SDK
           path: pylon-sdk
@@ -421,7 +421,7 @@ jobs:
           PYLON_FRAMEWORK_ARM64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
           PYLON_FRAMEWORK_X86_64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: build-results-macos
           path: ./wheelhouse/*.whl
@@ -453,7 +453,7 @@ jobs:
            ]
     runs-on: ubuntu-latest
     steps:
-    - uses: geekyeggo/delete-artifact@v5
+    - uses: geekyeggo/delete-artifact@v6
       continue-on-error: true
       with:
         name: |
@@ -500,7 +500,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download pypylon wheels
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: >-
             ${{
