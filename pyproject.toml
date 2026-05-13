@@ -3,7 +3,7 @@ requires = ["setuptools>=42,<72", "swig==4.3", "wheel", "lief; sys_platform == '
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-skip = "pp* cp36-* cp37-* cp38-*"
+skip = "cp38-*"
 build-verbosity = "0"
 test-requires = "pytest numpy"
 
@@ -24,9 +24,6 @@ archs = "x86_64 arm64"
 build = "cp39-macosx_*"
 before-all = 'echo "Building: $CIBW_BUILD"'
 repair-wheel-command = ""
-test-skip = [
-    "tests/pylondataprocessing_tests"
-]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
