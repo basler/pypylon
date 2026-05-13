@@ -364,7 +364,7 @@ jobs:
         run: dir pylon-sdk
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           PYLON_DEV_DIR: ${{ github.workspace }}\pylon-sdk\pylon\Development
 
@@ -416,7 +416,7 @@ jobs:
         run: ls pylon-sdk
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           PYLON_FRAMEWORK_ARM64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
           PYLON_FRAMEWORK_X86_64: ${{ github.workspace }}/pylon-sdk/pylon/Frameworks
