@@ -2,8 +2,9 @@
 requires = [
     "scikit-build-core>=0.8.0",
     "setuptools_scm[toml]>=8.0",
-    "swig>=4.3,<4.4.0",
-    "lief; sys_platform == 'darwin'"
+    "swig>=4.4,<4.5",
+    "lief; sys_platform == 'darwin'",
+    "pypylon-build-scm @ file:./build-support/pypylon_build_scm",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -48,6 +49,7 @@ license-files = [
 
 [tool.setuptools_scm]
 write_to = "src/pypylon/_version.py"
+local_scheme = "pylon"
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.setuptools_scm"
@@ -60,6 +62,9 @@ Repository = "https://github.com/basler/pypylon"
 cmake.version = ">=3.20"
 build.verbose = true
 logging.level = "DEBUG"
+
+[tool.scikit-build.sdist]
+include = ["build-support/pypylon_build_scm/**"]
 
 [tool.scikit-build.wheel]
 expand-macos-universal-tags = true
@@ -84,7 +89,6 @@ testpaths = [
     "tests/pylondataprocessing",
 ]
 filterwarnings = [
-    "ignore:builtin type .* has no __module__ attribute:DeprecationWarning",
     "ignore:importing from 'genicam' is deprecated:DeprecationWarning",
 ]
 

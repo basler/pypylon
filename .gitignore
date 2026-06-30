@@ -2,7 +2,7 @@
 generated*/
 
 # Ignore build/dist tree
-/build*
+/build/
 /dist/
 /pypylon/
 *.egg-info

@@ -55,7 +55,7 @@ if(PYPYLON_USE_LIMITED_API AND Python_VERSION VERSION_GREATER_EQUAL "3.9")
         endif()
     endif()
 endif()
-find_package(SWIG 4.3 REQUIRED)
+find_package(SWIG 4.4 REQUIRED)
 
 # Include SWIG
 include(UseSWIG)
@@ -221,6 +221,8 @@ if(WIN32)
             /EHsc    # set exception handling model
         )
         add_link_options(
+            /OPT:REF # eliminate unreferenced functions
+            /OPT:ICF # fold identical COMDATs
             /LTCG    # link-time code generation
         )
     endif()
@@ -276,7 +278,7 @@ if(UNIX)
 endif()
 
 if(WIN32)
-    list(APPEND CMAKE_SWIG_FLAGS -D_WIN32 -D_WIN64)
+    list(APPEND CMAKE_SWIG_FLAGS -D_WIN32 -D_WIN64 -DHAVE_PYLON_GUI)
 endif()
 
 # Function to create a SWIG Python module
@@ -439,6 +441,16 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/pypylon/
         PATTERN "*.py"
         PATTERN "__pycache__" EXCLUDE
 )
+
+# Package docs bundled with wheels (legacy setup.py copy_package_assets).
+if(EXISTS "${CMAKE_SOURCE_DIR}/docs/images")
+    install(
+        DIRECTORY "${CMAKE_SOURCE_DIR}/docs/images/"
+        DESTINATION pypylon/docs/images
+        FILES_MATCHING PATTERN "*.svg"
+    )
+endif()
+install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION pypylon)
 
 if(DEFINED SKBUILD_METADATA_DIR)
     # Get license directory based on platform

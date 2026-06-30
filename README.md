@@ -170,8 +170,8 @@ You need a few more things to compile pypylon:
  * An installation of pylon SDK for your platform
  * A compiler for your system (Visual Studio on Windows, gcc on linux, xCode commandline tools on macOS)
  * Python 3.9+ development files (e.g. `sudo apt install python3-dev` on linux)
- * [swig](http://www.swig.org) 4.3
-   * For all 64bit platforms you can install the tool via `pip install "swig==4.3"`
+ * [swig](http://www.swig.org) 4.4
+   * For all 64bit platforms you can install the tool via `pip install "swig==4.4.1"`
 
 To build pypylon from source:
 ```console

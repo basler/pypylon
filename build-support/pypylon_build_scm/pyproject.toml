@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pypylon-build-scm"
+version = "1.0.0"
+description = "setuptools-scm local version hook for pypylon non-reference SDK builds"
+
+[project.entry-points."setuptools_scm.local_scheme"]
+pylon = "pypylon_build_scm:pylon_local_version"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pypylon_build_scm*"]

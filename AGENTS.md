@@ -28,7 +28,7 @@ This file intentionally does not prescribe a specific environment manager
 (venv, conda, uv, …) — activate whichever one you use before running commands.
 
 Building from source additionally requires an installed pylon SDK, a C++
-compiler, Python development headers, and SWIG 4.3 (see
+compiler, Python development headers, and SWIG 4.4 (see
 [README.md](README.md#installation-from-source)).
 
 ## Common commands

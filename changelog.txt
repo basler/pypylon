@@ -1,6 +1,7 @@
 Version 26.x.x (unreleased)
     - Migrated from setuptools to scikit-build-core and CMake
     - Added Python limited API (stable ABI) support via scikit-build-core
+    - Upgraded SWIG to 4.4.x (fixes Py_LIMITED_API DeprecationWarnings from SWIG 4.3, swig/swig#2881)
     - Improved runtime dependency bundling and license file installation on all platforms
     - Updated CI and Docker build scripts for the new build system
 
