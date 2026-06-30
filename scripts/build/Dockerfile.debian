@@ -31,9 +31,9 @@ RUN pip install "setuptools<72" --upgrade
 
 # one genicam unittest requires a french locale
 # patchelf, unzip are needed for auditwheel
-# git is needed so setup.py can resolve tag based versions via git describe
+# cmake is needed for scikit-build-core; git is needed so setuptools_scm can resolve tag based versions via git describe
 # symlink for libicuuc.so.66 needed for pylon
-RUN apt-get update && apt-get install -y locales patchelf unzip libicu67 git\
+RUN apt-get update && apt-get install -y locales patchelf unzip libicu67 cmake git\
  && ln -s /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.67 /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.66\
  && rm -rf /var/lib/apt/lists/* \
  && sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen \

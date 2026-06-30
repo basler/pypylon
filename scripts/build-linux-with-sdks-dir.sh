@@ -4,7 +4,7 @@ set -e
 #it automatically searches and extracts the correct sdk from the directory given by $1
 #this is needed for the jenkins build
 #if you want to build pypylon for your installed pylon, don't use this script. You can do:
-# PYLON_ROOT=/path/to/your/pylon/install python3 setup.py bdist_wheel
+# PYLON_ROOT=/path/to/your/pylon/install python3 -m pip wheel . --no-deps --wheel-dir dist
 
 if [ $# -ne 1 ]; then
 	echo "Call this script with $0 <dir to the pylon SDK tar.gz files>"
@@ -49,5 +49,12 @@ PYLON_ROOT=$BUILD_DIR/pylon5-$BUILD
 echo "Using pylon SDK from $PYLON_ROOT"
 export PYLON_ROOT
 
-python3 setup.py clean
-python3 setup.py bdist_wheel
+# Install build dependencies for modern build system
+python3 -m pip install --user pip --upgrade
+python3 -m pip install --user build wheel
+
+# Clean up any previous builds
+rm -rf build/ dist/ *.egg-info/
+
+# Build wheel using modern build system
+python3 -m pip wheel . --no-deps --wheel-dir dist

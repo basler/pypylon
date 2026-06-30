@@ -11,6 +11,7 @@ generated*/
 __pycache__
 *.pyc
 python*/
+*.whl
 
 # Ignore compiler stuff
 *.idb
@@ -20,19 +21,14 @@ python*/
 /linux-build/
 /linux-build-tools/
 
-# Ignore Genicamtest XML Stuff
-/xml
-scripts/xml
-tests/genicam/xml/
-
 # Ignore .idea folder
 /.idea/
 
 # Ignore reference_types.txt
 scripts/reference_types.txt
 
-# Ignore NodeMap.pfs
-NodeMap.pfs
+# Ignore local pylon installation
+pylon-*/
 
 #ignore generated html
 pypylon.*.html
@@ -41,6 +37,8 @@ wheelhouse
 
 # macOS
 .DS_Store
+src/pypylon/_version.py
+licenses/
 
 # Local development files
 conan_package/
@@ -54,3 +52,14 @@ conan_package/
 /NodeMap.pfs
 /uv.lock
 /include
+
+# Unit test outputs
+xml/
+tests/xml/
+*NodeMap.pfs
+
+# pixi environments
+.pixi
+*.egg-info
+.venv
+compatibility_check_work
