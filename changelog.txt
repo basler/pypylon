@@ -1,3 +1,9 @@
+Version 26.x.x (unreleased)
+    - Migrated from setuptools to scikit-build-core and CMake
+    - Added Python limited API (stable ABI) support via scikit-build-core
+    - Improved runtime dependency bundling and license file installation on all platforms
+    - Updated CI and Docker build scripts for the new build system
+
 Version 26.6rc1
     - Date 2026-06-24
     - Updated to pylon Software Suite 26.6.2 on all platforms, which includes
