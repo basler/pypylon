@@ -80,6 +80,7 @@ $PYTHON -m pip install --user pip --upgrade
 
 # Install build dependencies for modern build system
 $PYTHON -m pip install --user build wheel
+$PYTHON -m pip install --user "./build-support/pypylon_build_scm"
 
 # Clean up any previous builds
 rm -rf build/ dist/ *.egg-info/
@@ -102,7 +103,7 @@ if [ -z "$DISABLE_TESTS" ]; then
     $PYTHON -m pip install --user --no-index --find-links dist pypylon --force-reinstall
 
     # Run tests using pytest
-    $PYTHON -m pytest tests/genicam_tests tests/pylon_tests/emulated tests/pylondataprocessing_tests || echo "Tests completed with issues (non-fatal for now)"
+    $PYTHON -m pytest tests/genicam tests/pylon/emulated tests/pylondataprocessing || echo "Tests completed with issues (non-fatal for now)"
 else
     # Build wheel without testing
     $PYTHON -m pip wheel . --no-deps --wheel-dir dist
