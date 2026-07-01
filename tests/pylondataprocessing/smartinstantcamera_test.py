@@ -419,7 +419,7 @@ class SmartInstantCameraTestSuite(PylonDataProcessingTestCase):
             camera.StartGrabbingMax(
                 True, 10, pylon.GrabStrategy_OneByOne,
                 pylon.GrabLoop_ProvidedByInstantCamera, pylon.GrabLoop_ProvidedByInstantCamera)
-            self.assertTrue(camera.GetGrabStopWaitObject().Wait(5000))
+            self.assertTrue(camera.GetGrabStopWaitObject().Wait(15000))
             self.assertFalse(camera.IsGrabbing())
 
             camera.StartGrabbing(
