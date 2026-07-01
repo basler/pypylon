@@ -138,6 +138,182 @@ using namespace Pylon;
 
 static PyObject* _genicam_translate = NULL;
 
+static bool ResolvePylonImageFormatSpec(
+    EPixelType pt,
+    uint32_t width,
+    uint32_t height,
+    uint32_t& out_width,
+    uint32_t& out_channels,
+    int& out_dtype_tag,
+    const char*& out_format_code)
+{
+    if (IsPacked(pt))
+    {
+        PyErr_SetString(PyExc_ValueError, "Packed Formats are not supported with numpy interface");
+        return false;
+    }
+
+    out_width = width;
+    out_channels = 0;
+    out_dtype_tag = 0;
+    out_format_code = nullptr;
+
+    switch (pt)
+    {
+    case PixelType_Mono8:
+    case PixelType_BayerGR8:
+    case PixelType_BayerRG8:
+    case PixelType_BayerGB8:
+    case PixelType_BayerBG8:
+    case PixelType_Confidence8:
+    case PixelType_Coord3D_C8:
+        out_dtype_tag = 1;
+        out_format_code = "B";
+        break;
+
+    case PixelType_Mono10:
+    case PixelType_BayerGR10:
+    case PixelType_BayerRG10:
+    case PixelType_BayerGB10:
+    case PixelType_BayerBG10:
+    case PixelType_Mono12:
+    case PixelType_BayerGR12:
+    case PixelType_BayerRG12:
+    case PixelType_BayerGB12:
+    case PixelType_BayerBG12:
+    case PixelType_Mono16:
+    case PixelType_BayerGR16:
+    case PixelType_BayerRG16:
+    case PixelType_BayerGB16:
+    case PixelType_BayerBG16:
+    case PixelType_Confidence16:
+    case PixelType_Coord3D_C16:
+        out_dtype_tag = 2;
+        out_format_code = "H";
+        break;
+
+    case PixelType_RGB8packed:
+    case PixelType_BGR8packed:
+        out_channels = 3;
+        out_dtype_tag = 1;
+        out_format_code = "B";
+        break;
+
+    case PixelType_RGB12packed:
+    case PixelType_BGR12packed:
+    case PixelType_RGB10packed:
+    case PixelType_BGR10packed:
+        out_channels = 3;
+        out_dtype_tag = 2;
+        out_format_code = "H";
+        break;
+
+    case PixelType_YUV422_YUYV_Packed:
+    case PixelType_YUV422packed:
+        out_channels = 2;
+        out_dtype_tag = 1;
+        out_format_code = "B";
+        break;
+
+    case PixelType_Coord3D_ABC32f:
+        out_channels = 3;
+        out_dtype_tag = 3;
+        out_format_code = "f";
+        break;
+
+    case PixelType_Data32f:
+        out_channels = 1;
+        out_dtype_tag = 3;
+        out_format_code = "f";
+        break;
+
+    case PixelType_BiColorRGBG8:
+    case PixelType_BiColorBGRG8:
+        out_width = width * 2;
+        out_dtype_tag = 1;
+        out_format_code = "B";
+        break;
+
+    case PixelType_BiColorRGBG10:
+    case PixelType_BiColorBGRG10:
+    case PixelType_BiColorRGBG12:
+    case PixelType_BiColorBGRG12:
+        out_width = width * 2;
+        out_dtype_tag = 2;
+        out_format_code = "H";
+        break;
+
+    default:
+        PyErr_SetString(PyExc_ValueError, "Pixel format currently not supported");
+        return false;
+    }
+
+    return true;
+}
+
+static PyObject* BuildPylonImageFormatTuple(EPixelType pt, uint32_t width, uint32_t height)
+{
+    uint32_t mapped_width = 0;
+    uint32_t channels = 0;
+    int dtype_tag = 0;
+    const char* format_code = nullptr;
+
+    if (!ResolvePylonImageFormatSpec(
+            pt,
+            width,
+            height,
+            mapped_width,
+            channels,
+            dtype_tag,
+            format_code))
+    {
+        return nullptr;
+    }
+
+    PyObject* shape = nullptr;
+    if (channels == 0)
+    {
+        shape = Py_BuildValue("(II)", height, mapped_width);
+    }
+    else
+    {
+        shape = Py_BuildValue("(III)", height, mapped_width, channels);
+    }
+    if (!shape)
+    {
+        return nullptr;
+    }
+
+    PyObject* format = PyUnicode_FromString(format_code);
+    if (!format)
+    {
+        Py_DECREF(shape);
+        return nullptr;
+    }
+
+    PyObject* dtype_tag_obj = PyInt_FromLong(dtype_tag);
+    if (!dtype_tag_obj)
+    {
+        Py_DECREF(format);
+        Py_DECREF(shape);
+        return nullptr;
+    }
+
+    PyObject* result = PyTuple_New(3);
+    if (!result)
+    {
+        Py_DECREF(dtype_tag_obj);
+        Py_DECREF(format);
+        Py_DECREF(shape);
+        return nullptr;
+    }
+
+    PyTuple_SET_ITEM(result, 0, shape);
+    PyTuple_SET_ITEM(result, 1, dtype_tag_obj);
+    PyTuple_SET_ITEM(result, 2, format);
+    return result;
+}
+
 // Translates the C++ exception to a Python exception by calling into _genicam.
 // The wrapped function in _genicam expects to receive the pointer as a PyLong.
 void TranslateGenicamException(const GenericException* e)
@@ -248,6 +424,15 @@ def needs_numpy(func):
     if e: raise e
     return func(*args, **kwargs)
  return func_wrapper
+
+def _dtype_from_tag(dtype_tag):
+  if dtype_tag == 1:
+    return _pylon_numpy.uint8, 1
+  if dtype_tag == 2:
+    return _pylon_numpy.uint16, 2
+  if dtype_tag == 3:
+    return _pylon_numpy.float32, 4
+  raise ValueError("Pixel format currently not supported")
 %}
 
 ///////////////////////
@@ -765,6 +950,534 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 #define PYLON_DEPRECATED(message)
 #define APIIMPORT
 #define APIEXPORT
+
+%rename(BufferFactory) Pylon::IBufferFactory;
+%rename(PythonBufferFactory) Pylon::CPythonBufferFactory;
+%rename(LookupBufferKeepAlive) Pylon::LookupPythonBufferKeepAlive;
+%ignore Pylon::g_keepAliveRegistryMutex;
+%ignore Pylon::g_keepAliveRegistry;
+%nothread Pylon::LookupPythonBufferKeepAlive;
+
+%include <pylon/BufferFactory.h>;
+
+%inline %{
+
+#include <map>
+#include <mutex>
+
+namespace Pylon
+{
+    static std::mutex g_keepAliveRegistryMutex;
+    static std::map<void*, PyObject*> g_keepAliveRegistry;
+
+    static void RegisterKeepAliveGlobal(void* ptr, PyObject* keepAlive)
+    {
+        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
+        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
+        if (it != g_keepAliveRegistry.end())
+        {
+            Py_DECREF(it->second);
+            it->second = keepAlive;
+        }
+        else
+        {
+            g_keepAliveRegistry[ptr] = keepAlive;
+        }
+        Py_INCREF(keepAlive);
+    }
+
+    static void UnregisterKeepAliveGlobal(void* ptr)
+    {
+        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
+        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
+        if (it != g_keepAliveRegistry.end())
+        {
+            Py_DECREF(it->second);
+            g_keepAliveRegistry.erase(it);
+        }
+    }
+
+    static PyObject* LookupKeepAliveGlobal(intptr_t ptrValue)
+    {
+        void* ptr = reinterpret_cast<void*>(ptrValue);
+        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
+        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
+        if (it == g_keepAliveRegistry.end())
+        {
+            Py_RETURN_NONE;
+        }
+        Py_INCREF(it->second);
+        return it->second;
+    }
+
+    static PyObject* BuildGrabResultArrayViewInfo(const CGrabResultData* resultData, bool raw)
+    {
+        if (!resultData)
+        {
+            PyErr_SetString(PyExc_RuntimeError, "grab result is invalid");
+            return NULL;
+        }
+
+        PyObject* shape = NULL;
+        PyObject* strides = NULL;
+        int dtypeTag = 1;
+        size_t requiredBytes = 0;
+
+        if (raw)
+        {
+            requiredBytes = resultData->GetPayloadSize();
+            shape = Py_BuildValue("(n)", (Py_ssize_t) requiredBytes);
+            Py_INCREF(Py_None);
+            strides = Py_None;
+        }
+        else
+        {
+            uint32_t mappedWidth = 0;
+            uint32_t channels = 0;
+            const char* formatCode = NULL;
+            if (!ResolvePylonImageFormatSpec(
+                    resultData->GetPixelType(),
+                    resultData->GetWidth(),
+                    resultData->GetHeight(),
+                    mappedWidth,
+                    channels,
+                    dtypeTag,
+                    formatCode))
+            {
+                return NULL;
+            }
+
+            if (channels == 0)
+            {
+                shape = Py_BuildValue("(II)", resultData->GetHeight(), mappedWidth);
+            }
+            else
+            {
+                shape = Py_BuildValue("(III)", resultData->GetHeight(), mappedWidth, channels);
+            }
+
+            const size_t itemSize = dtypeTag == 2 ? 2 : (dtypeTag == 3 ? 4 : 1);
+            const size_t rowBytes = channels == 0
+                ? (size_t) mappedWidth * itemSize
+                : (size_t) mappedWidth * channels * itemSize;
+            const size_t paddingX = resultData->GetPaddingX();
+            if (paddingX > 0)
+            {
+                if (channels == 0)
+                {
+                    strides = Py_BuildValue("(nn)", (Py_ssize_t) (rowBytes + paddingX), (Py_ssize_t) itemSize);
+                }
+                else
+                {
+                    strides = Py_BuildValue(
+                        "(nnn)",
+                        (Py_ssize_t) (rowBytes + paddingX),
+                        (Py_ssize_t) (channels * itemSize),
+                        (Py_ssize_t) itemSize
+                    );
+                }
+            }
+            else
+            {
+                Py_INCREF(Py_None);
+                strides = Py_None;
+            }
+            requiredBytes = resultData->GetImageSize();
+        }
+
+        if (!shape || !strides)
+        {
+            Py_XDECREF(shape);
+            Py_XDECREF(strides);
+            return NULL;
+        }
+
+        PyObject* dtypeTagObj = PyInt_FromLong(dtypeTag);
+        PyObject* requiredBytesObj = PyLong_FromSize_t(requiredBytes);
+        PyObject* owner = LookupKeepAliveGlobal(reinterpret_cast<intptr_t>(resultData->GetBuffer()));
+        if (!dtypeTagObj || !requiredBytesObj || !owner)
+        {
+            Py_XDECREF(shape);
+            Py_XDECREF(strides);
+            Py_XDECREF(dtypeTagObj);
+            Py_XDECREF(requiredBytesObj);
+            Py_XDECREF(owner);
+            return NULL;
+        }
+
+        PyObject* result = PyTuple_New(5);
+        if (!result)
+        {
+            Py_DECREF(shape);
+            Py_DECREF(strides);
+            Py_DECREF(dtypeTagObj);
+            Py_DECREF(requiredBytesObj);
+            Py_DECREF(owner);
+            return NULL;
+        }
+
+        PyTuple_SET_ITEM(result, 0, shape);
+        PyTuple_SET_ITEM(result, 1, dtypeTagObj);
+        PyTuple_SET_ITEM(result, 2, strides);
+        PyTuple_SET_ITEM(result, 3, requiredBytesObj);
+        PyTuple_SET_ITEM(result, 4, owner);
+        return result;
+    }
+
+    PyObject* LookupPythonBufferKeepAlive(intptr_t ptrValue)
+    {
+        PyGILState_STATE gilState = PyGILState_Ensure();
+        PyObject* result = LookupKeepAliveGlobal(ptrValue);
+        PyGILState_Release(gilState);
+        return result;
+    }
+
+    class CPythonBufferFactory : public IBufferFactory
+    {
+    public:
+        CPythonBufferFactory(
+            PyObject* allocateCallback,
+            PyObject* freeCallback = Py_None,
+            PyObject* destroyCallback = Py_None)
+            : m_allocateCallback(allocateCallback)
+            , m_freeCallback(freeCallback ? freeCallback : Py_None)
+            , m_destroyCallback(destroyCallback ? destroyCallback : Py_None)
+            , m_released(false)
+        {
+            if (!m_allocateCallback || !PyCallable_Check(m_allocateCallback))
+            {
+                throw INVALID_ARGUMENT_EXCEPTION("allocateCallback must be callable");
+            }
+            if (m_freeCallback != Py_None && !PyCallable_Check(m_freeCallback))
+            {
+                throw INVALID_ARGUMENT_EXCEPTION("freeCallback must be callable or None");
+            }
+            if (m_destroyCallback != Py_None && !PyCallable_Check(m_destroyCallback))
+            {
+                throw INVALID_ARGUMENT_EXCEPTION("destroyCallback must be callable or None");
+            }
+
+            Py_INCREF(m_allocateCallback);
+            Py_INCREF(m_freeCallback);
+            Py_INCREF(m_destroyCallback);
+        }
+
+        virtual ~CPythonBufferFactory()
+        {
+            if (Py_IsInitialized())
+            {
+                PyGILState_STATE gilState = PyGILState_Ensure();
+                ReleaseResources();
+                PyGILState_Release(gilState);
+            }
+        }
+
+        virtual void AllocateBuffer(size_t bufferSize, void** pCreatedBuffer, intptr_t& bufferContext)
+        {
+            if (!pCreatedBuffer)
+            {
+                throw INVALID_ARGUMENT_EXCEPTION("pCreatedBuffer must not be NULL");
+            }
+
+            *pCreatedBuffer = NULL;
+            bufferContext = 0;
+
+            PyGILState_STATE gilState = PyGILState_Ensure();
+
+            PyObject* sizeObj = PyLong_FromSize_t(bufferSize);
+            PyObject* result = PyObject_CallFunctionObjArgs(m_allocateCallback, sizeObj, NULL);
+            Py_DECREF(sizeObj);
+
+            if (!result)
+            {
+                PyErr_Print();
+                PyErr_Clear();
+                PyGILState_Release(gilState);
+                throw RUNTIME_EXCEPTION("PythonBufferFactory allocation callback failed");
+            }
+
+            PyObject* keepAlive = Py_None;
+            if (!ParseAllocationResult(result, bufferSize, pCreatedBuffer, bufferContext, keepAlive))
+            {
+                Py_DECREF(result);
+                if (PyErr_Occurred())
+                {
+                    PyErr_Print();
+                    PyErr_Clear();
+                }
+                PyGILState_Release(gilState);
+                throw INVALID_ARGUMENT_EXCEPTION("allocateCallback must return ptr or (ptr, keep_alive[, context])");
+            }
+            const bool hasKeepAlive = (keepAlive != Py_None);
+            if (hasKeepAlive)
+            {
+                // Keep reference independent from "result".
+                Py_INCREF(keepAlive);
+            }
+            Py_DECREF(result);
+
+            if (!(*pCreatedBuffer))
+            {
+                if (hasKeepAlive)
+                {
+                    Py_DECREF(keepAlive);
+                }
+                PyGILState_Release(gilState);
+                throw RUNTIME_EXCEPTION("allocateCallback returned NULL pointer");
+            }
+
+            if (hasKeepAlive)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                std::map<void*, PyObject*>::iterator it = m_keepAlive.find(*pCreatedBuffer);
+                if (it != m_keepAlive.end())
+                {
+                    Py_DECREF(it->second);
+                    it->second = keepAlive;
+                }
+                else
+                {
+                    m_keepAlive[*pCreatedBuffer] = keepAlive;
+                }
+                RegisterKeepAliveGlobal(*pCreatedBuffer, keepAlive);
+            }
+
+            PyGILState_Release(gilState);
+        }
+
+        virtual void FreeBuffer(void* pCreatedBuffer, intptr_t bufferContext)
+        {
+            PyGILState_STATE gilState = PyGILState_Ensure();
+            PyObject* keepAlive = NULL;
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                std::map<void*, PyObject*>::iterator it = m_keepAlive.find(pCreatedBuffer);
+                if (it != m_keepAlive.end())
+                {
+                    keepAlive = it->second;
+                    m_keepAlive.erase(it);
+                }
+            }
+            UnregisterKeepAliveGlobal(pCreatedBuffer);
+
+            if (m_freeCallback && m_freeCallback != Py_None)
+            {
+                PyObject* ptrObj = PyLong_FromVoidPtr(pCreatedBuffer);
+                PyObject* contextObj = PyLong_FromLongLong((long long)bufferContext);
+                PyObject* result = PyObject_CallFunctionObjArgs(
+                    m_freeCallback,
+                    ptrObj,
+                    contextObj,
+                    keepAlive ? keepAlive : Py_None,
+                    NULL
+                );
+                Py_DECREF(ptrObj);
+                Py_DECREF(contextObj);
+
+                if (!result)
+                {
+                    PyErr_Print();
+                    PyErr_Clear();
+                }
+                else
+                {
+                    Py_DECREF(result);
+                }
+            }
+
+            Py_XDECREF(keepAlive);
+            PyGILState_Release(gilState);
+        }
+
+        virtual void DestroyBufferFactory()
+        {
+            PyGILState_STATE gilState = PyGILState_Ensure();
+            if (m_destroyCallback && m_destroyCallback != Py_None)
+            {
+                PyObject* result = PyObject_CallFunctionObjArgs(m_destroyCallback, NULL);
+                if (!result)
+                {
+                    PyErr_Print();
+                    PyErr_Clear();
+                }
+                else
+                {
+                    Py_DECREF(result);
+                }
+            }
+
+            ReleaseResources();
+            PyGILState_Release(gilState);
+            delete this;
+        }
+
+        // Used by tests to validate callback/lifetime behavior without a camera.
+        PyObject* DebugAllocateBuffer(size_t bufferSize)
+        {
+            PyGILState_STATE gilState = PyGILState_Ensure();
+            try
+            {
+                void* createdBuffer = NULL;
+                intptr_t context = 0;
+                AllocateBuffer(bufferSize, &createdBuffer, context);
+                PyObject* result = PyTuple_New(2);
+                PyTuple_SET_ITEM(result, 0, PyLong_FromVoidPtr(createdBuffer));
+                PyTuple_SET_ITEM(result, 1, PyLong_FromLongLong((long long)context));
+                PyGILState_Release(gilState);
+                return result;
+            }
+            catch (...)
+            {
+                PyGILState_Release(gilState);
+                throw;
+            }
+        }
+
+        void DebugFreeBuffer(intptr_t ptrValue, intptr_t bufferContext)
+        {
+            FreeBuffer(reinterpret_cast<void*>(ptrValue), bufferContext);
+        }
+
+    private:
+        static bool ParseAllocationResult(
+            PyObject* result,
+            size_t requestedSize,
+            void** pCreatedBuffer,
+            intptr_t& bufferContext,
+            PyObject*& keepAlive)
+        {
+            keepAlive = Py_None;
+            bufferContext = 0;
+            bool hasCapacity = false;
+            size_t capacity = 0;
+
+            PyObject* ptrObj = result;
+            if (PyTuple_Check(result))
+            {
+                Py_ssize_t tupleSize = PyTuple_Size(result);
+                if (tupleSize < 1 || tupleSize > 4)
+                {
+                    return false;
+                }
+
+                ptrObj = PyTuple_GetItem(result, 0);
+                if (tupleSize >= 2)
+                {
+                    keepAlive = PyTuple_GetItem(result, 1);
+                }
+                if (tupleSize >= 3)
+                {
+                    PyObject* contextObj = PyTuple_GetItem(result, 2);
+                    long long contextVal = PyLong_AsLongLong(contextObj);
+                    if (PyErr_Occurred())
+                    {
+                        return false;
+                    }
+                    bufferContext = (intptr_t) contextVal;
+                }
+                if (tupleSize == 4)
+                {
+                    PyObject* capacityObj = PyTuple_GetItem(result, 3);
+                    size_t capacityVal = (size_t) PyLong_AsSize_t(capacityObj);
+                    if (PyErr_Occurred())
+                    {
+                        return false;
+                    }
+                    capacity = capacityVal;
+                    hasCapacity = true;
+                }
+            }
+            if (PyLong_Check(ptrObj))
+            {
+                *pCreatedBuffer = PyLong_AsVoidPtr(ptrObj);
+                if (PyErr_Occurred())
+                {
+                    return false;
+                }
+            }
+            else
+            {
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x030b0000
+                Py_buffer buffer;
+                if (PyObject_GetBuffer(ptrObj, &buffer, PyBUF_SIMPLE) != 0)
+                {
+                    // Parse as buffer failed. Keep the parse error as reason.
+                    return false;
+                }
+
+                *pCreatedBuffer = buffer.buf;
+                if (!hasCapacity)
+                {
+                    capacity = (size_t) buffer.len;
+                    hasCapacity = true;
+                }
+                if (keepAlive == Py_None)
+                {
+                    keepAlive = ptrObj;
+                }
+                PyBuffer_Release(&buffer);
+#else
+                PyErr_SetString(
+                    PyExc_TypeError,
+                    "buffer objects as allocateCallback return value require Python 3.11+ limited API"
+                );
+                return false;
+#endif
+            }
+
+            if (hasCapacity && capacity < requestedSize)
+            {
+                PyErr_Format(
+                    PyExc_ValueError,
+                    "allocateCallback capacity (%zu) is smaller than requested size (%zu)",
+                    capacity,
+                    requestedSize
+                );
+                return false;
+            }
+
+            return true;
+        }
+
+        void ReleaseResources()
+        {
+            if (m_released)
+            {
+                return;
+            }
+            m_released = true;
+
+            std::map<void*, PyObject*> keepAlive;
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                keepAlive.swap(m_keepAlive);
+            }
+
+            for (std::map<void*, PyObject*>::iterator it = keepAlive.begin(); it != keepAlive.end(); ++it)
+            {
+                UnregisterKeepAliveGlobal(it->first);
+                Py_XDECREF(it->second);
+            }
+
+            Py_XDECREF(m_allocateCallback);
+            Py_XDECREF(m_freeCallback);
+            Py_XDECREF(m_destroyCallback);
+            m_allocateCallback = NULL;
+            m_freeCallback = NULL;
+            m_destroyCallback = NULL;
+        }
+
+        PyObject* m_allocateCallback;
+        PyObject* m_freeCallback;
+        PyObject* m_destroyCallback;
+        std::mutex m_mutex;
+        std::map<void*, PyObject*> m_keepAlive;
+        bool m_released;
+    };
+}
+
+%}
+
 
 // for properties that have a standard genicam type like IInteger or IBoolean
 %define GENICAM_PROP(name)

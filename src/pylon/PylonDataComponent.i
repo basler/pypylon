@@ -36,8 +36,12 @@
     @needs_numpy
     def GetArrayZeroCopy(self, raw = False):
         '''
-        Get a numpy array for the image buffer as zero copy reference to the underlying buffer.
-        Note: The context manager variable MUST be released before leaving the scope.
+        Yield a NumPy array as a zero-copy view of the component buffer.
+
+        The view is valid only inside the with-block. This is the recommended
+        zero-copy path for image data, including GenDC components obtained via
+        GetFirstImageDataComponent(). Works while the parent grab result (and
+        any PythonBufferFactory allocation) remains alive.
         '''
         yield from _image_array_zero_copy_gen(self, self.GetMemoryView, raw)
 %}

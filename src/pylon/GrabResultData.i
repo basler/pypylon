@@ -40,6 +40,11 @@
         return (buf) ? PyByteArray_FromStringAndSize((const char *) buf, length) : Py_None;
     }
 
+    intptr_t GetBufferAddress()
+    {
+        return reinterpret_cast<intptr_t>($self->GetBuffer());
+    }
+
     PyObject * GetImageBuffer()
     {
         void * buf = $self->GetBuffer();

@@ -185,6 +185,23 @@ namespace Pylon {
         # should we increment the pyhon refcount here??
         pass
 %}
+%pythonprepend Pylon::CInstantCamera::SetBufferFactory %{
+    pFactory = args[0] if len(args) > 0 else None
+    cleanupProcedure = args[1] if len(args) > 1 else Cleanup_None
+    if len(args) == 1:
+        args = (pFactory, Cleanup_None)
+    if pFactory is not None and cleanupProcedure == Cleanup_Delete and hasattr(pFactory, "__disown__"):
+        pFactory.__disown__()
+%}
+%pythonappend Pylon::CInstantCamera::SetBufferFactory %{
+    pFactory = args[0] if len(args) > 0 else None
+    cleanupProcedure = args[1] if len(args) > 1 else Cleanup_None
+    if pFactory is None or cleanupProcedure == Cleanup_Delete:
+        self.__dict__.pop("_buffer_factory_ref", None)
+    elif cleanupProcedure == Cleanup_None:
+        # Keep the factory alive as long as it is attached to this camera.
+        self.__dict__["_buffer_factory_ref"] = pFactory
+%}
 
 %include <pylon/ECleanup.h>;
 %include <pylon/ERegistrationMode.h>;
