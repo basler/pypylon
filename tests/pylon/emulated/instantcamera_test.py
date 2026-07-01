@@ -6,7 +6,70 @@ manageable while still covering every public method and property.
 """
 from pylonemutestcase import PylonEmuTestCase
 from pypylon import pylon
+from pypylon import genicam
+import ctypes
+import gc
+import numpy
+import queue
+import random
+import threading
+import time
 import unittest
+import weakref
+
+
+class _Holder:
+    def __init__(self, size):
+        self.buffer = bytearray(size)
+
+    @property
+    def ptr(self):
+        return ctypes.addressof((ctypes.c_ubyte * len(self.buffer)).from_buffer(self.buffer))
+
+
+class _CudaLikeOwner:
+    def __init__(self, ptr, size):
+        self.nbytes = size
+        self.__cuda_array_interface__ = {
+            "shape": (size,),
+            "typestr": "|u1",
+            "data": (ptr, False),
+            "version": 3,
+        }
+
+
+class _TrackedBufferFactory:
+    def __init__(self, test_case):
+        self.test_case = test_case
+        self.allocated = {}
+        self.allocated_contexts = []
+        self.freed_contexts = []
+        self.free_keepalive_seen = []
+        self.lock = threading.Lock()
+        self.factory = pylon.PythonBufferFactory(self.allocate, self.free)
+
+    def allocate(self, size):
+        buf = (ctypes.c_ubyte * size)()
+        ptr = ctypes.addressof(buf)
+        with self.lock:
+            self.allocated[ptr] = buf
+            self.allocated_contexts.append(ptr)
+        return ptr, buf, ptr, size
+
+    def free(self, ptr, context, keep_alive):
+        with self.lock:
+            self.test_case.assertIn(ptr, self.allocated)
+            self.test_case.assertEqual(ptr, context)
+            self.freed_contexts.append(context)
+            self.free_keepalive_seen.append(keep_alive is not None)
+            self.allocated.pop(ptr)
+
+    def assert_all_freed_once(self):
+        with self.lock:
+            self.test_case.assertEqual(sorted(self.allocated_contexts), sorted(self.freed_contexts))
+            self.test_case.assertEqual(len(set(self.freed_contexts)), len(self.freed_contexts))
+            self.test_case.assertEqual({}, self.allocated)
+            self.test_case.assertTrue(all(self.free_keepalive_seen))
 
 
 class InstantCameraTestSuite(PylonEmuTestCase):
@@ -911,6 +974,408 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         """Using a parameter as property resulting in a returned genicam type instead of a parameter type."""
         with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
             root = camera.Root
+
+    # ------------------------------------------------------------------
+    # Python buffer factory
+    # ------------------------------------------------------------------
+
+    def _create_first_or_skip(self):
+        try:
+            return self.create_first()
+        except Exception as exc:
+            self.skipTest("CamEmu camera not available in this environment: %s" % exc)
+
+    def test_set_python_buffer_factory(self):
+        """SetBufferFactory with a Python callback allocates and frees buffers correctly."""
+        cam = self.create_first()
+        cam.Open()
+
+        tracked = _TrackedBufferFactory(self)
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+
+        cam.StartGrabbing()
+        contexts = []
+        while len(contexts) < 5:
+            with cam.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException) as grabResult:
+                self.assertTrue(grabResult.GrabSucceeded())
+                contexts.append(grabResult.BufferContext)
+                with grabResult.GetArrayZeroCopy() as array:
+                    self.assertEqual(array.ctypes.data, grabResult.BufferContext)
+                    self.assertEqual(array.shape[0], grabResult.Height)
+                    self.assertEqual(array.shape[1], grabResult.Width)
+        cam.StopGrabbing()
+
+        cam.SetBufferFactory(None)
+        cam.Close()
+
+        self.assertGreater(len(contexts), 0)
+        self.assertTrue(set(contexts).issubset(set(tracked.allocated_contexts)))
+        tracked.assert_all_freed_once()
+
+    def test_set_python_buffer_factory_gendc_zero_copy(self):
+        """Python buffer factory supplies GenDC payload bytes; component zero-copy views work."""
+        cam = self.create_first()
+        cam.Open()
+
+        tracked = _TrackedBufferFactory(self)
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+
+        try:
+            cam.GenDC.Value = True
+        except Exception as exc:
+            cam.Close()
+            self.skipTest("GenDC is not supported on this emulator: %s" % exc)
+
+        cam.StartGrabbing()
+        try:
+            with cam.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException) as grab_result:
+                self.assertTrue(grab_result.GrabSucceeded())
+                self.assertEqual(grab_result.PayloadType, pylon.PayloadType_GenDC)
+                self.assertIn(grab_result.BufferContext, tracked.allocated_contexts)
+
+                with grab_result.GetFirstImageDataComponent() as component:
+                    self.assertTrue(component.IsValid())
+                    with component.GetArrayZeroCopy() as image:
+                        self.assertGreater(image.shape[0], 0)
+                        self.assertGreater(image.shape[1], 0)
+        finally:
+            cam.StopGrabbing()
+
+        cam.SetBufferFactory(None)
+        cam.Close()
+        tracked.assert_all_freed_once()
+
+    def test_set_python_buffer_factory_default_keeps_factory_reference(self):
+        """SetBufferFactory keeps the factory alive when Cleanup_None is used (default)."""
+        cam = self.create_first()
+        cam.Open()
+
+        def alloc_cb(size):
+            holder = _Holder(size)
+            return (holder.ptr, holder, 0, len(holder.buffer))
+
+        factory = pylon.PythonBufferFactory(alloc_cb)
+        cam.SetBufferFactory(factory)
+        self.assertIs(cam.__dict__.get("_buffer_factory_ref"), factory)
+
+        cam.SetBufferFactory(None)
+        self.assertNotIn("_buffer_factory_ref", cam.__dict__)
+        cam.Close()
+
+    def test_python_buffer_factory_debug_lifetime(self):
+        """PythonBufferFactory debug helpers keep allocator objects alive until free."""
+        callbacks = []
+        holder_refs = []
+
+        def allocate(size):
+            holder = _Holder(size)
+            holder_refs.append(weakref.ref(holder))
+            return (holder.ptr, holder, 1234, len(holder.buffer))
+
+        def free(ptr, context, keepalive):
+            callbacks.append((ptr, context, keepalive is not None))
+
+        factory = pylon.PythonBufferFactory(allocate, free)
+        ptr, context = factory.DebugAllocateBuffer(128)
+        self.assertEqual(context, 1234)
+        self.assertTrue(holder_refs[0]() is not None)
+        self.assertTrue(pylon.LookupBufferKeepAlive(ptr) is not None)
+
+        gc.collect()
+        self.assertTrue(holder_refs[0]() is not None)
+
+        factory.DebugFreeBuffer(ptr, context)
+        self.assertEqual(len(callbacks), 1)
+        self.assertEqual(callbacks[0][0], ptr)
+        self.assertEqual(callbacks[0][1], context)
+        self.assertTrue(callbacks[0][2])
+        self.assertTrue(pylon.LookupBufferKeepAlive(ptr) is None)
+
+        gc.collect()
+        self.assertTrue(holder_refs[0]() is None)
+
+    def test_python_buffer_factory_capacity_guard(self):
+        """PythonBufferFactory rejects allocations when keepalive capacity is too small."""
+        def allocate(size):
+            holder = _Holder(size)
+            return (holder.ptr, holder, 1, size - 1)
+
+        factory = pylon.PythonBufferFactory(allocate)
+        with self.assertRaises(genicam.InvalidArgumentException):
+            factory.DebugAllocateBuffer(1024)
+
+    def test_python_buffer_factory_destroy_callback(self):
+        """DestroyBufferFactory invokes the optional destroy callback."""
+        destroyed = []
+
+        def allocate(size):
+            holder = _Holder(size)
+            return (holder.ptr, holder, 0, len(holder.buffer))
+
+        def destroy():
+            destroyed.append(True)
+
+        factory = pylon.PythonBufferFactory(allocate, None, destroy)
+        factory.thisown = 0
+        factory.DestroyBufferFactory()
+        self.assertEqual(destroyed, [True])
+
+    def test_python_buffer_factory_cuda_owner_proxy_shape(self):
+        """_PylonOwnerView reshapes CUDA owner interfaces for grab-result views."""
+        owner = _CudaLikeOwner(0x1234, 4096)
+        proxy = pylon._PylonOwnerView(
+            owner,
+            pylon.GrabResult(),
+            shape=(32, 32),
+            dtype=numpy.uint8,
+            strides=(32, 1),
+            nbytes=1024,
+        )
+
+        interface = proxy.__cuda_array_interface__
+        self.assertEqual(interface["shape"], (32, 32))
+        self.assertEqual(interface["typestr"], numpy.dtype(numpy.uint8).str)
+        self.assertEqual(interface["strides"], (32, 1))
+        self.assertEqual(interface["data"][0], 0x1234)
+        self.assertIs(proxy._owner, owner)
+
+    def test_arrayview_backpressure_when_held(self):
+        """GetArray(copy=False) keeps a grab buffer reserved until the view is released."""
+        cam = self._create_first_or_skip()
+        cam.Open()
+        try:
+            try:
+                cam.MaxNumBuffer.Value = 1
+            except Exception as exc:
+                self.skipTest("MaxNumBuffer is not configurable: %s" % exc)
+
+            cam.StartGrabbing(pylon.GrabStrategy_OneByOne)
+
+            held = []
+            with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                self.assertTrue(result.GrabSucceeded())
+                held.append(result.GetArray(copy=False))
+
+            with self.assertRaises(genicam.TimeoutException):
+                cam.RetrieveResult(200, pylon.TimeoutHandling_ThrowException)
+
+            held.clear()
+            gc.collect()
+
+            with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                self.assertTrue(result.GrabSucceeded())
+        finally:
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            cam.Close()
+
+    def test_arrayview_cross_thread_handoff_releases_buffer(self):
+        """Zero-copy array views handed to another thread release buffers when dropped."""
+        cam = self._create_first_or_skip()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        worker_errors = queue.Queue()
+        release_event = threading.Event()
+
+        try:
+            try:
+                cam.MaxNumBuffer.Value = 1
+            except Exception as exc:
+                self.skipTest("MaxNumBuffer is not configurable: %s" % exc)
+
+            cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+            cam.StartGrabbing(pylon.GrabStrategy_OneByOne)
+
+            frame_queue = queue.Queue()
+
+            def worker():
+                frame = None
+                try:
+                    frame = frame_queue.get(timeout=2)
+                    self.assertEqual(frame.shape[0], 1040)
+                    self.assertEqual(frame.shape[1], 1024)
+                    release_event.wait(timeout=2)
+                except Exception as exc:
+                    worker_errors.put(exc)
+                finally:
+                    del frame
+                    gc.collect()
+
+            thread = threading.Thread(target=worker)
+            thread.start()
+
+            with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                self.assertTrue(result.GrabSucceeded())
+                frame_queue.put(result.GetArray(copy=False))
+
+            with self.assertRaises(genicam.TimeoutException):
+                cam.RetrieveResult(200, pylon.TimeoutHandling_ThrowException)
+
+            self.assertEqual([], tracked.freed_contexts)
+            release_event.set()
+            thread.join(timeout=3)
+            self.assertFalse(thread.is_alive())
+            if not worker_errors.empty():
+                raise worker_errors.get()
+
+            gc.collect()
+            with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                self.assertTrue(result.GrabSucceeded())
+        finally:
+            release_event.set()
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            cam.SetBufferFactory(None)
+            cam.Close()
+
+        tracked.assert_all_freed_once()
+
+    def test_set_buffer_factory_waits_for_cross_thread_owner_view_release(self):
+        """SetBufferFactory(None) waits until cross-thread owner views are released."""
+        cam = self._create_first_or_skip()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        worker_errors = queue.Queue()
+        release_event = threading.Event()
+
+        try:
+            cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+            cam.StartGrabbing(pylon.GrabStrategy_OneByOne)
+
+            owner_queue = queue.Queue()
+
+            def worker():
+                owner_view = None
+                try:
+                    owner_view = owner_queue.get(timeout=2)
+                    self.assertEqual(owner_view.shape[0], 1040)
+                    self.assertEqual(owner_view.shape[1], 1024)
+                    release_event.wait(timeout=2)
+                except Exception as exc:
+                    worker_errors.put(exc)
+                finally:
+                    del owner_view
+                    gc.collect()
+
+            thread = threading.Thread(target=worker)
+            thread.start()
+
+            with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                self.assertTrue(result.GrabSucceeded())
+                held_context = result.BufferContext
+                owner_queue.put(result.GetBufferOwnerView())
+
+            cam.StopGrabbing()
+            self.assertNotIn(held_context, tracked.freed_contexts)
+
+            release_event.set()
+            thread.join(timeout=3)
+            self.assertFalse(thread.is_alive())
+            if not worker_errors.empty():
+                raise worker_errors.get()
+
+            gc.collect()
+            cam.SetBufferFactory(None)
+            cam.Close()
+        finally:
+            release_event.set()
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            if cam.IsOpen():
+                cam.SetBufferFactory(None)
+                cam.Close()
+
+        tracked.assert_all_freed_once()
+
+    def test_arrayview_randomized_cross_thread_backpressure_stress(self):
+        """Randomized cross-thread zero-copy handoff stress test with limited buffers."""
+        cam = self._create_first_or_skip()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        rng = random.Random(1701)
+        worker_errors = queue.Queue()
+        release_events = []
+        threads = []
+
+        try:
+            try:
+                cam.MaxNumBuffer.Value = 2
+            except Exception as exc:
+                self.skipTest("MaxNumBuffer is not configurable: %s" % exc)
+
+            cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+            cam.StartGrabbing(pylon.GrabStrategy_OneByOne)
+
+            for _round_idx in range(8):
+                frame_queue = queue.Queue()
+                release_events = [threading.Event(), threading.Event()]
+                threads = []
+                held_contexts = []
+
+                def worker(worker_idx):
+                    frame = None
+                    try:
+                        frame = frame_queue.get(timeout=2)
+                        self.assertEqual(frame.shape[0], 1040)
+                        self.assertEqual(frame.shape[1], 1024)
+                        time.sleep(rng.uniform(0.001, 0.01))
+                        release_events[worker_idx].wait(timeout=3)
+                        time.sleep(rng.uniform(0.001, 0.01))
+                    except Exception as exc:
+                        worker_errors.put(exc)
+                    finally:
+                        del frame
+                        gc.collect()
+
+                for worker_idx in range(2):
+                    thread = threading.Thread(target=worker, args=(worker_idx,))
+                    thread.start()
+                    threads.append(thread)
+
+                for _ in range(2):
+                    with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                        self.assertTrue(result.GrabSucceeded())
+                        held_contexts.append(result.BufferContext)
+                        frame_queue.put(result.GetArray(copy=False))
+
+                with self.assertRaises(genicam.TimeoutException):
+                    cam.RetrieveResult(120, pylon.TimeoutHandling_ThrowException)
+
+                for context in held_contexts:
+                    self.assertNotIn(context, tracked.freed_contexts)
+
+                release_order = [0, 1]
+                rng.shuffle(release_order)
+                release_events[release_order[0]].set()
+                time.sleep(rng.uniform(0.001, 0.02))
+                release_events[release_order[1]].set()
+
+                for thread in threads:
+                    thread.join(timeout=3)
+                    self.assertFalse(thread.is_alive())
+
+                if not worker_errors.empty():
+                    raise worker_errors.get()
+
+                gc.collect()
+                with cam.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException) as result:
+                    self.assertTrue(result.GrabSucceeded())
+
+            cam.StopGrabbing()
+            cam.SetBufferFactory(None)
+            cam.Close()
+        finally:
+            for event in release_events:
+                event.set()
+            for thread in threads:
+                thread.join(timeout=1)
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            if cam.IsOpen():
+                cam.SetBufferFactory(None)
+                cam.Close()
+
+        tracked.assert_all_freed_once()
 
 if __name__ == "__main__":
     unittest.main()

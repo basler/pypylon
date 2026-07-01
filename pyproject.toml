@@ -8,10 +8,16 @@ build-verbosity = "0"
 test-requires = "pytest numpy"
 
 [tool.pytest.ini_options]
+pythonpath = ["tests"]
 testpaths = [
     "tests/genicam",
     "tests/pylon/emulated",
     "tests/pylondataprocessing",
+]
+markers = [
+    "nvidia: requires an NVIDIA GPU with a working CUDA runtime",
+    "warp: requires NVIDIA Warp with a working CPU backend",
+    "cupy: requires CuPy with a working CUDA runtime",
 ]
 
 [tool.cibuildwheel.windows]
