@@ -53,6 +53,119 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
                               f"Gray value of first pixel: {img[0, 0]}")
 ```
 
+## Buffer Factories and Zero-Copy Array Access
+
+Runnable sample:
+[samples/pylon/grab_buffer_factory/grab_buffer_factory.py](samples/pylon/grab_buffer_factory/grab_buffer_factory.py)
+
+pypylon 26.6 adds several ways to work with image data. They compose with custom
+buffer factories — choose based on lifetime, payload type, and whether you need
+the allocator's native Python object.
+
+### Copying access (default, always safe)
+
+| API | Use when |
+|-----|----------|
+| `component.Array` / `grab_result.Array` | You need data that outlives the grab result |
+| `component.GetArray()` / `grab_result.GetArray()` | Same; explicit method form |
+| `ImageFormatConverter.Convert(src).Array` | Converted result as a new `PylonImage` copy |
+
+These work with or without a `PythonBufferFactory`.
+
+### Scoped zero-copy (recommended on master)
+
+`GetArrayZeroCopy()` is the standard zero-copy API on `GrabResult`,
+`PylonDataComponent`, and `PylonImage`. The view is valid only inside the
+`with` block; holding it past that scope raises `RuntimeError`.
+
+```python
+with grab_result.GetFirstImageDataComponent() as component:
+    with component.GetArrayZeroCopy() as view:
+        process(view)
+```
+
+Use this path for **both classic image payloads and GenDC** — always reach the
+image through `GetFirstImageDataComponent()` (or `DataContainer`) rather than
+treating the grab result as a flat image. Works with custom buffer factories
+because the grab result keeps the factory-allocated buffer alive.
+
+Related master APIs that produce **independent** output buffers (not views into
+the grab buffer):
+
+* `ImageFormatConverter.ConvertToArray(src)` — convert into a pre-allocated NumPy
+  array while `src` is still valid. Accepts `GrabResult`, `PylonDataComponent`,
+  and `PylonImage`. See
+  [samples/pylon/utility_image_format_converter/utility_image_format_converter.py](samples/pylon/utility_image_format_converter/utility_image_format_converter.py).
+* `ImagePersistence.SaveArray(...)` — save a NumPy array without creating a
+  `PylonImage` first.
+
+### Persistent zero-copy views (buffer-factory extension)
+
+When a view must **outlive the current scope** but stay tied to the grab buffer,
+use the buffer-factory view API on `GrabResult` (classic image payloads only):
+
+```python
+view = grab_result.GetArray(copy=False)   # same as GetArrayView()
+```
+
+The returned object keeps the `GrabResult` alive until it is released. Prefer
+`GetArrayZeroCopy()` when the view stays in one scope; use `copy=False` for
+hand-offs to other functions or threads. Holding too many views can stall
+acquisition because pylon cannot recycle grab buffers.
+
+`GetArrayZeroCopy()` and `GetArray(copy=False)` both work with a custom factory
+that allocates ordinary host memory. They are not interchangeable when the
+factory returns a **non-NumPy owner** (pinned Warp memory, CUDA arrays): use
+`GetBufferOwnerView()` instead (see GPU samples below).
+
+### Python buffer factories
+
+`InstantCamera.SetBufferFactory()` makes the camera grab into memory your Python
+code provides:
+
+```python
+factory = pylon.PythonBufferFactory(allocate, free)
+camera.SetBufferFactory(factory, pylon.Cleanup_None)
+```
+
+The allocation callback returns `(address, keepalive[, context[, capacity]])`.
+pylon keeps `keepalive` alive until the buffer is freed.
+
+| API | Role with a buffer factory |
+|-----|---------------------------|
+| `GetBufferOwner()` | The `keepalive` object for the current grab buffer |
+| `GetBufferOwnerView(raw=False)` | Shape that owner as an image; keeps the grab result alive. For **classic image payloads** with simple pixel formats — not for GenDC container layout |
+| `GetArrayZeroCopy()` | Scoped NumPy view into grab/component memory (any allocator) |
+| `GetArray(copy=False)` | Persistent NumPy view; best with host-memory factories |
+| `ConvertToArray(component)` | Reads from live grab/component; writes to a new owned array |
+
+For GenDC (`PayloadType_GenDC`) the factory allocates the **full container**.
+Access components via `GetFirstImageDataComponent()` or `DataContainer`, as in
+[samples/pylon/grab_data_container/grab_data_container.py](samples/pylon/grab_data_container/grab_data_container.py).
+
+### Optional: NVIDIA Warp and CUDA
+
+[samples/pylon/grab_warp_pinned/](samples/pylon/grab_warp_pinned/grab_warp_pinned.py)
+and [samples/pylon/grab_warp_packed_unpack/](samples/pylon/grab_warp_packed_unpack/grab_warp_packed_unpack.py)
+use `GetBufferOwnerView()` because the factory returns Warp pinned arrays with
+`__cuda_array_interface__`, not plain NumPy buffers. Install Warp
+(`pip install warp-lang`) and run:
+
+```console
+python samples/pylon/grab_warp_pinned/grab_warp_pinned.py
+python samples/pylon/grab_warp_packed_unpack/grab_warp_packed_unpack.py
+```
+
+### Buffer lifetime tests
+
+[tests/pylon/emulated/instantcamera_test.py](tests/pylon/emulated/instantcamera_test.py)
+covers factory allocation, `GetArrayZeroCopy()` with custom buffers, and
+`GetArray(copy=False)` backpressure across threads. CUDA owner proxies are in
+[tests/pylon/emulated/cupy_buffer_factory_test.py](tests/pylon/emulated/cupy_buffer_factory_test.py)
+(marked `nvidia` and `cupy`; skipped without GPU/CuPy).
+
+Optional Warp benchmarks: `tests/performance/test_warp_bufferfactory_perf.py`
+
 ## Getting Started with pylon Data Processing
 
  * pypylon additionally supports the pylon Data Processing API extension.
@@ -207,6 +320,14 @@ pip install pytest numpy
 pytest tests/genicam tests/pylon/emulated tests/pylondataprocessing
 ```
 The `tests/pylon/usb` and `tests/pylon/gigE` suites require real cameras.
+
+Optional Warp GPU buffer-factory benchmarks require NVIDIA Warp, a CUDA-capable
+system, and `pytest-benchmark`:
+
+```console
+pip install pytest-benchmark warp-lang
+python -m pytest tests/performance/test_warp_bufferfactory_perf.py --benchmark-json warp-bufferfactory.json
+```
 
 # Known Issues
  * For USB 3.0 cameras to work on Linux, you need to install appropriate udev rules.
