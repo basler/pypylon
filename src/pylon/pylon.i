@@ -124,6 +124,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pylon/CategoryParameter.h"
 #include "pylon/PortParameter.h"
 #include "pylon/PlaceholderParameter.h"
+#include <pylon/PixelTypeMapper.h>
 
 #ifdef _MSC_VER  // MSVC
 #  pragma warning(pop)
@@ -868,6 +869,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "TypeMappings.i"
 %include "Container.i"
 %include "PixelType.i"
+%include "PixelTypeMapper.i"
 %include "ImageMixin.i"
 %include "PayloadType.i"
 %include "Info.i"
