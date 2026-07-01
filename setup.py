@@ -42,6 +42,13 @@ def copy_package_assets():
     src_file = os.path.join(".", "README.md")
     dst_file = os.path.join(".", "pypylon", "README.md")
     shutil.copy(src_file, dst_file)
+
+    warp_src = os.path.join(".", "src", "pypylon", "warp.py")
+    warp_dst = os.path.join(".", "pypylon", "warp.py")
+    if os.path.isfile(warp_src):
+        os.makedirs(os.path.dirname(warp_dst), exist_ok=True)
+        print(f"Copy {warp_src} => {warp_dst}")
+        shutil.copy(warp_src, warp_dst)
 ################################################################################
 
 def prepare_for_limited_api(min_ver_str):
