@@ -1,6 +1,6 @@
-    // Simplified Pixel Type Mapper
-// Maps between PFNC integer pixel-format values and Pylon EPixelType.
-
+// Pixel Type Mapper
+// Map between Pylon pixel types and symbolic pixel-format values for SFNC 1.x/2.x versions.
+//
 %{
 #include <pylon/PixelTypeMapper.h>
 %}
@@ -19,6 +19,7 @@ static Pylon::EPixelType _pixel_type_from_name(const char* name)
 {
     return Pylon::CPixelTypeMapper::GetPylonPixelTypeByName(name);
 }
+
 %}
 
 %pythoncode %{
