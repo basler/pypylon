@@ -104,6 +104,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/GigETransportLayer.h>
 #include <pylon/gige/ActionTriggerConfiguration.h>
+#include <pylon/StaticDefectPixelCorrection.h>
 #ifdef _MSC_VER
 #include <pylon/PylonGUI.h>
 #endif
@@ -891,6 +892,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "ConfigurationEventHandler.i"
 %include "CameraEventHandler.i"
 %include "SoftwareTriggerConfiguration.i"
+%include "StaticDefectPixelCorrection.i"
 %include "AcquireContinuousConfiguration.i"
 %include "AcquireSingleFrameConfiguration.i"
 %include "ActionTriggerConfiguration.i"

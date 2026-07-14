@@ -163,3 +163,57 @@ ROI is one of the most effective performance tools in machine vision systems. By
 Unlike software cropping, ROI eliminates unnecessary data *before* it enters the pipeline.
 
 ---
+
+## Static Defect Pixel Correction (Optional)
+
+Some cameras (for example certain ace 2 models) support static defect pixel correction lists. Because this feature is optional, always handle the case where it is not available on the current device.
+
+### Practical Notes
+
+- Use `pylon.StaticDefectPixelCorrection` with `camera.NodeMap`
+- Use `ListType_Factory` to read factory-provided defect pixels
+- Use `ListType_User` to read/update user-specific defect pixels
+- Catch `pylon.RuntimeException` and `pylon.InvalidArgumentException` for unsupported models
+
+### Configuration Example
+
+```Python
+from pypylon import pylon
+
+with pylon.InstantCamera(pylon.FirstFound) as camera:
+    # Read the factory defect pixel list.
+    factory_ok, factory_pixels = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
+        camera.NodeMap,
+        [],
+        pylon.StaticDefectPixelCorrection.ListType_Factory,
+    )
+
+    # Build/update the user list as (x, y) or (x, y, type) tuples.
+    user_pixels = [(100, 200), (300, 400, 0)]
+
+    try:
+        normalize_ok, normalized_pixels = pylon.StaticDefectPixelCorrection.NormalizePixelList(
+            camera.NodeMap,
+            user_pixels,
+        )
+
+        set_ok, written_pixels = pylon.StaticDefectPixelCorrection.SetDefectPixelList(
+            camera.NodeMap,
+            normalized_pixels,
+            pylon.StaticDefectPixelCorrection.ListType_User,
+        )
+
+        get_ok, read_back_pixels = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
+            camera.NodeMap,
+            [],
+            pylon.StaticDefectPixelCorrection.ListType_User,
+        )
+    except (pylon.RuntimeException, pylon.InvalidArgumentException):
+        # Camera does not provide this feature.
+        pass
+```
+
+### Key Insight
+
+Treat static defect pixel correction as a capability-dependent feature: use it when available, and degrade gracefully when it is not.
+
