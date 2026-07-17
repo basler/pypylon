@@ -576,6 +576,9 @@ namespace Pylon
 %include "Region.i"
 %include "VariantDataType.i"
 %include "VariantContainerType.i"
+#if ((PYLON_DATAPROCESSING_VERSION_MAJOR > 5) || (PYLON_DATAPROCESSING_VERSION_MAJOR >= 5 && PYLON_DATAPROCESSING_VERSION_MINOR >= 1))
+%include "Error.i"
+#endif
 %include "Variant.i"
 %include "Update.i"
 %include "QueueMode.i"

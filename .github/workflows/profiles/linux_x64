@@ -1,11 +1,16 @@
-[env]
-CC=gcc-9
-CXX=g++-9
-
 [settings]
 arch=x86_64
 build_type=Release
 compiler=gcc
+compiler.cppstd=17
 compiler.libcxx=libstdc++11
 compiler.version=9
 os=Linux
+
+[buildenv]
+CC=gcc-9
+CXX=g++-9
+
+[conf]
+tools.build:compiler_executables={"c": "gcc-9", "cpp": "g++-9"}
+

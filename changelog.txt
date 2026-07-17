@@ -1,3 +1,9 @@
+Version 26.7
+    - Date 2026-07-17
+    - Updated to pylon Software Suite 26.7.1 on all platforms, which includes
+      pylon C++ SDK 12.2.1 and pylon Data Processing C++ SDK 5.1.0.
+    - Added the pylondataprocessing.Error type (Pylon::DataProcessing::CError) and the Variant GetError/SetError(Error) methods introduced by Data Processing SDK 5.1.0.
+
 Version 26.6
     - Date 2026-07-01
     - Updated to pylon Software Suite 26.6.2 on all platforms, which includes
