@@ -1,3 +1,8 @@
+Version 26.7
+    - Date 2026-07-17
+    - Updated to pylon Software Suite 26.7.0 on all platforms, which includes
+      pylon C++ SDK 12.2.1 and pylon Data Processing C++ SDK 5.1.0.
+
 Version 26.6
     - Date 2026-07-01
     - Updated to pylon Software Suite 26.6.2 on all platforms, which includes

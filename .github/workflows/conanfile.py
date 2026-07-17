@@ -67,16 +67,8 @@ class PyPylonConanConsumer(ConanFile):
 
         # Determine platform key
         requirements = config.get(self._platform_name, {}).get("requirements", [])
-        # Special-case: the control file currently lists 'pylon-vtool-package-a-sasl'
-        # with a '<base>.1' build id, which corresponds to a legacy Conan 1 recipe in
-        # and fails to load under Conan 2. Force it to use the same build id
-        # as 'pylon-vtool-package-a', which is the Conan 2 compatible recipe.
-        vtool_package_a_version = version_map.get("pylon-vtool-package-a")
         for req in requirements:
-            if req == "pylon-vtool-package-a-sasl" and vtool_package_a_version:
-                version = vtool_package_a_version
-            else:
-                version = version_map.get(req)
+            version = version_map.get(req)
             if version:
                 self.requires(f"{req}/{version}@release/potentially-public")
             else:
