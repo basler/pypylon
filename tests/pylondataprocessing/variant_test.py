@@ -491,6 +491,26 @@ class VariantTestSuite(PylonDataProcessingTestCase):
         self.assertEqual(testee.GetErrorDescription(), "Error message")
         self.assertEqual(testee.ErrorDescription, "Error message")
 
+    def test_get_error(self):
+        """GetError returns an Error object describing the variant's error state."""
+        if not hasattr(pylondataprocessing, "Error"):
+            self.skipTest("Error is not available in this DataProcessing SDK version")
+        testee = pylondataprocessing.Variant("A")
+        testee.SetError("Error message")
+        error = testee.GetError()
+        self.assertIsInstance(error, pylondataprocessing.Error)
+        self.assertTrue(error.IsValid())
+        self.assertEqual(error.GetDescription(), "Error message")
+
+    def test_set_error_from_error_object(self):
+        """SetError accepts an Error object."""
+        if not hasattr(pylondataprocessing, "Error"):
+            self.skipTest("Error is not available in this DataProcessing SDK version")
+        testee = pylondataprocessing.Variant("A")
+        testee.SetError(pylondataprocessing.Error("Error message"))
+        self.assertTrue(testee.HasError())
+        self.assertEqual(testee.GetErrorDescription(), "Error message")
+
     def test_getitem_and_len(self):
         """Array variants support indexing, negative indices, len() and raise IndexError."""
         array_variant = pylondataprocessing.Variant.MakeVariant(
