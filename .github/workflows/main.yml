@@ -166,10 +166,13 @@ jobs:
             f.write(f"value_arch_camel={os_name_arch_camel}\n")
         shell: python
 
-      - name: Install conan v1
-        run: pip install "conan<2"
+      - name: Install conan v2
+        run: pip install "conan>=2.14"
 
-      - name: Add conan v1 remote and authenticate
+      - name: Detect default Conan profile
+        run: conan profile detect --force
+
+      - name: Add conan v2 remotes and authenticate
         env:
           JF_URL: ${{ secrets.SDK_URL }}
           JF_USER: ${{ secrets.SDK_USER }}
@@ -177,16 +180,18 @@ jobs:
         run: |
           import os
           import subprocess
-      
-          subprocess.run(["conan", "config", "set", "general.revisions_enabled=1"], check=True)
-          subprocess.run([
-              "conan", "remote", "add", "pylon-conan-prod",
-              f"{os.environ['JF_URL']}/artifactory/api/conan/pylon-conan-prod", "--insert", "0"
-          ], check=True)
-          subprocess.run([
-              "conan", "user", "-p", os.environ["JF_ACCESS_TOKEN"],
-              "-r", "pylon-conan-prod", os.environ["JF_USER"]
-          ], check=True)
+
+          remotes = [
+              ("pylon-conan-prod", f"{os.environ['JF_URL']}/artifactory/api/conan/pylon-conan-prod", 0),
+          ]
+
+          for name, url, index in remotes:
+              subprocess.run([
+                  "conan", "remote", "add", name, url, "--index", str(index), "--force"
+              ], check=True)
+              subprocess.run([
+                  "conan", "remote", "login", "-p", os.environ["JF_ACCESS_TOKEN"], name, os.environ["JF_USER"]
+              ], check=True)
         shell: python
 
       - name: Download ${{ steps.osname.outputs.value_arch_camel }} control artifacts
@@ -202,11 +207,12 @@ jobs:
           import subprocess
       
           subprocess.run([
-              "conan", "install", "--update", "--install-folder", "conan",
-              "-pr", os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "profiles", "${{ steps.osname.outputs.value }}_${{ matrix.arch }}"),
-              "-o", f"pypylon:build_config={os.path.join(os.environ['GITHUB_WORKSPACE'], '.github', 'workflows', 'build_config.json')}",
-              "-o", f"pypylon:control_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'report_${{ steps.osname.outputs.value_arch }}.json')}",
-              "-o", f"pypylon:third_party_license_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'pylon_Third-Party_Licenses.txt')}",
+              "conan", "install", "--update", "--output-folder", "conan",
+              "-pr:h", os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "profiles", "${{ steps.osname.outputs.value }}_${{ matrix.arch }}"),
+              "-pr:b", "default",
+              "-o", f"pypylon/*:build_config={os.path.join(os.environ['GITHUB_WORKSPACE'], '.github', 'workflows', 'build_config.json')}",
+              "-o", f"pypylon/*:control_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'report_${{ steps.osname.outputs.value_arch }}.json')}",
+              "-o", f"pypylon/*:third_party_license_file={os.path.join(os.environ['GITHUB_WORKSPACE'], 'pylon-install-files', 'pylon_Third-Party_Licenses.txt')}",
               "-c", "tools.system.package_manager:mode=install",
               "-c", "tools.system.package_manager:sudo=True",
               os.path.join(os.environ['GITHUB_WORKSPACE'], ".github", "workflows", "conanfile.py")
@@ -328,7 +334,7 @@ jobs:
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -376,7 +382,7 @@ jobs:
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -429,7 +435,7 @@ jobs:
 
       - name: Upload Release Asset
         if: needs.prepare.outputs.is_release_build == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

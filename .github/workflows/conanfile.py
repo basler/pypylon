@@ -1,7 +1,9 @@
 import os
 import json
 import shutil
+import fnmatch
 from conan import ConanFile
+from conan.tools.files import copy
 
 
 class PyPylonConanConsumer(ConanFile):
@@ -17,6 +19,10 @@ class PyPylonConanConsumer(ConanFile):
         "control_file": "Placeholder will be overwritten by the CI",
         "third_party_license_file": "Placeholder will be overwritten by the CI"
     }
+
+    def layout(self):
+        # Keep generated/deployed output rooted at --output-folder.
+        self.folders.generators = "."
 
     @property
     def _platform_name(self):
@@ -37,6 +43,12 @@ class PyPylonConanConsumer(ConanFile):
             platform_key = "unknown"
         return platform_key
 
+    def _dependency_by_name(self, dep_name):
+        for _, dep in self.dependencies.items():
+            if dep.ref.name == dep_name:
+                return dep
+        return None
+
     def requirements(self):
         # Read the configuration and control files
         config_path = str(self.options.build_config)
@@ -55,14 +67,22 @@ class PyPylonConanConsumer(ConanFile):
 
         # Determine platform key
         requirements = config.get(self._platform_name, {}).get("requirements", [])
+        # Special-case: the control file currently lists 'pylon-vtool-package-a-sasl'
+        # with a '<base>.1' build id, which corresponds to a legacy Conan 1 recipe in
+        # and fails to load under Conan 2. Force it to use the same build id
+        # as 'pylon-vtool-package-a', which is the Conan 2 compatible recipe.
+        vtool_package_a_version = version_map.get("pylon-vtool-package-a")
         for req in requirements:
-            version = version_map.get(req)
+            if req == "pylon-vtool-package-a-sasl" and vtool_package_a_version:
+                version = vtool_package_a_version
+            else:
+                version = version_map.get(req)
             if version:
                 self.requires(f"{req}/{version}@release/potentially-public")
             else:
                 self.requires(f"{req}/25.09@release/potentially-public")
 
-    def imports(self):
+    def generate(self):
         # Read the configuration file
         config_path = str(self.options.build_config)
         with open(config_path) as f:
@@ -71,22 +91,32 @@ class PyPylonConanConsumer(ConanFile):
         # Copy legal files based on the platform
         os_name = str(self.settings.os).lower()
         if os_name == "linux":
-            license_path = os.path.join(self.install_folder, "pylon", "share", "pylon", "licenses")
+            license_path = os.path.join(self.generators_folder, "pylon", "share", "pylon", "licenses")
             os.makedirs(license_path, exist_ok=True)
             shutil.copy2(str(self.options.third_party_license_file), license_path)
-            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/share/pylon/licenses", ignore_case=True, keep_path=False)
+            dep = self._dependency_by_name("pylon-licenses")
+            if dep:
+                copy(self, "**/License.txt", src=dep.package_folder, dst=license_path, keep_path=False)
         elif os_name == "windows":
-            license_path = os.path.join(self.install_folder, "pylon", "Licenses")
+            license_path = os.path.join(self.generators_folder, "pylon", "Licenses")
             os.makedirs(license_path, exist_ok=True)
             shutil.copy2(str(self.options.third_party_license_file), license_path)
-            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/Licenses", ignore_case=True, keep_path=False)
+            dep = self._dependency_by_name("pylon-licenses")
+            if dep:
+                copy(self, "**/License.txt", src=dep.package_folder, dst=license_path, keep_path=False)
         elif os_name == "macos":
-            license_path = os.path.join(self.install_folder, "pylon", "Frameworks", "pylon.framework", "Versions", "A" ,"Resources")
+            license_path = os.path.join(self.generators_folder, "pylon", "Frameworks", "pylon.framework", "Versions", "A", "Resources")
             os.makedirs(license_path, exist_ok=True)
             shutil.copy2(str(self.options.third_party_license_file), license_path)
-            self.copy("**/License.txt", root_package="pylon-licenses", dst="pylon/Frameworks/pylon.framework/Versions/A/Resources", ignore_case=True, keep_path=False)
+            dep = self._dependency_by_name("pylon-licenses")
+            if dep:
+                copy(self, "**/License.txt", src=dep.package_folder, dst=license_path, keep_path=False)
 
-        # Copy the imports based on the platform
+        # Deploy selected package contents based on configured import patterns.
         imports = config.get(self._platform_name, {}).get("imports", [])
-        for imp in imports:
-            self.copy("*", root_package=imp, dst="pylon", ignore_case=True)
+        deploy_dst = os.path.join(self.generators_folder, "pylon")
+        for _, dep in self.dependencies.items():
+            if dep.ref.name == "pylon-licenses":
+                continue
+            if any(fnmatch.fnmatchcase(dep.ref.name, pattern) for pattern in imports):
+                copy(self, "*", src=dep.package_folder, dst=deploy_dst, keep_path=True)
