@@ -899,6 +899,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "ImagePersistence.i"
 %include "Image.i"
 %include "ReusableImage.i"
+%include "PixelData.i"
 %include "PylonImageBase.i"
 %include "PylonImage.i"
 %include "ImageFormatConverter.i"

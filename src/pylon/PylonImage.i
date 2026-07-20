@@ -138,7 +138,6 @@
 %ignore Pylon::CPylonImage::CopyImage(void*, size_t, EPixelType, uint32_t, uint32_t, size_t, EImageOrientation);
 %ignore Pylon::CPylonImage::AttachGrabResultBufferWithUserHints(const CGrabResultPtr&, EPixelType, uint32_t, uint32_t, size_t, EImageOrientation);
 %ignore Pylon::CPylonImage::AttachUserBuffer(void*, size_t, EPixelType, uint32_t, uint32_t, size_t, EImageOrientation, CPylonImageUserBufferEventHandler*);
-%ignore Pylon::CPylonImage::GetPixelData;
 
 %include <pylon/PylonImage.h>;
 
