@@ -1,4 +1,4 @@
-Version 26.7
+Version 26.8
     - Added support for InstantCamera buffer factory to allow the user to grab into user-defined buffers.
       This is useful for applications that want to manage their own memory for image acquisition.
 
