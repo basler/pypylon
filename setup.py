@@ -398,7 +398,7 @@ class BuildSupport(object):
 
     def get_package_data_files(self):
         # patterns for files in self.PackageDir
-        data_files = ["*.dll", "*.zip", "*.so", "*.so.*", "*.sig", "*.md"]
+        data_files = ["*.dll", "*.exe", "*.zip", "*.so", "*.so.*", "*.sig", "*.md"]
 
         # also add all files of any sub-directories recursively
         pdir = self.PackageDir
@@ -457,6 +457,7 @@ class BuildSupportWindows(BuildSupport):
             ],
 
         "gige": [
+            ("PylonGigEConnectionGuard.exe", ""),
             ("PylonGigE_*.dll", ""),
             ("gxapi*.dll", ""),
             ],
@@ -922,6 +923,19 @@ class BuildSupportLinux(BuildSupport):
                     print("Copy tree %s => %s (ignoring=%s)" % (src, dst, str(ignorepatterns)))
                     shutil.copytree(src, dst, ignore=shutil.ignore_patterns(*ignorepatterns))
 
+        try:
+            bin_dir = self.call_pylon_config("--bindir")
+        except subprocess.CalledProcessError:
+            # Older pylon versions may not support --bindir; fall back to the
+            # directory containing pylon-config itself.
+            bin_dir = os.path.dirname(self.PylonConfig)
+        package_bin_dir = os.path.abspath(os.path.join(self.PackageDir, "bin"))
+        os.makedirs(package_bin_dir, exist_ok=True)
+
+        for f in glob.glob(os.path.join(bin_dir, "pylongigeconnectionguard")):
+            print("Copy %s => %s" % (f, package_bin_dir))
+            shutil.copy(f, package_bin_dir)
+
     def call_pylon_config(self, *args):
         params = [self.PylonConfig]
         params.extend(args)
@@ -1125,6 +1139,20 @@ class BuildSupportMacOS(BuildSupport):
                 # Repair/replace signature of pylon.framework
                 info("Create AdHoc signature for \"" +  os.path.basename(full_dst) + "\"...")
                 subprocess.run(["codesign", "--force", "-s", "-", full_dst], check=True)
+
+        src_root = os.path.join(self.FrameworkPath, self.FrameworkName)
+        for src_pattern in (
+            "Versions/*/Resources/Tools/pylongigeconnectionguard*",
+            "Versions/*/Resources/Tools/PylonGigEConnectionGuard*",
+            "Tools/pylongigeconnectionguard*",
+            "Tools/PylonGigEConnectionGuard*",
+        ):
+            for f in glob.glob(os.path.join(src_root, src_pattern)):
+                rel_path = os.path.relpath(f, src_root)
+                dst = os.path.join(full_dst, rel_path)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                print("Copy %s => %s" % (f, dst))
+                shutil.copy(f, dst)
 
     def include_pylon_data_processing(self):
         return False

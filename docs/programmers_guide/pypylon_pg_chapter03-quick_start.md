@@ -100,6 +100,28 @@ Internally, you are pulling an image from a **buffer queue**.
 
 ---
 
+## Enabling ConnectionGuard for Interactive GigE Sessions
+
+When you open a GigE camera from a debugger, pylon automatically turns on
+`ConnectionGuardEnable` before `Open()`. This does two things: it increases
+the heartbeat timeout to 60 minutes so the camera doesn't restart unexpectedly,
+and it gracefully closes the connection if your program stops suddenly.
+
+If you want to set it explicitly, do so before opening the camera:
+
+```Python
+from pypylon import pylon
+
+with pylon.InstantCamera() as camera:
+    camera.Attach(pylon.FirstFound)
+    camera.TLNodeMap.ConnectionGuardEnable.Value = True
+    camera.Open()
+```
+
+This is useful when you want the same behavior outside a debugger session.
+
+---
+
 ### 4. Validate the Grab
 
 ```Python
