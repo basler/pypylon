@@ -138,6 +138,107 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(blue_pixel.BayerB, 44)
 
     # ------------------------------------------------------------------
+    # BiColor pixel data
+    # ------------------------------------------------------------------
+
+    def test_get_pixel_data_bicolor_rgbg8_returns_red_green_and_blue_green_pairs(self):
+        """GetPixelData returns BiColorRG and BiColorBG component pairs for BiColorRGBG8."""
+        image = _make_image(pylon.PixelType_BiColorRGBG8, 2, 1, bytearray([10, 20, 30, 40]))
+
+        red_green_pixel = image.GetPixelData(0, 0)
+        blue_green_pixel = image.GetPixelData(1, 0)
+
+        self.assertEqual(red_green_pixel.PixelDataType, pylon.PixelDataType_BiColorRG)
+        self.assertEqual(red_green_pixel.BitDepth, 8)
+        self.assertEqual(red_green_pixel.R, 10)
+        self.assertEqual(red_green_pixel.G, 20)
+
+        self.assertEqual(blue_green_pixel.PixelDataType, pylon.PixelDataType_BiColorBG)
+        self.assertEqual(blue_green_pixel.BitDepth, 8)
+        self.assertEqual(blue_green_pixel.B, 30)
+        self.assertEqual(blue_green_pixel.G, 40)
+
+    def test_get_pixel_data_bicolor_bgrg8_returns_blue_green_and_red_green_pairs(self):
+        """GetPixelData returns BiColorBG and BiColorRG component pairs for BiColorBGRG8."""
+        image = _make_image(pylon.PixelType_BiColorBGRG8, 2, 1, bytearray([10, 20, 30, 40]))
+
+        blue_green_pixel = image.GetPixelData(0, 0)
+        red_green_pixel = image.GetPixelData(1, 0)
+
+        self.assertEqual(blue_green_pixel.PixelDataType, pylon.PixelDataType_BiColorBG)
+        self.assertEqual(blue_green_pixel.BitDepth, 8)
+        self.assertEqual(blue_green_pixel.B, 10)
+        self.assertEqual(blue_green_pixel.G, 20)
+
+        self.assertEqual(red_green_pixel.PixelDataType, pylon.PixelDataType_BiColorRG)
+        self.assertEqual(red_green_pixel.R, 30)
+        self.assertEqual(red_green_pixel.G, 40)
+
+    def test_get_pixel_data_rejects_blue_for_red_green_bicolor_pixel_data(self):
+        """Reading blue from a BiColorRG pixel names the actual data type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_BiColorRGBG8, 2, 1, bytearray([10, 20, 30, 40]))
+
+        red_green_pixel = image.GetPixelData(0, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_BiColorRG"):
+            _ = red_green_pixel.B
+
+    def test_get_pixel_data_rejects_red_for_blue_green_bicolor_pixel_data(self):
+        """Reading red from a BiColorBG pixel names the actual data type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_BiColorRGBG8, 2, 1, bytearray([10, 20, 30, 40]))
+
+        blue_green_pixel = image.GetPixelData(1, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_BiColorBG"):
+            _ = blue_green_pixel.R
+
+    def test_get_pixel_data_bayer_bg8_returns_component_matching_position(self):
+        """GetPixelData returns the Bayer component selected by the BayerBG8 pixel position."""
+        image = _make_image(
+            pylon.PixelType_BayerBG8,
+            2,
+            2,
+            bytearray([11, 22, 33, 44]),
+        )
+
+        blue_pixel = image.GetPixelData(0, 0)
+        first_green_pixel = image.GetPixelData(1, 0)
+        second_green_pixel = image.GetPixelData(0, 1)
+        red_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        self.assertEqual(blue_pixel.BayerB, 11)
+        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(first_green_pixel.BayerG, 22)
+        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(second_green_pixel.BayerG, 33)
+        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
+        self.assertEqual(red_pixel.BayerR, 44)
+
+    def test_get_pixel_data_bayer_gb8_returns_component_matching_position(self):
+        """GetPixelData returns the Bayer component selected by the BayerGB8 pixel position."""
+        image = _make_image(
+            pylon.PixelType_BayerGB8,
+            2,
+            2,
+            bytearray([11, 22, 33, 44]),
+        )
+
+        first_green_pixel = image.GetPixelData(0, 0)
+        blue_pixel = image.GetPixelData(1, 0)
+        red_pixel = image.GetPixelData(0, 1)
+        second_green_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(first_green_pixel.BayerG, 11)
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        self.assertEqual(blue_pixel.BayerB, 22)
+        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
+        self.assertEqual(red_pixel.BayerR, 33)
+        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(second_green_pixel.BayerG, 44)
+
+    # ------------------------------------------------------------------
     # Coordinate validation
     # ------------------------------------------------------------------
 
