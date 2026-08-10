@@ -56,12 +56,12 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(pixel_data.Mono, 34)
 
     def test_get_pixel_data_rejects_component_not_matching_data_type(self):
-        """Reading an RGB component from mono PixelData names the actual data type in RuntimeError."""
+        """Reading an RGB component from mono PixelData names the actual data type in LogicalErrorException."""
         image = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([12]))
 
         pixel_data = image.GetPixelData(0, 0)
 
-        with self.assertRaisesRegex(RuntimeError, "actual type is PixelDataType_Mono"):
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_Mono"):
             _ = pixel_data.R
 
     def test_pixel_data_value_survives_image_release(self):
@@ -102,12 +102,12 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(pixel_data.B, 30)
 
     def test_get_pixel_data_rejects_alpha_for_rgb_pixel_data(self):
-        """Reading alpha from non-alpha RGB PixelData raises RuntimeError."""
+        """Reading alpha from non-alpha RGB PixelData raises LogicalErrorException."""
         image = _make_image(pylon.PixelType_RGB8packed, 1, 1, bytearray([10, 20, 30]))
 
         pixel_data = image.GetPixelData(0, 0)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(pylon.LogicalErrorException):
             _ = pixel_data.A
 
     # ------------------------------------------------------------------

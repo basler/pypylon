@@ -50,14 +50,21 @@ static const char* PixelDataTypeName(Pylon::SPixelData::EPixelDataType pixel_dat
     }
 }
 
-static std::logic_error PixelDataComponentError(
+static GenICam::LogicalErrorException PixelDataComponentError(
     const char* component_name,
     const char* expected_types,
-    Pylon::SPixelData::EPixelDataType actual_type)
+    Pylon::SPixelData::EPixelDataType actual_type,
+    const char* source_file,
+    int source_line)
 {
-    return std::logic_error(
-        std::string(component_name) + " is available only for " + expected_types
-        + "; actual type is " + PixelDataTypeName(actual_type));
+    Pylon::String_t msg;
+    msg.reserve(128);
+    msg.append(component_name);
+    msg.append(" is available only for ");
+    msg.append(expected_types);
+    msg.append(", actual type is ");
+    msg.append(PixelDataTypeName(actual_type));
+    return GenICam::LogicalErrorException( msg.c_str(), source_file, source_line );
 }
 %}
 
@@ -74,28 +81,28 @@ static std::logic_error PixelDataComponentError(
 
     int GetMono() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_Mono) {
-            throw PixelDataComponentError("Mono", "PixelDataType_Mono", $self->PixelDataType);
+            throw PixelDataComponentError("Mono", "PixelDataType_Mono", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.Mono;
     }
 
     int GetBayerR() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_BayerR) {
-            throw PixelDataComponentError("BayerR", "PixelDataType_BayerR", $self->PixelDataType);
+            throw PixelDataComponentError("BayerR", "PixelDataType_BayerR", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.BayerR;
     }
 
     int GetBayerG() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_BayerG) {
-            throw PixelDataComponentError("BayerG", "PixelDataType_BayerG", $self->PixelDataType);
+            throw PixelDataComponentError("BayerG", "PixelDataType_BayerG", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.BayerG;
     }
 
     int GetBayerB() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_BayerB) {
-            throw PixelDataComponentError("BayerB", "PixelDataType_BayerB", $self->PixelDataType);
+            throw PixelDataComponentError("BayerB", "PixelDataType_BayerB", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.BayerB;
     }
@@ -110,7 +117,7 @@ static std::logic_error PixelDataComponentError(
         if ($self->PixelDataType == Pylon::SPixelData::PixelDataType_BiColorRG) {
             return $self->Data.BiColorRG.R;
         }
-        throw PixelDataComponentError("R", "PixelDataType_RGB, PixelDataType_RGBA, or PixelDataType_BiColorRG", $self->PixelDataType);
+        throw PixelDataComponentError("R", "PixelDataType_RGB, PixelDataType_RGBA, or PixelDataType_BiColorRG", $self->PixelDataType, __FILE__, __LINE__);
     }
 
     int GetG() const {
@@ -126,7 +133,7 @@ static std::logic_error PixelDataComponentError(
         if ($self->PixelDataType == Pylon::SPixelData::PixelDataType_BiColorBG) {
             return $self->Data.BiColorBG.G;
         }
-        throw PixelDataComponentError("G", "PixelDataType_RGB, PixelDataType_RGBA, PixelDataType_BiColorRG, or PixelDataType_BiColorBG", $self->PixelDataType);
+        throw PixelDataComponentError("G", "PixelDataType_RGB, PixelDataType_RGBA, PixelDataType_BiColorRG, or PixelDataType_BiColorBG", $self->PixelDataType, __FILE__, __LINE__);
     }
 
     int GetB() const {
@@ -139,33 +146,33 @@ static std::logic_error PixelDataComponentError(
         if ($self->PixelDataType == Pylon::SPixelData::PixelDataType_BiColorBG) {
             return $self->Data.BiColorBG.B;
         }
-        throw PixelDataComponentError("B", "PixelDataType_RGB, PixelDataType_RGBA, or PixelDataType_BiColorBG", $self->PixelDataType);
+        throw PixelDataComponentError("B", "PixelDataType_RGB, PixelDataType_RGBA, or PixelDataType_BiColorBG", $self->PixelDataType, __FILE__, __LINE__);
     }
 
     int GetA() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_RGBA) {
-            throw PixelDataComponentError("A", "PixelDataType_RGBA", $self->PixelDataType);
+            throw PixelDataComponentError("A", "PixelDataType_RGBA", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.RGBA.A;
     }
 
     int GetY() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_YUV) {
-            throw PixelDataComponentError("Y", "PixelDataType_YUV", $self->PixelDataType);
+            throw PixelDataComponentError("Y", "PixelDataType_YUV", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.YUV.Y;
     }
 
     int GetU() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_YUV) {
-            throw PixelDataComponentError("U", "PixelDataType_YUV", $self->PixelDataType);
+            throw PixelDataComponentError("U", "PixelDataType_YUV", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.YUV.U;
     }
 
     int GetV() const {
         if ($self->PixelDataType != Pylon::SPixelData::PixelDataType_YUV) {
-            throw PixelDataComponentError("V", "PixelDataType_YUV", $self->PixelDataType);
+            throw PixelDataComponentError("V", "PixelDataType_YUV", $self->PixelDataType, __FILE__, __LINE__);
         }
         return $self->Data.YUV.V;
     }
