@@ -699,9 +699,11 @@ class ImageFormatConverterTestSuite(PylonEmuTestCase):
     def test_backwards_compatibility_direct_assignment(self):
         """Setting a parameter value using direct assignment instead of using the .Value property."""
         converter = pylon.ImageFormatConverter()
-        converter.InconvertibleEdgeHandling = pylon.InconvertibleEdgeHandling_Extend
+        with self.assertWarns(DeprecationWarning):
+            converter.InconvertibleEdgeHandling = pylon.InconvertibleEdgeHandling_Extend
         self.assertEqual(converter.InconvertibleEdgeHandling.Value, pylon.InconvertibleEdgeHandling_Extend)
-        converter.InconvertibleEdgeHandling = pylon.InconvertibleEdgeHandling_Clip
+        with self.assertWarns(DeprecationWarning):
+            converter.InconvertibleEdgeHandling = pylon.InconvertibleEdgeHandling_Clip
         self.assertEqual(converter.InconvertibleEdgeHandling.Value, pylon.InconvertibleEdgeHandling_Clip)
 
     # ------------------------------------------------------------------
