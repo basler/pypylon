@@ -137,6 +137,52 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
         self.assertEqual(blue_pixel.BayerB, 44)
 
+    def test_get_pixel_data_bayer_bg8_returns_component_matching_position(self):
+        """GetPixelData returns the Bayer component selected by the BayerBG8 pixel position."""
+        image = _make_image(
+            pylon.PixelType_BayerBG8,
+            2,
+            2,
+            bytearray([11, 22, 33, 44]),
+        )
+
+        blue_pixel = image.GetPixelData(0, 0)
+        first_green_pixel = image.GetPixelData(1, 0)
+        second_green_pixel = image.GetPixelData(0, 1)
+        red_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        self.assertEqual(blue_pixel.BayerB, 11)
+        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(first_green_pixel.BayerG, 22)
+        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(second_green_pixel.BayerG, 33)
+        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
+        self.assertEqual(red_pixel.BayerR, 44)
+
+    def test_get_pixel_data_bayer_gb8_returns_component_matching_position(self):
+        """GetPixelData returns the Bayer component selected by the BayerGB8 pixel position."""
+        image = _make_image(
+            pylon.PixelType_BayerGB8,
+            2,
+            2,
+            bytearray([11, 22, 33, 44]),
+        )
+
+        first_green_pixel = image.GetPixelData(0, 0)
+        blue_pixel = image.GetPixelData(1, 0)
+        red_pixel = image.GetPixelData(0, 1)
+        second_green_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(first_green_pixel.BayerG, 11)
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        self.assertEqual(blue_pixel.BayerB, 22)
+        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
+        self.assertEqual(red_pixel.BayerR, 33)
+        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(second_green_pixel.BayerG, 44)
+
     # ------------------------------------------------------------------
     # BiColor pixel data
     # ------------------------------------------------------------------
@@ -192,51 +238,6 @@ class PixelDataTestSuite(PylonEmuTestCase):
         with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_BiColorBG"):
             _ = blue_green_pixel.R
 
-    def test_get_pixel_data_bayer_bg8_returns_component_matching_position(self):
-        """GetPixelData returns the Bayer component selected by the BayerBG8 pixel position."""
-        image = _make_image(
-            pylon.PixelType_BayerBG8,
-            2,
-            2,
-            bytearray([11, 22, 33, 44]),
-        )
-
-        blue_pixel = image.GetPixelData(0, 0)
-        first_green_pixel = image.GetPixelData(1, 0)
-        second_green_pixel = image.GetPixelData(0, 1)
-        red_pixel = image.GetPixelData(1, 1)
-
-        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
-        self.assertEqual(blue_pixel.BayerB, 11)
-        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
-        self.assertEqual(first_green_pixel.BayerG, 22)
-        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
-        self.assertEqual(second_green_pixel.BayerG, 33)
-        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
-        self.assertEqual(red_pixel.BayerR, 44)
-
-    def test_get_pixel_data_bayer_gb8_returns_component_matching_position(self):
-        """GetPixelData returns the Bayer component selected by the BayerGB8 pixel position."""
-        image = _make_image(
-            pylon.PixelType_BayerGB8,
-            2,
-            2,
-            bytearray([11, 22, 33, 44]),
-        )
-
-        first_green_pixel = image.GetPixelData(0, 0)
-        blue_pixel = image.GetPixelData(1, 0)
-        red_pixel = image.GetPixelData(0, 1)
-        second_green_pixel = image.GetPixelData(1, 1)
-
-        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
-        self.assertEqual(first_green_pixel.BayerG, 11)
-        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
-        self.assertEqual(blue_pixel.BayerB, 22)
-        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
-        self.assertEqual(red_pixel.BayerR, 33)
-        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
-        self.assertEqual(second_green_pixel.BayerG, 44)
 
     # ------------------------------------------------------------------
     # Coordinate validation
@@ -255,6 +256,43 @@ class PixelDataTestSuite(PylonEmuTestCase):
 
         with self.assertRaises(pylon.InvalidArgumentException):
             image.GetPixelData(1, 0)
+
+    # ------------------------------------------------------------------
+    # Equality
+    # ------------------------------------------------------------------
+
+    def test_pixel_data_equal_for_same_type_and_value(self):
+        """Two PixelData with the same type, bit depth, and value compare equal."""
+        left = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([42])).GetPixelData(0, 0)
+        right = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([42])).GetPixelData(0, 0)
+
+        self.assertTrue(left == right)
+        self.assertFalse(left != right)
+
+    def test_pixel_data_not_equal_for_same_type_different_value(self):
+        """PixelData with the same type but different value compare unequal."""
+        left = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([42])).GetPixelData(0, 0)
+        right = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([7])).GetPixelData(0, 0)
+
+        self.assertFalse(left == right)
+        self.assertTrue(left != right)
+
+    def test_pixel_data_not_equal_for_different_pixel_data_type(self):
+        """PixelData with different PixelDataType compare unequal."""
+        mono = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([10])).GetPixelData(0, 0)
+        rgb = _make_image(pylon.PixelType_RGB8packed, 1, 1, bytearray([10, 20, 30])).GetPixelData(0, 0)
+
+        self.assertNotEqual(mono.PixelDataType, rgb.PixelDataType)
+        self.assertFalse(mono == rgb)
+        self.assertTrue(mono != rgb)
+
+    def test_pixel_data_not_equal_to_none_or_foreign_types(self):
+        """Comparing PixelData to None or an unrelated type is unequal without raising."""
+        pixel_data = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([42])).GetPixelData(0, 0)
+
+        for other in (None, 42, "PixelData"):
+            self.assertFalse(pixel_data == other)
+            self.assertTrue(pixel_data != other)
 
 
 if __name__ == "__main__":
