@@ -953,10 +953,11 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 
 %rename(BufferFactory) Pylon::IBufferFactory;
 %rename(PythonBufferFactory) Pylon::CPythonBufferFactory;
-%rename(LookupBufferKeepAlive) Pylon::LookupPythonBufferKeepAlive;
-%ignore Pylon::g_keepAliveRegistryMutex;
-%ignore Pylon::g_keepAliveRegistry;
-%nothread Pylon::LookupPythonBufferKeepAlive;
+%rename(_LookupBufferOwner) Pylon::LookupPythonBufferOwner;
+%ignore Pylon::g_pythonBufferFactoriesMutex;
+%ignore Pylon::g_pythonBufferFactories;
+%nothread Pylon::LookupPythonBufferOwner;
+%nothread Pylon::CPythonBufferFactory::CPythonBufferFactory;
 
 %include <pylon/BufferFactory.h>;
 
@@ -964,51 +965,13 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 
 #include <map>
 #include <mutex>
+#include <set>
 
 namespace Pylon
 {
-    static std::mutex g_keepAliveRegistryMutex;
-    static std::map<void*, PyObject*> g_keepAliveRegistry;
-
-    static void RegisterKeepAliveGlobal(void* ptr, PyObject* keepAlive)
-    {
-        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
-        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
-        if (it != g_keepAliveRegistry.end())
-        {
-            Py_DECREF(it->second);
-            it->second = keepAlive;
-        }
-        else
-        {
-            g_keepAliveRegistry[ptr] = keepAlive;
-        }
-        Py_INCREF(keepAlive);
-    }
-
-    static void UnregisterKeepAliveGlobal(void* ptr)
-    {
-        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
-        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
-        if (it != g_keepAliveRegistry.end())
-        {
-            Py_DECREF(it->second);
-            g_keepAliveRegistry.erase(it);
-        }
-    }
-
-    static PyObject* LookupKeepAliveGlobal(intptr_t ptrValue)
-    {
-        void* ptr = reinterpret_cast<void*>(ptrValue);
-        std::lock_guard<std::mutex> lock(g_keepAliveRegistryMutex);
-        std::map<void*, PyObject*>::iterator it = g_keepAliveRegistry.find(ptr);
-        if (it == g_keepAliveRegistry.end())
-        {
-            Py_RETURN_NONE;
-        }
-        Py_INCREF(it->second);
-        return it->second;
-    }
+    class CPythonBufferFactory;
+    static std::mutex g_pythonBufferFactoriesMutex;
+    static std::set<CPythonBufferFactory*> g_pythonBufferFactories;
 
     static PyObject* BuildGrabResultArrayViewInfo(const CGrabResultData* resultData, bool raw)
     {
@@ -1023,6 +986,31 @@ namespace Pylon
         int dtypeTag = 1;
         size_t requiredBytes = 0;
 
+        EPixelType pixelType = resultData->GetPixelType();
+        uint32_t width = resultData->GetWidth();
+        uint32_t height = resultData->GetHeight();
+        size_t paddingX = resultData->GetPaddingX();
+        size_t imageSize = 0;
+
+        if (!raw && resultData->GetPayloadType() == PayloadType_GenDC)
+        {
+            CPylonDataComponent component = resultData->GetFirstImageDataComponent(false);
+            if (!component.IsValid())
+            {
+                PyErr_SetString(PyExc_RuntimeError, "grab result has no image data component");
+                return NULL;
+            }
+            pixelType = component.GetPixelType();
+            width = component.GetWidth();
+            height = component.GetHeight();
+            paddingX = component.GetPaddingX();
+            imageSize = component.GetDataSize();
+        }
+        else if (!raw)
+        {
+            imageSize = resultData->GetImageSize();
+        }
+
         if (raw)
         {
             requiredBytes = resultData->GetPayloadSize();
@@ -1036,9 +1024,9 @@ namespace Pylon
             uint32_t channels = 0;
             const char* formatCode = NULL;
             if (!ResolvePylonImageFormatSpec(
-                    resultData->GetPixelType(),
-                    resultData->GetWidth(),
-                    resultData->GetHeight(),
+                    pixelType,
+                    width,
+                    height,
                     mappedWidth,
                     channels,
                     dtypeTag,
@@ -1049,18 +1037,17 @@ namespace Pylon
 
             if (channels == 0)
             {
-                shape = Py_BuildValue("(II)", resultData->GetHeight(), mappedWidth);
+                shape = Py_BuildValue("(II)", height, mappedWidth);
             }
             else
             {
-                shape = Py_BuildValue("(III)", resultData->GetHeight(), mappedWidth, channels);
+                shape = Py_BuildValue("(III)", height, mappedWidth, channels);
             }
 
             const size_t itemSize = dtypeTag == 2 ? 2 : (dtypeTag == 3 ? 4 : 1);
             const size_t rowBytes = channels == 0
                 ? (size_t) mappedWidth * itemSize
                 : (size_t) mappedWidth * channels * itemSize;
-            const size_t paddingX = resultData->GetPaddingX();
             if (paddingX > 0)
             {
                 if (channels == 0)
@@ -1082,7 +1069,7 @@ namespace Pylon
                 Py_INCREF(Py_None);
                 strides = Py_None;
             }
-            requiredBytes = resultData->GetImageSize();
+            requiredBytes = imageSize;
         }
 
         if (!shape || !strides)
@@ -1094,25 +1081,22 @@ namespace Pylon
 
         PyObject* dtypeTagObj = PyInt_FromLong(dtypeTag);
         PyObject* requiredBytesObj = PyLong_FromSize_t(requiredBytes);
-        PyObject* owner = LookupKeepAliveGlobal(reinterpret_cast<intptr_t>(resultData->GetBuffer()));
-        if (!dtypeTagObj || !requiredBytesObj || !owner)
+        if (!dtypeTagObj || !requiredBytesObj)
         {
             Py_XDECREF(shape);
             Py_XDECREF(strides);
             Py_XDECREF(dtypeTagObj);
             Py_XDECREF(requiredBytesObj);
-            Py_XDECREF(owner);
             return NULL;
         }
 
-        PyObject* result = PyTuple_New(5);
+        PyObject* result = PyTuple_New(4);
         if (!result)
         {
             Py_DECREF(shape);
             Py_DECREF(strides);
             Py_DECREF(dtypeTagObj);
             Py_DECREF(requiredBytesObj);
-            Py_DECREF(owner);
             return NULL;
         }
 
@@ -1120,15 +1104,6 @@ namespace Pylon
         PyTuple_SET_ITEM(result, 1, dtypeTagObj);
         PyTuple_SET_ITEM(result, 2, strides);
         PyTuple_SET_ITEM(result, 3, requiredBytesObj);
-        PyTuple_SET_ITEM(result, 4, owner);
-        return result;
-    }
-
-    PyObject* LookupPythonBufferKeepAlive(intptr_t ptrValue)
-    {
-        PyGILState_STATE gilState = PyGILState_Ensure();
-        PyObject* result = LookupKeepAliveGlobal(ptrValue);
-        PyGILState_Release(gilState);
         return result;
     }
 
@@ -1160,6 +1135,8 @@ namespace Pylon
             Py_INCREF(m_allocateCallback);
             Py_INCREF(m_freeCallback);
             Py_INCREF(m_destroyCallback);
+            std::lock_guard<std::mutex> lock(g_pythonBufferFactoriesMutex);
+            g_pythonBufferFactories.insert(this);
         }
 
         virtual ~CPythonBufferFactory()
@@ -1239,7 +1216,6 @@ namespace Pylon
                 {
                     m_keepAlive[*pCreatedBuffer] = keepAlive;
                 }
-                RegisterKeepAliveGlobal(*pCreatedBuffer, keepAlive);
             }
 
             PyGILState_Release(gilState);
@@ -1258,8 +1234,6 @@ namespace Pylon
                     m_keepAlive.erase(it);
                 }
             }
-            UnregisterKeepAliveGlobal(pCreatedBuffer);
-
             if (m_freeCallback && m_freeCallback != Py_None)
             {
                 PyObject* ptrObj = PyLong_FromVoidPtr(pCreatedBuffer);
@@ -1336,6 +1310,14 @@ namespace Pylon
         void DebugFreeBuffer(intptr_t ptrValue, intptr_t bufferContext)
         {
             FreeBuffer(reinterpret_cast<void*>(ptrValue), bufferContext);
+        }
+
+        PyObject* LookupKeepAlive(intptr_t ptrValue)
+        {
+            PyGILState_STATE gilState = PyGILState_Ensure();
+            PyObject* result = LookupKeepAliveImpl(reinterpret_cast<void*>(ptrValue));
+            PyGILState_Release(gilState);
+            return result;
         }
 
     private:
@@ -1446,6 +1428,10 @@ namespace Pylon
                 return;
             }
             m_released = true;
+            {
+                std::lock_guard<std::mutex> lock(g_pythonBufferFactoriesMutex);
+                g_pythonBufferFactories.erase(this);
+            }
 
             std::map<void*, PyObject*> keepAlive;
             {
@@ -1455,7 +1441,6 @@ namespace Pylon
 
             for (std::map<void*, PyObject*>::iterator it = keepAlive.begin(); it != keepAlive.end(); ++it)
             {
-                UnregisterKeepAliveGlobal(it->first);
                 Py_XDECREF(it->second);
             }
 
@@ -1467,6 +1452,18 @@ namespace Pylon
             m_destroyCallback = NULL;
         }
 
+        PyObject* LookupKeepAliveImpl(void* ptr)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            std::map<void*, PyObject*>::iterator it = m_keepAlive.find(ptr);
+            if (it == m_keepAlive.end())
+            {
+                Py_RETURN_NONE;
+            }
+            Py_INCREF(it->second);
+            return it->second;
+        }
+
         PyObject* m_allocateCallback;
         PyObject* m_freeCallback;
         PyObject* m_destroyCallback;
@@ -1474,6 +1471,54 @@ namespace Pylon
         std::map<void*, PyObject*> m_keepAlive;
         bool m_released;
     };
+
+    PyObject* LookupPythonBufferOwner(intptr_t ptrValue)
+    {
+        PyGILState_STATE gilState = PyGILState_Ensure();
+        PyObject* result = NULL;
+        {
+            std::lock_guard<std::mutex> lock(g_pythonBufferFactoriesMutex);
+            for (std::set<CPythonBufferFactory*>::iterator it = g_pythonBufferFactories.begin();
+                 it != g_pythonBufferFactories.end();
+                 ++it)
+            {
+                result = (*it)->LookupKeepAlive(ptrValue);
+                if (result != Py_None)
+                {
+                    // A pointer must identify at most one active allocation.
+                    // Numeric addresses can otherwise be ambiguous across
+                    // allocator address spaces or misbehaving factories.
+                    std::set<CPythonBufferFactory*>::iterator next = it;
+                    for (++next; next != g_pythonBufferFactories.end(); ++next)
+                    {
+                        PyObject* duplicate = (*next)->LookupKeepAlive(ptrValue);
+                        if (duplicate != Py_None)
+                        {
+                            Py_DECREF(duplicate);
+                            Py_DECREF(result);
+                            result = NULL;
+                            PyErr_SetString(
+                                PyExc_RuntimeError,
+                                "buffer pointer is registered by multiple PythonBufferFactory instances"
+                            );
+                            break;
+                        }
+                        Py_DECREF(duplicate);
+                    }
+                    break;
+                }
+                Py_DECREF(result);
+                result = NULL;
+            }
+        }
+        if (!result && !PyErr_Occurred())
+        {
+            Py_INCREF(Py_None);
+            result = Py_None;
+        }
+        PyGILState_Release(gilState);
+        return result;
+    }
 }
 
 %}

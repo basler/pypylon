@@ -112,6 +112,12 @@ namespace Pylon {
 %}
 }
 
+%pythonappend Pylon::CInstantCamera::DestroyDevice %{
+    self.__dict__.pop("_buffer_factory_ref", None)
+    self.__dict__.pop("_buffer_factory_cleanup", None)
+    self.__dict__.pop("_buffer_factory_retired", None)
+%}
+
 %pythonprepend Pylon::CInstantCamera::CInstantCamera %{
     # InstantCamera(firstFound: bool)
     if len(args) == 1 and isinstance(args[0], bool):
@@ -188,19 +194,28 @@ namespace Pylon {
 %pythonprepend Pylon::CInstantCamera::SetBufferFactory %{
     pFactory = args[0] if len(args) > 0 else None
     cleanupProcedure = args[1] if len(args) > 1 else Cleanup_None
+    previousFactory = self.__dict__.get("_buffer_factory_ref")
+    previousCleanup = self.__dict__.get("_buffer_factory_cleanup", Cleanup_None)
     if len(args) == 1:
         args = (pFactory, Cleanup_None)
-    if pFactory is not None and cleanupProcedure == Cleanup_Delete and hasattr(pFactory, "__disown__"):
-        pFactory.__disown__()
 %}
 %pythonappend Pylon::CInstantCamera::SetBufferFactory %{
     pFactory = args[0] if len(args) > 0 else None
     cleanupProcedure = args[1] if len(args) > 1 else Cleanup_None
-    if pFactory is None or cleanupProcedure == Cleanup_Delete:
+    if previousFactory is not None and previousFactory is not pFactory and previousCleanup == Cleanup_None:
+        self.__dict__.setdefault("_buffer_factory_retired", []).append(previousFactory)
+    if pFactory is None:
         self.__dict__.pop("_buffer_factory_ref", None)
-    elif cleanupProcedure == Cleanup_None:
-        # Keep the factory alive as long as it is attached to this camera.
+        self.__dict__.pop("_buffer_factory_cleanup", None)
+    else:
+        # Cleanup_None needs ownership; Cleanup_Delete keeps the proxy available
+        # for allocator-owner lookup while pylon owns the C++ instance.
         self.__dict__["_buffer_factory_ref"] = pFactory
+        self.__dict__["_buffer_factory_cleanup"] = cleanupProcedure
+        if cleanupProcedure == Cleanup_Delete:
+            # CPythonBufferFactory is a concrete SWIG proxy and does not expose
+            # the director-only __disown__ helper.
+            pFactory.thisown = False
 %}
 
 %include <pylon/ECleanup.h>;

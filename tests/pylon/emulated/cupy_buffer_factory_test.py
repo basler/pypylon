@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.nvidia, pytest.mark.cupy]
 
 
 def test_python_buffer_factory_cupy_owner_proxy():
-    """CUDA owner objects registered by the buffer factory are exposed via LookupBufferKeepAlive."""
+    """CUDA owners remain available through the factory-local keepalive map."""
     cupy = require_cupy()
 
     def allocate(size):
@@ -23,7 +23,7 @@ def test_python_buffer_factory_cupy_owner_proxy():
     ptr, context = factory.DebugAllocateBuffer(64)
     assert context == 77
 
-    owner = pylon.LookupBufferKeepAlive(ptr)
+    owner = factory.LookupKeepAlive(ptr)
     assert owner is not None
     assert hasattr(owner, "__cuda_array_interface__")
     assert int(owner.__cuda_array_interface__["data"][0]) == ptr
@@ -34,4 +34,4 @@ def test_python_buffer_factory_cupy_owner_proxy():
     )
 
     factory.DebugFreeBuffer(ptr, context)
-    assert pylon.LookupBufferKeepAlive(ptr) is None
+    assert factory.LookupKeepAlive(ptr) is None
