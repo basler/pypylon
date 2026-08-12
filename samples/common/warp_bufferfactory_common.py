@@ -36,17 +36,21 @@ class WarpPinnedBufferFactory:
     factory: object = field(init=False)
 
     def __post_init__(self) -> None:
-        self.factory = pylon.PythonBufferFactory(self.allocate, self.free)
+        active_buffers = self.active_buffers
 
-    def allocate(self, size: int):
-        owner = wp.empty((int(size),), dtype=wp.uint8, device="cpu", pinned=True)
-        ptr = int(owner.ptr)
-        capacity = int(getattr(owner, "capacity", size))
-        self.active_buffers[ptr] = owner
-        return ptr, owner, ptr, capacity
+        def allocate(size: int):
+            owner = wp.empty((int(size),), dtype=wp.uint8, device="cpu", pinned=True)
+            ptr = int(owner.ptr)
+            capacity = int(getattr(owner, "capacity", size))
+            active_buffers[ptr] = owner
+            return ptr, owner, ptr, capacity
 
-    def free(self, ptr, context, keep_alive) -> None:
-        self.active_buffers.pop(int(ptr), None)
+        def free(ptr, context, keep_alive) -> None:
+            active_buffers.pop(int(ptr), None)
+
+        # The callbacks capture only the buffer dictionary, avoiding a
+        # PythonBufferFactory -> bound method -> helper object reference cycle.
+        self.factory = pylon.PythonBufferFactory(allocate, free)
 
 
 def open_first_camera() -> pylon.InstantCamera:

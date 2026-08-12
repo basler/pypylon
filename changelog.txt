@@ -4,8 +4,17 @@ Version 26.6rc2
       pylon.PythonBufferFactory, allowing grab buffers to be allocated from Python
       (ctypes, NumPy, CUDA/CuPy, Warp pinned memory, and other keepalive-capable owners).
     - Added zero-copy grab-result helpers GetArray(copy=False), GetBufferOwner(),
-      GetBufferOwnerView(), and LookupBufferKeepAlive() for hand-offs outside scoped
-      GetArrayZeroCopy() contexts.
+      and GetBufferOwnerView() for hand-offs outside scoped GetArrayZeroCopy()
+      contexts. Buffer owners are retained and resolved by their Python buffer
+      factory without a process-wide owning registry.
+    - Hardened Python buffer-factory teardown so replaced Cleanup_None factories
+      survive delayed buffer releases, and made GrabResult image views resolve
+      the first image component for GenDC payloads.
+    - Fixed GetBufferOwnerView() reporting the whole allocation instead of the
+      image: the owner's array protocol is no longer forwarded through the view,
+      and the owner's strides are replaced along with its shape. Owners that
+      expose __array_struct__ (NumPy) or explicit strides (NVIDIA Warp) now
+      convert to correctly shaped arrays.
     - Added pypylon.warp with unpack_to_uint16() for expanding packed 10/12-bit pixel
       formats on CPU or CUDA via NVIDIA Warp.
     - Added samples/pylon/grab_buffer_factory and grab_warp_* samples for the

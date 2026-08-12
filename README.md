@@ -102,7 +102,7 @@ the grab buffer):
 ### Persistent zero-copy views (buffer-factory extension)
 
 When a view must **outlive the current scope** but stay tied to the grab buffer,
-use the buffer-factory view API on `GrabResult` (classic image payloads only):
+use the buffer-factory view API on `GrabResult`:
 
 ```python
 view = grab_result.GetArray(copy=False)   # same as GetArrayView()
@@ -133,8 +133,8 @@ pylon keeps `keepalive` alive until the buffer is freed.
 
 | API | Role with a buffer factory |
 |-----|---------------------------|
-| `GetBufferOwner()` | The `keepalive` object for the current grab buffer |
-| `GetBufferOwnerView(raw=False)` | Shape that owner as an image; keeps the grab result alive. For **classic image payloads** with simple pixel formats — not for GenDC container layout |
+| `GetBufferOwner()` | The `keepalive` object for the current grab buffer, resolved from the factory-local owner map |
+| `GetBufferOwnerView(raw=False)` | Shape that owner as an image and keep the grab result alive. GenDC returns an image-component view because the owner contains the full container |
 | `GetArrayZeroCopy()` | Scoped NumPy view into grab/component memory (any allocator) |
 | `GetArray(copy=False)` | Persistent NumPy view; best with host-memory factories |
 | `ConvertToArray(component)` | Reads from live grab/component; writes to a new owned array |
@@ -142,6 +142,19 @@ pylon keeps `keepalive` alive until the buffer is freed.
 For GenDC (`PayloadType_GenDC`) the factory allocates the **full container**.
 Access components via `GetFirstImageDataComponent()` or `DataContainer`, as in
 [samples/pylon/grab_data_container/grab_data_container.py](samples/pylon/grab_data_container/grab_data_container.py).
+Grab-result image APIs resolve the first image component, matching the pylon C++
+`IImage` adapter; `GetBufferOwner()` still returns the full-container owner.
+
+The factory retains each Python owner until pylon calls `FreeBuffer`.
+`GetBufferOwner()` works for results returned by `RetrieveResult`/`GrabOne` and
+inside `OnImageGrabbed`; owner lookup is factory-local and does not add a second,
+process-wide owning reference.
+
+With `Cleanup_None`, pypylon keeps replaced factories retired until
+`DestroyDevice()` so delayed `FreeBuffer` calls remain valid. Applications
+should still stop grabbing and release all grab results and persistent views
+before clearing the factory or destroying the device. `Cleanup_Delete` transfers
+the C++ factory lifetime to pylon; do not use its SWIG proxy after detaching it.
 
 ### Optional: NVIDIA Warp and CUDA
 

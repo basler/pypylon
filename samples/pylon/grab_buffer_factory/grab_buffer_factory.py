@@ -78,20 +78,21 @@ def demonstrate_zero_copy_apis(grab_result, frame_index):
                 f"dtype={converted.dtype}"
             )
 
-    # GrabResult.GetArrayZeroCopy is equivalent for classic single-image payloads.
-    with grab_result.GetArrayZeroCopy() as grab_view:
-        print(
-            f"  GetArrayZeroCopy(grab_result): shape={grab_view.shape}, "
-            f"pixel={grab_view[0, 0]}"
-        )
+    if grab_result.PayloadType != pylon.PayloadType_GenDC:
+        # GrabResult access is convenient for classic single-image payloads.
+        with grab_result.GetArrayZeroCopy() as grab_view:
+            print(
+                f"  GetArrayZeroCopy(grab_result): shape={grab_view.shape}, "
+                f"pixel={grab_view[0, 0]}"
+            )
 
-    # Persistent view: valid after this function returns until explicitly released.
-    persistent = grab_result.GetArray(copy=False)
-    print(
-        f"  GetArray(copy=False): shape={persistent.shape}, "
-        f"ptr={hex(persistent.ctypes.data)}"
-    )
-    del persistent
+        # Persistent view: valid after this function returns until released.
+        persistent = grab_result.GetArray(copy=False)
+        print(
+            f"  GetArray(copy=False): shape={persistent.shape}, "
+            f"ptr={hex(persistent.ctypes.data)}"
+        )
+        del persistent
 
 
 exit_code = 0
@@ -123,6 +124,8 @@ try:
                     demonstrate_zero_copy_apis(grab_result, frame_index)
                     frame_index += 1
         finally:
+            if camera.IsGrabbing():
+                camera.StopGrabbing()
             camera.SetBufferFactory(None)
 
     if active_buffers:
