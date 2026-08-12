@@ -1013,7 +1013,7 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         tracked.assert_all_freed_once()
 
     def test_set_python_buffer_factory_gendc_zero_copy(self):
-        """Python buffer factory supplies GenDC payload bytes; component zero-copy views work."""
+        """GenDC component and grab-result zero-copy views address the same image."""
         cam = self.create_first()
         cam.Open()
 
@@ -1032,12 +1032,25 @@ class InstantCameraTestSuite(PylonEmuTestCase):
                 self.assertTrue(grab_result.GrabSucceeded())
                 self.assertEqual(grab_result.PayloadType, pylon.PayloadType_GenDC)
                 self.assertIn(grab_result.BufferContext, tracked.allocated_contexts)
+                self.assertIs(
+                    grab_result.GetBufferOwner(),
+                    tracked.allocated[grab_result.BufferAddress],
+                )
 
                 with grab_result.GetFirstImageDataComponent() as component:
                     self.assertTrue(component.IsValid())
                     with component.GetArrayZeroCopy() as image:
-                        self.assertGreater(image.shape[0], 0)
-                        self.assertGreater(image.shape[1], 0)
+                        component_shape = image.shape
+                        component_first_pixel = image[0, 0]
+
+                with grab_result.GetArrayZeroCopy() as image:
+                    self.assertEqual(image.shape, component_shape)
+                    self.assertEqual(image[0, 0], component_first_pixel)
+
+                persistent = grab_result.GetArray(copy=False)
+                self.assertEqual(persistent.shape, component_shape)
+                self.assertEqual(persistent[0, 0], component_first_pixel)
+                del persistent
         finally:
             cam.StopGrabbing()
 
@@ -1079,7 +1092,7 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         ptr, context = factory.DebugAllocateBuffer(128)
         self.assertEqual(context, 1234)
         self.assertTrue(holder_refs[0]() is not None)
-        self.assertTrue(pylon.LookupBufferKeepAlive(ptr) is not None)
+        self.assertTrue(factory.LookupKeepAlive(ptr) is not None)
 
         gc.collect()
         self.assertTrue(holder_refs[0]() is not None)
@@ -1089,10 +1102,249 @@ class InstantCameraTestSuite(PylonEmuTestCase):
         self.assertEqual(callbacks[0][0], ptr)
         self.assertEqual(callbacks[0][1], context)
         self.assertTrue(callbacks[0][2])
-        self.assertTrue(pylon.LookupBufferKeepAlive(ptr) is None)
+        self.assertTrue(factory.LookupKeepAlive(ptr) is None)
 
         gc.collect()
         self.assertTrue(holder_refs[0]() is None)
+
+    def test_grab_result_buffer_owner_from_factory(self):
+        """GrabResult resolves its owner from the factory-local keepalive map."""
+        cam = self.create_first()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+
+        try:
+            with cam.GrabOne(5000) as grab_result:
+                self.assertTrue(grab_result.GrabSucceeded())
+                ptr = grab_result.BufferAddress
+                self.assertIs(grab_result.GetBufferOwner(), tracked.allocated[ptr])
+                self.assertIs(tracked.factory.LookupKeepAlive(ptr), tracked.allocated[ptr])
+            self.assertNotIn("_buffer_owner", grab_result.__dict__)
+        finally:
+            cam.SetBufferFactory(None)
+            cam.Close()
+
+        self.assertIsNone(tracked.factory.LookupKeepAlive(ptr))
+        self.assertFalse(hasattr(pylon, "LookupBufferKeepAlive"))
+
+    def test_image_event_handler_buffer_owner(self):
+        """OnImageGrabbed resolves the native owner without an owning global registry."""
+        owner_seen = threading.Event()
+        callback_errors = []
+
+        class OwnerCheckingHandler(pylon.ImageEventHandler):
+            def OnImageGrabbed(self, camera, grab_result):
+                try:
+                    owner = grab_result.GetBufferOwner()
+                    self.test_case.assertIsNotNone(owner)
+                    self.test_case.assertEqual(
+                        ctypes.addressof(owner),
+                        grab_result.BufferAddress,
+                    )
+                except Exception as exc:
+                    callback_errors.append(exc)
+                finally:
+                    owner_seen.set()
+
+        cam = self.create_first()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        handler = OwnerCheckingHandler()
+        handler.test_case = self
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+        cam.RegisterImageEventHandler(
+            handler,
+            pylon.RegistrationMode_ReplaceAll,
+            pylon.Cleanup_None,
+        )
+
+        try:
+            cam.StartGrabbing(
+                pylon.GrabStrategy_OneByOne,
+                pylon.GrabLoop_ProvidedByInstantCamera,
+            )
+            self.assertTrue(owner_seen.wait(timeout=5.0))
+            if callback_errors:
+                raise callback_errors[0]
+        finally:
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            cam.DeregisterImageEventHandler(handler)
+            cam.SetBufferFactory(None)
+            cam.Close()
+
+    def test_set_buffer_factory_none_retires_factory_until_device_destroy(self):
+        """A replaced Cleanup_None factory survives pending buffer releases."""
+        freed = []
+
+        def allocate(size):
+            holder = _Holder(size)
+            return holder.ptr, holder, holder.ptr, len(holder.buffer)
+
+        def free(ptr, context, keepalive):
+            freed.append(ptr)
+
+        cam = self.create_first()
+        cam.Open()
+        cam.MaxNumBuffer.Value = 1
+        factory = pylon.PythonBufferFactory(allocate, free)
+        factory_ref = weakref.ref(factory)
+        cam.SetBufferFactory(factory)
+        del factory
+
+        cam.StartGrabbing(pylon.GrabStrategy_OneByOne)
+        with cam.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException) as result:
+            view = result.GetArray(copy=False)
+            ptr = result.BufferAddress
+
+        cam.StopGrabbing()
+        self.assertNotIn(ptr, freed)
+        cam.SetBufferFactory(None)
+        gc.collect()
+        self.assertIsNotNone(factory_ref())
+
+        del view
+        gc.collect()
+        self.assertIn(ptr, freed)
+        self.assertIsNotNone(factory_ref())
+
+        cam.DestroyDevice()
+        gc.collect()
+        self.assertIsNone(factory_ref())
+
+    def test_set_buffer_factory_cleanup_delete_frees_before_destroy(self):
+        """Cleanup_Delete destroys the factory only after all buffers are freed."""
+        call_log = []
+
+        def allocate(size):
+            holder = _Holder(size)
+            return holder.ptr, holder, holder.ptr, len(holder.buffer)
+
+        def free(ptr, context, keepalive):
+            call_log.append(("free", ptr))
+
+        def destroy():
+            call_log.append(("destroy", None))
+
+        cam = self.create_first()
+        cam.Open()
+        factory = pylon.PythonBufferFactory(allocate, free, destroy)
+        cam.SetBufferFactory(factory, pylon.Cleanup_Delete)
+        with cam.GrabOne(5000) as grab_result:
+            self.assertTrue(grab_result.GrabSucceeded())
+
+        cam.SetBufferFactory(None)
+        cam.Close()
+
+        self.assertIn(("destroy", None), call_log)
+        destroy_index = call_log.index(("destroy", None))
+        self.assertGreater(destroy_index, 0)
+        self.assertTrue(all(kind == "free" for kind, _ in call_log[:destroy_index]))
+
+    def test_set_buffer_factory_replacement_retires_the_previous_factory(self):
+        """Replacing a Cleanup_None factory keeps the previous one alive until device destroy."""
+        first = _TrackedBufferFactory(self)
+        second = _TrackedBufferFactory(self)
+
+        cam = self.create_first()
+        cam.Open()
+        cam.SetBufferFactory(first.factory, pylon.Cleanup_None)
+        with cam.GrabOne(5000) as grab_result:
+            self.assertTrue(grab_result.GrabSucceeded())
+
+        cam.SetBufferFactory(second.factory, pylon.Cleanup_None)
+        self.assertIn(first.factory, cam.__dict__["_buffer_factory_retired"])
+        self.assertIs(second.factory, cam.__dict__["_buffer_factory_ref"])
+
+        with cam.GrabOne(5000) as grab_result:
+            self.assertIs(
+                second.allocated[grab_result.BufferAddress],
+                grab_result.GetBufferOwner(),
+            )
+
+        cam.SetBufferFactory(None)
+        cam.Close()
+        cam.DestroyDevice()
+
+        self.assertNotIn("_buffer_factory_retired", cam.__dict__)
+        first.assert_all_freed_once()
+        second.assert_all_freed_once()
+
+    def test_set_buffer_factory_cleanup_delete_transfers_ownership(self):
+        """Cleanup_Delete hands the C++ instance to pylon but keeps the proxy usable."""
+        tracked = _TrackedBufferFactory(self)
+
+        cam = self.create_first()
+        cam.Open()
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_Delete)
+        self.assertFalse(tracked.factory.thisown)
+
+        try:
+            with cam.GrabOne(5000) as grab_result:
+                ptr = grab_result.BufferAddress
+                self.assertIs(tracked.allocated[ptr], tracked.factory.LookupKeepAlive(ptr))
+        finally:
+            cam.SetBufferFactory(None)
+            cam.Close()
+
+    def test_image_event_handler_buffer_owner_for_gen_dc(self):
+        """OnImageGrabbed resolves the container owner for GenDC payloads."""
+        owner_seen = threading.Event()
+        callback_errors = []
+
+        class OwnerCheckingHandler(pylon.ImageEventHandler):
+            def OnImageGrabbed(self, camera, grab_result):
+                try:
+                    self.test_case.assertEqual(
+                        pylon.PayloadType_GenDC,
+                        grab_result.PayloadType,
+                    )
+                    owner = grab_result.GetBufferOwner()
+                    self.test_case.assertIsNotNone(owner)
+                    self.test_case.assertEqual(
+                        ctypes.addressof(owner),
+                        grab_result.BufferAddress,
+                    )
+                except Exception as exc:
+                    callback_errors.append(exc)
+                finally:
+                    owner_seen.set()
+
+        cam = self.create_first()
+        cam.Open()
+        tracked = _TrackedBufferFactory(self)
+        cam.SetBufferFactory(tracked.factory, pylon.Cleanup_None)
+
+        try:
+            cam.GenDC.Value = True
+        except genicam.GenericException as exc:
+            cam.SetBufferFactory(None)
+            cam.Close()
+            self.skipTest("GenDC is not supported on this emulator: %s" % exc)
+
+        handler = OwnerCheckingHandler()
+        handler.test_case = self
+        cam.RegisterImageEventHandler(
+            handler,
+            pylon.RegistrationMode_ReplaceAll,
+            pylon.Cleanup_None,
+        )
+
+        try:
+            cam.StartGrabbing(
+                pylon.GrabStrategy_OneByOne,
+                pylon.GrabLoop_ProvidedByInstantCamera,
+            )
+            self.assertTrue(owner_seen.wait(timeout=5.0))
+            if callback_errors:
+                raise callback_errors[0]
+        finally:
+            if cam.IsGrabbing():
+                cam.StopGrabbing()
+            cam.DeregisterImageEventHandler(handler)
+            cam.SetBufferFactory(None)
+            cam.Close()
 
     def test_python_buffer_factory_capacity_guard(self):
         """PythonBufferFactory rejects allocations when keepalive capacity is too small."""
