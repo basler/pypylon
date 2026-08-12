@@ -2,6 +2,10 @@
 %ignore operator IImage&;
 %rename(GrabResult) Pylon::CGrabResultPtr;
 
+%pythonappend Pylon::CGrabResultPtr::Release %{
+    self.__dict__.pop("_buffer_owner", None)
+%}
+
 %pythoncode %{
     from contextlib import contextmanager
 
@@ -24,6 +28,12 @@
         except Exception:
             return None
 
+    _PYLON_OWNER_ARRAY_PROTOCOL_ATTRIBUTES = frozenset((
+        "__array_struct__",
+        "__array_interface__",
+        "__cuda_array_interface__",
+    ))
+
     class _PylonOwnerView:
         """
         Keeps GrabResult alive while exposing a shaped view of the owner object.
@@ -37,27 +47,28 @@
             self.strides = strides
             self.nbytes = nbytes
 
-        @property
-        def __array_interface__(self):
-            interface = dict(self._owner.__array_interface__)
+        def _reshaped_interface(self, interface):
+            interface = dict(interface)
             if self.shape is not None:
+                # Strides only ever describe the shape they were computed for,
+                # so the owner's strides for the whole allocation must go too.
+                # None means C-contiguous in both array protocols.
                 interface["shape"] = self.shape
+                interface["strides"] = self.strides
+            elif self.strides is not None:
+                interface["strides"] = self.strides
             if self.dtype is not None:
                 interface["typestr"] = _pylon_numpy.dtype(self.dtype).str
-            if self.strides is not None:
-                interface["strides"] = self.strides
+                interface.pop("descr", None)
             return interface
 
         @property
+        def __array_interface__(self):
+            return self._reshaped_interface(self._owner.__array_interface__)
+
+        @property
         def __cuda_array_interface__(self):
-            interface = dict(self._owner.__cuda_array_interface__)
-            if self.shape is not None:
-                interface["shape"] = self.shape
-            if self.dtype is not None:
-                interface["typestr"] = _pylon_numpy.dtype(self.dtype).str
-            if self.strides is not None:
-                interface["strides"] = self.strides
-            return interface
+            return self._reshaped_interface(self._owner.__cuda_array_interface__)
 
         def __array__(self, dtype=None):
             ar = _pylon_numpy.asarray(self._owner, dtype=dtype)
@@ -75,6 +86,11 @@
             return moved
 
         def __getattr__(self, item):
+            # The owner describes the whole allocation. Forwarding its array
+            # protocols would take precedence over the shaped views above and
+            # hand out the unshaped buffer instead of the image.
+            if item in _PYLON_OWNER_ARRAY_PROTOCOL_ATTRIBUTES:
+                raise AttributeError(item)
             return getattr(self._owner, item)
 %}
 %extend Pylon::CGrabResultPtr {
@@ -106,21 +122,15 @@
             buf = self.GetBuffer()
             return _pylon_numpy.ndarray(shape, dtype=_pylon_numpy.uint8, buffer=buf)
 
-        pt = self.GetPixelType()
+        pt = self._GetImagePixelType()
         if IsPacked(pt):
             unpacked = ImageFormatConverter._Unpack(self)
             shape, dtype, format = _image_get_image_format(unpacked)
             buf = unpacked.GetBuffer()
             strides = None
         else:
-            shape, dtype, format = self.GetImageFormat(pt)
+            shape, dtype, strides, _ = self._GetArrayViewFormat()
             buf = self.GetImageBuffer()
-
-            strides = None
-            if self.PaddingX > 0:
-                # If padding is present, we need to calculate the strides
-                # strides = (bytes per row, bytes per pixel)
-                strides = self.Width * _pylon_numpy.dtype(dtype).itemsize + self.PaddingX, _pylon_numpy.dtype(dtype).itemsize
 
         # Now we will copy the data into an array:
         return _pylon_numpy.ndarray(shape, dtype=dtype, buffer=buf, strides=strides)
@@ -129,19 +139,21 @@
         """
         Return the Python keepalive object associated with this grab buffer if available.
         """
-        return _pylon.LookupBufferKeepAlive(self.BufferAddress)
+        if "_buffer_owner" not in self.__dict__:
+            self.__dict__["_buffer_owner"] = _pylon._LookupBufferOwner(self.BufferAddress)
+        return self.__dict__["_buffer_owner"]
 
     @needs_numpy
     def _GetArrayViewFormat(self, raw=False):
-        shape, dtype_tag, strides, required_bytes, _ = self._GetArrayViewInfo(raw)
+        shape, dtype_tag, strides, required_bytes = self._GetArrayViewInfo(raw)
         dtype, _ = _dtype_from_tag(dtype_tag)
         return shape, dtype, strides, required_bytes
 
     @needs_numpy
     def _GetArrayViewInfoPython(self, raw=False):
-        shape, dtype_tag, strides, required_bytes, owner = self._GetArrayViewInfo(raw)
+        shape, dtype_tag, strides, required_bytes = self._GetArrayViewInfo(raw)
         dtype, _ = _dtype_from_tag(dtype_tag)
-        return shape, dtype, strides, required_bytes, owner
+        return shape, dtype, strides, required_bytes, self.GetBufferOwner()
 
     @needs_numpy
     def GetBufferOwnerView(self, raw=False):
@@ -150,6 +162,9 @@
 
         This is intended for custom allocator owners such as Warp/CUDA objects.
         """
+        if self.PayloadType == PayloadType_GenDC and not raw:
+            return self.GetArrayView(raw=False, prefer_owner=False)
+
         shape, dtype, strides, required_bytes, owner = self._GetArrayViewInfoPython(raw)
         if owner is None:
             return None
@@ -178,7 +193,7 @@
         - For CUDA-aware owner objects (__cuda_array_interface__): returns a proxy.
         """
 
-        pt = self.GetPixelType()
+        pt = self._GetImagePixelType()
         if IsPacked(pt):
             # Packed formats require unpacking, which is a copy.
             return self.GetArray(raw=raw)
@@ -186,7 +201,7 @@
         owner = None
         shape, dtype, strides, required_bytes, owner = self._GetArrayViewInfoPython(raw)
 
-        if prefer_owner:
+        if prefer_owner and (raw or self.PayloadType != PayloadType_GenDC):
             if owner is not None:
                 owner_capacity = getattr(owner, "nbytes", None)
                 if owner_capacity is None and hasattr(owner, "__cuda_array_interface__"):
@@ -304,17 +319,60 @@
         For views that must outlive the current scope, use GetArray(copy=False).
         For custom non-NumPy buffer owners, use GetBufferOwnerView().
         '''
-        yield from _image_array_zero_copy_gen(self, self.GetImageMemoryView, raw)
+        pt = self._GetImagePixelType()
+        if IsPacked(pt):
+            yield ImageFormatConverter._Unpack(self).GetArray()
+            return
+
+        if raw:
+            mv = self.GetMemoryView()
+            ar = _pylon_numpy.asarray(mv)
+        else:
+            shape, dtype, strides, _ = self._GetArrayViewFormat()
+            mv = self.GetImageMemoryView()
+            ar = _pylon_numpy.ndarray(shape, dtype=dtype, buffer=mv, strides=strides)
+
+        initial_refcount = sys.getrefcount(ar)
+        yield ar
+        if sys.getrefcount(ar) > initial_refcount + 1:
+            raise RuntimeError("Please remove any references to the array before leaving context manager scope!!!")
+        mv.release()
 
 %}
 
     %nothread _GetImageFormatFast;
+    %nothread _GetImagePixelType;
     %nothread _GetArrayViewInfo;
 
     PyObject* _GetImageFormatFast(Pylon::EPixelType pt)
     {
         const Pylon::CGrabResultData* resultData = (*$self).operator->();
+        if (resultData->GetPayloadType() == Pylon::PayloadType_GenDC)
+        {
+            Pylon::CPylonDataComponent component = resultData->GetFirstImageDataComponent(false);
+            if (!component.IsValid())
+            {
+                PyErr_SetString(PyExc_RuntimeError, "grab result has no image data component");
+                return NULL;
+            }
+            return BuildPylonImageFormatTuple(pt, component.GetWidth(), component.GetHeight());
+        }
         return BuildPylonImageFormatTuple(pt, resultData->GetWidth(), resultData->GetHeight());
+    }
+
+    Pylon::EPixelType _GetImagePixelType()
+    {
+        const Pylon::CGrabResultData* resultData = (*$self).operator->();
+        if (resultData->GetPayloadType() == Pylon::PayloadType_GenDC)
+        {
+            Pylon::CPylonDataComponent component = resultData->GetFirstImageDataComponent(false);
+            if (!component.IsValid())
+            {
+                return Pylon::PixelType_Undefined;
+            }
+            return component.GetPixelType();
+        }
+        return resultData->GetPixelType();
     }
 
     PyObject* _GetArrayViewInfo(bool raw)

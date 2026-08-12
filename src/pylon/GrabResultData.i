@@ -48,7 +48,22 @@
     PyObject * GetImageBuffer()
     {
         void * buf = $self->GetBuffer();
-        size_t length = $self->GetImageSize();
+        size_t length = 0;
+        if ($self->GetPayloadType() == Pylon::PayloadType_GenDC)
+        {
+            Pylon::CPylonDataComponent component = $self->GetFirstImageDataComponent(false);
+            if (!component.IsValid())
+            {
+                PyErr_SetString(PyExc_RuntimeError, "grab result has no image data component");
+                return NULL;
+            }
+            buf = const_cast<void*>(component.GetData());
+            length = component.GetDataSize();
+        }
+        else
+        {
+            length = $self->GetImageSize();
+        }
         return (buf) ? PyByteArray_FromStringAndSize((const char *) buf, length) : Py_None;
     }
 
@@ -71,9 +86,26 @@
     {
 // need at least Python 3.3 for memory view
 %#if PY_VERSION_HEX >= 0x03030000
+        void* buf = $self->GetBuffer();
+        size_t length = 0;
+        if ($self->GetPayloadType() == Pylon::PayloadType_GenDC)
+        {
+            Pylon::CPylonDataComponent component = $self->GetFirstImageDataComponent(false);
+            if (!component.IsValid())
+            {
+                PyErr_SetString(PyExc_RuntimeError, "grab result has no image data component");
+                return NULL;
+            }
+            buf = const_cast<void*>(component.GetData());
+            length = component.GetDataSize();
+        }
+        else
+        {
+            length = $self->GetImageSize();
+        }
         return PyMemoryView_FromMemory(
-            (char*)$self->GetBuffer(),
-            $self->GetImageSize(),
+            (char*)buf,
+            length,
             PyBUF_WRITE
             );
 %#else
