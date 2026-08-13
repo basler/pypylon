@@ -160,7 +160,61 @@ class PixelTypeMapperTestSuite(PylonEmuTestCase):
             "RGB8",
         )
 
+    def test_sfnc_boundary_equal_to_2_0_0_uses_sfnc2_mapping(self):
+        """A version exactly equal to Sfnc_2_0_0 selects SFNC 2.x mapping."""
+        self.assertEqual(
+            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
+                pylon.PixelType_RGB8packed, pylon.Sfnc_2_0_0
+            ),
+            "RGB8",
+        )
+
+    def test_sfnc_1_5_0_uses_pre2_mapping(self):
+        """An SFNC 1.x version selects SFNC 1.x/pre-2 mapping."""
+        self.assertEqual(
+            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
+                pylon.PixelType_RGB8packed, pylon.Sfnc_1_5_0
+            ),
+            "RGB8Packed",
+        )
+
+    def test_sfnc_version_none_uses_sfnc2_mapping(self):
+        """Passing sfnc_version=None selects SFNC 2.x mapping."""
+        self.assertEqual(
+            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
+                pylon.PixelType_RGB8packed, None
+            ),
+            "RGB8",
+        )
+
+    def test_sfnc_version_missing_constant_falls_back_to_sfnc2(self):
+        """If Sfnc_2_0_0 is unavailable, mapping falls back to SFNC 2.x behavior."""
+        sfnc1 = pylon.Sfnc_1_5_0
+        sfnc2 = pylon.Sfnc_2_0_0
+
+        delattr(pylon, "Sfnc_2_0_0")
+        try:
+            self.assertEqual(
+                pylon.PixelTypeMapper.GetPixelFormatByPixelType(
+                    pylon.PixelType_RGB8packed, sfnc1
+                ),
+                "RGB8",
+            )
+        finally:
+            setattr(pylon, "Sfnc_2_0_0", sfnc2)
+
+    def test_sfnc_version_non_comparable_value_raises_type_error(self):
+        """Passing a non-comparable sfnc_version raises TypeError."""
+        with self.assertRaises(TypeError):
+            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
+                pylon.PixelType_Mono8, object()
+            )
+
+        with self.assertRaises(TypeError):
+            pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(
+                pylon.PixelType_Mono8, object()
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
-
