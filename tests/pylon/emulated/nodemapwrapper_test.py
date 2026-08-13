@@ -677,6 +677,46 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
 
         camera.Close()
 
+    def test_to_parameter_inode_falls_back_to_base_parameter_when_mapping_not_available(self):
+        """ToParameter(INode) falls back to base Parameter when _node_to_specific finds no matching interface constant."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nm = camera.GetNodeMap()._Get()
+        inode = raw_nm.GetNode("GainRaw").GetNode()
+
+        original_intf_iinteger = genicam.intfIInteger
+        try:
+            genicam.intfIInteger = -999999
+            result = pylon.ToParameter(inode)
+        finally:
+            genicam.intfIInteger = original_intf_iinteger
+            camera.Close()
+
+        self.assertIsInstance(result, pylon.Parameter)
+        self.assertNotIsInstance(result, pylon.IntegerParameter)
+        self.assertTrue(result.IsValid())
+        self.assertEqual(result.GetNode().GetName(), "GainRaw")
+
+    def test_to_parameter_base_parameter_remains_base_when_mapping_not_available(self):
+        """ToParameter(base Parameter) returns the same base object if _node_to_specific cannot specialise it."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nm = camera.GetNodeMap()._Get()
+        base_param = pylon.Parameter(raw_nm.GetNode("GainRaw").GetNode())
+
+        original_intf_iinteger = genicam.intfIInteger
+        try:
+            genicam.intfIInteger = -999999
+            result = pylon.ToParameter(base_param)
+        finally:
+            genicam.intfIInteger = original_intf_iinteger
+            camera.Close()
+
+        self.assertIs(result, base_param)
+        self.assertIsInstance(result, pylon.Parameter)
+        self.assertNotIsInstance(result, pylon.IntegerParameter)
+        self.assertTrue(result.IsValid())
+
     def test_to_parameter_specific_parameter_kept_unchanged(self):
         """ToParameter() returns a specific Parameter subclass unchanged."""
         camera = self.create_first()
@@ -726,6 +766,39 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         camera.Open()
         raw_nm = camera.GetNodeMap()._Get()
         result = pylon.ToParameter(raw_nm.GetNode("Device"))
+        self.assertIsInstance(result, pylon.PortParameter)
+        camera.Close()
+
+    def test_to_parameter_register_node(self):
+        """ToParameter() wraps a register INode into an ArrayParameter."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nm = camera.GetNodeMap()._Get()
+        result = pylon.ToParameter(raw_nm.GetNode("BslImageCompressionBCBDescriptor"))
+        self.assertIsInstance(result, pylon.ArrayParameter)
+        camera.Close()
+
+    def test_to_parameter_port_node_via_get_node(self):
+        """ToParameter() reaches _node_to_specific's intfIPort branch.
+
+        genicam's native INodeMap.GetNode()/GetNodes() auto-downcast any
+        Port-interface node directly to genicam.IPort (never genicam.INode),
+        so ToParameter() takes its separate isinstance(val, IPort) shortcut
+        and never reaches _node_to_specific for such nodes (see
+        test_to_parameter_port_node above). pylon's own Parameter.GetNode(),
+        however, returns a plain, un-downcast INode whose
+        GetPrincipalInterfaceType() is still intfIPort, which correctly
+        dispatches through _node_to_specific.
+        """
+        camera = self.create_first()
+        camera.Open()
+        port_param = camera.GetNodeMap().GetNode("Device")
+        self.assertIsInstance(port_param, pylon.PortParameter)
+        node = port_param.GetNode()
+        self.assertIsInstance(node, genicam.INode)
+        self.assertNotIsInstance(node, genicam.IPort)
+        self.assertEqual(node.GetPrincipalInterfaceType(), genicam.intfIPort)
+        result = pylon.ToParameter(node)
         self.assertIsInstance(result, pylon.PortParameter)
         camera.Close()
 
