@@ -510,6 +510,86 @@ class PylonImageTestSuite(PylonEmuTestCase):
         shape, dtype, fmt = image.GetImageFormat(pylon.PixelType_Mono16)
         self.assertEqual(dtype, np.uint16)
 
+    def test_get_image_format_supports_all_mapped_pixel_types(self):
+        """GetImageFormat(pt) returns the expected shape/dtype/format for every supported mapped pixel type."""
+        import numpy as np
+
+        width = 7
+        height = 5
+        image = _make_mono8_image(width, height)
+
+        cases = (
+            # Mono/Bayer/Confidence/Coord3D-C, 8-bit
+            (pylon.PixelType_Mono8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_BayerGR8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_BayerRG8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_BayerGB8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_BayerBG8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_Confidence8, (height, width), np.uint8, "B"),
+            (pylon.PixelType_Coord3D_C8, (height, width), np.uint8, "B"),
+            # Mono/Bayer, 10-bit
+            (pylon.PixelType_Mono10, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGR10, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerRG10, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGB10, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerBG10, (height, width), np.uint16, "H"),
+            # Mono/Bayer, 12-bit
+            (pylon.PixelType_Mono12, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGR12, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerRG12, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGB12, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerBG12, (height, width), np.uint16, "H"),
+            # Mono/Bayer/Confidence/Coord3D-C, 16-bit
+            (pylon.PixelType_Mono16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGR16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerRG16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerGB16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_BayerBG16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_Confidence16, (height, width), np.uint16, "H"),
+            (pylon.PixelType_Coord3D_C16, (height, width), np.uint16, "H"),
+            # RGB/BGR
+            (pylon.PixelType_RGB8packed, (height, width, 3), np.uint8, "B"),
+            (pylon.PixelType_BGR8packed, (height, width, 3), np.uint8, "B"),
+            (pylon.PixelType_RGB12packed, (height, width, 3), np.uint16, "H"),
+            (pylon.PixelType_BGR12packed, (height, width, 3), np.uint16, "H"),
+            (pylon.PixelType_RGB10packed, (height, width, 3), np.uint16, "H"),
+            (pylon.PixelType_BGR10packed, (height, width, 3), np.uint16, "H"),
+            # YUV 4:2:2
+            (pylon.PixelType_YUV422_YUYV_Packed, (height, width, 2), np.uint8, "B"),
+            (pylon.PixelType_YUV422packed, (height, width, 2), np.uint8, "B"),
+            # 32-bit float formats
+            (pylon.PixelType_Coord3D_ABC32f, (height, width, 3), np.float32, "f"),
+            (pylon.PixelType_Data32f, (height, width, 1), np.float32, "f"),
+            # BiColor
+            (pylon.PixelType_BiColorRGBG8, (height, width * 2), np.uint8, "B"),
+            (pylon.PixelType_BiColorBGRG8, (height, width * 2), np.uint8, "B"),
+            (pylon.PixelType_BiColorRGBG10, (height, width * 2), np.uint16, "H"),
+            (pylon.PixelType_BiColorBGRG10, (height, width * 2), np.uint16, "H"),
+            (pylon.PixelType_BiColorRGBG12, (height, width * 2), np.uint16, "H"),
+            (pylon.PixelType_BiColorBGRG12, (height, width * 2), np.uint16, "H"),
+        )
+
+        for pixel_type, expected_shape, expected_dtype, expected_fmt in cases:
+            with self.subTest(pixel_type=pixel_type):
+                shape, dtype, fmt = image.GetImageFormat(pixel_type)
+                self.assertEqual(shape, expected_shape)
+                self.assertEqual(dtype, expected_dtype)
+                self.assertEqual(fmt, expected_fmt)
+
+    def test_get_image_format_raises_value_error_for_unsupported_pixel_type_override(self):
+        """GetImageFormat(pt) raises ValueError for an unsupported pixel type."""
+        image = _make_mono8_image()
+        with self.assertRaises(ValueError):
+            image.GetImageFormat(pylon.PixelType_Undefined)
+
+    def test_get_image_format_raises_value_error_for_packed_pixel_type_override(self):
+        """GetImageFormat(pt) raises ValueError when the supplied pixel type is packed."""
+        image = _make_mono8_image()
+        for packed_pixel_type in (pylon.PixelType_Mono12packed, pylon.PixelType_Mono12p):
+            with self.subTest(pixel_type=packed_pixel_type):
+                with self.assertRaises(ValueError):
+                    image.GetImageFormat(packed_pixel_type)
+
     # ------------------------------------------------------------------
     # GetArray
     # ------------------------------------------------------------------
