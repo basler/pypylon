@@ -2,9 +2,9 @@
 """Test coverage runner for pypylon."""
 
 import os
+import runpy
 import shutil
 import sys
-import unittest
 from pathlib import Path
 
 try:
@@ -37,13 +37,35 @@ def cleanup_coverage_artifacts():
             pass
 
 
-def run_coverage_on_files(file_pattern, use_unittest=False):
+def run_script_file(script_path):
+    """Run a Python file as __main__ while preserving process state."""
+    script_dir = str(script_path.parent.resolve())
+    script_file = str(script_path.resolve())
+    old_argv = sys.argv[:]
+    had_dir = script_dir in sys.path
+
+    if not had_dir:
+        sys.path.insert(0, script_dir)
+
+    sys.argv = [script_file]
+    try:
+        runpy.run_path(script_file, run_name="__main__")
+    except SystemExit as exc:
+        if exc.code not in (None, 0, False):
+            print(f"Script failed (exit={exc.code}): {script_path}")
+    finally:
+        sys.argv = old_argv
+        if not had_dir:
+            sys.path.remove(script_dir)
+
+
+def run_coverage_on_files(file_pattern):
     """
     Run coverage on files matching the pattern.
     
     Args:
         file_pattern: Glob pattern for test files
-        use_unittest: If True, run as unittest modules
+        file_pattern: Glob pattern for Python files
     """
     base_path = Path('.')
     files = sorted(base_path.glob(file_pattern))
@@ -54,26 +76,7 @@ def run_coverage_on_files(file_pattern, use_unittest=False):
     
     for test_file in files:
         print(f"Running coverage on: {test_file}")
-        
-        cov = coverage.Coverage(source=['pypylon'], branch=True, data_file='.coverage')
-        cov.start()
-        
-        try:
-            if use_unittest:
-                module_name = str(test_file).replace('.py', '').replace('/', '.')
-                loader = unittest.TestLoader()
-                suite = loader.loadTestsFromName(module_name)
-                runner = unittest.TextTestRunner(verbosity=0)
-                runner.run(suite)
-            else:
-                module_name = str(test_file).replace('.py', '').replace('/', '.')
-                loader = unittest.TestLoader()
-                suite = loader.loadTestsFromName(module_name)
-                runner = unittest.TextTestRunner(verbosity=0)
-                runner.run(suite)
-        finally:
-            cov.stop()
-            cov.save()
+        run_script_file(test_file)
 
 
 def main():
@@ -86,38 +89,39 @@ def main():
         
         print("=== Cleaning up old coverage data ===")
         cleanup_coverage_artifacts()
-        
-        print("\n=== Running coverage on genicam tests ===")
-        run_coverage_on_files('genicam/*test.py', use_unittest=False)
-        
-        print("\n=== Running coverage on pylon/emulated tests ===")
-        os.chdir('pylon/emulated')
-        run_coverage_on_files('*test.py', use_unittest=True)
-        os.chdir('../..')
-        
-        print("\n=== Running coverage on pylon/gigE tests ===")
-        os.chdir('pylon/gigE')
-        run_coverage_on_files('*test.py', use_unittest=True)
-        os.chdir('../..')
-        
-        print("\n=== Running coverage on pylon/usb tests ===")
-        os.chdir('pylon/usb')
-        run_coverage_on_files('*test.py', use_unittest=True)
-        os.chdir('../..')
-        
-        print("\n=== Running coverage on samples ===")
-        os.chdir('../samples/pylon')
-        run_coverage_on_files('**/*.py', use_unittest=False)
-        os.chdir('../../tests')
-        
-        print("\n=== Combining coverage data ===")
-        cov = coverage.Coverage(data_file='.coverage')
-        cov.combine()
-        
+
+        cov = coverage.Coverage(source=['pypylon'], branch=True, data_file='.coverage')
+        cov.start()
+        try:
+            print("\n=== Running coverage on genicam tests ===")
+            run_coverage_on_files('genicam/*test.py')
+
+            print("\n=== Running coverage on pylon/emulated tests ===")
+            os.chdir('pylon/emulated')
+            run_coverage_on_files('*test.py')
+            os.chdir('../..')
+
+            print("\n=== Running coverage on pylon/gigE tests ===")
+            os.chdir('pylon/gigE')
+            run_coverage_on_files('*test.py')
+            os.chdir('../..')
+
+            print("\n=== Running coverage on pylon/usb tests ===")
+            os.chdir('pylon/usb')
+            run_coverage_on_files('*test.py')
+            os.chdir('../..')
+
+            print("\n=== Running coverage on samples ===")
+            os.chdir('../samples/pylon')
+            run_coverage_on_files('**/*.py')
+            os.chdir('../../tests')
+        finally:
+            cov.stop()
+            cov.save()
+
         print("\n=== Generating HTML report ===")
-        cov.load()
         cov.html_report(directory='htmlcov')
-        
+
         print("\nCoverage report generated in: htmlcov/index.html")
         
     finally:
