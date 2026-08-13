@@ -590,6 +590,31 @@ class PylonImageTestSuite(PylonEmuTestCase):
                 with self.assertRaises(ValueError):
                     image.GetImageFormat(packed_pixel_type)
 
+    def test_get_image_format_raises_runtime_error_when_numpy_binding_is_not_module(self):
+        """The needs_numpy wrapper raises RuntimeError if pylon._pylon_numpy exists but is not a module."""
+        image = _make_mono8_image()
+        original_numpy_binding = pylon._pylon_numpy
+        try:
+            pylon._pylon_numpy = 42
+            with self.assertRaisesRegex(RuntimeError, "_pylon_numpy not a module"):
+                image.GetImageFormat()
+        finally:
+            pylon._pylon_numpy = original_numpy_binding
+
+    def test_get_image_format_raises_not_implemented_error_when_numpy_binding_missing(self):
+        """The needs_numpy wrapper raises NotImplementedError if pylon._pylon_numpy is missing."""
+        image = _make_mono8_image()
+        had_numpy_binding = hasattr(pylon, "_pylon_numpy")
+        original_numpy_binding = getattr(pylon, "_pylon_numpy", None)
+        try:
+            if had_numpy_binding:
+                delattr(pylon, "_pylon_numpy")
+            with self.assertRaisesRegex(NotImplementedError, "please install numpy"):
+                image.GetImageFormat()
+        finally:
+            if had_numpy_binding:
+                setattr(pylon, "_pylon_numpy", original_numpy_binding)
+
     # ------------------------------------------------------------------
     # GetArray
     # ------------------------------------------------------------------
