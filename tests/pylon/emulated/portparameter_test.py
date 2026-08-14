@@ -10,6 +10,7 @@ import unittest
 # Port nodes defined in the test nodemap
 PORT_DEVICE = "Device"
 PORT_TEST = "TestPort"
+PORT_CHUNK_TEST = "TestChunkPort"
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +276,116 @@ class PortParameterTestSuite(PylonParameterTestCase):
         p = pylon.PortParameter()
         with self.assertRaises(Exception):
             p.Write(0, bytes([0x00, 0x00, 0x00, 0x00]))
+
+    # ------------------------------------------------------------------
+    # GetInfo / GetInfoOrDefault
+    # ------------------------------------------------------------------
+
+    def test_port_parameter_get_info_name(self):
+        """GetInfo with ParameterInfo_Name returns the node name."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual(PORT_TEST, p.GetInfo(pylon.ParameterInfo_Name))
+
+    def test_port_parameter_get_info_display_name(self):
+        """GetInfo with ParameterInfo_DisplayName returns the display name."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual("TestPort Display Name", p.GetInfo(pylon.ParameterInfo_DisplayName))
+
+    def test_port_parameter_get_info_tool_tip(self):
+        """GetInfo with ParameterInfo_ToolTip returns the tooltip."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual("TestPort ToolTip", p.GetInfo(pylon.ParameterInfo_ToolTip))
+
+    def test_port_parameter_get_info_description(self):
+        """GetInfo with ParameterInfo_Description returns the description."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual("TestPort Description", p.GetInfo(pylon.ParameterInfo_Description))
+
+    def test_port_parameter_get_info_unattached_raises(self):
+        """GetInfo raises for all ParameterInfo values when unattached."""
+        p = pylon.PortParameter()
+        for info in (
+            pylon.ParameterInfo_Name,
+            pylon.ParameterInfo_DisplayName,
+            pylon.ParameterInfo_ToolTip,
+            pylon.ParameterInfo_Description,
+        ):
+            with self.assertRaises(Exception):
+                p.GetInfo(info)
+
+    def test_port_parameter_get_info_or_default_unattached(self):
+        """GetInfoOrDefault returns the supplied default when unattached."""
+        p = pylon.PortParameter()
+        self.assertEqual("a", p.GetInfoOrDefault(pylon.ParameterInfo_Name, "a"))
+        self.assertEqual("b", p.GetInfoOrDefault(pylon.ParameterInfo_DisplayName, "b"))
+        self.assertEqual("c", p.GetInfoOrDefault(pylon.ParameterInfo_ToolTip, "c"))
+        self.assertEqual("d", p.GetInfoOrDefault(pylon.ParameterInfo_Description, "d"))
+
+    def test_port_parameter_get_info_or_default_attached(self):
+        """GetInfoOrDefault returns the real value when attached."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual(PORT_TEST, p.GetInfoOrDefault(pylon.ParameterInfo_Name, "fallback"))
+
+    # ------------------------------------------------------------------
+    # GetChunkID / CacheChunkData
+    # ------------------------------------------------------------------
+
+    def test_port_parameter_get_chunk_id_chunk_port(self):
+        """GetChunkID returns the chunk ID string for a chunk port node."""
+        p = pylon.PortParameter(self.nodemap, PORT_CHUNK_TEST)
+        self.assertEqual("42", p.GetChunkID())
+
+    def test_port_parameter_chunk_id_property(self):
+        """ChunkID property returns the same value as GetChunkID()."""
+        p = pylon.PortParameter(self.nodemap, PORT_CHUNK_TEST)
+        self.assertEqual(p.GetChunkID(), p.ChunkID)
+
+    def test_port_parameter_cache_chunk_data_chunk_port(self):
+        """CacheChunkData returns genicam.No for a static chunk ID port."""
+        p = pylon.PortParameter(self.nodemap, PORT_CHUNK_TEST)
+        self.assertEqual(genicam.No, p.CacheChunkData())
+
+    def test_port_parameter_get_chunk_id_non_chunk_port(self):
+        """GetChunkID returns an empty string for a plain port (no ChunkID defined)."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual("", p.GetChunkID())
+
+    def test_port_parameter_cache_chunk_data_non_chunk_port(self):
+        """CacheChunkData returns genicam.No for a plain port (no ChunkID defined)."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual(genicam.No, p.CacheChunkData())
+
+    def test_port_parameter_get_chunk_id_unattached_raises(self):
+        """GetChunkID raises when unattached."""
+        p = pylon.PortParameter()
+        with self.assertRaises(Exception):
+            p.GetChunkID()
+
+    def test_port_parameter_cache_chunk_data_unattached_raises(self):
+        """CacheChunkData raises when unattached."""
+        p = pylon.PortParameter()
+        with self.assertRaises(Exception):
+            p.CacheChunkData()
+
+    # ------------------------------------------------------------------
+    # GetSwapEndianess
+    # ------------------------------------------------------------------
+
+    def test_port_parameter_get_swap_endianess_plain_port(self):
+        """GetSwapEndianess returns genicam.No for a plain port node."""
+        p = pylon.PortParameter(self.nodemap, PORT_TEST)
+        self.assertEqual(genicam.No, p.GetSwapEndianess())
+
+    def test_port_parameter_get_swap_endianess_chunk_port(self):
+        """GetSwapEndianess returns genicam.No for a chunk port node."""
+        p = pylon.PortParameter(self.nodemap, PORT_CHUNK_TEST)
+        self.assertEqual(genicam.No, p.GetSwapEndianess())
+
+    def test_port_parameter_get_swap_endianess_unattached_raises(self):
+        """GetSwapEndianess raises when unattached."""
+        p = pylon.PortParameter()
+        with self.assertRaises(Exception):
+            p.GetSwapEndianess()
 
 if __name__ == "__main__":
     unittest.main()

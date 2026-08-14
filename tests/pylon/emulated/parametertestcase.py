@@ -286,7 +286,14 @@ class PylonParameterTestCase(unittest.TestCase):
     <Value>1</Value>
   </Boolean>
 
-   <Port Name="TestPort"/>
+   <Port Name="TestPort">
+     <ToolTip>TestPort ToolTip</ToolTip>
+     <Description>TestPort Description</Description>
+     <DisplayName>TestPort Display Name</DisplayName>
+   </Port>
+   <Port Name="TestChunkPort">
+     <ChunkID>42</ChunkID>
+   </Port>
    <IntReg Name="IntChild" >
        <Address>0</Address>
        <Length>2</Length>
