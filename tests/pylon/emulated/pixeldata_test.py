@@ -102,12 +102,12 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(pixel_data.B, 30)
 
     def test_get_pixel_data_rejects_alpha_for_rgb_pixel_data(self):
-        """Reading alpha from non-alpha RGB PixelData raises LogicalErrorException."""
+        """Reading alpha from non-alpha RGB PixelData names the actual type in LogicalErrorException."""
         image = _make_image(pylon.PixelType_RGB8packed, 1, 1, bytearray([10, 20, 30]))
 
         pixel_data = image.GetPixelData(0, 0)
 
-        with self.assertRaises(pylon.LogicalErrorException):
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_RGB"):
             _ = pixel_data.A
 
     # ------------------------------------------------------------------
@@ -183,6 +183,29 @@ class PixelDataTestSuite(PylonEmuTestCase):
         self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
         self.assertEqual(second_green_pixel.BayerG, 44)
 
+    def test_get_pixel_data_bayer_gr8_returns_component_matching_position(self):
+        """GetPixelData returns the Bayer component selected by the BayerGR8 pixel position."""
+        image = _make_image(
+            pylon.PixelType_BayerGR8,
+            2,
+            2,
+            bytearray([11, 22, 33, 44]),
+        )
+
+        first_green_pixel = image.GetPixelData(0, 0)
+        red_pixel = image.GetPixelData(1, 0)
+        blue_pixel = image.GetPixelData(0, 1)
+        second_green_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(first_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(first_green_pixel.BayerG, 11)
+        self.assertEqual(red_pixel.PixelDataType, pylon.PixelDataType_BayerR)
+        self.assertEqual(red_pixel.BayerR, 22)
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        self.assertEqual(blue_pixel.BayerB, 33)
+        self.assertEqual(second_green_pixel.PixelDataType, pylon.PixelDataType_BayerG)
+        self.assertEqual(second_green_pixel.BayerG, 44)
+
     # ------------------------------------------------------------------
     # BiColor pixel data
     # ------------------------------------------------------------------
@@ -238,6 +261,135 @@ class PixelDataTestSuite(PylonEmuTestCase):
         with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_BiColorBG"):
             _ = blue_green_pixel.R
 
+    # ------------------------------------------------------------------
+    # RGBA pixel data
+    # ------------------------------------------------------------------
+
+    def test_get_pixel_data_rgba8packed_returns_all_four_components(self):
+        """GetPixelData returns R, G, B, and A values for RGBA8packed."""
+        image = _make_image(pylon.PixelType_RGBA8packed, 1, 1, bytearray([11, 22, 33, 44]))
+
+        pixel_data = image.GetPixelData(0, 0)
+
+        self.assertEqual(pixel_data.PixelDataType, pylon.PixelDataType_RGBA)
+        self.assertEqual(pixel_data.BitDepth, 8)
+        self.assertEqual(pixel_data.R, 11)
+        self.assertEqual(pixel_data.G, 22)
+        self.assertEqual(pixel_data.B, 33)
+        self.assertEqual(pixel_data.A, 44)
+
+    def test_get_pixel_data_rejects_mono_from_rgba_pixel_data(self):
+        """Reading Mono from RGBA PixelData names the actual type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_RGBA8packed, 1, 1, bytearray([11, 22, 33, 44]))
+
+        pixel_data = image.GetPixelData(0, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_RGBA"):
+            _ = pixel_data.Mono
+
+    # ------------------------------------------------------------------
+    # YUV pixel data
+    # ------------------------------------------------------------------
+
+    def test_get_pixel_data_yuv422packed_returns_yuv_components(self):
+        """GetPixelData returns the expected Y, U, and V values for YUV422packed."""
+        # YUV422packed layout: U0, Y0, V0, Y1 (two pixels share U/V chroma).
+        image = _make_image(
+            pylon.PixelType_YUV422packed,
+            2,
+            1,
+            bytearray([128, 100, 64, 200]),
+        )
+
+        first_pixel = image.GetPixelData(0, 0)
+        second_pixel = image.GetPixelData(1, 0)
+
+        self.assertEqual(first_pixel.PixelDataType, pylon.PixelDataType_YUV)
+        self.assertEqual(first_pixel.Y, 100)
+        self.assertEqual(first_pixel.U, 128)
+        self.assertEqual(first_pixel.V, 64)
+
+        self.assertEqual(second_pixel.PixelDataType, pylon.PixelDataType_YUV)
+        self.assertEqual(second_pixel.Y, 200)
+        self.assertEqual(second_pixel.U, 128)
+        self.assertEqual(second_pixel.V, 64)
+
+    def test_get_pixel_data_rejects_mono_from_yuv_pixel_data(self):
+        """Reading Mono from YUV PixelData names the actual type in LogicalErrorException."""
+        image = _make_image(
+            pylon.PixelType_YUV422packed,
+            2,
+            1,
+            bytearray([128, 100, 64, 200]),
+        )
+
+        pixel_data = image.GetPixelData(0, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_YUV"):
+            _ = pixel_data.Mono
+
+    # ------------------------------------------------------------------
+    # Copy construction
+    # ------------------------------------------------------------------
+
+    def test_pixel_data_copy_construction_preserves_value(self):
+        """PixelData(other) produces an independent copy with the same type and channel value."""
+        original = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([77])).GetPixelData(0, 0)
+
+        copy = pylon.PixelData(original)
+
+        self.assertEqual(copy.PixelDataType, pylon.PixelDataType_Mono)
+        self.assertEqual(copy.Mono, 77)
+        self.assertEqual(copy, original)
+
+    # ------------------------------------------------------------------
+    # Error message coverage
+    # ------------------------------------------------------------------
+
+    def test_get_pixel_data_rejects_mono_from_rgb_pixel_data_with_message(self):
+        """Reading Mono from RGB PixelData names the actual type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_RGB8packed, 1, 1, bytearray([10, 20, 30]))
+
+        pixel_data = image.GetPixelData(0, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_RGB"):
+            _ = pixel_data.Mono
+
+    def test_get_pixel_data_rejects_wrong_bayer_component_with_message(self):
+        """Reading BayerR from a BayerB pixel names the actual type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_BayerRG8, 2, 2, bytearray([11, 22, 33, 44]))
+
+        blue_pixel = image.GetPixelData(1, 1)
+
+        self.assertEqual(blue_pixel.PixelDataType, pylon.PixelDataType_BayerB)
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_BayerB"):
+            _ = blue_pixel.BayerR
+
+    def test_get_pixel_data_rejects_yuv_component_from_mono_pixel_data_with_message(self):
+        """Reading Y from Mono PixelData names the actual type in LogicalErrorException."""
+        image = _make_image(pylon.PixelType_Mono8, 1, 1, bytearray([42]))
+
+        pixel_data = image.GetPixelData(0, 0)
+
+        with self.assertRaisesRegex(pylon.LogicalErrorException, "actual type is PixelDataType_Mono"):
+            _ = pixel_data.Y
+
+    # ------------------------------------------------------------------
+    # Class-level constants
+    # ------------------------------------------------------------------
+
+    def test_pixel_data_type_constants_accessible_on_class(self):
+        """PixelDataType constants are accessible on the PixelData class and equal the module-level aliases."""
+        self.assertEqual(pylon.PixelData.PixelDataType_Unknown, pylon.PixelDataType_Unknown)
+        self.assertEqual(pylon.PixelData.PixelDataType_Mono, pylon.PixelDataType_Mono)
+        self.assertEqual(pylon.PixelData.PixelDataType_YUV, pylon.PixelDataType_YUV)
+        self.assertEqual(pylon.PixelData.PixelDataType_RGB, pylon.PixelDataType_RGB)
+        self.assertEqual(pylon.PixelData.PixelDataType_RGBA, pylon.PixelDataType_RGBA)
+        self.assertEqual(pylon.PixelData.PixelDataType_BayerR, pylon.PixelDataType_BayerR)
+        self.assertEqual(pylon.PixelData.PixelDataType_BayerG, pylon.PixelDataType_BayerG)
+        self.assertEqual(pylon.PixelData.PixelDataType_BayerB, pylon.PixelDataType_BayerB)
+        self.assertEqual(pylon.PixelData.PixelDataType_BiColorRG, pylon.PixelDataType_BiColorRG)
+        self.assertEqual(pylon.PixelData.PixelDataType_BiColorBG, pylon.PixelDataType_BiColorBG)
 
     # ------------------------------------------------------------------
     # Coordinate validation
@@ -297,5 +449,3 @@ class PixelDataTestSuite(PylonEmuTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
