@@ -9,6 +9,15 @@ import unittest
 
 
 class ConfigurationHelperTestSuite(PylonEmuTestCase):
+    # ------------------------------------------------------------------
+    # Construction
+    # ------------------------------------------------------------------
+
+    def test_construction(self):
+        """ConfigurationHelper can be instantiated."""
+        helper = pylon.ConfigurationHelper()
+        self.assertIsNotNone(helper)
+
     def test_create_camera(self):
         """Test to create a camera instance."""
         cam = self.create_first()

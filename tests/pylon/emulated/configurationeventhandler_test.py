@@ -302,6 +302,57 @@ class ConfigurationEventHandlerTestSuite(PylonEmuTestCase):
             # Passing None as handler deregisters all currently registered configuration handlers.
             camera.RegisterConfiguration(None, pylon.RegistrationMode_ReplaceAll, pylon.Cleanup_Delete)
 
+    # ------------------------------------------------------------------
+    # Base class pass-through
+    # ------------------------------------------------------------------
+
+    def test_base_class_lifecycle_callbacks_do_not_raise(self):
+        """Base class On* lifecycle methods execute without raising when a plain handler is registered."""
+        handler = pylon.ConfigurationEventHandler()
+        with pylon.InstantCamera() as camera:
+            camera.RegisterConfiguration(handler, pylon.RegistrationMode_ReplaceAll, pylon.Cleanup_None)
+            try:
+                camera.Attach(self.get_camera_traits(), pylon.FirstFound)
+                camera.Open()
+                camera.StartGrabbing()
+                camera.StopGrabbing()
+                camera.Close()
+            finally:
+                camera.DeregisterConfiguration(handler)
+
+    def test_base_class_on_destroy_and_on_destroyed_do_not_raise(self):
+        """Base class OnDestroy and OnDestroyed execute without raising when the device is destroyed."""
+        handler = pylon.ConfigurationEventHandler()
+        with pylon.InstantCamera() as camera:
+            camera.RegisterConfiguration(handler, pylon.RegistrationMode_ReplaceAll, pylon.Cleanup_None)
+            try:
+                camera.Attach(self.get_camera_traits(), pylon.FirstFound)
+                camera.DestroyDevice()
+            finally:
+                camera.DeregisterConfiguration(handler)
+
+    def test_base_class_on_detach_and_on_detached_do_not_raise(self):
+        """Base class OnDetach and OnDetached execute without raising when the device is detached."""
+        handler = pylon.ConfigurationEventHandler()
+        with pylon.InstantCamera() as camera:
+            camera.RegisterConfiguration(handler, pylon.RegistrationMode_ReplaceAll, pylon.Cleanup_None)
+            try:
+                camera.Attach(self.get_camera_traits(), pylon.FirstFound)
+                camera.DetachDevice()
+            finally:
+                camera.DeregisterConfiguration(handler)
+
+    def test_base_class_on_camera_device_removed_does_not_raise(self):
+        """Base class OnCameraDeviceRemoved is directly callable and does not raise."""
+        handler = pylon.ConfigurationEventHandler()
+        with self.create_first() as camera:
+            handler.OnCameraDeviceRemoved(camera)
+
+    def test_base_class_on_grab_error_does_not_raise(self):
+        """Base class OnGrabError is directly callable and does not raise."""
+        handler = pylon.ConfigurationEventHandler()
+        with self.create_first() as camera:
+            handler.OnGrabError(camera, "test error message")
 
 if __name__ == "__main__":
     unittest.main()
