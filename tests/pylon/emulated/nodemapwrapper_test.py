@@ -681,8 +681,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter(INode) falls back to base Parameter when _node_to_specific finds no matching interface constant."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        inode = raw_nm.GetNode("GainRaw").GetNode()
+        raw_nodemap = camera.GetNodeMap()._Get()
+        inode = raw_nodemap.GetNode("GainRaw").GetNode()
 
         original_intf_iinteger = genicam.intfIInteger
         try:
