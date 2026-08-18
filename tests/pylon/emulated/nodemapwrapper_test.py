@@ -681,7 +681,7 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter(INode) falls back to base Parameter when _node_to_specific finds no matching interface constant."""
         camera = self.create_first()
         camera.Open()
-        raw_nodemap = camera.GetNodeMap()._Get()
+        raw_nodemap = camera.NodeMap._Get()
         inode = raw_nodemap.GetNode("GainRaw").GetNode()
 
         original_intf_iinteger = genicam.intfIInteger
@@ -701,8 +701,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter(base Parameter) returns the same base object if _node_to_specific cannot specialise it."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        base_param = pylon.Parameter(raw_nm.GetNode("GainRaw").GetNode())
+        raw_nodemap = camera.NodeMap._Get()
+        base_param = pylon.Parameter(raw_nodemap.GetNode("GainRaw").GetNode())
 
         original_intf_iinteger = genicam.intfIInteger
         try:
@@ -721,9 +721,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() returns a specific Parameter subclass unchanged."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
+        nodemap = camera.NodeMap
 
-        int_param = pylon.IntegerParameter(nm.GetNode("GainRaw").GetNode())
+        int_param = pylon.IntegerParameter(nodemap.GetNode("GainRaw").GetNode())
         result = pylon.ToParameter(int_param)
         self.assertIs(result, int_param)
 
@@ -746,8 +746,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps a category INode into a CategoryParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("Root"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("Root"))
         self.assertIsInstance(result, pylon.CategoryParameter)
         camera.Close()
 
@@ -755,8 +755,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps an enum-entry INode into an EnumEntryParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("EnumEntry_GainAuto_Off"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("EnumEntry_GainAuto_Off"))
         self.assertIsInstance(result, pylon.EnumEntryParameter)
         camera.Close()
 
@@ -764,8 +764,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps a port INode into a PortParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("Device"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("Device"))
         self.assertIsInstance(result, pylon.PortParameter)
         camera.Close()
 
@@ -773,8 +773,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps a register INode into an ArrayParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("BslImageCompressionBCBDescriptor"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("BslImageCompressionBCBDescriptor"))
         self.assertIsInstance(result, pylon.ArrayParameter)
         camera.Close()
 
@@ -792,7 +792,7 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """
         camera = self.create_first()
         camera.Open()
-        port_param = camera.GetNodeMap().GetNode("Device")
+        port_param = camera.NodeMap.GetNode("Device")
         self.assertIsInstance(port_param, pylon.PortParameter)
         node = port_param.GetNode()
         self.assertIsInstance(node, genicam.INode)
@@ -806,8 +806,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter and NodeMapWrapper.GetNode agree on the returned type for all key nodes."""
         camera = self.create_first()
         camera.Open()
-        nm      = camera.GetNodeMap()
-        raw_nm  = nm._Get()
+        nodemap = camera.NodeMap
+        raw_nodemap = nodemap._Get()
 
         pairs = [
             ("GainRaw",                         pylon.IntegerParameter),
@@ -822,8 +822,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         ]
         for name, expected_type in pairs:
             with self.subTest(node=name):
-                via_wrapper    = nm.GetNode(name)
-                via_to_param   = pylon.ToParameter(raw_nm.GetNode(name))
+                via_wrapper    = nodemap.GetNode(name)
+                via_to_param   = pylon.ToParameter(raw_nodemap.GetNode(name))
                 self.assertIsInstance(via_wrapper,  expected_type, f"wrapper mismatch for {name}")
                 self.assertIsInstance(via_to_param, expected_type, f"ToParameter mismatch for {name}")
 
@@ -846,9 +846,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """InvalidateNodes() does not raise and the nodemap remains usable afterwards."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        nm.InvalidateNodes()
-        self.assertTrue(nm.Contains("GainRaw"))
+        nodemap = camera.NodeMap
+        nodemap.InvalidateNodes()
+        self.assertTrue(nodemap.Contains("GainRaw"))
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -870,9 +870,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
 
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
+        nodemap = camera.NodeMap
         port = _SimplePort()
-        nm.Connect(port, "Device")
+        nodemap.Connect(port, "Device")
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -883,17 +883,17 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """NewNodeWriteConcatenator() returns a non-None concatenator object."""
         camera = self.create_first()
         camera.Open()
-        conc = camera.GetNodeMap().NewNodeWriteConcatenator()
-        self.assertIsNotNone(conc)
+        concatenator = camera.NodeMap.NewNodeWriteConcatenator()
+        self.assertIsNotNone(concatenator)
         camera.Close()
 
     def test_nodemap_wrapper_concatenated_write(self):
         """ConcatenatedWrite() executes a concatenator without raising."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        conc = nm.NewNodeWriteConcatenator()
-        nm.ConcatenatedWrite(conc)
+        nodemap = camera.NodeMap
+        concatenator = nodemap.NewNodeWriteConcatenator()
+        nodemap.ConcatenatedWrite(concatenator)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -904,9 +904,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """SetSuppressCallbackMode() accepts True and False without raising."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        nm.SetSuppressCallbackMode(True)
-        nm.SetSuppressCallbackMode(False)
+        nodemap = camera.NodeMap
+        nodemap.SetSuppressCallbackMode(True)
+        nodemap.SetSuppressCallbackMode(False)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -917,8 +917,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """GetDeviceName() returns a non-empty string."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        name = nm.GetDeviceName()
+        nodemap = camera.NodeMap
+        name = nodemap.GetDeviceName()
         self.assertIsInstance(name, str)
         self.assertTrue(len(name) > 0)
         camera.Close()
@@ -927,8 +927,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """DeviceName property matches GetDeviceName()."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        self.assertEqual(nm.GetDeviceName(), nm.DeviceName)
+        nodemap = camera.NodeMap
+        self.assertEqual(nodemap.GetDeviceName(), nodemap.DeviceName)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -939,7 +939,7 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """Poll() accepts an elapsed-time argument without raising."""
         camera = self.create_first()
         camera.Open()
-        camera.GetNodeMap().Poll(100)
+        camera.NodeMap.Poll(100)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -950,7 +950,7 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """GetLock() returns a non-None lock object."""
         camera = self.create_first()
         camera.Open()
-        lock = camera.GetNodeMap().GetLock()
+        lock = camera.NodeMap.GetLock()
         self.assertIsNotNone(lock)
         camera.Close()
 
@@ -962,9 +962,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """GetNumNodes() returns a positive integer."""
         camera = self.create_first()
         camera.Open()
-        num = camera.GetNodeMap().GetNumNodes()
-        self.assertIsInstance(num, int)
-        self.assertGreater(num, 0)
+        node_count = camera.NodeMap.GetNumNodes()
+        self.assertIsInstance(node_count, int)
+        self.assertGreater(node_count, 0)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -975,7 +975,7 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ParseSwissKnifes() does not raise on a valid camera nodemap."""
         camera = self.create_first()
         camera.Open()
-        camera.GetNodeMap().ParseSwissKnifes()
+        camera.NodeMap.ParseSwissKnifes()
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -986,9 +986,9 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """Accessing an unknown dunder attribute raises AttributeError."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
+        nodemap = camera.NodeMap
         with self.assertRaises(AttributeError):
-            getattr(nm, "__foobar__")
+            getattr(nodemap, "__foobar__")
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -999,10 +999,10 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """Direct feature assignment emits DeprecationWarning and sets the value."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
+        nodemap = camera.NodeMap
         with self.assertWarns(DeprecationWarning):
-            nm.GainRaw = 200
-        self.assertEqual(200, nm.GainRaw.Value)
+            nodemap.GainRaw = 200
+        self.assertEqual(200, nodemap.GainRaw.Value)
         camera.Close()
 
     # ------------------------------------------------------------------
@@ -1013,8 +1013,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """dir(nodemap) returns a sorted list that includes NodeMapWrapper method names."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
-        listing = dir(nm)
+        nodemap = camera.NodeMap
+        listing = dir(nodemap)
         self.assertIsInstance(listing, list)
         self.assertEqual(listing, sorted(set(listing)))
         self.assertIn("GetNode", listing)
