@@ -126,6 +126,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pylon/PortParameter.h"
 #include "pylon/PlaceholderParameter.h"
 #include <pylon/PixelTypeMapper.h>
+#include "pylon/BufferFactoryContext.h"
 
 #ifdef _MSC_VER  // MSVC
 #  pragma warning(pop)
@@ -886,6 +887,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "GrabResultPtr.i"
 %include "WaitObject.i"
 %include "WaitObjects.i"
+%include "BufferFactory.i"
 %include "InstantCamera.i"
 %include "InstantCameraArray.i"
 %include "ImageEventHandler.i"

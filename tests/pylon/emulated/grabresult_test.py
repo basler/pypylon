@@ -366,16 +366,16 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(grab_result.CameraContext, 0)
         grab_result.Release()
 
-    def test_buffer_context_is_an_integer(self):
-        """GetBufferContext returns an integer context value associated with the buffer."""
+    def test_buffer_context_is_none_without_custom_buffer_factory(self):
+        """GetBufferContext returns None when no custom BufferFactory was used to allocate the buffer."""
         with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
             camera.Width.Value = 64
             camera.Height.Value = 48
             grab_result = camera.GrabOne(1000)
         # Method access
-        self.assertIsInstance(grab_result.GetBufferContext(), int)
+        self.assertIsNone(grab_result.GetBufferContext())
         # Property access (preferred style)
-        self.assertIsInstance(grab_result.BufferContext, int)
+        self.assertIsNone(grab_result.BufferContext)
         grab_result.Release()
 
     # ------------------------------------------------------------------

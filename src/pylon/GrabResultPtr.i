@@ -2,7 +2,27 @@
 %ignore operator IImage&;
 %rename(GrabResult) Pylon::CGrabResultPtr;
 
+%{
+#include "pylon/BufferFactoryContext.h"
+%}
+
 %extend Pylon::CGrabResultPtr {
+
+    // CGrabResultPtr's automatic smart-pointer forwarding (based on its
+    // operator->()) only synthesizes forwarding wrappers for genuine methods
+    // of CGrabResultData, not for the %extend-based GetBufferContext()
+    // replacement in GrabResultData.i. So it is forwarded explicitly here.
+    %nothread GetBufferContext;
+
+    PyObject * GetBufferContext()
+    {
+        return Pylon::CPyBufferContextBox::UnboxContext( (*$self)->GetBufferContext() );
+    }
+    PyObject * GetBufferFactory()
+    {
+        return Pylon::CPyBufferContextBox::UnboxFactory( (*$self)->GetBufferContext() /* <- this is correct */ );
+    }
+
 %pythoncode %{
     GetImageFormat = needs_numpy(_image_get_image_format)
 
@@ -127,3 +147,4 @@ ADD_PROP_GET(GrabResult, DataContainer)
 ADD_PROP_GET(GrabResult, CameraContext)
 ADD_PROP_GET(GrabResult, BufferSize)
 ADD_PROP_GET(GrabResult, BufferContext)
+ADD_PROP_GET(GrabResult, BufferFactory)

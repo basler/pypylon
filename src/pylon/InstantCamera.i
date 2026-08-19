@@ -108,6 +108,10 @@ namespace Pylon {
         self.RegisterConfiguration(None, _pylon.RegistrationMode_ReplaceAll, _pylon.Cleanup_None)
         self.RegisterImageEventHandler(None, _pylon.RegistrationMode_ReplaceAll, _pylon.Cleanup_None)
         self.RegisterCameraEventHandler(None, "Dummy", 0, _pylon.RegistrationMode_ReplaceAll, _pylon.Cleanup_None)
+        # reset the buffer factory (if any) so that BufferFactory.OnReleased() fires
+        # deterministically here, instead of whenever this InstantCamera object
+        # happens to be garbage collected.
+        self.SetBufferFactory(None)
         return False
 %}
 }
@@ -184,6 +188,21 @@ namespace Pylon {
     elif args[4] == Cleanup_None:
         # should we increment the pyhon refcount here??
         pass
+%}
+
+%pythonprepend Pylon::CInstantCamera::SetBufferFactory %{
+    # SetBufferFactory(factory: BufferFactory | None)
+    # There is no cleanup switch here: Cleanup_Delete is always used, the
+    # instant camera always takes ownership of the passed factory and calls
+    # BufferFactory.OnReleased() when it is no longer needed.
+    factory = args[0] if len(args) > 0 else None
+    if factory is not None:
+        adapter = _BufferFactoryAdapter(factory)
+        adapter.thisown = False
+        _pylon.InstantCamera_SetBufferFactory(self, adapter, _pylon.Cleanup_Delete)
+    else:
+        _pylon.InstantCamera_SetBufferFactory(self, None, _pylon.Cleanup_Delete)
+    return
 %}
 
 %include <pylon/ECleanup.h>;
