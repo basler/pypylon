@@ -108,11 +108,11 @@ namespace Pylon
                 }
             }
 
-            void* buffer = NULL;
+            void* pBuffer = NULL;
             if (pBufferObj != Py_None)
             {
-                buffer = PyLong_AsVoidPtr( pBufferObj );
-                if (buffer == NULL && PyErr_Occurred())
+                pBuffer = PyLong_AsVoidPtr( pBufferObj );
+                if (pBuffer == NULL && PyErr_Occurred())
                 {
                     std::string message = DescribeCurrentPythonError(
                         "BufferFactory.AllocateBuffer() must return the allocated buffer address (int) as the "
@@ -123,8 +123,15 @@ namespace Pylon
                 }
             }
 
-            *pCreatedBuffer = buffer;
-            bufferContext = reinterpret_cast<intptr_t>( new CPyBufferContextBox( pContextObj, m_pyFactory ) );
+            *pCreatedBuffer = pBuffer;
+            if (pBuffer)
+            {
+                bufferContext = reinterpret_cast<intptr_t>( new CPyBufferContextBox( pContextObj, m_pyFactory ) );
+            }
+            else
+            {
+                bufferContext = 0;
+            }
 
             Py_DECREF( pResult );
             PyGILState_Release( gstate );
@@ -278,6 +285,8 @@ class BufferFactory:
         buffer is the integer address of the allocated memory (or None if
         the allocation failed). context is an arbitrary, optional Python
         object that is passed back unchanged to FreeBuffer().
+
+        May return null for buffer if the allocation fails.
 
         This method can be called from different threads, including an
         internal pylon grab engine thread.

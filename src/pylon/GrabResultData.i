@@ -48,7 +48,7 @@
     // Returns the context object provided by BufferFactory.AllocateBuffer()
     // for the buffer backing this grab result, or None if the buffer was not
     // allocated through a (Python) BufferFactory or no context was provided.
-    PyObject * GetBufferContext2()
+    PyObject * GetBufferContext()
     {
         return Pylon::CPyBufferContextBox::UnboxContext( $self->GetBufferContext() );
     }

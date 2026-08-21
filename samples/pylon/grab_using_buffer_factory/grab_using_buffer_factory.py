@@ -8,7 +8,7 @@ A buffer factory is only necessary if you want to grab into externally
 supplied buffers.
 
 The buffer factory below returns the NumPy array backing each buffer as the
-buffer's context, so grab_result.GetBufferContext() gives zero-copy access to
+buffer's context, so grab_result.BufferContext gives zero-copy access to
 the very array pylon filled with image data - no extra copy through
 grab_result.Array is needed.
 
@@ -33,10 +33,14 @@ class NumpyBufferFactory(pylon.BufferFactory):
         The array itself is returned as the context, so pypylon keeps it
         alive between AllocateBuffer() and FreeBuffer() - no extra buffer
         bookkeeping is required here. The context can later be retrieved
-        from a grab result by calling grab_result.GetBufferContext().
+        from a grab result by accessing grab_result.BufferContext.
 
         Warning: This method can be called by different threads.
         """
+        print("Allocating buffer.")
+        # note: if you are working with fixed image properties,
+        # you can also preallocate an array of the exact size and reuse it for all buffers,
+        # and skip the reshaping after grabbing.
         buffer_array = np.empty(buffer_size, dtype=np.uint8)
         return buffer_array.ctypes.data, buffer_array
 
@@ -48,7 +52,7 @@ class NumpyBufferFactory(pylon.BufferFactory):
 
         Warning: This method can be called by different threads.
         """
-        pass
+        print("Buffer released.")
 
     def OnReleased(self):
         """Called when the buffer factory is released.
@@ -72,7 +76,7 @@ try:
         print("Using device:", camera.DeviceInfo.ModelName)
         print()
 
-        camera.PixelFormat.Value = "Mono8"
+        camera.PixelFormat.Value = "Mono8" # The sample only works for Mono8 2D image payloads, force it here.
 
         # Use our own implementation of a buffer factory.
         camera.SetBufferFactory(numpy_buffer_factory)
@@ -99,10 +103,16 @@ try:
                         # The buffer context is the exact NumPy array that pylon
                         # filled with pixel data - a zero-copy view, reshaped to
                         # the actual image dimensions.
-                        buffer_array = grab_result.GetBufferContext()
+                        buffer_array = grab_result.BufferContext
                         pixel_count = grab_result.Width * grab_result.Height
-                        image = buffer_array[:pixel_count].reshape(
-                            grab_result.Height, grab_result.Width
+                        # copy=False makes reshape() raise a ValueError instead of
+                        # silently copying, so a zero-copy view is guaranteed.
+                        # reshape() returns a view of the original array, so the buffer context array is not changed.
+                        # For other image formats, you may need to take PixelType and PaddingX into account when reshaping.
+                        image = np.reshape(
+                            buffer_array[:pixel_count],
+                            (grab_result.Height, grab_result.Width),
+                            copy=False,
                         )
 
                         print(f"SizeX: {image.shape[1]}; SizeY: {image.shape[0]}; "

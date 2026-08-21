@@ -61,6 +61,8 @@ namespace Pylon
         // Returns true if this looks like a genuine box, as opposed to some
         // unrelated intptr_t value produced. This is just a sanity check for faster debugging.
         // The pylon default buffer factory reports bufferContext=0.
+        // Otherwise, only the pypylon buffer factory adapter (CPyBufferFactory) is used,
+        // and it always produces a valid box.
         bool IsValid() const
         {
             return m_magic == kMagic;

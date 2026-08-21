@@ -112,7 +112,7 @@ class BufferFactoryTestSuite(PylonEmuTestCase):
         self.assertTrue(factory.released)
 
     def test_on_released_called_when_result_released(self):
-        """OnReleased is called when the owning instant camera is destroyed."""
+        """OnReleased is called when last grab result is released or destroyed."""
         factory = TrackingBufferFactory()
         with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
             camera.SetBufferFactory(factory)
