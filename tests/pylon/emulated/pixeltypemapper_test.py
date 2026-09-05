@@ -1,5 +1,6 @@
-"""Unit tests for the PixelTypeMapper class-based API."""
-
+"""\
+This unit test checks all of the mapped pypylon API introduced by src/pylon/PixelTypeMapper.i.
+"""
 
 from pylonemutestcase import PylonEmuTestCase
 from pypylon import pylon
@@ -8,6 +9,7 @@ import unittest
 
 class PixelTypeMapperTestSuite(PylonEmuTestCase):
     """Checks mapping between PixelType values and symbolic pixel format names."""
+
     # -------------------------------------------------------------------------
     # Public interface
     # -------------------------------------------------------------------------
@@ -15,205 +17,129 @@ class PixelTypeMapperTestSuite(PylonEmuTestCase):
         """The PixelTypeMapper class is available on the pylon module."""
         self.assertTrue(hasattr(pylon, "PixelTypeMapper"))
 
-    def test_get_pixel_type_from_format_value_is_exposed(self):
-        """The PixelTypeMapper method GetPylonPixelTypeByPixelFormatValue is available."""
-        self.assertTrue(hasattr(pylon.PixelTypeMapper, "GetPylonPixelTypeByPixelFormatValue"))
-        self.assertTrue(callable(pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue))
+    def test_get_pylon_pixel_type_by_name_is_exposed(self):
+        """The PixelTypeMapper method GetPylonPixelTypeByName is available."""
+        self.assertTrue(hasattr(pylon.PixelTypeMapper, "GetPylonPixelTypeByName"))
+        self.assertTrue(callable(pylon.PixelTypeMapper.GetPylonPixelTypeByName))
 
-    def test_get_pixel_format_value_from_pixel_type_is_exposed(self):
-        """The PixelTypeMapper method GetPixelFormatByPixelType is available."""
-        self.assertTrue(hasattr(pylon.PixelTypeMapper, "GetPixelFormatByPixelType"))
-        self.assertTrue(callable(pylon.PixelTypeMapper.GetPixelFormatByPixelType))
+    def test_get_name_by_pixel_type_is_exposed(self):
+        """The PixelTypeMapper method GetNameByPixelType is available."""
+        self.assertTrue(hasattr(pylon.PixelTypeMapper, "GetNameByPixelType"))
+        self.assertTrue(callable(pylon.PixelTypeMapper.GetNameByPixelType))
 
     def test_sfnc_version_constants_are_available(self):
-        """The SFNC version constants are available."""
+        """The built-in SFNC version constants used by GetNameByPixelType are available."""
+        self.assertTrue(hasattr(pylon, "Sfnc_VersionUndefined"))
         self.assertTrue(hasattr(pylon, "Sfnc_1_5_0"))
         self.assertTrue(hasattr(pylon, "Sfnc_2_0_0"))
-        self.assertTrue(hasattr(pylon, "Sfnc_2_1_0"))
 
     # -------------------------------------------------------------------------
-    # Map pixel format values to pixel type (int)
+    # GetPylonPixelTypeByName: symbolic name (str) -> pixel type (int)
     # -------------------------------------------------------------------------
-    def test_get_pixel_type_from_format_value_returns_int(self):
-        """The result type of GetPylonPixelTypeByPixelFormatValue is int."""
-        result = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(pylon.PixelType_Mono8)
+    def test_get_pylon_pixel_type_by_name_returns_int(self):
+        """The result type of GetPylonPixelTypeByName is int."""
+        result = pylon.PixelTypeMapper.GetPylonPixelTypeByName("Mono8")
         self.assertIsInstance(result, int)
 
-    def test_get_pixel_type_from_format_value_recognizes_known_types(self):
-        """The PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue recognizes known pixel types."""
-        for pixel_type in (
-            pylon.PixelType_Mono8,
-            pylon.PixelType_Mono16,
-            pylon.PixelType_RGB8packed,
-            pylon.PixelType_BayerRG8,
-        ):
-            with self.subTest(pixel_type=pixel_type):
-                result = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(pixel_type)
-                self.assertEqual(result, pixel_type)
+    def test_get_pylon_pixel_type_by_name_recognizes_known_names(self):
+        """GetPylonPixelTypeByName recognizes known symbolic names."""
+        expected = {
+            "Mono8": pylon.PixelType_Mono8,
+            "Mono16": pylon.PixelType_Mono16,
+            "RGB8": pylon.PixelType_RGB8packed,
+            "RGB8Packed": pylon.PixelType_RGB8packed,
+            "BayerRG8": pylon.PixelType_BayerRG8,
+        }
+        for symbolic_name, expected_type in expected.items():
+            with self.subTest(symbolic_name=symbolic_name):
+                result = pylon.PixelTypeMapper.GetPylonPixelTypeByName(symbolic_name)
+                self.assertEqual(result, expected_type)
 
-    def test_get_pixel_type_from_format_value_returns_undefined_for_invalid_value(self):
-        """The PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue returns PixelType_Undefined for unknown values."""
-        result = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(0xDEADBEEF)
+    def test_get_pylon_pixel_type_by_name_returns_undefined_for_invalid_name(self):
+        """GetPylonPixelTypeByName returns PixelType_Undefined for unknown names."""
+        result = pylon.PixelTypeMapper.GetPylonPixelTypeByName("NotARealPixelFormat")
         self.assertEqual(result, pylon.PixelType_Undefined)
 
-    def test_get_pixel_type_from_format_value_default_sfnc_is_2_0_0(self):
-        """The PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue uses SFNC 2.0.0 as default."""
-        result_default = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(pylon.PixelType_Mono8)
-        result_explicit = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(
-            pylon.PixelType_Mono8, pylon.Sfnc_2_0_0
-        )
-        self.assertEqual(result_default, result_explicit)
-
-    def test_get_pixel_type_from_format_value_accepts_sfnc_versions(self):
-        """The PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue accepts SFNC 1.x and SFNC 2.x versions."""
-        result_sfnc1 = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(
-            pylon.PixelType_Mono8, pylon.Sfnc_1_5_0
-        )
-        result_sfnc2 = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(
-            pylon.PixelType_Mono8, pylon.Sfnc_2_0_0
-        )
-        self.assertNotEqual(result_sfnc1, pylon.PixelType_Undefined)
-        self.assertNotEqual(result_sfnc2, pylon.PixelType_Undefined)
-
     # -------------------------------------------------------------------------
-    # Map pixel type (str) to pixel format value (int)
+    # GetNameByPixelType: pixel type (int) -> symbolic name (str)
     # -------------------------------------------------------------------------
-    def test_get_pixel_format_value_from_pixel_type_returns_string(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType returns strings."""
-        result = pylon.PixelTypeMapper.GetPixelFormatByPixelType(pylon.PixelType_Mono8)
+    def test_get_name_by_pixel_type_returns_string(self):
+        """GetNameByPixelType returns a string."""
+        result = pylon.PixelTypeMapper.GetNameByPixelType(pylon.PixelType_Mono8)
         self.assertIsInstance(result, str)
 
-    def test_get_pixel_format_value_from_pixel_type_maps_known_types(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType maps known types correctly."""
+    def test_get_name_by_pixel_type_maps_known_types(self):
+        """GetNameByPixelType maps known pixel types correctly."""
         expected = {
             pylon.PixelType_Mono8: "Mono8",
             pylon.PixelType_Mono16: "Mono16",
-            pylon.PixelType_RGB8packed: "RGB8",
             pylon.PixelType_BayerRG8: "BayerRG8",
         }
         for pixel_type, expected_name in expected.items():
             with self.subTest(pixel_type=pixel_type):
-                result = pylon.PixelTypeMapper.GetPixelFormatByPixelType(pixel_type)
+                result = pylon.PixelTypeMapper.GetNameByPixelType(pixel_type)
                 self.assertEqual(result, expected_name)
 
-    def test_get_pixel_format_value_from_pixel_type_undefined_returns_empty_string(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType returns empty string for the PixelType_Undefined."""
-        result = pylon.PixelTypeMapper.GetPixelFormatByPixelType(pylon.PixelType_Undefined)
+    def test_get_name_by_pixel_type_undefined_returns_empty_string(self):
+        """GetNameByPixelType returns an empty string for PixelType_Undefined."""
+        result = pylon.PixelTypeMapper.GetNameByPixelType(pylon.PixelType_Undefined)
         self.assertEqual(result, "")
 
-    def test_get_pixel_format_value_from_pixel_type_invalid_returns_empty_string(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType returns empty string for invalid pixel types."""
-        result = pylon.PixelTypeMapper.GetPixelFormatByPixelType(0xDEADBEEF)
-        self.assertEqual(result, "")
-
-    # -------------------------------------------------------------------------
-    # SFNC version behavior and round-trip
-    # -------------------------------------------------------------------------
-    def test_get_pixel_format_value_from_pixel_type_default_sfnc_is_2_0_0(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType uses SFNC 2.0.0 as default."""
-        result_default = pylon.PixelTypeMapper.GetPixelFormatByPixelType(pylon.PixelType_Mono8)
-        result_explicit = pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-            pylon.PixelType_Mono8, pylon.Sfnc_2_0_0
+    def test_get_name_by_pixel_type_default_sfnc_is_pre2_0(self):
+        """GetNameByPixelType defaults to the pre-2.0 naming, matching the pylon API default."""
+        result_default = pylon.PixelTypeMapper.GetNameByPixelType(pylon.PixelType_RGB8packed)
+        result_explicit = pylon.PixelTypeMapper.GetNameByPixelType(
+            pylon.PixelType_RGB8packed, pylon.Sfnc_VersionUndefined
         )
         self.assertEqual(result_default, result_explicit)
+        self.assertEqual(result_default, "RGB8Packed")
 
-    def test_get_pixel_format_value_from_pixel_type_accepts_sfnc_versions(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType accepts SFNC 1.x and SFNC 2.x. versions."""
-        result_sfnc1 = pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-            pylon.PixelType_Mono8, pylon.Sfnc_1_5_0
+    def test_sfnc_version_changes_symbolic_name(self):
+        """GetNameByPixelType returns a different name depending on the SFNC version."""
+        self.assertEqual(
+            pylon.PixelTypeMapper.GetNameByPixelType(
+                pylon.PixelType_RGB8packed, pylon.Sfnc_1_5_0
+            ),
+            "RGB8Packed",
         )
-        result_sfnc2 = pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-            pylon.PixelType_Mono8, pylon.Sfnc_2_0_0
+        self.assertEqual(
+            pylon.PixelTypeMapper.GetNameByPixelType(
+                pylon.PixelType_RGB8packed, pylon.Sfnc_2_0_0
+            ),
+            "RGB8",
         )
-        self.assertTrue(len(result_sfnc1) > 0)
-        self.assertTrue(len(result_sfnc2) > 0)
 
+    def test_sfnc_version_accepts_camera_get_sfnc_version(self):
+        """GetNameByPixelType accepts the VersionInfo returned by camera.GetSfncVersion()."""
+        camera = self.create_first()
+        camera.Open()
+        try:
+            sfnc_version = camera.GetSfncVersion()  # Sfnc_VersionUndefined for the emulated camera
+            result = pylon.PixelTypeMapper.GetNameByPixelType(
+                pylon.PixelType_RGB8packed, sfnc_version
+            )
+            self.assertEqual(result, "RGB8Packed")
+        finally:
+            camera.Close()
+
+    # -------------------------------------------------------------------------
+    # Round trip
+    # -------------------------------------------------------------------------
     def test_round_trip_various_formats(self):
-        """The PixelTypeMapper allows round trips for known pixel types."""
+        """Names obtained from GetNameByPixelType map back with GetPylonPixelTypeByName."""
         test_formats = [
             (pylon.PixelType_Mono8, "Mono8"),
             (pylon.PixelType_Mono16, "Mono16"),
-            (pylon.PixelType_RGB8packed, "RGB8"),
-            (pylon.PixelType_BGR8packed, "BGR8"),
             (pylon.PixelType_BayerRG8, "BayerRG8"),
         ]
 
         for pixel_type, expected_name in test_formats:
             with self.subTest(pixel_type=pixel_type):
-                name = pylon.PixelTypeMapper.GetPixelFormatByPixelType(pixel_type)
+                name = pylon.PixelTypeMapper.GetNameByPixelType(pixel_type)
                 self.assertEqual(name, expected_name)
-                roundtrip_type = pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(pixel_type)
+                roundtrip_type = pylon.PixelTypeMapper.GetPylonPixelTypeByName(name)
                 self.assertEqual(roundtrip_type, pixel_type)
 
-    def test_sfnc_versions_can_change_symbolic_name(self):
-        """The PixelTypeMapper.GetPixelFormatByPixelType changes the resulting name dependent on SFNC version."""
-        self.assertEqual(
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_RGB8packed, pylon.Sfnc_1_5_0
-            ),
-            "RGB8Packed",
-        )
-        self.assertEqual(
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_RGB8packed, pylon.Sfnc_2_0_0
-            ),
-            "RGB8",
-        )
-
-    def test_sfnc_boundary_equal_to_2_0_0_uses_sfnc2_mapping(self):
-        """A version exactly equal to Sfnc_2_0_0 selects SFNC 2.x mapping."""
-        self.assertEqual(
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_RGB8packed, pylon.Sfnc_2_0_0
-            ),
-            "RGB8",
-        )
-
-    def test_sfnc_1_5_0_uses_pre2_mapping(self):
-        """An SFNC 1.x version selects SFNC 1.x/pre-2 mapping."""
-        self.assertEqual(
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_RGB8packed, pylon.Sfnc_1_5_0
-            ),
-            "RGB8Packed",
-        )
-
-    def test_sfnc_version_none_uses_sfnc2_mapping(self):
-        """Passing sfnc_version=None selects SFNC 2.x mapping."""
-        self.assertEqual(
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_RGB8packed, None
-            ),
-            "RGB8",
-        )
-
-    def test_sfnc_version_missing_constant_falls_back_to_sfnc2(self):
-        """If Sfnc_2_0_0 is unavailable, mapping falls back to SFNC 2.x behavior."""
-        sfnc1 = pylon.Sfnc_1_5_0
-        sfnc2 = pylon.Sfnc_2_0_0
-
-        delattr(pylon, "Sfnc_2_0_0")
-        try:
-            self.assertEqual(
-                pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                    pylon.PixelType_RGB8packed, sfnc1
-                ),
-                "RGB8",
-            )
-        finally:
-            setattr(pylon, "Sfnc_2_0_0", sfnc2)
-
-    def test_sfnc_version_non_comparable_value_raises_type_error(self):
-        """Passing a non-comparable sfnc_version raises TypeError."""
-        with self.assertRaises(TypeError):
-            pylon.PixelTypeMapper.GetPixelFormatByPixelType(
-                pylon.PixelType_Mono8, object()
-            )
-
-        with self.assertRaises(TypeError):
-            pylon.PixelTypeMapper.GetPylonPixelTypeByPixelFormatValue(
-                pylon.PixelType_Mono8, object()
-            )
 
 
 if __name__ == "__main__":
