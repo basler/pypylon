@@ -28,7 +28,6 @@ class StaticDefectPixelCorrectionTestSuite(PylonEmuTestCase):
         with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
             result = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
                 camera.NodeMap,
-                [],
                 pylon.StaticDefectPixelCorrection.ListType_User,
             )
 

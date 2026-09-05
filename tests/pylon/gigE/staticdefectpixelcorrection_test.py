@@ -29,7 +29,6 @@ class StaticDefectPixelCorrectionTestSuite(PylonTestCase):
             try:
                 result = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
                     camera.NodeMap,
-                    [],
                     pylon.StaticDefectPixelCorrection.ListType_Factory,
                 )
             except (pylon.RuntimeException, pylon.InvalidArgumentException) as exc:
@@ -46,7 +45,6 @@ class StaticDefectPixelCorrectionTestSuite(PylonTestCase):
             try:
                 result = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
                     camera.NodeMap,
-                    [],
                     pylon.StaticDefectPixelCorrection.ListType_User,
                 )
             except (pylon.RuntimeException, pylon.InvalidArgumentException) as exc:
@@ -108,7 +106,6 @@ class StaticDefectPixelCorrectionTestSuite(PylonTestCase):
 
             get_result = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
                 camera.NodeMap,
-                [],
                 pylon.StaticDefectPixelCorrection.ListType_User,
             )
             self.assertTrue(get_result[0])

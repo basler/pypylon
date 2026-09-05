@@ -16,18 +16,34 @@ namespace Pylon
     typedef staticdefectpixel_vector StaticDefectPixelList_t;
 }
 
-// The single StaticDefectPixelList_t& parameter is in/out:
-//   - SetDefectPixelList / NormalizePixelList read it as input,
-//   - GetDefectPixelList ignores the input content and only uses the argument
-//     to receive the result.
-// Every call returns [success, pixel_list], where pixel_list is a Python list
-// of (x, y, type) tuples.
+// The StaticDefectPixelList_t& parameter is in/out for SetDefectPixelList and
+// NormalizePixelList (they read it as input); GetDefectPixelList never needs
+// an input list from the caller, so it does not take one at all (see the
+// %extend override below). Every call returns [success, pixel_list], where
+// pixel_list is a Python list of (x, y, type) tuples.
 %feature("docstring") Pylon::CStaticDefectPixelCorrection::GetDefectPixelList
-    "GetDefectPixelList(nodemap, pixel_list, list_type=ListType_User) -> [success, pixel_list]";
+    "GetDefectPixelList(nodemap, list_type=ListType_User) -> [success, pixel_list]";
 %feature("docstring") Pylon::CStaticDefectPixelCorrection::SetDefectPixelList
     "SetDefectPixelList(nodemap, pixel_list, list_type=ListType_User) -> [success, pixel_list]";
 %feature("docstring") Pylon::CStaticDefectPixelCorrection::NormalizePixelList
     "NormalizePixelList(nodemap, pixel_list) -> [success, pixel_list]";
+
+// The header's GetDefectPixelList(pNodeMap, pixelList, listType) is replaced
+// below by an %extend overload that drops the input pixel_list parameter, so
+// it must not be wrapped as-is.
+%ignore Pylon::CStaticDefectPixelCorrection::GetDefectPixelList;
+%rename(GetDefectPixelList) GetDefectPixelList2;
+
+// Output-only variant of the StaticDefectPixelList_t& typemap, applied below
+// only to the "outPixelList" parameter name (used by the GetDefectPixelList
+// %extend override), so SetDefectPixelList/NormalizePixelList keep requiring
+// an input list.
+%typemap(in, numinputs=0)
+Pylon::StaticDefectPixelList_t& outPixelList
+(Pylon::StaticDefectPixelList_t pixel_list)
+{
+    $1 = &pixel_list;
+}
 
 // Accept Python lists for StaticDefectPixelList_t& parameters and return the
 // potentially modified list as a Python list of (x, y, type) tuples.
@@ -120,4 +136,18 @@ Pylon::StaticDefectPixelList_t&
 }
 
 %include <pylon/StaticDefectPixelCorrection.h>
+
+// Replacement for the ignored GetDefectPixelList: no input pixel_list is
+// needed since the camera-provided content is the only thing that ends up in
+// the output list.
+%extend Pylon::CStaticDefectPixelCorrection
+{
+    static bool GetDefectPixelList2(
+        GenApi::INodeMap* pNodeMap,
+        Pylon::StaticDefectPixelList_t& outPixelList,
+        Pylon::CStaticDefectPixelCorrection::EListType listType = Pylon::CStaticDefectPixelCorrection::ListType_User)
+    {
+        return Pylon::CStaticDefectPixelCorrection::GetDefectPixelList(pNodeMap, outPixelList, listType);
+    }
+}
 

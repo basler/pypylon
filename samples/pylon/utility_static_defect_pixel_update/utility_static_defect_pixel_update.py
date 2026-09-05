@@ -4,6 +4,7 @@ Detect and update user static defect pixels e.g. on ace 2 cameras.
 
 See also:
 https://docs.baslerweb.com/knowledge/static-defect-pixel-correction-in-ace-2-additional-information
+https://docs.baslerweb.com/defect-pixel-correction#setting-the-static-defect-pixel-correction-mode
 
 This utility grabs a series of frames, averages them over time to suppress
 temporal noise, and detects hot pixels (bright outliers in a dark image) or
@@ -14,9 +15,32 @@ Run it in one of two modes:
   - hot:  point the camera at a dark scene (lens capped) to find hot pixels.
   - cold: point the camera at a bright, homogeneous scene to find cold pixels.
 
-Without hardware, configure Basler Camera Emulation so a virtual device is
-visible to pylon.FirstFound:
-https://docs.baslerweb.com/camera-emulation
+Background - the camera's two defect pixel lists:
+  The camera keeps two static-defect pixel lists, each a file accessible
+  through GenICam file access:
+    - "FactoryDefectPixelCorrection": the factory-detected defect pixel list. Read-only.
+    - "UserDefectPixelCorrection": the user defect pixel list. Read/write, and the one
+      this sample updates.
+
+  Each defect pixel is identified by its position, with (0, 0) at the top
+  left of the sensor.
+
+  If the user list is empty and BslStaticDefectPixelCorrectionMode is set to User,
+  nothing is corrected.
+
+  Correction can use the user list alone or the user list together with the
+  factory list. To combine both, pylon merges them before uploading:
+    1. Load the factory defect list.
+    2. Add the user's own defects.
+    3. Optionally: Normalize the combined list (sort and de-duplicate) using NormalizePixelList().
+    4. Upload the result to the user file. This steps runs the normalization again.
+  This sample follows that same sequence in update_user_defect_list() below,
+  using pylon.StaticDefectPixelCorrection so the merge is done consistently
+  regardless of transport layer or byte order.
+
+  Not every camera exposes static defect pixel correction; check for support
+  via the BslStaticDefectPixelCorrectionMaxDefects parameter, which reports
+  the maximum number of correctable defects (0 if unsupported).
 
 Note: This sample requires proper hardware setup to function correctly.
 """
@@ -59,7 +83,14 @@ class MeasurementConfiguration(pylon.ConfigurationEventHandler):
         camera.Width.TrySetToMaximum()
         camera.Height.TrySetToMaximum()
         camera.TestImageSelector.TrySetValue("Off")
-        camera.PixelFormat.TrySetValue("Mono8")
+        compatible_formats = [
+            "BayerBG8",
+            "BayerRG8",
+            "BayerGR8",
+            "BayerGB8",
+            "Mono8",
+        ]
+        camera.PixelFormat.TrySetValue(compatible_formats)
         camera.ReverseX.TrySetValue(False)
         camera.ReverseY.TrySetValue(False)
         camera.BinningHorizontal.TrySetValue(1)
@@ -172,16 +203,6 @@ def outliers_to_coordinates(outliers):
     return [(x, y) for x, y, _value, _relevance in outliers]
 
 
-def merge_coordinate_lists(existing_pixels, detected_pixels):
-    """Merge existing and detected (x, y) pixels into a sorted, duplicate-free list."""
-    merged = set()
-    for pixel in existing_pixels:
-        merged.add((int(pixel[0]), int(pixel[1])))
-    for x, y in detected_pixels:
-        merged.add((int(x), int(y)))
-    return sorted(merged, key=lambda item: (item[1], item[0]))
-
-
 def print_outlier_report(outliers):
     """Print the number of detected outliers and the strongest ones."""
     print(f"\nDetected outliers: {len(outliers)}")
@@ -195,24 +216,44 @@ def print_outlier_report(outliers):
 
 
 def update_user_defect_list(camera, detected_pixels):
-    """Merge detected pixels into the camera's user static-defect list and write it back."""
+    """Merge detected pixels into the camera's user static-defect list and write it back.
 
+    Follows the load-factory / add-user / sort-filter / upload sequence
+    described in the camera's static defect pixel correction documentation, so
+    that the resulting "User Overrides" file corrects both the factory-known
+    and the newly detected defects. Each defect pixel is a position with (0, 0)
+    at the top left of the sensor; positions are de-duplicated and ordered by
+    NormalizePixelList().
+    """
+
+    # A capacity of 0 means the feature (or its underlying GenICam controls)
+    # is not available on this camera.
     capacity = camera.BslStaticDefectPixelCorrectionMaxDefects.GetValueOrDefault( 0 )
     if capacity <= 0:
         raise RuntimeError("The camera does not support static defect pixel correction or has zero capacity.")
-    if capacity < len(detected_pixels) :
-        raise RuntimeError("Too many defects detected - adopt test settings or reduce the number of detected defects.")
 
+    # Step 1: load the read-only factory defect list.
+    factory_ok, factory_pixels = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
+        camera.NodeMap,
+        pylon.StaticDefectPixelCorrection.ListType_Factory,
+    )
+    if not factory_ok:
+        raise RuntimeError("Reading the factory static-defect list failed.")
+
+    # Step 2: add the user's own defects - both the ones already present in
+    # the writable "User Overrides" file and the ones just detected. An empty
+    # (or previously untouched) user list is valid and simply contributes no
+    # existing entries.
     get_ok, existing_pixels = pylon.StaticDefectPixelCorrection.GetDefectPixelList(
         camera.NodeMap,
-        [],
         pylon.StaticDefectPixelCorrection.ListType_User,
     )
     if not get_ok:
         raise RuntimeError("Reading the user static-defect list failed.")
 
-    target_pixels = merge_coordinate_lists(existing_pixels, detected_pixels)
+    target_pixels = factory_pixels + existing_pixels + detected_pixels
 
+    # Step 3: sort and de-duplicate the combined list.
     normalize_ok, normalized_pixels = pylon.StaticDefectPixelCorrection.NormalizePixelList(
         camera.NodeMap,
         target_pixels,
@@ -220,6 +261,10 @@ def update_user_defect_list(camera, detected_pixels):
     if not normalize_ok:
         raise RuntimeError("Normalizing the static-defect list failed.")
 
+    if capacity < len(normalized_pixels):
+        raise RuntimeError("Too many defects detected - adopt test settings or reduce the number of detected defects.")
+
+    # Step 4: upload the merged, normalized list back to "UserDefectPixelCorrection" GenICam file.
     set_ok, written_pixels = pylon.StaticDefectPixelCorrection.SetDefectPixelList(
         camera.NodeMap,
         normalized_pixels,
@@ -307,6 +352,10 @@ try:
             written_count = update_user_defect_list(camera, detected_pixels)
             print(f"\nEntries written to user static-defect list: {written_count}")
 
+        # Note: Writing the user defect list does not by itself enable correction. Set
+        # BslStaticDefectPixelCorrectionMode to "User" for the camera to apply it.
+        # See:
+        # https://docs.baslerweb.com/defect-pixel-correction#setting-the-static-defect-pixel-correction-mode
 except Exception as e:
     print("An exception occurred:", e)
     import traceback
