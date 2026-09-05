@@ -7,7 +7,7 @@
 %include <pylon/PylonImageBase.h>;
 
 %extend Pylon::CPylonImageBase {
-	Pylon::SPixelData GetPixelDataValue(uint32_t position_x, uint32_t position_y) const {
-		return $self->GetPixelData(position_x, position_y);
-	}
+    Pylon::SPixelData GetPixelDataValue(uint32_t position_x, uint32_t position_y) const {
+        return $self->GetPixelData(position_x, position_y);
+    }
 }
