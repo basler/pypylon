@@ -600,5 +600,47 @@ class DataContainerTestSuite(PylonEmuTestCase):
 
         container.Release()
 
+    # ------------------------------------------------------------------
+    # PaddingY / context manager
+    # ------------------------------------------------------------------
+
+    def test_get_padding_y_default_component(self):
+        """GetPaddingY() and PaddingY both return 0 for a default-constructed component."""
+        testee = pylon.PylonDataComponent()
+        self.assertEqual(testee.GetPaddingY(), 0)
+        self.assertEqual(testee.PaddingY, 0)
+
+    def test_get_padding_y_from_loaded_fixture(self):
+        """GetPaddingY() and PaddingY return 0 for every component in the little_boxes.gendc fixture."""
+        thisdir = os.path.dirname(__file__)
+        filename = os.path.join(thisdir, 'little_boxes.gendc')
+        container = pylon.PylonDataContainer(filename)
+        self.assertEqual(container.DataComponentCount, 3)
+
+        for i in range(container.DataComponentCount):
+            component = container.GetDataComponentByIndex(i)
+            self.assertEqual(component.GetPaddingY(), 0)
+            self.assertEqual(component.PaddingY, 0)
+            component.Release()
+
+        container.Release()
+
+    def test_component_context_manager(self):
+        """Using a component as a context manager returns self on __enter__ and releases it on __exit__."""
+        thisdir = os.path.dirname(__file__)
+        filename = os.path.join(thisdir, 'little_boxes.gendc')
+        container = pylon.PylonDataContainer(filename)
+
+        component = container.GetDataComponentByIndex(0)
+        self.assertTrue(component.IsValid())
+
+        with component as c:
+            self.assertIs(c, component)
+            self.assertTrue(c.IsValid())
+
+        self.assertFalse(component.IsValid())
+        container.Release()
+
+
 if __name__ == "__main__":
     unittest.main()

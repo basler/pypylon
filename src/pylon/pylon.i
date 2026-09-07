@@ -104,6 +104,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pylon/PylonIncludes.h>
 #include <pylon/gige/GigETransportLayer.h>
 #include <pylon/gige/ActionTriggerConfiguration.h>
+#include <pylon/StaticDefectPixelCorrection.h>
 #ifdef _MSC_VER
 #include <pylon/PylonGUI.h>
 #endif
@@ -124,6 +125,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pylon/CategoryParameter.h"
 #include "pylon/PortParameter.h"
 #include "pylon/PlaceholderParameter.h"
+#include <pylon/PixelTypeMapper.h>
+#include "pylon/BufferFactoryContext.h"
 
 #ifdef _MSC_VER  // MSVC
 #  pragma warning(pop)
@@ -868,6 +871,7 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "TypeMappings.i"
 %include "Container.i"
 %include "PixelType.i"
+%include "PixelTypeMapper.i"
 %include "ImageMixin.i"
 %include "PayloadType.i"
 %include "Info.i"
@@ -883,18 +887,21 @@ const Pylon::StringList_t & (Pylon::StringList_t str_list)
 %include "GrabResultPtr.i"
 %include "WaitObject.i"
 %include "WaitObjects.i"
+%include "BufferFactory.i"
 %include "InstantCamera.i"
 %include "InstantCameraArray.i"
 %include "ImageEventHandler.i"
 %include "ConfigurationEventHandler.i"
 %include "CameraEventHandler.i"
 %include "SoftwareTriggerConfiguration.i"
+%include "StaticDefectPixelCorrection.i"
 %include "AcquireContinuousConfiguration.i"
 %include "AcquireSingleFrameConfiguration.i"
 %include "ActionTriggerConfiguration.i"
 %include "ImagePersistence.i"
 %include "Image.i"
 %include "ReusableImage.i"
+%include "PixelData.i"
 %include "PylonImageBase.i"
 %include "PylonImage.i"
 %include "ImageFormatConverter.i"

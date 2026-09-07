@@ -6,6 +6,13 @@
 %ignore GetBuffer() const;
 %ignore GetDataComponent;
 
+// The raw intptr_t returned by the real GetBufferContext() is only
+// meaningful together with the Pylon::CPyBufferContextBox it may point to
+// (see BufferFactory.i); it is replaced below by a %extend overload that
+// unboxes it into the actual Python context object.
+%ignore GetBufferContext() const;
+
+
 %include <pylon/PylonVersionNumber.h>;
 
 // Method-qualified typemap: wrap the returned INodeMap& in an NodeMapWrapper
@@ -21,6 +28,10 @@
 
 %include <pylon/GrabResultData.h>;
 
+%{
+#include "pylon/BufferFactoryContext.h"
+%}
+
 %extend Pylon::CGrabResultData {
 
     // Since 'GetBuffer', 'GetImageBuffer', 'GetMemoryView', and 'GetImageMemoryView'
@@ -32,6 +43,24 @@
     %nothread GetImageBuffer;
     %nothread GetMemoryView;
     %nothread GetImageMemoryView;
+    %nothread GetBufferContext;
+
+    // Returns the context object provided by BufferFactory.AllocateBuffer()
+    // for the buffer backing this grab result, or None if the buffer was not
+    // allocated through a (Python) BufferFactory or no context was provided.
+    PyObject * GetBufferContext()
+    {
+        return Pylon::CPyBufferContextBox::UnboxContext( $self->GetBufferContext() );
+    }
+
+    // Returns the factory object that was used to allocate the buffer using
+    // BufferFactory.AllocateBuffer(), or None if the buffer was not
+    // allocated through a (Python) BufferFactory.
+    // The factory object is the same as the one passed to InstantCamera.SetBufferFactory().
+    PyObject * GetBufferFactory()
+    {
+        return Pylon::CPyBufferContextBox::UnboxFactory( $self->GetBufferContext() );
+    }
 
     PyObject * GetBuffer()
     {

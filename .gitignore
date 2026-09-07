@@ -54,3 +54,4 @@ conan_package/
 /NodeMap.pfs
 /uv.lock
 /include
+*.coverage

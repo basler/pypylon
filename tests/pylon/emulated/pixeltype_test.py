@@ -228,6 +228,52 @@ class PixelTypeTestSuite(PylonEmuTestCase):
         self.assertTrue(pylon.IsFloatingPoint(pylon.PixelType_Data64f))
         self.assertEqual(pylon.BitDepth(pylon.PixelType_Data64f), 64)
 
+    # ------------------------------------------------------------------
+    # Buffer geometry helpers
+    # ------------------------------------------------------------------
+
+    def test_compute_stride_returns_ok_flag_and_byte_count(self):
+        """ComputeStride returns [True, stride_bytes] for valid pixel types."""
+        ok, stride = pylon.ComputeStride(pylon.PixelType_Mono8, 640)
+        self.assertTrue(ok)
+        self.assertEqual(stride, 640)
+
+        ok, stride = pylon.ComputeStride(pylon.PixelType_RGB8packed, 640)
+        self.assertTrue(ok)
+        self.assertEqual(stride, 1920)
+
+    def test_compute_stride_includes_padding(self):
+        """ComputeStride adds paddingX bytes to the result."""
+        ok, stride_no_pad = pylon.ComputeStride(pylon.PixelType_Mono8, 640)
+        ok, stride_padded = pylon.ComputeStride(pylon.PixelType_Mono8, 640, 4)
+        self.assertTrue(ok)
+        self.assertEqual(stride_padded, stride_no_pad + 4)
+
+    def test_compute_padding_x_recovers_padding_from_stride(self):
+        """ComputePaddingX inverts ComputeStride to recover the padding bytes."""
+        _, stride = pylon.ComputeStride(pylon.PixelType_Mono8, 640, 4)
+        padding = pylon.ComputePaddingX(stride, pylon.PixelType_Mono8, 640)
+        self.assertEqual(padding, 4)
+
+        _, stride_no_pad = pylon.ComputeStride(pylon.PixelType_Mono8, 640)
+        self.assertEqual(pylon.ComputePaddingX(stride_no_pad, pylon.PixelType_Mono8, 640), 0)
+
+    def test_compute_buffer_size_equals_stride_times_height(self):
+        """ComputeBufferSize equals stride × height for simple and padded cases."""
+        self.assertEqual(
+            pylon.ComputeBufferSize(pylon.PixelType_Mono8, 640, 480),
+            640 * 480,
+        )
+        self.assertEqual(
+            pylon.ComputeBufferSize(pylon.PixelType_RGB8packed, 640, 480),
+            1920 * 480,
+        )
+        _, padded_stride = pylon.ComputeStride(pylon.PixelType_Mono8, 640, 4)
+        self.assertEqual(
+            pylon.ComputeBufferSize(pylon.PixelType_Mono8, 640, 480, 4),
+            padded_stride * 480,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

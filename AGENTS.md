@@ -14,8 +14,8 @@ for the project overview, installation, and quick-start examples.
 | `pypylon/` | Generated/packaged Python modules (build output; not edited by hand). |
 | `generated/` | SWIG-generated C++/Python (build output). |
 | `samples/` | Example scripts under `pylon/` and `pylondataprocessing/` (one folder per sample, `<name>/<name>.py`); shared helper modules in `common/`; shared image/data assets in `images/`. See [context/sample_style.md](context/sample_style.md) for layout and naming. |
-| `samples_reference_pypylon/` | Reference ports of the C++ pylon samples. |
-| `tests/` | Unit tests: `genicam/`, `pylon/{emulated,usb,gigE}/`, `pylondataprocessing/`. Entry point: `tests/all_tests.py`. |
+| `docs/programmers_guide/` | In-repo Programmer's Guide chapters for installation, acquisition, parameters, threading, integration, and troubleshooting. |
+| `tests/` | Unit tests: `genicam/`, `pylon/{emulated,usb,gigE}/`, `pylondataprocessing/`. Common runners include `pytest` (CI path below) and `tests/all_*_tests.py` / `tests/all_tests.py`. |
 | `scripts/` | Build/format helper scripts. |
 | `context/` | Coding-style reference docs (see below). |
 | `setup.py`, `pyproject.toml` | Build configuration. |
@@ -26,6 +26,11 @@ Run all project Python commands inside the Python environment where pypylon is
 built/installed, so they use the correct interpreter and the matching pylon SDK.
 This file intentionally does not prescribe a specific environment manager
 (venv, conda, uv, …) — activate whichever one you use before running commands.
+
+If pylon SDK is installed in a non-default location, set the SDK location
+before building from source:
+- Linux: `export PYLON_ROOT=<installation directory of pylon SDK>`
+- macOS: `export PYLON_FRAMEWORK_LOCATION=<framework base folder that contains pylon.framework>`
 
 Building from source additionally requires an installed pylon SDK, a C++
 compiler, Python development headers, and SWIG 4.3 (see
@@ -102,3 +107,6 @@ Read the relevant style doc in full before writing code:
 | adding or editing a unit test | [context/test_style.md](context/test_style.md) |
 
 `sample_style.md` and `test_style.md` build on `common_style.md`.
+
+## Platform specific information
+MacOS does not support pylondataprocessing currently.

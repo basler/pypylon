@@ -1,9 +1,9 @@
 ARG DOCKER_BASE_IMAGE
 
 #the following lines are used to get a qemu binary only with docker tools
-FROM multiarch/qemu-user-static:4.2.0-6 as qemu
+FROM multiarch/qemu-user-static:4.2.0-6 AS qemu
 
-FROM $DOCKER_BASE_IMAGE
+FROM ${DOCKER_BASE_IMAGE}
 ARG CMD_WRAPPER
 ARG QEMU_TARGET_ARCH
 COPY --from=qemu /usr/bin/* /usr/bin/
@@ -33,11 +33,56 @@ RUN pip install "setuptools<72" --upgrade
 # patchelf, unzip are needed for auditwheel
 # git is needed so setup.py can resolve tag based versions via git describe
 # symlink for libicuuc.so.66 needed for pylon
-RUN apt-get update && apt-get install -y locales patchelf unzip libicu67 git\
- && ln -s /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.67 /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.66\
- && rm -rf /var/lib/apt/lists/* \
- && sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen \
- && locale-gen
+#
+# The occasional "404 Not Found" on e.g. libc-l10n after a debian point release
+# is caused by the Fastly CDN behind deb.debian.org briefly serving a stale,
+# cached package index whose referenced .deb has already been rotated out of the
+# pool. To stay on the *latest* (and pool-consistent) index we force apt to
+# revalidate instead of using a possibly stale cached copy
+# (Acquire::http::No-Cache) and retry a few times.
+#
+# Only if deb.debian.org keeps serving an inconsistent index/pool across all
+# retries we fall back to snapshot.debian.org, where the index and the pool are
+# frozen together and are therefore always consistent. The snapshot timestamp
+# can be bumped via the DEBIAN_SNAPSHOT build arg; any timestamp is accepted and
+# redirected to the nearest available snapshot.
+ARG DEBIAN_SNAPSHOT=20260901T000000Z
+RUN set -eu; \
+    echo 'Acquire::http::No-Cache "true";' > /etc/apt/apt.conf.d/10no-cache; \
+    echo 'Acquire::Retries "5";'           > /etc/apt/apt.conf.d/80-retries; \
+    ok=0; \
+    for i in 1 2 3 4 5; do \
+      if apt-get update && apt-get install -y locales patchelf unzip libicu67 git; then \
+        ok=1; break; \
+      fi; \
+      echo "apt attempt $i against deb.debian.org failed, retrying in 30s..."; \
+      rm -rf /var/lib/apt/lists/*; \
+      sleep 30; \
+    done; \
+    if [ "$ok" -ne 1 ]; then \
+      echo "deb.debian.org kept serving an inconsistent index/pool, falling back to snapshot.debian.org (${DEBIAN_SNAPSHOT})"; \
+      . /etc/os-release 2>/dev/null || true; \
+      codename="${VERSION_CODENAME:-}"; \
+      case "$codename" in \
+        buster)            sec_suite="buster/updates" ;; \
+        bullseye|bookworm) sec_suite="${codename}-security" ;; \
+        *)                 codename="" ;; \
+      esac; \
+      if [ -n "$codename" ]; then \
+        { \
+          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename} main"; \
+          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename}-updates main"; \
+          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}/ ${sec_suite} main"; \
+        } > /etc/apt/sources.list; \
+        rm -f /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true; \
+      fi; \
+      apt-get -o Acquire::Check-Valid-Until=false update; \
+      apt-get install -y locales patchelf unzip libicu67 git; \
+    fi; \
+    ln -s /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.67 /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.66; \
+    rm -rf /var/lib/apt/lists/*; \
+    sed -i 's/^# *\(fr_FR.UTF-8\)/\1/' /etc/locale.gen; \
+    locale-gen
 
 RUN mkdir /work
 RUN mkdir /pylon_installer

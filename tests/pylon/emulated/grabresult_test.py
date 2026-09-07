@@ -366,16 +366,16 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(grab_result.CameraContext, 0)
         grab_result.Release()
 
-    def test_buffer_context_is_an_integer(self):
-        """GetBufferContext returns an integer context value associated with the buffer."""
+    def test_buffer_context_is_none_without_custom_buffer_factory(self):
+        """GetBufferContext returns None when no custom BufferFactory was used to allocate the buffer."""
         with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
             camera.Width.Value = 64
             camera.Height.Value = 48
             grab_result = camera.GrabOne(1000)
         # Method access
-        self.assertIsInstance(grab_result.GetBufferContext(), int)
+        self.assertIsNone(grab_result.GetBufferContext())
         # Property access (preferred style)
-        self.assertIsInstance(grab_result.BufferContext, int)
+        self.assertIsNone(grab_result.BufferContext)
         grab_result.Release()
 
     # ------------------------------------------------------------------
@@ -796,6 +796,200 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertEqual(component.OffsetY, grab_result.OffsetY)
         component.Release()
         grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # Payload size and image size: Mono16 (GrabResultData.h)
+    # ------------------------------------------------------------------
+
+    def test_payload_size_is_two_bytes_per_pixel_for_mono16(self):
+        """PayloadSize and ImageSize both equal width * height * 2 bytes for Mono16."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "Mono16"
+            grab_result = camera.GrabOne(1000)
+        expected_size = 64 * 48 * 2
+        self.assertEqual(grab_result.PayloadSize, expected_size)
+        self.assertEqual(grab_result.ImageSize, expected_size)
+        grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # GetStride: multi-channel format (GrabResultData.i)
+    # ------------------------------------------------------------------
+
+    def test_get_stride_returns_bytes_per_row_for_rgb8_packed(self):
+        """GetStride for RGB8Packed returns (True, width * 3) because each pixel is 3 bytes."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "RGB8Packed"
+            grab_result = camera.GrabOne(1000)
+        success, stride = grab_result.GetStride()
+        self.assertTrue(success)
+        self.assertEqual(stride, 64 * 3)  # RGB8Packed: 3 bytes per pixel, no padding
+        grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # Multi-channel and Bayer pixel formats (GrabResultPtr.i / numpy)
+    # ------------------------------------------------------------------
+
+    def test_get_array_returns_3d_shape_for_rgb8_packed(self):
+        """GetArray returns a 3-D (height, width, 3) uint8 ndarray for RGB8Packed."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "RGB8Packed"
+            grab_result = camera.GrabOne(1000)
+        array = grab_result.GetArray()
+        self.assertEqual(array.shape, (48, 64, 3))
+        self.assertEqual(array.dtype, numpy.uint8)
+        grab_result.Release()
+
+    def test_get_array_returns_3d_shape_for_bgr8_packed(self):
+        """GetArray returns a 3-D (height, width, 3) uint8 ndarray for BGR8Packed."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "BGR8Packed"
+            grab_result = camera.GrabOne(1000)
+        array = grab_result.GetArray()
+        self.assertEqual(array.shape, (48, 64, 3))
+        self.assertEqual(array.dtype, numpy.uint8)
+        grab_result.Release()
+
+    def test_get_image_format_rgb8_packed_returns_3d_shape(self):
+        """GetImageFormat for RGB8Packed returns ((height, width, 3), uint8, 'B')."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "RGB8Packed"
+            grab_result = camera.GrabOne(1000)
+        shape, dtype, format_char = grab_result.GetImageFormat()
+        self.assertEqual(shape, (48, 64, 3))
+        self.assertEqual(dtype, numpy.uint8)
+        self.assertEqual(format_char, "B")
+        grab_result.Release()
+
+    def test_get_array_returns_2d_uint8_for_bayer_rg8(self):
+        """GetArray for BayerRG8 returns a 2-D uint8 ndarray (single plane, not demosaiced)."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "BayerRG8"
+            grab_result = camera.GrabOne(1000)
+        array = grab_result.GetArray()
+        self.assertEqual(array.shape, (48, 64))
+        self.assertEqual(array.dtype, numpy.uint8)
+        grab_result.Release()
+
+    def test_get_array_returns_2d_uint16_for_bayer_rg16(self):
+        """GetArray for BayerRG16 returns a 2-D uint16 ndarray (single plane, not demosaiced)."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "BayerRG16"
+            grab_result = camera.GrabOne(1000)
+        array = grab_result.GetArray()
+        self.assertEqual(array.shape, (48, 64))
+        self.assertEqual(array.dtype, numpy.uint16)
+        grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # NumPy zero-copy raw access (GrabResultPtr.i)
+    # ------------------------------------------------------------------
+
+    def test_get_array_zero_copy_raw_returns_1d_uint8_payload(self):
+        """GetArrayZeroCopy(raw=True) yields a 1-D uint8 array of length PayloadSize."""
+        import numpy
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "Mono8"
+            grab_result = camera.GrabOne(1000)
+        with grab_result.GetArrayZeroCopy(raw=True) as raw_array:
+            self.assertEqual(raw_array.ndim, 1)
+            self.assertEqual(raw_array.dtype, numpy.uint8)
+            self.assertEqual(raw_array.size, grab_result.PayloadSize)
+        grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # Context manager: exception propagation (GrabResultPtr.i)
+    # ------------------------------------------------------------------
+
+    def test_context_manager_releases_on_exception(self):
+        """__exit__ releases the GrabResult even when an exception is raised inside the with-block."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            grab_result = camera.GrabOne(1000)
+
+        try:
+            with grab_result:
+                self.assertTrue(grab_result.IsValid())
+                raise ValueError("intentional test error")
+        except ValueError:
+            pass
+
+        self.assertFalse(grab_result.IsValid())
+
+    # ------------------------------------------------------------------
+    # GrabResult smart pointer: simultaneous references (GrabResultPtr.h)
+    # ------------------------------------------------------------------
+
+    def test_multiple_grab_results_held_simultaneously_are_all_valid(self):
+        """Multiple GrabResults grabbed without releasing earlier ones are all independently valid."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "Mono8"
+            first = camera.GrabOne(1000)
+            second = camera.GrabOne(1000)
+            third = camera.GrabOne(1000)
+
+        self.assertTrue(first.IsValid())
+        self.assertTrue(second.IsValid())
+        self.assertTrue(third.IsValid())
+        # All IDs must be distinct
+        self.assertNotEqual(first.ID, second.ID)
+        self.assertNotEqual(second.ID, third.ID)
+        first.Release()
+        second.Release()
+        third.Release()
+
+    # ------------------------------------------------------------------
+    # Context values: custom CameraContext (GrabResultData.h)
+    # ------------------------------------------------------------------
+
+    def test_camera_context_reflects_set_camera_context(self):
+        """CameraContext in the grab result equals the value set via SetCameraContext."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.SetCameraContext(42)
+            grab_result = camera.GrabOne(1000)
+        self.assertEqual(grab_result.CameraContext, 42)
+        self.assertEqual(grab_result.GetCameraContext(), 42)
+        grab_result.Release()
+
+    # ------------------------------------------------------------------
+    # Introspection: __dir__ (GrabResultPtr.i)
+    # ------------------------------------------------------------------
+
+    def test_dir_includes_public_methods_and_properties(self):
+        """dir(grab_result) lists the public properties and methods exposed by the binding."""
+        with pylon.InstantCamera(self.get_camera_traits(), pylon.FirstFound) as camera:
+            camera.Width.Value = 64
+            camera.Height.Value = 48
+            camera.PixelFormat.Value = "Mono8"
+            grab_result = camera.GrabOne(1000)
+        names = dir(grab_result)
+        for expected in ("Width", "Height", "Array", "GetArray", "GrabSucceeded", "PayloadType"):
+            self.assertIn(expected, names)
+        grab_result.Release()
+
 
 if __name__ == "__main__":
     unittest.main()

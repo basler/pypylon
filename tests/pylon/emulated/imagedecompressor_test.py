@@ -684,7 +684,7 @@ class ImageDecompressorTestSuite(PylonEmuTestCase):
                 self.skipTest("Camera does not support compression; skipping nodemap vs instance comparison")
             camera.ImageCompressionMode.Value = "BaslerCompressionBeyond"
             decompressor = pylon.ImageDecompressor(camera.NodeMap)
-            from_instance = decompressor.GetCompressionDescriptor()
+            from_instance = decompressor.GetCurrentCompressionDescriptor()
             from_nodemap = pylon.ImageDecompressor.GetCompressionDescriptor(camera.NodeMap)
             self.assertEqual(bytes(from_instance), bytes(from_nodemap))
 

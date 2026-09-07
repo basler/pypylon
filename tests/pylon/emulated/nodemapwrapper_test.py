@@ -677,13 +677,53 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
 
         camera.Close()
 
+    def test_to_parameter_inode_falls_back_to_base_parameter_when_mapping_not_available(self):
+        """ToParameter(INode) falls back to base Parameter when _node_to_specific finds no matching interface constant."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nodemap = camera.NodeMap._Get()
+        inode = raw_nodemap.GetNode("GainRaw").GetNode()
+
+        original_intf_iinteger = genicam.intfIInteger
+        try:
+            genicam.intfIInteger = -999999
+            result = pylon.ToParameter(inode)
+        finally:
+            genicam.intfIInteger = original_intf_iinteger
+            camera.Close()
+
+        self.assertIsInstance(result, pylon.Parameter)
+        self.assertNotIsInstance(result, pylon.IntegerParameter)
+        self.assertTrue(result.IsValid())
+        self.assertEqual(result.GetNode().GetName(), "GainRaw")
+
+    def test_to_parameter_base_parameter_remains_base_when_mapping_not_available(self):
+        """ToParameter(base Parameter) returns the same base object if _node_to_specific cannot specialise it."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nodemap = camera.NodeMap._Get()
+        base_param = pylon.Parameter(raw_nodemap.GetNode("GainRaw").GetNode())
+
+        original_intf_iinteger = genicam.intfIInteger
+        try:
+            genicam.intfIInteger = -999999
+            result = pylon.ToParameter(base_param)
+        finally:
+            genicam.intfIInteger = original_intf_iinteger
+            camera.Close()
+
+        self.assertIs(result, base_param)
+        self.assertIsInstance(result, pylon.Parameter)
+        self.assertNotIsInstance(result, pylon.IntegerParameter)
+        self.assertTrue(result.IsValid())
+
     def test_to_parameter_specific_parameter_kept_unchanged(self):
         """ToParameter() returns a specific Parameter subclass unchanged."""
         camera = self.create_first()
         camera.Open()
-        nm = camera.GetNodeMap()
+        nodemap = camera.NodeMap
 
-        int_param = pylon.IntegerParameter(nm.GetNode("GainRaw").GetNode())
+        int_param = pylon.IntegerParameter(nodemap.GetNode("GainRaw").GetNode())
         result = pylon.ToParameter(int_param)
         self.assertIs(result, int_param)
 
@@ -706,8 +746,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps a category INode into a CategoryParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("Root"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("Root"))
         self.assertIsInstance(result, pylon.CategoryParameter)
         camera.Close()
 
@@ -715,8 +755,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps an enum-entry INode into an EnumEntryParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("EnumEntry_GainAuto_Off"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("EnumEntry_GainAuto_Off"))
         self.assertIsInstance(result, pylon.EnumEntryParameter)
         camera.Close()
 
@@ -724,8 +764,41 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter() wraps a port INode into a PortParameter."""
         camera = self.create_first()
         camera.Open()
-        raw_nm = camera.GetNodeMap()._Get()
-        result = pylon.ToParameter(raw_nm.GetNode("Device"))
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("Device"))
+        self.assertIsInstance(result, pylon.PortParameter)
+        camera.Close()
+
+    def test_to_parameter_register_node(self):
+        """ToParameter() wraps a register INode into an ArrayParameter."""
+        camera = self.create_first()
+        camera.Open()
+        raw_nodemap = camera.NodeMap._Get()
+        result = pylon.ToParameter(raw_nodemap.GetNode("BslImageCompressionBCBDescriptor"))
+        self.assertIsInstance(result, pylon.ArrayParameter)
+        camera.Close()
+
+    def test_to_parameter_port_node_via_get_node(self):
+        """ToParameter() reaches _node_to_specific's intfIPort branch.
+
+        genicam's native INodeMap.GetNode()/GetNodes() auto-downcast any
+        Port-interface node directly to genicam.IPort (never genicam.INode),
+        so ToParameter() takes its separate isinstance(val, IPort) shortcut
+        and never reaches _node_to_specific for such nodes (see
+        test_to_parameter_port_node above). pylon's own Parameter.GetNode(),
+        however, returns a plain, un-downcast INode whose
+        GetPrincipalInterfaceType() is still intfIPort, which correctly
+        dispatches through _node_to_specific.
+        """
+        camera = self.create_first()
+        camera.Open()
+        port_param = camera.NodeMap.GetNode("Device")
+        self.assertIsInstance(port_param, pylon.PortParameter)
+        node = port_param.GetNode()
+        self.assertIsInstance(node, genicam.INode)
+        self.assertNotIsInstance(node, genicam.IPort)
+        self.assertEqual(node.GetPrincipalInterfaceType(), genicam.intfIPort)
+        result = pylon.ToParameter(node)
         self.assertIsInstance(result, pylon.PortParameter)
         camera.Close()
 
@@ -733,8 +806,8 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         """ToParameter and NodeMapWrapper.GetNode agree on the returned type for all key nodes."""
         camera = self.create_first()
         camera.Open()
-        nm      = camera.GetNodeMap()
-        raw_nm  = nm._Get()
+        nodemap = camera.NodeMap
+        raw_nodemap = nodemap._Get()
 
         pairs = [
             ("GainRaw",                         pylon.IntegerParameter),
@@ -749,11 +822,204 @@ class NodeMapWrapperTestSuite(PylonEmuTestCase):
         ]
         for name, expected_type in pairs:
             with self.subTest(node=name):
-                via_wrapper    = nm.GetNode(name)
-                via_to_param   = pylon.ToParameter(raw_nm.GetNode(name))
+                via_wrapper    = nodemap.GetNode(name)
+                via_to_param   = pylon.ToParameter(raw_nodemap.GetNode(name))
                 self.assertIsInstance(via_wrapper,  expected_type, f"wrapper mismatch for {name}")
                 self.assertIsInstance(via_to_param, expected_type, f"ToParameter mismatch for {name}")
 
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # Construction / abstract guard
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_construction_raises(self):
+        """NodeMapWrapper cannot be instantiated directly — it is abstract."""
+        with self.assertRaises(AttributeError):
+            pylon.NodeMapWrapper()
+
+    # ------------------------------------------------------------------
+    # InvalidateNodes
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_invalidate_nodes(self):
+        """InvalidateNodes() does not raise and the nodemap remains usable afterwards."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        nodemap.InvalidateNodes()
+        self.assertTrue(nodemap.Contains("GainRaw"))
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # Connect
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_connect(self):
+        """Connect() attaches a custom CPortImpl to a named port in the nodemap."""
+        class _SimplePort(genicam.CPortImpl):
+            def __init__(self):
+                genicam.CPortImpl.__init__(self)
+                self._mem = bytearray(1024)
+            def Read(self, address, length):
+                return bytes(self._mem[address:address + length])
+            def Write(self, address, data):
+                self._mem[address:address + len(data)] = data
+            def GetAccessMode(self):
+                return genicam.RW
+
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        port = _SimplePort()
+        nodemap.Connect(port, "Device")
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # NewNodeWriteConcatenator / ConcatenatedWrite
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_new_node_write_concatenator(self):
+        """NewNodeWriteConcatenator() returns a non-None concatenator object."""
+        camera = self.create_first()
+        camera.Open()
+        concatenator = camera.NodeMap.NewNodeWriteConcatenator()
+        self.assertIsNotNone(concatenator)
+        camera.Close()
+
+    def test_nodemap_wrapper_concatenated_write(self):
+        """ConcatenatedWrite() executes a concatenator without raising."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        concatenator = nodemap.NewNodeWriteConcatenator()
+        nodemap.ConcatenatedWrite(concatenator)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # SetSuppressCallbackMode
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_set_suppress_callback_mode(self):
+        """SetSuppressCallbackMode() accepts True and False without raising."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        nodemap.SetSuppressCallbackMode(True)
+        nodemap.SetSuppressCallbackMode(False)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # GetDeviceName / DeviceName property
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_get_device_name(self):
+        """GetDeviceName() returns a non-empty string."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        name = nodemap.GetDeviceName()
+        self.assertIsInstance(name, str)
+        self.assertTrue(len(name) > 0)
+        camera.Close()
+
+    def test_nodemap_wrapper_device_name_property(self):
+        """DeviceName property matches GetDeviceName()."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        self.assertEqual(nodemap.GetDeviceName(), nodemap.DeviceName)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # Poll
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_poll(self):
+        """Poll() accepts an elapsed-time argument without raising."""
+        camera = self.create_first()
+        camera.Open()
+        camera.NodeMap.Poll(100)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # GetLock
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_get_lock(self):
+        """GetLock() returns a non-None lock object."""
+        camera = self.create_first()
+        camera.Open()
+        lock = camera.NodeMap.GetLock()
+        self.assertIsNotNone(lock)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # GetNumNodes
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_get_num_nodes(self):
+        """GetNumNodes() returns a positive integer."""
+        camera = self.create_first()
+        camera.Open()
+        node_count = camera.NodeMap.GetNumNodes()
+        self.assertIsInstance(node_count, int)
+        self.assertGreater(node_count, 0)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # ParseSwissKnifes
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_parse_swiss_knifes(self):
+        """ParseSwissKnifes() does not raise on a valid camera nodemap."""
+        camera = self.create_first()
+        camera.Open()
+        camera.NodeMap.ParseSwissKnifes()
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # __getattr__ early-exit branch
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_getattr_unknown_dunder_raises(self):
+        """Accessing an unknown dunder attribute raises AttributeError."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        with self.assertRaises(AttributeError):
+            getattr(nodemap, "__foobar__")
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # __setattr__ deprecated assignment
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_setattr_deprecated_assignment(self):
+        """Direct feature assignment emits DeprecationWarning and sets the value."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        with self.assertWarns(DeprecationWarning):
+            nodemap.GainRaw = 200
+        self.assertEqual(200, nodemap.GainRaw.Value)
+        camera.Close()
+
+    # ------------------------------------------------------------------
+    # __dir__
+    # ------------------------------------------------------------------
+
+    def test_nodemap_wrapper_dir_returns_method_names(self):
+        """dir(nodemap) returns a sorted list that includes NodeMapWrapper method names."""
+        camera = self.create_first()
+        camera.Open()
+        nodemap = camera.NodeMap
+        listing = dir(nodemap)
+        self.assertIsInstance(listing, list)
+        self.assertEqual(listing, sorted(set(listing)))
+        self.assertIn("GetNode", listing)
+        self.assertIn("Contains", listing)
+        self.assertIn("GetNumNodes", listing)
         camera.Close()
 
 if __name__ == "__main__":

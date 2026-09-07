@@ -127,7 +127,7 @@ namespace Pylon
         // IsValid — always false
         // ------------------------------------------------------------------
 
-        virtual bool IsValid() const
+        bool IsValid() const override
         {
             return false;
         }
@@ -136,7 +136,7 @@ namespace Pylon
         // Attach — always throws NOT_IMPLEMENTED
         // ------------------------------------------------------------------
 
-        virtual bool Attach( GenApi::INodeMap* /*pNodeMap*/, const char* /*pName*/ ) override
+        bool Attach( GenApi::INodeMap* /*pNodeMap*/, const char* /*pName*/ ) override
         {
             throw LOGICAL_ERROR_EXCEPTION(
                 "CPlaceholderParameter '%s' cannot be attached. "
@@ -144,7 +144,7 @@ namespace Pylon
                 m_path.c_str() );
         }
 
-        virtual bool Attach( GenApi::INodeMap& /*nodeMap*/, const char* /*pName*/ ) override
+        bool Attach( GenApi::INodeMap& /*nodeMap*/, const char* /*pName*/ ) override
         {
             throw LOGICAL_ERROR_EXCEPTION(
                 "CPlaceholderParameter '%s' cannot be attached. "
@@ -152,7 +152,7 @@ namespace Pylon
                 m_path.c_str() );
         }
 
-        virtual bool Attach( GenApi::INode* /*pNode*/ ) override
+        bool Attach( GenApi::INode* /*pNode*/ ) override
         {
             throw LOGICAL_ERROR_EXCEPTION(
                 "CPlaceholderParameter '%s' cannot be attached. "
@@ -160,7 +160,7 @@ namespace Pylon
                 m_path.c_str() );
         }
 
-        virtual bool Attach( GenApi::IValue* /*pValue*/ ) override
+        bool Attach( GenApi::IValue* /*pValue*/ ) override
         {
             throw LOGICAL_ERROR_EXCEPTION(
                 "CPlaceholderParameter '%s' cannot be attached. "

@@ -320,5 +320,27 @@ class ParameterTestSuite(PylonParameterTestCase):
         self.assertTrue(genicam.IsReadable(p))
         self.assertTrue(genicam.IsWritable(p))
 
+    # ------------------------------------------------------------------
+    # GetValueOrDefault
+    # ------------------------------------------------------------------
+
+    def test_get_value_or_default_readable(self):
+        """GetValueOrDefault returns the parameter value as a string for a readable parameter."""
+        p = pylon.Parameter(self.nodemap, "TestIntRO")
+        self.assertEqual("1500", p.GetValueOrDefault("fallback"))
+
+    def test_get_value_or_default_write_only(self):
+        """GetValueOrDefault returns the supplied default for a write-only parameter."""
+        p = pylon.Parameter(self.nodemap, "TestIntWO")
+        self.assertFalse(p.IsReadable())
+        self.assertEqual("fallback", p.GetValueOrDefault("fallback"))
+
+    def test_get_value_or_default_unattached(self):
+        """GetValueOrDefault returns the supplied default for an unattached parameter."""
+        p = pylon.Parameter()
+        self.assertFalse(p.IsReadable())
+        self.assertEqual("fallback", p.GetValueOrDefault("fallback"))
+
+
 if __name__ == "__main__":
     unittest.main()

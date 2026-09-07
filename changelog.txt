@@ -1,3 +1,18 @@
+Version 26.8
+    - Date 2026-09-04
+    - Updated to pylon Software Suite 26.8.1 on all platforms, which includes
+      pylon C++ SDK 12.3.0 and pylon Data Processing C++ SDK 5.1.0.
+    - Added support for InstantCamera buffer factory to allow the user to grab into user-defined buffers.
+      This is useful for applications that want to manage their own memory for image acquisition.
+      Add a sample demonstrating how to use the new feature.
+    - Made pixel data available to Python users: images now provide GetPixelData(x, y) that returns a
+      PixelData object exposing the pixel type, bit depth and component accessors (e.g. Mono, R, G, B, A, Y, U, V).
+    - Gave access to the GigE connection guard: it is now distributed with pypylon and can be enabled explicitly
+      via camera.TLNodeMap.ConnectionGuardEnable before Open() to increase the heartbeat timeout and to gracefully
+      close the connection if the program stops unexpectedly.
+    - Added support for static defect pixel correction. Add a sample demonstrating how to use the new feature.
+    - Extended the unit tests to extend the test coverage.
+
 Version 26.7
     - Date 2026-07-23
     - Updated to pylon Software Suite 26.7.2 on all platforms, which includes
