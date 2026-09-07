@@ -70,9 +70,16 @@ class PyPylonConanConsumer(ConanFile):
         for req in requirements:
             version = version_map.get(req)
             if version:
-                self.requires(f"{req}/{version}@release/potentially-public")
+                ref = f"{req}/{version}@release/potentially-public"
             else:
-                self.requires(f"{req}/25.09@release/potentially-public")
+                ref = f"{req}/25.09@release/potentially-public"
+            # The control file is the authoritative source for the pylon
+            # versions to package. A directly required package (e.g. pylon-core)
+            # may transitively be pulled in with an older version by another
+            # dependency (e.g. pylon-dataprocessing). Use force=True so the
+            # version from the control file wins any version conflict instead of
+            # aborting the graph resolution.
+            self.requires(ref, force=True)
 
     def generate(self):
         # Read the configuration file
