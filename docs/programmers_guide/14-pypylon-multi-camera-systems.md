@@ -1,36 +1,28 @@
-# 14. Multi-Camera Systems
+# Multi-Camera Systems
 
-This chapter explains how to design, configure, and operate systems that use multiple cameras simultaneously. Multi-camera setups are common in industrial applications such as inspection, 3D reconstruction, and synchronized data acquisition.
+This topic explains how to design, configure, and operate systems that use multiple cameras simultaneously.
 
----
+Multi-camera setups are common in industrial applications such as inspection, 3D reconstruction, and synchronized data acquisition. They are used when a single camera isn't sufficient to capture all the required information.
 
-## Why Use Multiple Cameras?
+Typical use cases:
 
-Multi-camera systems are used when a single camera is not sufficient to capture all required information.
-
-Typical reasons:
-
-- capturing different viewpoints of an object
-- increasing field of view
-- increasing throughput
-- parallel inspection of multiple objects
-
----
+- Capturing different viewpoints of an object
+- Increasing the field of view
+- Increasing throughput
+- Parallel inspection of multiple objects
 
 ## Fundamental Challenges
 
 Working with multiple cameras introduces several challenges:
 
-- synchronization (timing)
-- bandwidth limitations (especially GigE)
+- Synchronization (timing)
+- Bandwidth limitations (especially when using GigE cameras)
 - CPU load (processing multiple streams)
-- device identification and mapping
-
----
+- Device identification and mapping
 
 ## Device Identification
 
-Each camera must be uniquely identified, typically by its serial number.
+Each camera must have a unique identifier, typically its serial number.
 
 ```python
 for device_info in device_info_list:
@@ -44,9 +36,7 @@ Camera 40123456 → Left view
 Camera 40123478 → Right view
 ```
 
-Avoid using indices such as `devices[0]`, because enumeration order is not stable.
-
----
+Avoid using indices such as `devices[0]` because the order in which cameras are enumerated may change. For more details, see [Enumerating Cameras](pypylon-discovering-and-selecting-cameras.md#selecting-a-camera).
 
 ## Creating Multiple Camera Instances
 
@@ -64,26 +54,30 @@ for device_info in device_info_list:
     cameras.append(camera)
 ```
 
-This creates and opens one camera instance per detected device.
+This creates and opens one camera instance per device.
 
----
+## Acquisition Methods
 
-## Sequential vs Parallel Acquisition
+When using multiple cameras, you have to decide on an acquisition method: [sequential](#sequential-acquisition) or [parallel](#parallel-acquisition).
 
 ### Sequential Acquisition
+
+This means that image processing is done one camera after the other.
 
 ```text
 Cam1 → Capture → Process
 Cam2 → Capture → Process
 ```
 
-- simple to implement
-- not time-synchronized
-- slower overall
+Key characteristics of this method:
 
----
+- Simple to implement
+- Not time-synchronized
+- Slower overall
 
 ### Parallel Acquisition
+
+This means that images from several cameras are processed together.
 
 ```text
 Cam1 → Capture →
@@ -91,19 +85,23 @@ Cam1 → Capture →
 Cam2 → Capture →
 ```
 
-- cameras acquire simultaneously
-- required for synchronization
-- higher CPU and bandwidth requirements
+Key characteristics of this method:
 
----
+- Cameras acquire simultaneously
+- Required for synchronization
+- Higher CPU and bandwidth requirements
 
 ## Synchronization Methods
 
+To synchronize cameras, you can choose between software and hardware synchronization. The advantages and disadvantages are similar to software vs. hardware [triggering](pypylon-triggered-image-acquisition.md).
+
 ### Software Synchronization
 
-- trigger cameras via software
-- limited precision
-- affected by OS scheduling
+Key characteristics of this method:
+
+- Trigger cameras via software
+- Limited precision
+- Affected by operating system scheduling
 
 Example:
 
@@ -111,19 +109,17 @@ Example:
 camera.ExecuteSoftwareTrigger()
 ```
 
----
-
 ### Hardware Synchronization (Recommended)
 
 ```text
 Master camera → trigger signal → Slave cameras
 ```
 
-- precise timing
-- deterministic behavior
-- required for stereo or measurement systems
+Key characteristics of this method:
 
----
+- Precise timing
+- Deterministic behavior
+- Required for stereo or measurement systems
 
 ## Bandwidth Considerations (GigE)
 
@@ -131,18 +127,16 @@ Multiple GigE cameras share the same network bandwidth.
 
 Potential problems:
 
-- packet loss
-- dropped frames
-- increased latency
+- Packet loss
+- Dropped frames
+- Increased latency
 
-Mitigation strategies:
+You can use one of the following strategies to mitigate potential problems:
 
-- use dedicated NICs
-- enable jumbo frames
-- reduce ROI or frame rate
-- configure packet delay
-
----
+- Use dedicated network interface cards (NICs)
+- Enable jumbo frames (MTU 9000)
+- Reduce ROI or frame rate
+- Configure packet delay
 
 ## Processing Architecture
 
@@ -152,10 +146,8 @@ Mitigation strategies:
 Acquire all → process all
 ```
 
-- simple
-- limited scalability
-
----
+- Simple
+- Limited scalability
 
 ### Multi-Threaded (Recommended)
 
@@ -163,13 +155,11 @@ Acquire all → process all
 Camera threads → queue → processing threads
 ```
 
-- scalable
-- better CPU utilization
-- more complex to implement
+- Scalable
+- Better CPU utilization
+- More complex to implement
 
----
-
-## Example Pattern
+## Example Patterns
 
 ### Basic Multi-Camera Loop (Sequential Polling)
 
@@ -197,8 +187,6 @@ while any(camera.IsGrabbing() for camera in cameras):
                     # Do processing on image here, e.g. call a function.
                     process(image)
 ```
-
----
 
 ### Advanced Approach: InstantCameraArray (Recommended)
 
@@ -245,56 +233,44 @@ with pylon.InstantCameraArray(len(device_info_list)) as cameras:
                 print("Error:", grab_result.ErrorDescription)
 ```
 
----
+!!! info "Why `InstantCameraArray` Is Important"
+    Compared to manual looping, this approach provides:
 
-### Why InstantCameraArray Is Important
+    - single acquisition loop for all cameras
+    - automatic camera context tracking (`camera.CameraContext`)
+    - simpler synchronization handling
+    - more efficient thread usage
 
-Compared to manual looping, this approach provides:
+    Conceptually:
 
-- single acquisition loop for all cameras
-- automatic camera context tracking (`camera.CameraContext`)
-- simpler synchronization handling
-- more efficient thread usage
-
-Conceptually:
-
-```text
-Multiple Cameras → InstantCameraArray → Unified RetrieveResult() → Processing
-```
-
----
+    ```text
+    Multiple Cameras → InstantCameraArray → Unified RetrieveResult() → Processing
+    ```
 
 ## Practical Design Guidelines
 
-- always identify cameras via serial number
-- prefer hardware synchronization
-- reduce bandwidth where possible (ROI, FPS)
-- use separate processing threads for scalability
-- monitor system load (CPU, network)
-
----
+- Always identify cameras by serial number.
+- Prefer hardware synchronization.
+- Reduce bandwidth where possible (e.g., by specifying a [ROI](pypylon-configuring-camera-parameters.md#roi) or lowering the frame rate).
+- Use separate processing threads for scalability.
+- Monitor system load (CPU, network).
 
 ## Common Pitfalls
 
-- relying on device index
-- exceeding network bandwidth
-- ignoring synchronization requirements
-- blocking processing in acquisition loop
+- Relying on device index.
+- Exceeding network bandwidth.
+- Ignoring synchronization requirements.
+- Blocking processing in acquisition loop.
 
----
-
-## Conceptual System Overview
+## Mental Model
 
 ```text
 Multiple Cameras → Acquisition → Buffers → Processing → Results
 ```
 
----
-
 ## Key Takeaways
 
-- multi-camera systems require careful design
-- synchronization is critical for many applications
-- bandwidth and CPU must be considered early
-- scalable architectures use parallel processing
-
+- Multi-camera systems require careful design.
+- Synchronization is critical for many applications.
+- Bandwidth and CPU must be considered early.
+- Scalable architectures use parallel processing.
