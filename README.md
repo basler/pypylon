@@ -5,7 +5,8 @@
 </picture>
 
 <br>
-pypylon is the official Python language binding for the Basler pylon C++ APIs. It enables Python applications to control and acquire images from Basler machine vision products, e.g. cameras. Furthermore, the pylon Data Processing API allows you to perform image processing tasks.
+
+pypylon is the official Python language binding for the [Basler pylon C++ APIs](https://docs.baslerweb.com/pylonapi/cpp). It enables Python applications to control and acquire images from Basler machine vision products, e.g. cameras. Furthermore, the pylon Data Processing API allows you to perform image processing tasks.
 
 > **Note:** This README was updated for pypylon 26.6.
 > pypylon 26.6 introduces breaking changes. While most existing code is expected to remain functional, check the [changelog](https://github.com/basler/pypylon/blob/master/changelog.txt) for a full list of affected areas.
@@ -13,9 +14,10 @@ pypylon is the official Python language binding for the Basler pylon C++ APIs. I
 Background information about usage of pypylon, programming samples and jupyter notebooks can also be found at [pypylon-samples](https://github.com/basler/pypylon-samples) *(may not always reflect the latest pypylon API/style)*.
 
 [![Build Status](https://github.com/basler/pypylon/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/basler/pypylon/actions/workflows/main.yml)
+[![Documentation](https://raw.githubusercontent.com/basler/pypylon/master/docs/images/docs_badge.svg)](https://docs.baslerweb.com/pypylon-introduction)
 
 # Getting Started
-> A detailed pypylon Programmer's Guide is available [here](https://github.com/basler/pypylon/blob/master/docs/programmers_guide).
+> 📖 A detailed pypylon Programmer's Guide can be found on [GitHub](https://github.com/basler/pypylon/blob/master/docs/programmers_guide) as well as in the [Basler Product Documentation](https://docs.baslerweb.com/pypylon-introduction).
 
  * Install [pylon](https://www.baslerweb.com/pylon)
    This is strongly recommended but not mandatory. See [known issues](#known-issues) for further details.
