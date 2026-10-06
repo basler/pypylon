@@ -1,0 +1,100 @@
+name: pypylon issue
+description: Report a bug or ask a question about the pypylon Python API.
+title: "<Please write a comprehensive title>"
+labels: ["Needs Triage"]
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thank you for taking the time to open an issue.
+
+      **This issue tracker is for pypylon only.**
+
+      * Questions or problems with **cameras / firmware**, the **pylon SDK (C++/.NET)** or **pylon vTools**:
+        please contact the official [Basler Support](https://www.baslerweb.com/en/support/contact).
+      * "How do I ...?" questions: please check the pypylon Programmer's Guide on
+        [GitHub](https://github.com/basler/pypylon/blob/master/docs/programmers_guide) or in the
+        [Basler Product Documentation](https://docs.baslerweb.com/pypylon-introduction), the [samples](https://github.com/basler/pypylon/tree/master/samples) 
+        and the  [pypylon-samples](https://github.com/basler/pypylon-samples) repository.
+
+      Before creating a new issue, please check the issue tracker for existing issues on the same topic.
+
+- type: checkboxes
+  attributes:
+    label: Scope
+    options:
+      - label: I confirm that this issue is about pypylon itself and not about a camera, the pylon SDK (C++/.NET) or pylon vTools.
+        required: true
+
+- type: dropdown
+  attributes:
+    label: Issue type
+    options:
+      - Bug
+      - Question about the pypylon API
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Describe the issue:"
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Reproduce the code example:"
+    description: >
+      A short code example that reproduces the problem. It should be
+      self-contained, i.e., can be copy-pasted into the Python interpreter or
+      run as-is via `python sample_code.py`. If possible, use the pylon Camera
+      Emulation so the issue can be reproduced without camera hardware.
+    placeholder: |
+      import pypylon.pylon as py
+      << your code here >>
+    render: python
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Error message:"
+    description: >
+      Please include the full error message, if any.
+    placeholder: |
+      << Full traceback starting from `Traceback: ...` >>
+    render: shell
+
+- type: textarea
+  attributes:
+    label: "Runtime information:"
+    description: |
+      Do you have the full Basler pylon Software Suite installed in addition to pypylon?
+      
+      > In the pylon Viewer the keys `Shift + Ctrl + Alt + i` will capture OS / software version information, that you can paste here.
+
+      The below command will output python/pypylon and system versions. Please use the python interpreter used in your project to execute
+
+      ```python
+      import sys, pypylon.pylon, platform
+      print(f'python: {sys.version}')
+      print(f'platform: {sys.platform}/{platform.machine()}/{platform.release()}')
+      print(f'pypylon: {pypylon.pylon.__version__} / {".".join([str(i) for i in pypylon.pylon.GetPylonVersion()])}')
+      ```
+
+      And in case of containerized applications also list the operating system and platform of the base system!
+    placeholder: |
+      << Runtime information >>
+    render: shell
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Camera model(s) and hardware setup (optional)"
+    description: >
+      Only needed if the issue cannot be reproduced with the pylon Camera Emulation.
+      List the camera model(s) and, if relevant, the PC/embedded system, CPU architecture,
+      operating system and the interfaces used to connect the cameras.
+

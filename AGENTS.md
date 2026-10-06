@@ -2,8 +2,8 @@
 
 Development guide for contributors and automated assistants working in this
 repository.
-pypylon is the official Python wrapper for the Basler pylon Camera Software
-Suite, built with SWIG on top of the pylon C++ SDK. See [README.md](README.md)
+pypylon is the official Python language binding for the [Basler pylon C++ APIs](https://docs.baslerweb.com/pylonapi/cpp)
+Suite, built with SWIG. See [README.md](README.md)
 for the project overview, installation, and quick-start examples.
 
 ## Repository map
