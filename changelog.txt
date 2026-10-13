@@ -1,3 +1,12 @@
+Version 26.9
+    - Date 2026-09-14
+    - Updated to pylon Software Suite 26.9.2 on all platforms, which includes
+      pylon C++ SDK 12.4.2 and pylon Data Processing C++ SDK 5.1.0.
+    - Revised the Programmer's Guide and adopted a new chapter naming scheme.
+    - Reworked the GitHub issue template into a single form and updated links.
+    - Added a sample that uses the buffer factory together with CUDA.
+    - Updated README.
+
 Version 26.8
     - Date 2026-09-04
     - Updated to pylon Software Suite 26.8.1 on all platforms, which includes
