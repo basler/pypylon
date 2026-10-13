@@ -49,6 +49,15 @@ class PyPylonConanConsumer(ConanFile):
                 return dep
         return None
 
+    @staticmethod
+    def _version_to_range(version):
+        base = str(version).split("+", 1)[0]
+        parts = base.split(".")
+        if len(parts) == 3 and all(p.isdigit() for p in parts):
+            major, minor, patch = (int(p) for p in parts)
+            return f"[>={major}.{minor}.{patch} <{major}.{minor}.{patch + 1}]"
+        return version
+
     def requirements(self):
         # Read the configuration and control files
         config_path = str(self.options.build_config)
@@ -70,7 +79,7 @@ class PyPylonConanConsumer(ConanFile):
         for req in requirements:
             version = version_map.get(req)
             if version:
-                ref = f"{req}/{version}@release/potentially-public"
+                ref = f"{req}/{self._version_to_range(version)}@release/potentially-public"
             else:
                 ref = f"{req}/25.09@release/potentially-public"
             # The control file is the authoritative source for the pylon
