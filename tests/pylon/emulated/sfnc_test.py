@@ -12,12 +12,13 @@ class SfncTestSuite(PylonEmuTestCase):
     # ------------------------------------------------------------------
 
     def test_sfnc_camera_version(self):
-        """GetSfncVersion returns Sfnc_VersionUndefined for the emulated camera."""
+        """GetSfncVersion returns SFNC 2.5.0 for the emulated camera."""
         camera = self.create_first()
         camera.Open()
-        sfnc = pylon.GetSfncVersion(camera.GetNodeMap()) # Emu has no SFNC version, so this should return Sfnc_VersionUndefined
-        self.assertEqual(sfnc, pylon.Sfnc_VersionUndefined)
-        self.assertEqual("<VersionInfo 0.0.0>", str(sfnc))
+        sfnc = pylon.GetSfncVersion(camera.GetNodeMap())
+        # Since pylon 12.4 the emulated camera reports SFNC version 2.5.0.
+        self.assertEqual(sfnc, pylon.Sfnc_2_5_0)
+        self.assertEqual("<VersionInfo 2.5.0>", str(sfnc))
         camera.Close()
 
     # ------------------------------------------------------------------

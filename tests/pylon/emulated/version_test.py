@@ -141,11 +141,11 @@ class VersionInfoTestSuite(PylonEmuTestCase):
     # ------------------------------------------------------------------
 
     def test_sfnc_version_accessors(self):
-        """Camera emulator reports SFNC version 0.0.0.0."""
+        """Camera emulator reports SFNC version 2.5.0 (since pylon 12.4)."""
         with self.create_first() as camera:
             version = camera.GetSfncVersion()
-            self.assertEqual(0, version.getMajor())
-            self.assertEqual(0, version.getMinor())
+            self.assertEqual(2, version.getMajor())
+            self.assertEqual(5, version.getMinor())
             self.assertEqual(0, version.getSubminor())
             self.assertEqual(0, version.getBuild())
 
@@ -153,7 +153,7 @@ class VersionInfoTestSuite(PylonEmuTestCase):
         """VersionInfo repr formats as <VersionInfo major.minor.subminor>."""
         with self.create_first() as camera:
             version = camera.GetSfncVersion()
-            self.assertEqual("<VersionInfo 0.0.0>", repr(version))
+            self.assertEqual("<VersionInfo 2.5.0>", repr(version))
 
 
 if __name__ == "__main__":

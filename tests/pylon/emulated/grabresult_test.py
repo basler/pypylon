@@ -10,8 +10,6 @@ from pypylon import genicam
 import unittest
 
 
-SIZE_MAX = 18446744073709551615
-
 class GrabResultTestSuite(PylonEmuTestCase):
 
     # ------------------------------------------------------------------
@@ -280,8 +278,8 @@ class GrabResultTestSuite(PylonEmuTestCase):
         self.assertGreaterEqual(second.GetBlockID(), first.GetBlockID())
         # Property access (preferred style)
         self.assertGreaterEqual(second.BlockID, first.BlockID)
-        # CamEmu reports "invalid value", currently
-        self.assertEqual(second.BlockID, SIZE_MAX)
+        # CamEmu reports 0 as a placeholder BlockID (since pylon 12.4).
+        self.assertEqual(second.BlockID, 0)
         first.Release()
         second.Release()
 
