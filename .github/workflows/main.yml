@@ -181,6 +181,7 @@ jobs:
           import os
           import subprocess
 
+          # This should be the only remote used for downloading pylon artifacts
           remotes = [
               ("pylon-conan-prod", f"{os.environ['JF_URL']}/artifactory/api/conan/pylon-conan-prod", 0),
           ]
