@@ -114,11 +114,12 @@ class PixelTypeMapperTestSuite(PylonEmuTestCase):
         camera = self.create_first()
         camera.Open()
         try:
-            sfnc_version = camera.GetSfncVersion()  # Sfnc_VersionUndefined for the emulated camera
+            sfnc_version = camera.GetSfncVersion()  # SFNC 2.5.0 since pylon 12.4
             result = pylon.PixelTypeMapper.GetNameByPixelType(
                 pylon.PixelType_RGB8packed, sfnc_version
             )
-            self.assertEqual(result, "RGB8Packed")
+            # SFNC 2.x uses the short name "RGB8" (instead of pre-2.0 "RGB8Packed").
+            self.assertEqual(result, "RGB8")
         finally:
             camera.Close()
 

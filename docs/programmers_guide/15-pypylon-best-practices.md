@@ -1,12 +1,10 @@
-# 15. Best Practices
+# Best Practices
 
 This chapter summarizes proven recommendations for building robust, efficient, and maintainable pypylon applications in production environments.
 
----
-
 ## Resource Management
 
-Always ensure that camera resources are properly acquired and released.
+Always ensure that camera resources are acquired and released properly.
 
 ```Python
 with pylon.InstantCamera(pylon.FirstFound) as camera:
@@ -15,26 +13,24 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
 
 Benefits:
 
-- automatic cleanup
-- exception safety
-- prevents resource leaks
-
----
+- Automatic cleanup
+- Exception safety
+- Prevents resource leaks
 
 ## Device Identification
 
-Never rely on device indices:
+Never rely on device indices as they are not stable:
 
 ```Python
-devices[0]  # not stable!
+devices[0]
 ```
 
-Instead, use unique identifiers:
+Use unique identifiers instead:
 
-- serial number
-- user-defined name
+- Serial number
+- User-defined name
 
----
+See [Discovering and Selecting a Camera](pypylon-discovering-and-selecting-cameras.md) for details.
 
 ## Performance Optimization
 
@@ -43,22 +39,16 @@ Instead, use unique identifiers:
 - `LatestImageOnly` → low latency
 - `OneByOne` → complete processing
 
----
-
 ### Reduce Data at Source
 
-- use ROI
-- reduce resolution
-- lower frame rate if possible
-
----
+- Specify a [ROI](pypylon-configuring-camera-parameters.md#roi).
+- Reduce resolution.
+- Lower frame rate if possible.
 
 ### Avoid Unnecessary Copies
 
-- copy only when required
-- reuse buffers when possible
-
----
+- Copy only when required.
+- Reuse buffers when possible.
 
 ## Threading Design
 
@@ -70,17 +60,13 @@ Camera → Queue → Processing
 
 Benefits:
 
-- better CPU utilization
-- avoids blocking acquisition
-
----
+- Better CPU utilization
+- Avoids blocking acquisition
 
 ### Use Producer–Consumer Pattern
 
-- acquisition thread pushes images
-- processing thread(s) consume them
-
----
+- Acquisition thread pushes images.
+- Processing threads consume them.
 
 ### Use Thread-Safe Queues
 
@@ -88,8 +74,6 @@ Benefits:
 import queue
 q = queue.Queue()
 ```
-
----
 
 ## Multi-Stage Pipelines
 
@@ -101,11 +85,9 @@ Grab → Preprocess → Analyze → Output
 
 Guidelines:
 
-- each stage has one responsibility
-- communicate via queues
-- allow independent scaling per stage
-
----
+- Each stage has one responsibility.
+- Communicate via queues.
+- Allow independent scaling per stage.
 
 ## Error Handling
 
@@ -118,9 +100,7 @@ else:
     log_error(grab_result.ErrorDescription)
 ```
 
----
-
-### Handle Exceptions Gracefully
+### Catch and Log Exceptions
 
 ```Python
 try:
@@ -130,87 +110,67 @@ except Exception as e:
     log_error(e)
 ```
 
----
-
 ### Implement Recovery Logic
 
 ```PlainText
 Error → StopGrabbing → Retry → Continue
 ```
 
----
-
 ## Shutdown Strategy
 
 Implement clean shutdown mechanisms:
 
-- use `threading.Event`
-- avoid blocking calls without timeout
-- stop acquisition explicitly
+- Use `threading.Event`.
+- Avoid blocking calls without timeout.
+- Stop acquisition explicitly.
 
 ```Python
 stop_event.set()
 camera.StopGrabbing()
 ```
 
----
-
 ## OpenCV Integration Rules
 
-- run `imshow()` only in main thread
-- avoid GUI in worker threads
-
----
+- Run `imshow()` only in main thread.
+- Avoid GUI in worker threads.
 
 ## System Monitoring
 
 Track key metrics:
 
-- frame rate
-- processing latency
-- queue sizes
+- Frame rate
+- Processing latency
+- Queue sizes
 - CPU usage
-
----
 
 ## Configuration Management
 
-- store camera parameters externally
-- avoid hard-coded values
-- validate configuration at startup
+- Store camera parameters externally.
+- Avoid hardcoded values.
+- Validate configuration at startup.
 
----
+## Recommendations for Testing
 
-## Testing Recommendations
-
-- test with real hardware
-- simulate load conditions
-- verify recovery behavior
-
----
+- Test with real hardware.
+- Simulate load conditions.
+- Verify recovery behavior.
 
 ## Common Pitfalls
 
-- using image buffers after release
-- blocking queues indefinitely
-- ignoring synchronization requirements
-- mixing UI and worker threads
+- Using image buffers after release
+- Blocking queues indefinitely
+- Ignoring synchronization requirements
+- Mixing UI and worker threads
 
----
-
-## Conceptual Overview
+## Mental Model
 
 ```PlainText
 Reliable system = correct architecture + error handling + performance tuning
 ```
 
----
-
 ## Key Takeaways
 
-- design for robustness from the start
-- separate concerns (acquisition vs processing)
-- validate every external interaction
-- plan for failure and recovery
-
----
+- Design for robustness from the start.
+- Separate concerns (acquisition vs. processing).
+- Validate every external interaction.
+- Plan for failure and recovery.

@@ -1,9 +1,21 @@
 blank_issues_enabled: false
 contact_links:
-  - name: PyPylon general usage questions
+  - name: pypylon Programmer's Guide (GitHub)
+    url: https://github.com/basler/pypylon/blob/master/docs/programmers_guide
+    about: "Installation, image acquisition, camera parameter configuration, threading, integration, and troubleshooting using pypylon"
+
+  - name: pypylon Programmer's Guide (Basler Product Documentation)
+    url: https://docs.baslerweb.com/pypylon-introduction
+    about: "The pypylon Programmer's Guide in the Basler Product Documentation"
+
+  - name: pypylon general usage questions
     url: https://github.com/basler/pypylon-samples
     about: "For more documentation and specific use cases see the companion repository pypylon-samples"
 
   - name: Basler Feature Documentation
     url: https://docs.baslerweb.com/features
-    about: "For questions on how a camera feature works please check first in the Basler Product Documention"
+    about: "For questions on how a camera feature works please check first in the Basler Product Documentation"
+
+  - name: Basler Official Support
+    url: https://www.baslerweb.com/en/support/contact
+    about: "For camera, pylon SDK (C++/.NET), and pylon vTools questions, or business support requests"

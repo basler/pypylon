@@ -1,41 +1,33 @@
-# 12. Threading and Concurrency
+# Threading and Concurrency
 
-This chapter explains how threading and concurrency are used in pypylon applications, and how to structure acquisition and processing pipelines for performance and scalability.
+This topic explains how threading and concurrency are used in pypylon applications and how to structure acquisition and processing pipelines for performance and scalability.
 
----
-
-## Conceptual Model
+This visualization illustrates how image acquisition works in a Python application.
 
 ```text
 Camera → Native Thread → Buffer Queue → Python Application
 ```
 
-- The camera acquisition runs in a **native (C++) thread** inside pylon
-- Your Python code retrieves images from a **buffer queue**
-- This separation enables asynchronous acquisition
-
----
-
-## Why Threading Matters
+- Image acquisition runs in a **native (C++) thread** inside pylon.
+- Your Python code retrieves images from a **buffer queue**.
+- This separation enables asynchronous acquisition.
 
 In many applications, image acquisition is faster than processing:
 
 ```text
-Camera → 100 FPS
-Processing → 20 FPS
+Camera → 100 fps
+Processing → 20 fps
 ```
 
 Without concurrency:
 
-- buffers fill up
-- frames are dropped
-- latency increases
-
----
+- Buffers fill up.
+- Frames are dropped.
+- Latency increases.
 
 ## Basic Execution Model
 
-### Single-Threaded Approach
+A single-threaded approach is the simplest form of an image acquisition pipeline.
 
 ```text
 Acquire → Process → Acquire → Process
@@ -51,30 +43,27 @@ while camera.IsGrabbing():
             process(image)
 ```
 
-### Limitations
+This has the following disadvantages:
 
-- processing blocks acquisition
-- poor CPU utilization
-- limited scalability
-
----
+- Processing blocks acquisition.
+- Poor CPU utilization
+- Limited scalability
 
 ## Producer–Consumer Pattern (Recommended)
+
+This is a more sophisticated approach for an image acquisition pipeline.
 
 ```text
 Acquisition Thread → Queue → Worker Thread(s)
 ```
 
-### Concept
-
-- **Producer**: grabs images and pushes them into a queue
-- **Consumer**: processes images independently
-
----
+- **Producer**: The acquisition thread grabs images and pushes them into a queue.
+- **Consumer**: The worker threads process images independently.
 
 ## Example Implementation Using a Custom Thread
 
-Note: You can use the grab loop thread provided by the InstantCamera (see the grab_using_grab_loop_thread sample), but here is a custom implementation for demonstration:
+!!! info
+    You can use the grab loop thread provided by the InstantCamera (see the **grab_using_grab_loop_thread** sample). This is a custom implementation for demonstration purposes only.
 
 ```python
 import threading
@@ -114,8 +103,6 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
     image_queue.join()
 ```
 
----
-
 ## Queue Behavior and Backpressure
 
 ```text
@@ -124,16 +111,14 @@ Queue full → producer blocks → acquisition slows down
 
 Strategies:
 
-- increase queue size
-- drop frames manually
-- use `LatestImageOnly`
-
----
+- Increase queue size.
+- Drop frames manually.
+- Use `LatestImageOnly`.
 
 ## Combining with Grab Strategies
 
-- `LatestImageOnly` → reduces backlog
-- `OneByOne` → ensures completeness
+- `LatestImageOnly`: Reduces backlog.
+- `OneByOne`: Ensures completeness.
 
 Best practice:
 
@@ -142,23 +127,19 @@ LatestImageOnly + queue → responsive systems
 OneByOne + logging → analysis systems
 ```
 
----
+## Thread-Safety Considerations
 
-## Thread Safety Considerations
-
-- avoid sharing mutable data without locks
-- copy images before passing to other threads, e.g. by using the Array function.
-- use `queue.Queue` for safe communication
-
----
+- Avoid sharing mutable data without locks.
+- Copy images before passing them to other threads, e.g., by using the `Array` function.
+- Use `queue.Queue` for safe communication.
 
 ## CPU Utilization
 
-Parallel processing allows:
+Parallel processing has the following advantages:
 
-- better CPU usage
-- separation of concerns
-- scalable architectures
+- Better CPU usage
+- Separation of concerns
+- Scalable architectures
 
 ```text
 Core 1 → Acquisition
@@ -166,22 +147,18 @@ Core 2 → Processing
 Core 3 → AI
 ```
 
----
-
 ## When to Use Multiple Threads
 
-Use threading when:
+**Use** threading in these situations:
 
-- processing is slower than acquisition
-- multiple processing stages exist
-- real-time responsiveness is required
+- Processing is slower than acquisition.
+- Multiple processing stages exist.
+- Real-time responsiveness is required.
 
-Avoid threading when:
+**Avoid** threading in these situations:
 
-- processing is trivial
-- system complexity must be minimal
-
----
+- Processing is negligible.
+- System complexity must be minimal.
 
 ## Advanced Patterns (Overview)
 
@@ -193,15 +170,11 @@ A multi-stage pipeline splits image processing into independent steps that run c
 Grab → Preprocess → Analyze → Display
 ```
 
----
-
 ### Multi-Consumer Setup
 
 ```text
-Producer → Queue → multiple processing threads
+Producer → Queue → Multiple processing threads
 ```
-
----
 
 ## Conceptual Pipeline
 
@@ -209,13 +182,9 @@ Producer → Queue → multiple processing threads
 Camera → Queue → Processing → Results
 ```
 
----
-
 ## Key Takeaways
 
-- acquisition and processing should be decoupled
-- use producer-consumer pattern for scalability
-- queues provide safe thread communication
-- threading improves performance but increases complexity
-
----
+- Acquisition and processing should be decoupled.
+- Use producer-consumer pattern for scalability.
+- Queues provide thread-safe communication.
+- Threading improves performance but increases complexity.
