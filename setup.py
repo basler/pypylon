@@ -457,6 +457,7 @@ class BuildSupportWindows(BuildSupport):
             ],
 
         "gige": [
+            ("PylonRDMA_GSG.dll", ""),
             ("PylonGigEConnectionGuard.exe", ""),
             ("PylonGigE_*.dll", ""),
             ("gxapi*.dll", ""),
@@ -800,6 +801,7 @@ class BuildSupportLinux(BuildSupport):
             (r"libpylonbase\.so\.\d+", ""),
             ],
         "gige": [
+            (r"libpylon_GSG_RDMA\.so", ""),
             (r"libpylon_TL_gige\.so", ""),
             (r"libgxapi\.so\.\d+", "")
             ],
