@@ -1,8 +1,12 @@
 Version 26.10
-    - Date 2026-11-11
+    - Date 2026-11-06
+    - Updated to pylon Software Suite 26.10.1 on all platforms, which includes
+      pylon C++ SDK 12.5.2 and pylon Data Processing C++ SDK 6.0.0.
     - Added support for python 3.15
     - Updated the Programmer’s Guide with a contents page, links between sections, and clearer diagrams.
     - Added a sample showing how to capture images directly into Vulkan memory and process them on the GPU.
+    - Extended the camera parameter persistence sample to save and load stream grabber, transport layer,
+      event grabber, and InstantCamera settings using separate .pfs files.
 
 Version 26.9
     - Date 2026-10-14

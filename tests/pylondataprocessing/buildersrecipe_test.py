@@ -8,7 +8,9 @@ from pylondataprocessingtestcase import PylonDataProcessingTestCase
 from pypylon import pylondataprocessing
 from pypylon import pylon
 import unittest
+import json
 import os
+import tempfile
 
 CAMERA_VTOOL_UUID = "846bca11-6bf2-4895-88c4-fe038f5a659c".upper()
 FORMAT_CONVERTER_VTOOL_UUID = "4049ea56-3827-4faf-9478-c3ba02e4a0cb".upper()
@@ -147,6 +149,59 @@ class BuildersRecipeTestSuite(PylonDataProcessingTestCase):
             loaded_recipe.Unload()
             os.remove(recipe_filename)
         recipe.ResetToEmpty()
+
+    # ------------------------------------------------------------------
+    # SaveAs overloads
+    # ------------------------------------------------------------------
+
+    @unittest.skipUnless(
+        pylondataprocessing.GetVersion() >= pylon.VersionInfo(3, 1, 0),
+        "SaveAs requires data processing 3.1+",
+    )
+    def test_save_as_without_detail_level(self):
+        """The original two-argument SaveAs overload preserves recipe outputs."""
+        with tempfile.TemporaryDirectory() as directory:
+            recipe_filename = os.path.join(directory, "default.precipe")
+            with pylondataprocessing.BuildersRecipe() as recipe:
+                recipe.AddOutput("Image", pylondataprocessing.VariantDataType_PylonImage)
+                for file_format in (
+                    pylondataprocessing.RecipeFileFormat_JsonDefault,
+                    pylondataprocessing.RecipeFileFormat_JsonCompressedBinaryData,
+                ):
+                    with self.subTest(file_format=file_format):
+                        recipe.SaveAs(file_format, recipe_filename)
+                        with pylondataprocessing.Recipe() as loaded_recipe:
+                            loaded_recipe.Load(recipe_filename)
+                            self.assertIn("Image", loaded_recipe.GetOutputNames())
+
+    @unittest.skipUnless(
+        pylondataprocessing.GetVersion() >= pylon.VersionInfo(6, 0, 0),
+        "SaveAs with a detail level requires data processing 6.0+",
+    )
+    def test_save_as_with_detail_level(self):
+        """Both file formats persist the requested detail level and remain loadable."""
+        with tempfile.TemporaryDirectory() as directory:
+            recipe_filename = os.path.join(directory, "detail.precipe")
+            with pylondataprocessing.BuildersRecipe() as recipe:
+                recipe.AddOutput("Image", pylondataprocessing.VariantDataType_PylonImage)
+                for file_format in (
+                    pylondataprocessing.RecipeFileFormat_JsonDefault,
+                    pylondataprocessing.RecipeFileFormat_JsonCompressedBinaryData,
+                ):
+                    for detail_level, expected_detail_level in (
+                        (pylondataprocessing.Detail_Complete, "Complete"),
+                        (pylondataprocessing.Detail_Lean, "Lean"),
+                    ):
+                        with self.subTest(file_format=file_format, detail_level=detail_level):
+                            recipe.SaveAs(file_format, recipe_filename, detail_level)
+                            with open(recipe_filename, encoding="utf-8-sig") as recipe_file:
+                                saved_recipe = json.load(recipe_file)
+                            self.assertEqual(
+                                saved_recipe["PylonMetaData"]["DetailLevel"], expected_detail_level
+                            )
+                            with pylondataprocessing.Recipe() as loaded_recipe:
+                                loaded_recipe.Load(recipe_filename)
+                                self.assertIn("Image", loaded_recipe.GetOutputNames())
 
     def test_typed_parameter_methods_are_exposed(self):
         """BuildersRecipe inherits typed parameter access methods from Recipe."""
