@@ -42,6 +42,9 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Test SDK control file selection
+      run: python3 -m unittest discover -s .github/workflows/scripts -p 'test_prepare_control_files.py' -v
+
     - name: Check for release build and tag
       if: startsWith(github.ref, 'refs/tags/')
       run: |
@@ -60,49 +63,35 @@ jobs:
       id: get_sdks
       run: |
         set +x
-        set -e
-        build_config=$(cat .github/workflows/build_config.json)
-        # Get the latest pylon version from Artifactory
-        pylon_default_version=$(jf rt s "pylon-artifacts-generic-prod/setup/*" | jq '.[] | .path' | awk -F'/' '{print $3}' | sort -V | uniq | tac | head -n 1)
-        for os in $(echo $build_config | jq -r 'keys[]'); do
-          # When TAG_NAME is set (release build), use the pylon version from the tag, stripping any rc suffix
-          tag=$(echo "${TAG_NAME:-$pylon_default_version}" | sed 's/rc[0-9]*$//')
-          echo "Downloading control files for $os using pylon $tag"
-          # Find the latest build number for the given pylon version
-          latest_build=$(jf rt s "pylon-artifacts-generic-*/setup/*/report_$os*.json" | jq -r --arg tag "$tag" '.[] | select(.path | test($tag)) | .path' | sed -E 's|.*/([0-9]{8}\.[0-9]+)/.*|\1|' | sort -V | tail -1)
-          # Download control files
-          for path in $(jf rt s "pylon-artifacts-generic-*/setup/*/report_$os*.json" | jq -r --arg tag "$tag" --arg build "$latest_build" '.[] | select(.path | test($tag)) | select(.path | test($build)) | .path'); do
-            jf rt dl --flat $path ./${os,,}/report_${os,,}.json
-          done
-          # Download 3rd party licenses
-          for path in $(jf rt s "pylon-artifacts-generic-*/setup/*/oso_$os*.txt" | jq -r --arg tag "$tag" --arg build "$latest_build" '.[] | select(.path | test($tag)) | select(.path | test($build)) | .path'); do
-            jf rt dl --flat $path ./${os,,}/pylon_Third-Party_Licenses.txt
-          done        
-        done
+        python3 .github/workflows/scripts/prepare_control_files.py
 
     - name: Upload control files for Linux aarch64
       uses: actions/upload-artifact@v6
       with:
         name: Linux_aarch64_Pylon
         path: linux_aarch64
+        if-no-files-found: error
     
     - name: Upload control files for Linux x86_64
       uses: actions/upload-artifact@v6
       with:
         name: Linux_x86_64_Pylon
         path: linux_x86_64
+        if-no-files-found: error
 
     - name: Upload control files for Windows
       uses: actions/upload-artifact@v6
       with:
         name: Windows_Pylon
         path: windows
+        if-no-files-found: error
 
     - name: Upload control files for macOS
       uses: actions/upload-artifact@v6
       with:
         name: macOS_Pylon
         path: macos
+        if-no-files-found: error
 
   download:
     needs: prepare
