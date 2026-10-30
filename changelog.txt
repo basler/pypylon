@@ -1,3 +1,8 @@
+Version 26.10
+    - Date 2026-11-11
+    - Added support for python 3.15
+    - Enhanced the programmer's with table of contents, cross-references, and revised the diagrams
+
 Version 26.9
     - Date 2026-10-14
     - Updated to pylon Software Suite 26.9.2 on all platforms, which includes

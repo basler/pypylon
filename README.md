@@ -150,13 +150,13 @@ To install pypylon open your favourite terminal and run:
 
 Prebuilt pypylon wheels on PyPI are available for the Python versions and platforms listed below:
 
- |                | 3.9 | 3.10 | 3.11 | 3.12 | 3.13 | 3.14 |
- |----------------|-----|------|------|------|------|------|
- | Windows 64bit  | x   | x    |  x   |  x   |  x   |  x   |
- | Linux x86_64*  | x   | x    |  x   |  x   |  x   |  x   |
- | Linux aarch64* | x   | x    |  x   |  x   |  x   |  x   |
- | macOS x86_64** | x   | x    |  x   |  x   |  x   |  x   |
- | macOS arm64**  | x   | x    |  x   |  x   |  x   |  x   |
+ |                | 3.9 | 3.10 | 3.11 | 3.12 | 3.13 | 3.14 | 3.15 |
+ |----------------|-----|------|------|------|------|------|------|
+ | Windows 64bit  | x   | x    |  x   |  x   |  x   |  x   |  x   |
+ | Linux x86_64*  | x   | x    |  x   |  x   |  x   |  x   |  x   |
+ | Linux aarch64* | x   | x    |  x   |  x   |  x   |  x   |  x   |
+ | macOS x86_64** | x   | x    |  x   |  x   |  x   |  x   |  x   |
+ | macOS arm64**  | x   | x    |  x   |  x   |  x   |  x   |  x   |
 
 
 > Additional Notes on binary packages:
