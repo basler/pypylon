@@ -1,3 +1,7 @@
+[Previous](13-pypylon-integration-with-opencv.md) | [Contents](README.md) | [Next](15-pypylon-best-practices.md)
+
+---
+
 # Multi-Camera Systems
 
 This topic explains how to design, configure, and operate systems that use multiple cameras simultaneously.
@@ -31,12 +35,13 @@ for device_info in device_info_list:
 
 Mapping example:
 
-```text
-Camera 40123456 → Left view
-Camera 40123478 → Right view
-```
+````mermaid
+flowchart LR
+    leftCamera["Camera 40123456"] --> leftView["Left view"]
+    rightCamera["Camera 40123478"] --> rightView["Right view"]
+````
 
-Avoid using indices such as `devices[0]` because the order in which cameras are enumerated may change. For more details, see [Enumerating Cameras](pypylon-discovering-and-selecting-cameras.md#selecting-a-camera).
+Avoid using indices such as `devices[0]` because the order in which cameras are enumerated may change. For more details, see [Enumerating Cameras](05-pypylon-discovering-and-selecting-cameras.md#selecting-a-camera).
 
 ## Creating Multiple Camera Instances
 
@@ -64,10 +69,11 @@ When using multiple cameras, you have to decide on an acquisition method: [seque
 
 This means that image processing is done one camera after the other.
 
-```text
-Cam1 → Capture → Process
-Cam2 → Capture → Process
-```
+````mermaid
+flowchart TD
+    cam1["Camera 1"] --> capture1["Capture"] --> process1["Process"]
+    cam2["Camera 2"] --> capture2["Capture"] --> process2["Process"]
+````
 
 Key characteristics of this method:
 
@@ -79,11 +85,12 @@ Key characteristics of this method:
 
 This means that images from several cameras are processed together.
 
-```text
-Cam1 → Capture →
-                → Process
-Cam2 → Capture →
-```
+````mermaid
+flowchart LR
+    process[/"Process"/]
+    cam1["Camera 1"] --> capture1["Capture"] --> process
+    cam2["Camera 2"] --> capture2["Capture"] --> process
+````
 
 Key characteristics of this method:
 
@@ -93,7 +100,7 @@ Key characteristics of this method:
 
 ## Synchronization Methods
 
-To synchronize cameras, you can choose between software and hardware synchronization. The advantages and disadvantages are similar to software vs. hardware [triggering](pypylon-triggered-image-acquisition.md).
+To synchronize cameras, you can choose between software and hardware synchronization. The advantages and disadvantages are similar to software vs. hardware [triggering](09-pypylon-triggered-image-acquisition.md).
 
 ### Software Synchronization
 
@@ -111,9 +118,10 @@ camera.ExecuteSoftwareTrigger()
 
 ### Hardware Synchronization (Recommended)
 
-```text
-Master camera → trigger signal → Slave cameras
-```
+````mermaid
+flowchart LR
+    master["Master camera"] --> signal["Trigger signal"] --> slaves["Slave cameras"]
+````
 
 Key characteristics of this method:
 
@@ -142,18 +150,20 @@ You can use one of the following strategies to mitigate potential problems:
 
 ### Single-Threaded
 
-```text
-Acquire all → process all
-```
+````mermaid
+flowchart LR
+    acquire["Acquire from all cameras"] --> process["Process all images"]
+````
 
 - Simple
 - Limited scalability
 
 ### Multi-Threaded (Recommended)
 
-```text
-Camera threads → queue → processing threads
-```
+````mermaid
+flowchart LR
+    cameras["Camera threads"] --> queue["Queue"] --> workers["Processing threads"]
+````
 
 - Scalable
 - Better CPU utilization
@@ -243,15 +253,18 @@ with pylon.InstantCameraArray(len(device_info_list)) as cameras:
 
     Conceptually:
 
-    ```text
-    Multiple Cameras → InstantCameraArray → Unified RetrieveResult() → Processing
-    ```
+
+````mermaid
+flowchart LR
+    cameras["Multiple cameras"] --> array["InstantCameraArray"]
+    array --> retrieve["Unified RetrieveResult()"] --> processing["Processing"]
+````
 
 ## Practical Design Guidelines
 
 - Always identify cameras by serial number.
 - Prefer hardware synchronization.
-- Reduce bandwidth where possible (e.g., by specifying a [ROI](pypylon-configuring-camera-parameters.md#roi) or lowering the frame rate).
+- Reduce bandwidth where possible (e.g., by specifying a [ROI](08-pypylon-configuring-camera-parameters.md#roi) or lowering the frame rate).
 - Use separate processing threads for scalability.
 - Monitor system load (CPU, network).
 
@@ -264,9 +277,11 @@ with pylon.InstantCameraArray(len(device_info_list)) as cameras:
 
 ## Mental Model
 
-```text
-Multiple Cameras → Acquisition → Buffers → Processing → Results
-```
+````mermaid
+flowchart LR
+    cameras["Multiple cameras"] --> acquisition["Acquisition"]
+    acquisition --> buffers["Buffers"] --> processing["Processing"] --> results["Results"]
+````
 
 ## Key Takeaways
 
@@ -274,3 +289,7 @@ Multiple Cameras → Acquisition → Buffers → Processing → Results
 - Synchronization is critical for many applications.
 - Bandwidth and CPU must be considered early.
 - Scalable architectures use parallel processing.
+
+---
+
+[Previous](13-pypylon-integration-with-opencv.md) | [Contents](README.md) | [Next](15-pypylon-best-practices.md)

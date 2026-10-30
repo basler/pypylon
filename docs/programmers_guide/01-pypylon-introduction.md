@@ -1,3 +1,7 @@
+[Previous](README.md) | [Contents](README.md) | [Next](02-pypylon-installation-and-environment-setup.md)
+
+---
+
 # Introduction
 
 pypylon is the official Python language binding for the Basler pylon C++ APIs.
@@ -28,3 +32,7 @@ block
   E["Camera and Grabber Hardware"]
 ````
 Understanding the layered architecture helps debug issues (driver, transport, or application level).
+
+---
+
+[Previous](README.md) | [Contents](README.md) | [Next](02-pypylon-installation-and-environment-setup.md)

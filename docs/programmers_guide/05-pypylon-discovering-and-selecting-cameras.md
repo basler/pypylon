@@ -1,3 +1,7 @@
+[Previous](04-pypylon-core-concepts.md) | [Contents](README.md) | [Next](06-pypylon-image-acquisition.md)  
+
+---
+
 # Discovering and Selecting Cameras
 
 This topic explains the process of discovering and selecting cameras to work with.
@@ -6,7 +10,7 @@ Before an application can use a camera, it must first **discover** which cameras
 
 ## Enumerating Cameras
 
-Unlike consumer cameras (e.g., webcams), industrial cameras aren't automatically tied to a single application. Instead the following is true:
+Unlike consumer cameras (e.g., webcams), industrial cameras aren't automatically tied to a single application. Instead, the following is true:
 
 - Multiple cameras may be connected at the same time.
 - Cameras may be connected via different transport layers, e.g., USB, GigE, etc.
@@ -50,15 +54,12 @@ for device_info in device_info_list:
 
 ### Mental Model
 
-```PlainText
-System Startup
-     ↓
-Transport Layers Scan for Devices
-     ↓
-Detected Camera List (Enumeration)
-     ↓
-Application selects a camera
-```
+````mermaid
+flowchart TD
+    start["System startup"] --> scan["Transport layers scan for devices"]
+    scan --> devices["Detected camera list (enumeration)"]
+    devices --> select["Application selects a camera"]
+````
 
 ## Selecting a Camera
 
@@ -103,7 +104,8 @@ camera = pylon.InstantCamera({pylon.SerialNumberKey : serial_number}, pylon.Firs
 
 ### Multi-Camera Systems
 
-Basler recommends enumerating the devices first. Afterwards, you can select the desired camera by its unique identifier, e.g., its serial number, to avoid the overhead of multiple device enumerations.
+Basler recommends enumerating the devices first. Afterward, you can select the desired camera by its unique identifier,
+e.g., its serial number, to avoid the overhead of multiple device enumerations.
 
 - Enumerate all cameras.
 - Map cameras by serial number or user-defined name.
@@ -124,3 +126,5 @@ Enumeration is essential because it makes your application:
 
 Without proper enumeration, systems become fragile and difficult to maintain.
 ---
+
+[Previous](04-pypylon-core-concepts.md) | [Contents](README.md) | [Next](06-pypylon-image-acquisition.md)  

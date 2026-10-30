@@ -1,3 +1,7 @@
+[Previous](14-pypylon-multi-camera-systems.md) | [Contents](README.md) | [Next](16-pypylon-troubleshooting.md)
+
+---
+
 # Best Practices
 
 This chapter summarizes proven recommendations for building robust, efficient, and maintainable pypylon applications in production environments.
@@ -30,7 +34,7 @@ Use unique identifiers instead:
 - Serial number
 - User-defined name
 
-See [Discovering and Selecting a Camera](pypylon-discovering-and-selecting-cameras.md) for details.
+See [Discovering and Selecting a Camera](05-pypylon-discovering-and-selecting-cameras.md) for details.
 
 ## Performance Optimization
 
@@ -41,7 +45,7 @@ See [Discovering and Selecting a Camera](pypylon-discovering-and-selecting-camer
 
 ### Reduce Data at Source
 
-- Specify a [ROI](pypylon-configuring-camera-parameters.md#roi).
+- Specify a [ROI](08-pypylon-configuring-camera-parameters.md#roi).
 - Reduce resolution.
 - Lower frame rate if possible.
 
@@ -54,9 +58,10 @@ See [Discovering and Selecting a Camera](pypylon-discovering-and-selecting-camer
 
 ### Separate Acquisition and Processing
 
-```PlainText
-Camera → Queue → Processing
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> queue["Queue"] --> processing["Processing"]
+````
 
 Benefits:
 
@@ -79,9 +84,10 @@ q = queue.Queue()
 
 Structure complex applications as pipelines:
 
-```PlainText
-Grab → Preprocess → Analyze → Output
-```
+````mermaid
+flowchart LR
+    grab["Grab"] --> preprocess["Preprocess"] --> analyze["Analyze"] --> output["Output"]
+````
 
 Guidelines:
 
@@ -112,9 +118,10 @@ except Exception as e:
 
 ### Implement Recovery Logic
 
-```PlainText
-Error → StopGrabbing → Retry → Continue
-```
+````mermaid
+flowchart LR
+    Error --> StopGrabbing --> Retry --> Continue
+````
 
 ## Shutdown Strategy
 
@@ -164,9 +171,17 @@ Track key metrics:
 
 ## Mental Model
 
-```PlainText
-Reliable system = correct architecture + error handling + performance tuning
-```
+````mermaid
+flowchart BT
+    system["Reliable System"]
+    error["Error"] 
+    performance["Performance"]
+    architecture["Architecture"]
+    
+    architecture --> system
+    error        --> system
+    performance  --> system
+````
 
 ## Key Takeaways
 
@@ -174,3 +189,7 @@ Reliable system = correct architecture + error handling + performance tuning
 - Separate concerns (acquisition vs. processing).
 - Validate every external interaction.
 - Plan for failure and recovery.
+
+---
+
+[Previous](14-pypylon-multi-camera-systems.md) | [Contents](README.md) | [Next](16-pypylon-troubleshooting.md)

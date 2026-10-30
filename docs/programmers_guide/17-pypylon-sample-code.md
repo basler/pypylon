@@ -1,3 +1,7 @@
+[Previous](16-pypylon-troubleshooting.md) | [Contents](README.md) |
+
+---
+
 # Sample Code
 
 This chapter provides practical, ready-to-use code snippets for common pypylon tasks. This sample code can be used as building blocks for real-world applications.
@@ -70,7 +74,7 @@ camera.Gain.Value = 5
 
 ## Specifying a Region Of Interest (ROI)
 
-For more details, see [Configuring Camera Parameters](pypylon-configuring-camera-parameters.md#roi).
+For more details, see [Configuring Camera Parameters](08-pypylon-configuring-camera-parameters.md#roi).
 
 Get the top left corner from a camera.
 
@@ -139,7 +143,7 @@ except Exception as e:
 
 ## Multi-Camera Setup
 
-Using [multiple cameras](pypylon-multi-camera-systems.md) efficiently is best done with `InstantCameraArray`. It allows grabbing from all cameras in a single loop.
+Using [multiple cameras](14-pypylon-multi-camera-systems.md) efficiently is best done with `InstantCameraArray`. It allows grabbing from all cameras in a single loop.
 
 ```Python
 from pypylon import pylon
@@ -251,3 +255,7 @@ else:
 - Sample code speeds up development.
 - Combine code snippets to build more complex applications.
 - Adapt sample code to your specific use case.
+
+---
+
+[Previous](16-pypylon-troubleshooting.md) | [Contents](README.md) |

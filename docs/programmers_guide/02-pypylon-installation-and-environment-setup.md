@@ -1,15 +1,19 @@
+[Previous](01-pypylon-introduction.md) | [Contents](README.md) | [Next](03-pypylon-quick-start.md)
+
+---
+
 # Installation and Environment Setup
 
 This topic covers describes the installation of pypylon and how to verify it.
 
-For background information about pypylon, see the [Introduction](pypylon-introduction.md).
+For background information about pypylon, see the [Introduction](01-pypylon-introduction.md).
 
 ## Installing the pylon Software Suite
 
 Install the pylon software suite from Basler together with installing pypylon and required supplementary packages, e.g. for 3D cameras.
-Note: The pypylon wheel package already includes the [pylon C++ runtimes](pylon-software-suite.md#sdk-and-apis) and [vTools](vtools.md). This is sufficient for using pypylon and works immediately for transport layers that don't require any extra drivers.
+Note: The pypylon wheel package already includes the [pylon C++ runtimes](https://docs.baslerweb.com/pylon-software-suite#sdk-and-apis) and [vTools](https://docs.baslerweb.com/vtools). This is sufficient for using pypylon and works immediately for transport layers that don't require any extra drivers.
 
-You can download the [pylon Software Suite](pylon-software-suite.md) as well as any additional supplementary packages, e.g., for 3D cameras, from the [Basler website](https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon) if required.
+You can download the [pylon Software Suite](https://docs.baslerweb.com/pylon-software-suite) as well as any additional supplementary packages, e.g., for 3D cameras, from the [Basler website](https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon) if required.
 
 The installation wizard of the pylon Software Suite guides you through the process and allows you to decide which components to install. The following components are recommended:
 
@@ -81,3 +85,7 @@ If you're planning to use GigE cameras, the following optimizations are recommen
 ## Distributing pypylon
 Pypylon provides a complete pylon Runtime, so it is not required to install pylon Software Suite.
 In case you also require camera, or frame grabber driver take a look in [pylon Deployment Guide](https://docs.baslerweb.com/pylonapi/pylon-deployment-guide.html) .
+
+---
+
+[Previous](01-pypylon-introduction.md) | [Contents](README.md) | [Next](03-pypylon-quick-start.md)

@@ -1,3 +1,7 @@
+[Previous](10-pypylon-performance-optimization.md) | [Contents](README.md) | [Next](12-pypylon-threading-and-concurrency.md)
+
+---
+
 # Error Handling and Recovery
 
 This topic explains why error handling is important.
@@ -15,21 +19,24 @@ Typical sources of errors include:
 
 The following visualizations illustrate why error handling is important:
 
-```PlainText
-System starts → runs normally → transient failure occurs
-```
+````mermaid
+flowchart LR
+    start["System starts"] --> running["Runs normally"] --> failure["Transient failure occurs"]
+````
 
 **Without** proper handling:
 
-```PlainText
-Unhandled exception → application crashes → acquisition stops
-```
+````mermaid
+flowchart LR
+    exception["Unhandled exception"] --> crash["Application crashes"] --> stop["Acquisition stops"]
+````
 
 **With** proper handling:
 
-```PlainText
-Failure → detect → recover → continue
-```
+````mermaid
+flowchart LR
+    failure["Failure"] --> detect["Detect"] --> recover["Recover"] --> resume["Continue"]
+````
 
 The goal is not to prevent every possible failure. The goal is to make failures visible, controlled, and recoverable.
 
@@ -194,9 +201,10 @@ This pattern allows a system to recover from temporary failures without manual i
 
 Internal buffers or the grabbing state may no longer represent a clean acquisition pipeline after an acquisition error.
 
-```PlainText
-Error → uncertain acquisition state → reset required
-```
+````mermaid
+flowchart LR
+    error["Error"] --> state["Acquisition state is uncertain"] --> reset["Reset required"]
+````
 
 That's why calling `StopGrabbing()` is an essential part of the recovery loop. It helps with the following:
 
@@ -204,31 +212,30 @@ That's why calling `StopGrabbing()` is an essential part of the recovery loop. I
 - Releasing or recycling internal buffers
 - Preparing the camera for a clean restart
 
-This doesn't solve every possible hardware failure but it's often the first safe recovery step.
+This doesn't solve every possible hardware failure, but it's often the first safe recovery step.
 
 ## Camera Disconnect Handling
 
 A physical disconnect is one of the most common real-world failure cases.
 
-```PlainText
-Camera unplugged → communication lost → exception
-```
+````mermaid
+flowchart LR
+    unplugged["Camera unplugged"] --> lost["Communication lost"] --> exception["Exception"]
+````
 
 A robust application should assume that hardware can disappear at any time.
 
 A typical recovery sequence is shown here:
 
-```PlainText
-Detect error
-   ↓
-Stop acquisition
-   ↓
-Wait briefly
-   ↓
-Re-enumerate cameras if needed
-   ↓
-Reconnect or report fatal failure
-```
+````mermaid
+flowchart TD
+    detect["Detect error"] --> stop["Stop acquisition"]
+    stop --> wait["Wait briefly"]
+    wait --> enumerate["Re-enumerate cameras if needed"]
+    enumerate --> reconnect{"Camera available?"}
+    reconnect -- Yes --> retry["Reconnect and retry"]
+    reconnect -- No --> fatal["Report fatal failure"]
+````
 
 For production systems, reconnect logic is often implemented at a higher level than the basic grab loop.
 
@@ -245,9 +252,10 @@ This ensures that the grab result is released even if an exception occurs inside
 
 Without proper cleanup an acquisition may stall:
 
-```PlainText
-Unreleased grab results → buffers unavailable → acquisition stalls
-```
+````mermaid
+flowchart LR
+    unreleased["Unreleased grab results"] --> unavailable["Buffers unavailable"] --> stall["Acquisition stalls"]
+````
 
 This is why all examples in this guide use context managers for grab results.
 
@@ -288,3 +296,7 @@ A production application should clearly distinguish between errors that can be r
 - Use logging and clear error classification in production.
 
 A well-designed error handling strategy ensures stable, autonomous camera applications.
+
+---
+
+[Previous](10-pypylon-performance-optimization.md) | [Contents](README.md) | [Next](12-pypylon-threading-and-concurrency.md)

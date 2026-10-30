@@ -1,3 +1,7 @@
+[Previous](12-pypylon-threading-and-concurrency.md) | [Contents](README.md) | [Next](14-pypylon-multi-camera-systems.md)
+
+---
+
 # Integration with OpenCV
 
 This topic explains how to integrate pypylon image acquisition with OpenCV for visualization and image processing.
@@ -15,9 +19,11 @@ Since pypylon images are already NumPy arrays, integration is seamless.
 
 ## Basic Workflow
 
-```PlainText
-Camera → pypylon → NumPy Array → OpenCV → Display/Processing
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> pypylon["pypylon"] --> array["NumPy array"]
+    array --> opencv["OpenCV"] --> result["Display or processing"]
+````
 
 ## Simple Example
 
@@ -48,7 +54,7 @@ OpenCV expects images in **BGR** format, while cameras may output the following 
 
 ### Converting Images to OpenCV-Compatible Formats
 
-For a live loop, prefer `converter.ConvertToArray(grab_result)`: This writes the converted pixels directly into a pre-allocated NumPy array and avoids the extra copy of `converter.Convert(grab_result).Array` (see [Working with Images](pypylon-working-with-images.md) for details).
+For a live loop, prefer `converter.ConvertToArray(grab_result)`: This writes the converted pixels directly into a pre-allocated NumPy array and avoids the extra copy of `converter.Convert(grab_result).Array` (see [Working with Images](07-pypylon-working-with-images.md) for details).
 
 ```Python
 converter = pylon.ImageFormatConverter()
@@ -117,9 +123,11 @@ These are the steps:
 
 This pattern represents a common real-world workflow:
 
-```PlainText
-Acquire → Select ROI → Compute Feature → Visualize → Decide
-```
+````mermaid
+flowchart LR
+    acquire["Acquire"] --> roi["Select ROI"] --> feature["Compute feature"]
+    feature --> visualize["Visualize"] --> decide["Decide"]
+````
 
 ```Python
 import cv2
@@ -165,3 +173,7 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
 - Color conversion is often required.
 - OpenCV provides powerful visualization and processing tools.
 - Combining NumPy  and OpenCV enables flexible pipelines.
+
+---
+
+[Previous](12-pypylon-threading-and-concurrency.md) | [Contents](README.md) | [Next](14-pypylon-multi-camera-systems.md)
