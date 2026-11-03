@@ -1,7 +1,8 @@
 Version 26.10
     - Date 2026-11-11
     - Added support for python 3.15
-    - Enhanced the programmer's with table of contents, cross-references, and revised the diagrams
+    - Updated the Programmer’s Guide with a contents page, links between sections, and clearer diagrams.
+    - Added a sample showing how to capture images directly into Vulkan memory and process them on the GPU.
 
 Version 26.9
     - Date 2026-10-14
