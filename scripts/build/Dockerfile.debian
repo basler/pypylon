@@ -43,7 +43,8 @@ RUN pip install "setuptools<72" --upgrade
 #
 # Only if deb.debian.org keeps serving an inconsistent index/pool across all
 # retries we fall back to snapshot.debian.org, where the index and the pool are
-# frozen together and are therefore always consistent. The snapshot timestamp
+# frozen together. Snapshot downloads can still return transient HTTP 503 errors,
+# so update/install is retried there with a delay as well. The snapshot timestamp
 # can be bumped via the DEBIAN_SNAPSHOT build arg; any timestamp is accepted and
 # redirected to the nearest available snapshot.
 ARG DEBIAN_SNAPSHOT=20260901T000000Z
@@ -52,12 +53,12 @@ RUN set -eu; \
     echo 'Acquire::Retries "5";'           > /etc/apt/apt.conf.d/80-retries; \
     ok=0; \
     for i in 1 2 3 4 5; do \
-      if apt-get update && apt-get install -y locales patchelf unzip libicu67 git; then \
+      if apt-get -o APT::Update::Error-Mode=any update && apt-get install -y locales patchelf unzip libicu67 git; then \
         ok=1; break; \
       fi; \
-      echo "apt attempt $i against deb.debian.org failed, retrying in 30s..."; \
+      echo "apt attempt $i against deb.debian.org failed"; \
       rm -rf /var/lib/apt/lists/*; \
-      sleep 30; \
+      if [ "$i" -lt 5 ]; then sleep 30; fi; \
     done; \
     if [ "$ok" -ne 1 ]; then \
       echo "deb.debian.org kept serving an inconsistent index/pool, falling back to snapshot.debian.org (${DEBIAN_SNAPSHOT})"; \
@@ -70,14 +71,26 @@ RUN set -eu; \
       esac; \
       if [ -n "$codename" ]; then \
         { \
-          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename} main"; \
-          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename}-updates main"; \
-          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}/ ${sec_suite} main"; \
+          echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename} main"; \
+          echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}/ ${codename}-updates main"; \
+          echo "deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}/ ${sec_suite} main"; \
         } > /etc/apt/sources.list; \
         rm -f /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true; \
       fi; \
-      apt-get -o Acquire::Check-Valid-Until=false update; \
-      apt-get install -y locales patchelf unzip libicu67 git; \
+      rm -rf /var/lib/apt/lists/*; \
+      for i in 1 2 3 4 5; do \
+        if apt-get -o APT::Update::Error-Mode=any -o Acquire::Check-Valid-Until=false update && \
+           apt-get install -y locales patchelf unzip libicu67 git; then \
+          ok=1; break; \
+        fi; \
+        echo "apt fallback attempt $i failed"; \
+        rm -rf /var/lib/apt/lists/*; \
+        if [ "$i" -lt 5 ]; then sleep 30; fi; \
+      done; \
+      if [ "$ok" -ne 1 ]; then \
+        echo "Unable to install required Debian build packages after all retries" >&2; \
+        exit 100; \
+      fi; \
     fi; \
     ln -s /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.67 /usr/lib/$QEMU_TARGET_ARCH-linux-gnu/libicuuc.so.66; \
     rm -rf /var/lib/apt/lists/*; \
