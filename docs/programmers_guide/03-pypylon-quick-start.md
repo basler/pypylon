@@ -1,3 +1,7 @@
+[Previous](02-pypylon-installation-and-environment-setup.md) | [Contents](README.md) | [Next](04-pypylon-core-concepts.md)
+
+---
+
 # Quick Start
 
 This topic shows you the first steps in pypylon by means of a simple workflow.
@@ -116,17 +120,13 @@ Let's break this sample down into its individual steps:
 
 This visualization illustrates what happens internally.
 
-```PlainText
-Camera (hardware)
-      ↓
-pylon driver + buffers
-      ↓
-Transport layer (USB/GigE)
-      ↓
-RetrieveResult()
-      ↓
-NumPy array (your application)
-```
+````mermaid
+flowchart TD
+    camera["Camera (hardware)"] --> driver["pylon driver and buffers"]
+    driver --> transport["Transport layer (USB/GigE)"]
+    transport --> retrieve["RetrieveResult()"]
+    retrieve --> array["NumPy array (your application)"]
+````
 
 Key idea:
 
@@ -145,6 +145,10 @@ Buffers sit in between and decouple both worlds (camera and application).
 
 Once you have understood this pattern, you can build on it to write code for the following tasks:
 
-- Building [continuous acquisition](pypylon-image-acquisition.md) loops
-- Configuring [triggered acquisition](pypylon-triggered-image-acquisition.md)
-- Designing a [multi-camera setup](pypylon-multi-camera-systems.md)
+- Building [continuous acquisition](06-pypylon-image-acquisition.md) loops
+- Configuring [triggered acquisition](09-pypylon-triggered-image-acquisition.md)
+- Designing a [multi-camera setup](14-pypylon-multi-camera-systems.md)
+
+---
+
+[Previous](02-pypylon-installation-and-environment-setup.md) | [Contents](README.md) | [Next](04-pypylon-core-concepts.md)

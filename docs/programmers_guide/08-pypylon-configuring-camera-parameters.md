@@ -1,3 +1,7 @@
+[Previous](07-pypylon-working-with-images.md) | [Contents](README.md) | [Next](09-pypylon-triggered-image-acquisition.md)
+
+---
+
 # Configuring Camera Parameters
 
 This topic provides descriptions of some of the most commonly used parameters.
@@ -10,10 +14,11 @@ The **exposure time** defines how long the camera sensor is exposed to light for
 
 During exposure, the sensor collects photons and converts them into an electrical signal. The longer the exposure time, the more light is accumulated. This visualization summarizes this:
 
-```PlainText
-Short exposure → less light → darker image
-Long exposure  → more light → brighter image
-```
+````mermaid
+flowchart LR
+    short["Short exposure"] --> less["Less light"] --> dark["Darker image"]
+    long["Long exposure"] --> more["More light"] --> bright["Brighter image"]
+````
 
 The length of the exposure time has the following effects:
 
@@ -66,10 +71,11 @@ camera.ExposureTimeAbs.SetValue(3000, pylon.FloatValueCorrection_ClipToRange)
 
 The **gain** controls the electronic amplification of the sensor signal after exposure. Unlike exposure time, gain doesn't increase the amount of captured light but amplifies the existing signal. This visualization summarizes this:
 
-```PlainText
-Low gain  → weak amplification → darker but cleaner image
-High gain → strong amplification → brighter but noisier image
-```
+````mermaid
+flowchart LR
+    low["Low gain"] --> weak["Weak amplification"] --> clean["Darker, cleaner image"]
+    high["High gain"] --> strong["Strong amplification"] --> noisy["Brighter, noisier image"]
+````
 
 ### Effects of Gain
 
@@ -100,12 +106,13 @@ General rule: **Prefer longer exposure times over higher gain whenever possible*
 
 The **region of interest (ROI)** defines the part of the sensor that is actually read out and transferred for each frame. By default, the ROI is the same size as the sensor (full resolution). Changing its width and height allows you to focus only on the relevant part of the scene. This visualization summarizes this:
 
-```PlainText
-Full sensor → large image → more data
-Part of the sensor → cropped image → less data
-```
+````mermaid
+flowchart LR
+    full["Full sensor"] --> large["Large image"] --> more["More data"]
+    roi["Part of the sensor (ROI)"] --> cropped["Cropped image"] --> less["Less data"]
+````
 
-If you reduce the ROI, any pixels outside of the specified region aren't read out or transmitted.
+If you reduce the ROI, any pixels outside the specified region aren't read out or transmitted.
 
 You can adjust the ROI using the `Width`, `Height`, `OffsetX` and `OffsetY` parameters. `Width` + `OffsetX` are limited by `MaxWidth` and `Height` + `OffsetY` ar limited by `MaxHeight`.
 
@@ -152,7 +159,7 @@ Unlike image cropping by software, reducing the ROI eliminates unnecessary data 
 
 ## Static Defect Pixel Correction
 
-[Defect pixel correction](defect-pixel-correction.md) allows you to minimize the influence of sensitivity differences of individual pixels of the sensor. This feature is not available on all cameras. Therefore, it's important to make provisions for it not being available on the current device.
+[Defect pixel correction](https://docs.baslerweb.com/defect-pixel-correction) allows you to minimize the influence of sensitivity differences of individual pixels of the sensor. This feature is not available on all cameras. Therefore, it's important to make provisions for it not being available on the current device.
 
 !!! info
     - Use `pylon.StaticDefectPixelCorrection` with `camera.NodeMap`.
@@ -201,3 +208,7 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
 ### Key Takeaways
 
 Treat static defect pixel correction as a device-dependent feature: use it when available and degrade gracefully when it's not available.
+
+---
+
+[Previous](07-pypylon-working-with-images.md) | [Contents](README.md) | [Next](09-pypylon-triggered-image-acquisition.md)

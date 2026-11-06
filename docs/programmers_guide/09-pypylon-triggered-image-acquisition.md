@@ -1,3 +1,7 @@
+[Previous](08-pypylon-configuring-camera-parameters.md) | [Contents](README.md) | [Next](10-pypylon-performance-optimization.md)
+
+---
+
 # Triggered Image Acquisition
 
 Triggered acquisition is used when image capture must happen at a specific moment in time, rather than continuously.
@@ -19,9 +23,11 @@ Examples of external events that can be used as triggers:
 
 This visualization summarizes a typical workflow:
 
-```text
-Trigger → Exposure → Readout → Transfer → Application
-```
+````mermaid
+flowchart LR
+    trigger["Trigger"] --> exposure["Exposure"] --> readout["Readout"]
+    readout --> transfer["Transfer"] --> app["Application"]
+````
 
 The **trigger** lets the camera start an **exposure**. This is **read out** from the sensor, preprocessed, and **transferred** to the host. At the end, it is passed on to the **application**.
 
@@ -88,7 +94,7 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
 
 If a **software trigger** isn't precise enough for your use case or if a hardware signal is already available, using a **hardware trigger** is the best option.
 
-In this case, [depending on the camera model](cameras.md), there are one or more inputs available that can act as a **trigger input**. A **rising edge** or **falling edge** can be used to trigger an event like **start of exposure** of the camera.
+In this case, [depending on the camera model](https://docs.baslerweb.com/cameras), there are one or more inputs available that can act as a **trigger input**. A **rising edge** or **falling edge** can be used to trigger an event like **start of exposure** of the camera.
 
 ```python
 camera.TriggerSource.Value = "Line1"
@@ -129,3 +135,7 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
             else:
                 print("Grab failed:", grab_result.ErrorDescription)
 ```
+
+---
+
+[Previous](08-pypylon-configuring-camera-parameters.md) | [Contents](README.md) | [Next](10-pypylon-performance-optimization.md)

@@ -1,3 +1,7 @@
+[Previous](06-pypylon-image-acquisition.md) | [Contents](README.md) | [Next](08-pypylon-configuring-camera-parameters.md)
+
+---
+
 # Working with Images
 
 This topic explains how image data is represented in pypylon, how to safely access it, and how to prepare it for further processing (e.g., with NumPy, OpenCV, or AI frameworks).
@@ -8,9 +12,10 @@ In pypylon, images are exposed, e.g., as **NumPy arrays**, which means that they
 
 This is a typical workflow:
 
-```PlainText
-Camera → GrabResult → Buffer → NumPy Array
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> result["GrabResult"] --> buffer["Buffer"] --> array["NumPy array"]
+````
 
 ## Accessing Image Data
 
@@ -136,7 +141,7 @@ The following actions may reduce the performance:
 
 Strategies to avoid this:
 
-- Reducing the region of interest (ROI) (see [Configuring Camera Parameters](pypylon-configuring-camera-parameters.md))
+- Reducing the region of interest (ROI) (see [Configuring Camera Parameters](08-pypylon-configuring-camera-parameters.md))
 - Avoiding unnecessary conversions
 
 ## Using Images in Processing Pipelines
@@ -145,9 +150,11 @@ Because images are NumPy arrays, they can be used directly with [OpenCV](#opencv
 
 This is a generalized illustration of an image pipeline.
 
-```PlainText
-Camera → GrabResult → NumPy Array → Processing → Output
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> result["GrabResult"] --> array["NumPy array"]
+    array --> processing["Processing"] --> output["Output"]
+````
 
 This represents the central data flow of most computer vision systems.
 
@@ -239,9 +246,11 @@ Here are some explanations of the individual steps:
 
 A generalized NumPy image pipeline looks like this:
 
-```PlainText
-Raw Image → NumPy Array → Processing → Features → Decision
-```
+````mermaid
+flowchart LR
+    raw["Raw image"] --> array["NumPy array"] --> processing["Processing"]
+    processing --> features["Features"] --> decision["Decision"]
+````
 
 ## Key Takeaways
 
@@ -249,3 +258,7 @@ Raw Image → NumPy Array → Processing → Features → Decision
 - Always copy buffer data when needed.
 - Ensure you're using correct pixel formats.
 - Conversion may be required for downstream processing.
+
+---
+
+[Previous](06-pypylon-image-acquisition.md) | [Contents](README.md) | [Next](08-pypylon-configuring-camera-parameters.md)

@@ -1,12 +1,19 @@
+[Previous](03-pypylon-quick-start.md) | [Contents](README.md) | [Next](05-pypylon-discovering-and-selecting-cameras.md)
+
+---
+
 # Core Concepts
 
 ## Acquisition Lifecycle
 
-```PlainText
-Camera → Transport → Buffer Queue → Application
-                         ↑
-                   RetrieveResult()
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> transport["Transport"]
+    transport --> queue["Buffer queue"]
+    app["Application"]
+    proc["RetrieveResult()"]
+    queue --> proc --> app
+````
 
 ### Mental Model
 
@@ -18,9 +25,13 @@ Camera → Transport → Buffer Queue → Application
 
 Slow processing may lead to backlog and dropped frames. You can specify a suitable timeout value for `RetrieveResult()` to avoid waiting indefinitely for a grab result.
 
-```PlainText
-RetrieveResult() → Waits until frame or timeout
-```
+````mermaid
+flowchart LR
+    call["RetrieveResult()"] --> wait["Wait for a frame"]
+    wait --> available{"Frame arrives before timeout?"}
+    available -- Yes --> result["Return grab result"]
+    available -- No --> timeout["Timeout"]
+````
 
 ## GenICam Nodes
 
@@ -73,3 +84,5 @@ camera.NotThere.TrySetValue(3000)
       camera.Width.Value = 640
       camera.StartGrabbing()
       ```
+
+[Previous](03-pypylon-quick-start.md) | [Contents](README.md) | [Next](05-pypylon-discovering-and-selecting-cameras.md)       

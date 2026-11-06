@@ -1,3 +1,7 @@
+[Previous](15-pypylon-best-practices.md) | [Contents](README.md) | [Next](17-pypylon-sample-code.md)
+
+---
+
 # Troubleshooting
 
 This topic helps with diagnosing and resolving common issues encountered when working with pypylon and industrial cameras.
@@ -146,9 +150,10 @@ QObject::killTimer error
 
 The first step is to identify which layer causes the issue.
 
-```PlainText
-Hardware → Transport → Driver → Application
-```
+````mermaid 
+flowchart BT
+  Hardware -->  Transport --> Driver -->  Application
+````
 
 Look for the following issue indicators:
 
@@ -174,3 +179,6 @@ logging.exception("Camera error")
 - Always isolate hardware vs. software problems.
 - Monitor system resources continuously.
 - Use systematic debugging approach.
+
+---
+[Previous](15-pypylon-best-practices.md) | [Contents](README.md) | [Next](17-pypylon-sample-code.md)

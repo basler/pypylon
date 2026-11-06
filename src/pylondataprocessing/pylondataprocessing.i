@@ -597,6 +597,9 @@ namespace Pylon
 #if ((PYLON_DATAPROCESSING_VERSION_MAJOR > 3) || (PYLON_DATAPROCESSING_VERSION_MAJOR >= 3 && PYLON_DATAPROCESSING_VERSION_MINOR >= 1))
 %include "RecipeFileFormat.i"
 #endif
+#if PYLON_DATAPROCESSING_VERSION_MAJOR >= 6
+%include "SettingsDetailLevel.i"
+#endif
 %include "BuildersRecipe.i"
 %include "SmartResult.i"
 %include "SmartInstantCamera.i"

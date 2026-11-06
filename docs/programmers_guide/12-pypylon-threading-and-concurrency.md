@@ -1,12 +1,18 @@
+[Previous](11-pypylon-error-handling-and-recovery.md) | [Contents](README.md) | [Next](13-pypylon-integration-with-opencv.md)
+
+---
+
 # Threading and Concurrency
 
 This topic explains how threading and concurrency are used in pypylon applications and how to structure acquisition and processing pipelines for performance and scalability.
 
 This visualization illustrates how image acquisition works in a Python application.
 
-```text
-Camera → Native Thread → Buffer Queue → Python Application
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> thread["Native pylon thread"]
+    thread --> queue["Buffer queue"] --> app["Python application"]
+````
 
 - Image acquisition runs in a **native (C++) thread** inside pylon.
 - Your Python code retrieves images from a **buffer queue**.
@@ -14,10 +20,12 @@ Camera → Native Thread → Buffer Queue → Python Application
 
 In many applications, image acquisition is faster than processing:
 
-```text
-Camera → 100 fps
-Processing → 20 fps
-```
+````mermaid
+block
+  camera["Camera: 100 fps"]
+  blockId5<["&nbsp;"]>(x)
+  processing["Processing: 20 fps"]
+````
 
 Without concurrency:
 
@@ -29,9 +37,10 @@ Without concurrency:
 
 A single-threaded approach is the simplest form of an image acquisition pipeline.
 
-```text
-Acquire → Process → Acquire → Process
-```
+````mermaid
+flowchart LR
+    acquire1["Acquire"] --> process1["Process"] --> acquire2["Acquire"] --> process2["Process"]
+````
 
 Example:
 
@@ -53,9 +62,11 @@ This has the following disadvantages:
 
 This is a more sophisticated approach for an image acquisition pipeline.
 
-```text
-Acquisition Thread → Queue → Worker Thread(s)
-```
+````mermaid
+flowchart LR
+    acquisition["Acquisition thread (producer)"] --> queue["Queue"]
+    queue --> workers["Worker thread(s) (consumer)"]
+````
 
 - **Producer**: The acquisition thread grabs images and pushes them into a queue.
 - **Consumer**: The worker threads process images independently.
@@ -105,9 +116,10 @@ with pylon.InstantCamera(pylon.FirstFound) as camera:
 
 ## Queue Behavior and Backpressure
 
-```text
-Queue full → producer blocks → acquisition slows down
-```
+````mermaid
+flowchart LR
+    full["Queue is full"] --> blocks["Producer blocks"] --> slows["Acquisition slows down"]
+````
 
 Strategies:
 
@@ -122,10 +134,11 @@ Strategies:
 
 Best practice:
 
-```text
-LatestImageOnly + queue → responsive systems
-OneByOne + logging → analysis systems
-```
+````mermaid
+flowchart LR
+    latest["LatestImageOnly + queue"] --> responsive["Responsive systems"]
+    ordered["OneByOne + logging"] --> analysis["Analysis systems"]
+````
 
 ## Thread-Safety Considerations
 
@@ -141,11 +154,12 @@ Parallel processing has the following advantages:
 - Separation of concerns
 - Scalable architectures
 
-```text
-Core 1 → Acquisition
-Core 2 → Processing
-Core 3 → AI
-```
+````mermaid
+flowchart LR
+    core1["Core 1"] --> acquisition["Acquisition"]
+    core2["Core 2"] --> processing["Processing"]
+    core3["Core 3"] --> ai["AI"]
+````
 
 ## When to Use Multiple Threads
 
@@ -166,21 +180,27 @@ Core 3 → AI
 
 A multi-stage pipeline splits image processing into independent steps that run concurrently and exchange data via queues.
 
-```text
-Grab → Preprocess → Analyze → Display
-```
+````mermaid
+flowchart LR
+    grab["Grab"] --> preprocess["Preprocess"] --> analyze["Analyze"] --> display["Display"]
+````
 
 ### Multi-Consumer Setup
 
-```text
-Producer → Queue → Multiple processing threads
-```
+````mermaid
+flowchart LR
+    producer["Producer"] --> queue["Queue"]
+    queue --> worker1["Processing thread 1"]
+    queue --> worker2["Processing thread 2"]
+    queue --> worker3["Processing thread N"]
+````
 
 ## Conceptual Pipeline
 
-```text
-Camera → Queue → Processing → Results
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> queue["Queue"] --> processing["Processing"] --> results["Results"]
+````
 
 ## Key Takeaways
 
@@ -188,3 +208,7 @@ Camera → Queue → Processing → Results
 - Use producer-consumer pattern for scalability.
 - Queues provide thread-safe communication.
 - Threading improves performance but increases complexity.
+
+---
+
+[Previous](11-pypylon-error-handling-and-recovery.md) | [Contents](README.md) | [Next](13-pypylon-integration-with-opencv.md)

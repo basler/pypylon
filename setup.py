@@ -17,12 +17,12 @@ from pathlib import Path
 from logging import info, warning, error
 # The pylon version this source tree was designed for, by platform
 ReferencePylonVersion = {
-    "Windows": "12.4.2",
+    "Windows": "12.5.2",
     # ATTENTION: This version is the pylon core version reported by pylon-config,
     # which is not equal to the version on the outer tar.gz
-    "Linux": "12.4.2",
+    "Linux": "12.5.2",
     "Linux_armv7l": "6.2.0",
-    "Darwin": "12.4.2"
+    "Darwin": "12.5.2"
 }
 
 ################################################################################
@@ -457,6 +457,7 @@ class BuildSupportWindows(BuildSupport):
             ],
 
         "gige": [
+            ("PylonNebulaMatrix_GSG.dll", ""),
             ("PylonRDMA_GSG.dll", ""),
             ("PylonGigEConnectionGuard.exe", ""),
             ("PylonGigE_*.dll", ""),

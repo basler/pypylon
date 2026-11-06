@@ -1,3 +1,7 @@
+[Previous](09-pypylon-triggered-image-acquisition.md) | [Contents](README.md) | [Next](11-pypylon-error-handling-and-recovery.md)
+
+---
+
 # Performance Optimization
 
 This topic explains what grab strategies are and why they are important.
@@ -6,10 +10,11 @@ Industrial cameras often produce images at a constant and potentially very high 
 
 This creates a fundamental mismatch:
 
-```PlainText
-Camera (Producer) → fast
-Application (Consumer) → slower
-```
+````mermaid
+flowchart LR
+    camera["Camera (producer, fast)"] --> queue["Buffer queue"]
+    queue --> app["Application (consumer, slower)"] --> backlog["Backlog can grow"]
+````
 
 Without a grab strategy, one of these situations will arise:
 
@@ -20,9 +25,11 @@ Grab strategies define **how the system behaves under load**.
 
 ## Mental Model
 
-```PlainText
-Camera → Frame Stream → Buffer Queue → RetrieveResult() → Application
-```
+````mermaid
+flowchart LR
+    camera["Camera"] --> stream["Frame stream"] --> queue["Buffer queue"]
+    queue --> retrieve["RetrieveResult()"] --> app["Application"]
+````
 
 If the application is slower than the camera, the queue fills up and a decision is required how to handle the situation. This is what a grab strategy is for.
 
@@ -34,11 +41,16 @@ Two grab strategies are available.
 
 Only the most recent frame is kept. Older frames are dropped while the application is busy. This visualization illustrates this:
 
-```PlainText
-Camera:    F1 → F2 → F3 → F4
-App reads:        →    F4
-Dropped:   F1, F2, F3
-```
+````mermaid
+sequenceDiagram
+    participant Camera
+    participant Queue as Buffer queue
+    participant App as Application
+    Camera->>Queue: F1, F2, F3, F4
+    Note over Queue: "Keep only the newest frame F4, discard F1-F3"
+    App->>Queue: RetrieveResult()
+    Queue-->>App: F4
+````
 
 **Advantages:**
 
@@ -61,10 +73,20 @@ Use **LatestImageOnly** when you need current information, frame drops are accep
 
 Every frame is queued and processed in order. No frames are dropped intentionally. This visualization illustrates this:
 
-```PlainText
-Camera:    F1 → F2 → F3 → F4
-App reads: F1 → F2 → F3 → F4
-```
+````mermaid
+sequenceDiagram
+    participant Camera
+    participant Queue as Buffer queue
+    participant App as Application
+    Camera->>Queue: F1
+    Camera->>Queue: F2
+    Camera->>Queue: F3
+    Camera->>Queue: F4
+    Queue-->>App: F1
+    Queue-->>App: F2
+    Queue-->>App: F3
+    Queue-->>App: F4
+````
 
 **Advantages:**
 
@@ -109,3 +131,7 @@ There is no "best" strategy. The choice depends on whether you need the **latest
 | --------------- | -------------- | ---------- | ----------- |
 | LatestImageOnly | Low            | Yes        | Low         |
 | OneByOne        | High (if slow) | No         | High        |
+
+---
+
+[Previous](09-pypylon-triggered-image-acquisition.md) | [Contents](README.md) | [Next](11-pypylon-error-handling-and-recovery.md)
