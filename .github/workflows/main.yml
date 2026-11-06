@@ -98,14 +98,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-14, windows-latest ]
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest ]
         arch: [ x64, arm64 ]
         exclude:
           # Exclude ARM64 architecture for windows-latest
           - os: windows-latest
             arch: arm64
-          # Exclude X64 architecture for macos-14
-          - os: macos-14
+          # Exclude X64 architecture for macos-15
+          - os: macos-15
             arch: x64
           # Exclude ARM64 architecture for ubuntu-24.04
           - os: ubuntu-24.04
@@ -389,7 +389,7 @@ jobs:
 
   build-macos:
     needs: [prepare,download]
-    runs-on: macos-latest
+    runs-on: macos-15
     strategy:
       fail-fast: false
     steps:
@@ -469,7 +469,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-14, windows-latest ]
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest ]
         python-version: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14', '3.15' ]
         architecture: [ x64, arm64 ]
         exclude:
@@ -484,10 +484,10 @@ jobs:
             architecture: x64
             # Exclude python 3.9 - 3.10 on macOS x86_64 due too issues with the runner image
             # See also GitHub issue: https://github.com/actions/setup-python/issues/825
-          - os: macos-14
+          - os: macos-15
             architecture: x64
             python-version: 3.9
-          - os: macos-14
+          - os: macos-15
             architecture: x64
             python-version: 3.10
 
